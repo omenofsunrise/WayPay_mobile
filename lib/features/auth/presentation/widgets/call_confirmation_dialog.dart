@@ -107,7 +107,7 @@ class _CallConfirmationDialogState extends State<CallConfirmationDialog> {
               child: DefaultButton(
                 onPressed: () => context.pop(),
                 text: 'Отмена',
-                color: const Color(0xFF25CBA1),
+                isGreen: true,
               ),
             ),
           ],

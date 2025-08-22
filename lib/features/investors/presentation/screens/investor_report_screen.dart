@@ -1,59 +1,57 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
+import 'package:waypay/assets/resources.dart';
 import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/network/token_storage.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
-import 'package:waypay/core/widgets/default_button.dart';
 import 'package:waypay/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay/features/investors/data/models/investors_model.dart';
-import 'package:waypay/features/investors/presentation/widgets/investor_payout_dialog.dart';
-import 'package:waypay/features/investors/presentation/widgets/investor_picker_modal.dart';
-import 'package:waypay/routes/routes.dart';
+import 'package:waypay/features/investors/presentation/widgets/investor_credit_table.dart';
+import 'package:waypay/features/investors/presentation/widgets/investor_payout_table.dart';
 
 class InvestorReportScreen extends StatefulWidget {
-  const InvestorReportScreen({super.key});
+  const InvestorReportScreen({super.key, required this.initialInvestor});
+
+  final InvestorsModel initialInvestor;
 
   @override
   State<InvestorReportScreen> createState() => _InvestorReportScreenState();
 }
 
 class _InvestorReportScreenState extends State<InvestorReportScreen> {
-  final _tokenStorage = TokenStorage();
-  InvestorsModel? selectedInvestor;
+  late InvestorsModel selectedInvestor;
   Map<String, dynamic>? reportData;
   String? error;
-  bool isLoadingReport = false;
+  bool isLoading = false;
 
-  Future<void> _logout() async {
-    await _tokenStorage.clearAll();
-    if (mounted) {
-      context.pushReplacementNamed(Routes.userTypeSelectionScreen.toName);
-    }
+  @override
+  void initState() {
+    super.initState();
+    selectedInvestor = widget.initialInvestor;
+    _loadInvestorAndReport(selectedInvestor.id);
   }
 
-  Future<void> _loadReport(int investorId) async {
+  Future<void> _loadInvestorAndReport(int investorId) async {
     setState(() {
-      isLoadingReport = true;
+      isLoading = true;
       reportData = null;
       error = null;
     });
-
     try {
-      final data = await getIt<InvestorsRemoteDataSource>().getInvestorReport(
-        investorId,
-      );
+      final investor = await getIt<InvestorsRemoteDataSource>().getInvestorById(investorId);
+      final report = await getIt<InvestorsRemoteDataSource>().getInvestorReport(investorId);
+      if (!mounted) return;
       setState(() {
-        reportData = data;
-        isLoadingReport = false;
+        selectedInvestor = investor;
+        reportData = report;
+        isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
-        error = 'Ошибка загрузки отчета: $e';
-        isLoadingReport = false;
+        error = 'Ошибка загрузки: $e';
+        isLoading = false;
       });
     }
   }
@@ -71,22 +69,22 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
     if (value == null) return '-';
     final num? number = num.tryParse(value.toString());
     if (number == null) return value.toString();
-    return NumberFormat('#,##0').format(number);
+    return NumberFormat('#,##0', 'ru_RU').format(number);
   }
 
-  Widget _buildCard(String title, String value, IconData icon) {
+  Widget _buildCard(String title, String value, String icon) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
       ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: Color(AppColors.primary), size: 28),
+            SvgPicture.asset(icon, width: 48, height: 48),
             const SizedBox(height: 12),
             Text(
               value,
@@ -108,133 +106,35 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: AppDrawer(),
-      backgroundColor: const Color(AppColors.primaryLight),
+      backgroundColor: const Color(AppColors.primary),
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
-        backgroundColor: const Color(AppColors.primaryLight),
+        backgroundColor: const Color(AppColors.primary),
         elevation: 0,
-        title: Text(
-          'Отчет инвестора',
-          style: AppStyle.medium20.copyWith(color: Colors.white),
+        title: Text('Отчёт: ${selectedInvestor.nickname}', style: AppStyle.medium20.copyWith(color: Colors.white)),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(Icons.arrow_back),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person, color: Colors.white),
-            onPressed: () => context.pushNamed(Routes.profileScreen.toName),
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: _logout,
-          ),
-        ],
       ),
       body: Column(
         children: [
-          Container(
-            color: const Color(AppColors.primaryLight),
-            padding: const EdgeInsets.all(16),
-            child: DefaultButton(
-              text: selectedInvestor == null
-                  ? 'Выбрать инвестора'
-                  : 'Выбран: ${selectedInvestor!.nickname}',
-              onPressed: () async {
-                final result = await showDialog<InvestorsModel>(
-                  context: context,
-                  builder: (_) => const InvestorPickerModal(),
-                );
-                if (result != null) {
-                  setState(() => selectedInvestor = result);
-                  _loadReport(result.id);
-                }
-              },
-            ),
-          ),
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
                 color: Color(0xFFF5F5F5),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
               ),
-              child: isLoadingReport
+              child: isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : reportData == null
-                  ? const Center(
-                      child: Text('Выберите инвестора для просмотра отчета'),
-                    )
+                  ? Center(child: Text(error ?? 'Нет данных', textAlign: TextAlign.center))
                   : SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         children: [
-                          DefaultButton(
-                            text: 'Выплатить инвестору',
-                            color: Color(AppColors.primary),
-                            onPressed: () async {
-                              final isCompany =
-                                  reportData?['isCompany'] == true;
-                              final income =
-                                  (reportData?[isCompany
-                                              ? 'investorIncome'
-                                              : 'investorIncome'] ??
-                                          0.0)
-                                      as num;
-                              final balance =
-                                  (reportData?['balance'] ?? 0.0) as num;
-                              final maxAmount = income < balance
-                                  ? income
-                                  : balance;
-
-                              final amount = await showDialog<double>(
-                                context: context,
-                                builder: (_) => InvestorPayoutDialog(
-                                  maxAmount: maxAmount.toDouble(),
-                                  income: income.toDouble(),
-                                  balance: balance.toDouble(),
-                                ),
-                              );
-
-                              if (amount != null) {
-                                try {
-                                  showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (_) => const Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  );
-
-                                  final payoutResponse =
-                                      await getIt<InvestorsRemoteDataSource>()
-                                          .createInvestorPayout(
-                                            investorId: selectedInvestor!.id,
-                                            amount: amount,
-                                          );
-
-                                  Navigator.of(context).pop();
-
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Выплата ${payoutResponse.amount.toStringAsFixed(0)} ₽ успешно проведена!',
-                                      ),
-                                    ),
-                                  );
-
-                                  _loadReport(selectedInvestor!.id);
-                                } catch (e) {
-                                  Navigator.of(context).pop();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Ошибка выплаты: $e'),
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                          ),
                           const SizedBox(height: 16),
                           GridView.count(
                             shrinkWrap: true,
@@ -244,81 +144,87 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
                             mainAxisSpacing: 16,
                             childAspectRatio: 1,
                             children: [
-                              // Дата создания
-                              _buildCard(
-                                'Создан',
-                                formatDate(reportData?['createdAt']),
-                                Icons.calendar_today,
-                              ),
-
-                              // Если компания
-                              if (reportData?['isCompany'] == true) ...[
+                              if (reportData?['isCompany'] == false) ...[
                                 _buildCard(
                                   'Инвестиция',
                                   '${formatNumber(reportData?['investment'])} ₽',
-                                  Icons.attach_money,
+                                  SvgIcons.investition,
                                 ),
                                 _buildCard(
-                                  'Активные договоры',
-                                  formatNumber(
-                                    reportData?['activeCreditsAmount'],
-                                  ),
-                                  Icons.assignment,
+                                  'Незакрытые договоры',
+                                  formatNumber(reportData?['activeCreditsAmount']),
+                                  SvgIcons.credits,
                                 ),
-                                _buildCard(
-                                  'Доход компании',
-                                  '${formatNumber(reportData?['investorIncome'])} ₽',
-                                  Icons.trending_up,
-                                ),
-                                _buildCard(
-                                  'Касса',
-                                  '${formatNumber(reportData?['balance'])} ₽',
-                                  Icons.account_balance_wallet,
-                                ),
-                              ],
-
-                              // Если НЕ компания
-                              if (reportData?['isCompany'] != true) ...[
                                 _buildCard(
                                   'Доля инвестора',
-                                  '${selectedInvestor?.investorPie ?? '-'}%',
-                                  Icons.pie_chart,
-                                ),
-                                _buildCard(
-                                  'Инвестиция',
-                                  '${formatNumber(reportData?['investment'])} ₽',
-                                  Icons.attach_money,
+                                  '${selectedInvestor.investorPie} %',
+                                  SvgIcons.investorPercent,
                                 ),
                                 _buildCard(
                                   'Доход инвестора',
                                   '${formatNumber(reportData?['investorIncome'])} ₽',
-                                  Icons.trending_up,
+                                  SvgIcons.investorCash,
                                 ),
                                 _buildCard(
                                   'Собственный доход',
-                                  '${formatNumber(reportData?['selfIncome'])} ₽',
-                                  Icons.trending_up,
+                                  '${formatNumber(reportData?['allSelfIncome'])} ₽',
+                                  SvgIcons.debtSelf,
                                 ),
                                 _buildCard(
                                   'Общий доход',
-                                  '${formatNumber((reportData?['investorIncome'] ?? 0) + (reportData?['selfIncome'] ?? 0))} ₽',
-                                  Icons.summarize,
+                                  '${formatNumber(reportData?['allSelfIncome'] + reportData?['investorIncome'])} ₽',
+                                  SvgIcons.companyAmount,
+                                ),
+                                _buildCard('Касса', '${formatNumber(reportData?['balance'])} ₽', SvgIcons.cash),
+                                _buildCard(
+                                  'Просрочка',
+                                  '${formatNumber(reportData?['delinquencyAmount'])} ₽',
+                                  SvgIcons.delay,
                                 ),
                                 _buildCard(
-                                  'Касса',
-                                  '${formatNumber(reportData?['balance'])} ₽',
-                                  Icons.account_balance_wallet,
+                                  'Доходы по платежам в текущем месяце',
+                                  '${formatNumber(reportData?['paymentIncome'])} ₽',
+                                  SvgIcons.debt,
+                                ),
+                              ],
+                              if (reportData?['isCompany'] == true) ...[
+                                _buildCard(
+                                  'Инвестиция',
+                                  '${formatNumber(reportData?['investment'])} ₽',
+                                  SvgIcons.investition,
                                 ),
                                 _buildCard(
                                   'Незакрытые договоры',
-                                  formatNumber(
-                                    reportData?['activeCreditsAmount'],
-                                  ),
-                                  Icons.assignment,
+                                  formatNumber(reportData?['activeCreditsAmount']),
+                                  SvgIcons.credits,
+                                ),
+                                _buildCard(
+                                  'Доход компании',
+                                  '${formatNumber(reportData?['investorIncome'])} ₽',
+                                  SvgIcons.companyAmount,
+                                ),
+                                _buildCard(
+                                  'Доход от инвестора',
+                                  '${formatNumber(reportData?['allSelfIncome'])} ₽',
+                                  SvgIcons.investorAmount,
+                                ),
+                                _buildCard('Касса', '${formatNumber(reportData?['balance'])} ₽', SvgIcons.cash),
+                                _buildCard(
+                                  'Просрочка',
+                                  '${formatNumber(reportData?['delinquencyAmount'])} ₽',
+                                  SvgIcons.delay,
+                                ),
+                                _buildCard(
+                                  'Доходы по платежам в текущем месяце',
+                                  '${formatNumber(reportData?['paymentIncome'])} ₽',
+                                  SvgIcons.debt,
                                 ),
                               ],
                             ],
                           ),
+                          InvestorPayoutTable(investorId: widget.initialInvestor.id),
+                          const SizedBox(height: 16),
+                          InvestorCreditsWidget(investorId: widget.initialInvestor.id),
                         ],
                       ),
                     ),

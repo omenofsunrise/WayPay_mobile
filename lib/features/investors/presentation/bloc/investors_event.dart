@@ -16,3 +16,9 @@ class SearchInvestorsEvent extends InvestorsEvent {
 }
 
 class ResetSearchInvestorsEvent extends InvestorsEvent {}
+
+class ToggleInvestorBlockStatusEvent extends InvestorsEvent {
+  final int investorId;
+
+  ToggleInvestorBlockStatusEvent(this.investorId);
+}

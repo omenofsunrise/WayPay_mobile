@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/models/employee_role.dart';
 import 'package:waypay/core/network/token_storage.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
@@ -16,7 +15,8 @@ import 'package:waypay/core/widgets/form_modal/label_text_field.dart';
 import 'package:waypay/core/widgets/pagination_widget.dart';
 import 'package:waypay/core/widgets/refresh.dart';
 import 'package:waypay/features/investors/data/data_sources/investors_remote_data_source.dart';
-import 'package:waypay/features/investors/presentation/widgets/investos_card.dart';
+import 'package:waypay/features/investors/presentation/widgets/investor_card.dart';
+import 'package:waypay/features/profile/data/models/employee.dart';
 import 'package:waypay/routes/routes.dart';
 import 'package:waypay/core/storage/user_storage.dart';
 import 'package:waypay/core/widgets/default_button.dart';
@@ -43,9 +43,8 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
 
   Future<void> _logout() async {
     await _tokenStorage.clearAll();
-    if (mounted) {
-      context.pushReplacementNamed(Routes.userTypeSelectionScreen.toName);
-    }
+    if (!mounted) return;
+    context.pushReplacementNamed(Routes.phoneAuthScreen.toName);
   }
 
   void _showAddInvestorModal() {
@@ -60,53 +59,53 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
       filter: {"#": RegExp(r'\d')},
     );
 
-    String? nicknameError;
-    String? fullNameError;
-    String? phoneError;
-    String? pieError;
-    String? investmentError;
+    final ValueNotifier<String?> nicknameError = ValueNotifier(null);
+    final ValueNotifier<String?> fullNameError = ValueNotifier(null);
+    final ValueNotifier<String?> phoneError = ValueNotifier(null);
+    final ValueNotifier<String?> pieError = ValueNotifier(null);
+    final ValueNotifier<String?> investmentError = ValueNotifier(null);
 
     bool validateInputs() {
       bool isValid = true;
 
-      nicknameError = null;
-      fullNameError = null;
-      phoneError = null;
-      pieError = null;
-      investmentError = null;
+      nicknameError.value = null;
+      fullNameError.value = null;
+      phoneError.value = null;
+      pieError.value = null;
+      investmentError.value = null;
 
       if (nicknameController.text.trim().isEmpty) {
-        nicknameError = 'Введите никнейм';
+        nicknameError.value = 'Введите никнейм';
         isValid = false;
       }
       if (fullNameController.text.trim().isEmpty) {
-        fullNameError = 'Введите ФИО';
+        fullNameError.value = 'Введите ФИО';
         isValid = false;
       }
       final phone = phoneFormatter.getUnmaskedText();
       if (phone.length != 10) {
-        phoneError = 'Номер должен состоять из 10 цифр';
+        phoneError.value = 'Номер должен состоять из 10 цифр';
         isValid = false;
       }
       if (pieController.text.trim().isEmpty) {
-        pieError = 'Введите долю';
+        pieError.value = 'Введите долю';
         isValid = false;
       } else {
         final pieValue = int.tryParse(pieController.text.trim());
         if (pieValue == null || pieValue < 0 || pieValue > 100) {
-          pieError = 'Введите число от 0 до 100';
+          pieError.value = 'Введите число от 0 до 100';
           isValid = false;
         }
       }
       if (investmentController.text.trim().isEmpty) {
-        investmentError = 'Введите сумму';
+        investmentError.value = 'Введите сумму';
         isValid = false;
       } else {
         final investmentValue = double.tryParse(
           investmentController.text.trim(),
         );
         if (investmentValue == null || investmentValue < 0) {
-          investmentError = 'Введите корректное число';
+          investmentError.value = 'Введите корректное число';
           isValid = false;
         }
       }
@@ -117,42 +116,57 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) {
+        builder: (innerDialogContext, setState) {
           return AppModal(
             title: 'Добавить инвестора',
             content: Column(
               children: [
-                LabeledTextField(
-                  label: 'Никнейм',
-                  controller: nicknameController,
-                  errorText: nicknameError,
+                ValueListenableBuilder<String?>(
+                  valueListenable: nicknameError,
+                  builder: (_, error, __) => LabeledTextField(
+                    label: 'Никнейм',
+                    controller: nicknameController,
+                    errorText: error,
+                  ),
                 ),
-                LabeledTextField(
-                  label: 'ФИО',
-                  controller: fullNameController,
-                  errorText: fullNameError,
-                  format: LabeledTextFieldFormat.fullName,
+                ValueListenableBuilder<String?>(
+                  valueListenable: fullNameError,
+                  builder: (_, error, __) => LabeledTextField(
+                    label: 'ФИО',
+                    controller: fullNameController,
+                    errorText: error,
+                    format: LabeledTextFieldFormat.fullName,
+                  ),
                 ),
-                _buildPhoneField(
-                  controller: phoneController,
-                  formatter: phoneFormatter,
-                  errorText: phoneError,
+                ValueListenableBuilder<String?>(
+                  valueListenable: phoneError,
+                  builder: (_, error, __) => _buildPhoneField(
+                    controller: phoneController,
+                    formatter: phoneFormatter,
+                    errorText: error,
+                  ),
                 ),
-                LabeledTextField(
-                  label: 'Доля инвестора (%)',
-                  controller: pieController,
-                  keyboardType: TextInputType.number,
-                  errorText: pieError,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                ValueListenableBuilder<String?>(
+                  valueListenable: pieError,
+                  builder: (_, error, __) => LabeledTextField(
+                    label: 'Доля инвестора (%)',
+                    controller: pieController,
+                    keyboardType: TextInputType.number,
+                    errorText: error,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
                 ),
-                LabeledTextField(
-                  label: 'Инвестиция',
-                  controller: investmentController,
-                  keyboardType: TextInputType.number,
-                  errorText: investmentError,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                  ],
+                ValueListenableBuilder<String?>(
+                  valueListenable: investmentError,
+                  builder: (_, error, __) => LabeledTextField(
+                    label: 'Инвестиция',
+                    controller: investmentController,
+                    keyboardType: TextInputType.number,
+                    errorText: error,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -160,23 +174,28 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                     Expanded(
                       child: DefaultButton(
                         text: 'Отмена',
-                        color: const Color(AppColors.greyLight),
-                        onPressed: () => Navigator.pop(context),
+                        isGreen: false,
+                        onPressed: () {
+                          if (!innerDialogContext.mounted) return;
+                          Navigator.pop(innerDialogContext);
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: DefaultButton(
                         text: 'Создать',
-                        color: const Color(AppColors.primary),
+                        isGreen: true,
                         onPressed: () async {
                           if (!validateInputs()) {
                             setState(() {});
                             return;
                           }
 
-                          Navigator.pop(dialogContext);
+                          if (!innerDialogContext.mounted) return;
+                          Navigator.pop(innerDialogContext);
 
+                          if (!context.mounted) return;
                           showDialog(
                             context: context,
                             barrierDismissible: false,
@@ -193,53 +212,54 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                                   phoneNumber:
                                       phoneController.text.trim().isEmpty
                                       ? null
-                                      : phoneController.text.trim(),
+                                      : phoneFormatter.getUnmaskedText(),
                                   investorPie:
-                                      int.tryParse(pieController.text) ?? 0,
+                                      int.tryParse(pieController.text.trim()) ??
+                                      0,
                                   investmentAmount:
                                       double.tryParse(
-                                        investmentController.text,
+                                        investmentController.text.trim(),
                                       ) ??
                                       0.0,
                                 );
 
-                            if (mounted) {
-                              Navigator.pop(context);
-                            }
+                            if (!context.mounted) return;
+                            Navigator.pop(context);
 
+                            if (!context.mounted) return;
                             context.read<InvestorsBloc>().add(
                               LoadInvestorsEvent(refresh: true, page: 1),
                             );
 
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Инвестор успешно создан'),
-                                ),
-                              );
-                            }
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Инвестор успешно создан'),
+                              ),
+                            );
                           } catch (e) {
-                            if (mounted) {
-                              Navigator.pop(context);
-                            }
-                            if (mounted) {
-                              showDialog(
-                                context: context,
-                                builder: (_) => AlertDialog(
-                                  title: const Text('Ошибка'),
-                                  content: Text(
-                                    'Не удалось создать инвестора.\n$e',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
+                            if (!context.mounted) return;
+                            Navigator.pop(context);
 
-                                      child: const Text('Ок'),
-                                    ),
-                                  ],
+                            if (!context.mounted) return;
+                            showDialog(
+                              context: context,
+                              builder: (_) => AlertDialog(
+                                title: const Text('Ошибка'),
+                                content: Text(
+                                  'Не удалось создать инвестора.\n$e',
                                 ),
-                              );
-                            }
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      if (!context.mounted) return;
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('Ок'),
+                                  ),
+                                ],
+                              ),
+                            );
                           }
                         },
                       ),
@@ -257,30 +277,18 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: AppDrawer(),
-      backgroundColor: const Color(AppColors.primaryLight),
+      drawer: const AppDrawer(),
+      backgroundColor: const Color(AppColors.primary),
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
-        backgroundColor: const Color(AppColors.primaryLight),
+        backgroundColor: const Color(AppColors.primary),
         elevation: 0,
         title: Text(
           'Инвесторы',
-          style: AppStyle.medium20.copyWith(color: Color(AppColors.background)),
+          style: AppStyle.medium20.copyWith(
+            color: const Color(AppColors.background),
+          ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person, color: Colors.white),
-            tooltip: 'Профиль',
-            onPressed: () {
-              context.pushNamed(Routes.profileScreen.toName);
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            tooltip: 'Выйти',
-            onPressed: _logout,
-          ),
-        ],
       ),
       body: ValueListenableBuilder<EmployeeRole?>(
         valueListenable: UserStorage().roleNotifier,
@@ -289,7 +297,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
           return Column(
             children: [
               Container(
-                color: const Color(AppColors.primaryLight),
+                color: const Color(AppColors.primary),
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
@@ -307,7 +315,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                           style: AppStyle.inter(
                             size: 24,
                             weight: FontWeight.w300,
-                            color: Color(AppColors.background),
+                            color: const Color(AppColors.background),
                           ),
                         );
                       },
@@ -341,6 +349,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                         _debounce = Timer(
                           const Duration(milliseconds: 500),
                           () {
+                            if (!context.mounted) return;
                             final bloc = context.read<InvestorsBloc>();
                             if (value.isNotEmpty) {
                               bloc.add(SearchInvestorsEvent(value));
@@ -403,7 +412,9 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                                   ElevatedButton(
                                     onPressed: _logout,
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: Color(AppColors.red),
+                                      backgroundColor: const Color(
+                                        AppColors.red,
+                                      ),
                                       foregroundColor: Colors.white,
                                     ),
                                     child: const Text('Войти заново'),
@@ -411,9 +422,12 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                                   const SizedBox(height: 8),
                                 ],
                                 ElevatedButton(
-                                  onPressed: () => context
-                                      .read<InvestorsBloc>()
-                                      .add(LoadInvestorsEvent(refresh: true)),
+                                  onPressed: () {
+                                    if (!context.mounted) return;
+                                    context.read<InvestorsBloc>().add(
+                                      LoadInvestorsEvent(refresh: true),
+                                    );
+                                  },
                                   child: const Text('Повторить'),
                                 ),
                               ],
@@ -431,11 +445,12 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                             Expanded(
                               child: Refresher(
                                 onRefresh: () async {
+                                  if (!context.mounted) return;
                                   final bloc = context.read<InvestorsBloc>();
-                                  final state = bloc.state;
+                                  final currentState = bloc.state;
                                   int currentPage = 1;
-                                  if (state is InvestorsLoaded) {
-                                    currentPage = state.currentPage;
+                                  if (currentState is InvestorsLoaded) {
+                                    currentPage = currentState.currentPage;
                                   }
                                   bloc.add(
                                     LoadInvestorsEvent(
@@ -455,18 +470,18 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                                 ),
                               ),
                             ),
-                            if (canAddInvestor)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                child: DefaultButton(
-                                  text: 'Добавить инвестора',
-                                  color: Color(AppColors.primaryLight),
-                                  onPressed: _showAddInvestorModal,
-                                ),
-                              ),
+                            // if (canAddInvestor)
+                            //   Padding(
+                            //     padding: const EdgeInsets.symmetric(
+                            //       horizontal: 16,
+                            //       vertical: 8,
+                            //     ),
+                            //     child: DefaultButton(
+                            //       text: 'Добавить инвестора',
+                            //       isGreen: true,
+                            //       onPressed: _showAddInvestorModal,
+                            //     ),
+                            //   ),
                             Padding(
                               padding: const EdgeInsets.only(
                                 top: 8,
@@ -476,6 +491,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                                 currentPage: state.currentPage,
                                 totalPages: state.totalPages,
                                 onPageSelected: (page) {
+                                  if (!context.mounted) return;
                                   context.read<InvestorsBloc>().add(
                                     LoadInvestorsEvent(
                                       refresh: true,
@@ -518,7 +534,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 10),
           TextField(
             controller: controller,
             keyboardType: TextInputType.phone,
@@ -530,10 +546,27 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                 horizontal: 12,
                 vertical: 14,
               ),
-              border: OutlineInputBorder(
+              enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Color(AppColors.primary)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: Color(AppColors.primary),
+                  width: 2,
+                ),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.red),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
               ),
             ),
+            style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
           ),
         ],
       ),

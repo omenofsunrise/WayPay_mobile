@@ -1,199 +1,289 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:waypay/core/di/dependency_injection.dart';
+import 'package:waypay/core/network/token_storage.dart';
+import 'package:waypay/core/storage/user_storage.dart';
+import 'package:waypay/core/theme/app_colors.dart';
+import 'package:waypay/core/theme/app_style.dart';
+import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
 import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:waypay/core/models/employee_role.dart';
+import 'package:waypay/features/profile/data/models/employee.dart';
+import 'package:waypay/features/profile/presentation/cubit/profile_cubit.dart'
+    show ProfileCubit, ProfileLoaded, ProfileState;
+import 'package:waypay/features/profile/presentation/screens/active_sessions_screen.dart';
+import 'package:waypay/features/profile/presentation/screens/company_screen.dart';
+import 'package:waypay/features/profile/presentation/screens/employees_screen.dart';
+import 'package:waypay/features/profile/presentation/screens/my_profile.dart';
+import 'package:waypay/features/profile/presentation/widgets/edit_profile_modal.dart';
+import 'package:waypay/routes/routes.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final int? employeeId;
+  const ProfileScreen({super.key, this.employeeId});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  Map<String, dynamic>? _employee;
-  EmployeeRole? _role;
-  List<Permission> _permissions = [];
-  bool _loading = true;
-  String? _error;
+  final AuthRemoteDataSource dataSource = getIt<AuthRemoteDataSource>();
+  Employee? currentUser;
+  final _tokenStorage = TokenStorage();
+  final _userStorage = UserStorage();
+  int _selectedIndex = 0;
+
+  late List<ProfileTabItem> _tabItems;
+
+  late final ProfileCubit _profileCubit;
+  final Map<EmployeeRole, int> roleHierarchy = {
+    EmployeeRole.employee: 0,
+    EmployeeRole.accountant: 1,
+    EmployeeRole.admin: 2,
+    EmployeeRole.director: 3,
+    EmployeeRole.superAdmin: 4,
+  };
+
+  Future<Employee?> getCurrentUser(AuthRemoteDataSource dataSource) async {
+    final info = await dataSource.getAuthInfo();
+    final employeeJson = info['employee'] as Map<String, dynamic>?;
+    if (employeeJson == null) return null;
+    return Employee.fromJson(employeeJson);
+  }
+
+  bool canEditEmployee({
+    required Employee currentUser,
+    required Employee targetEmployee,
+  }) {
+    final currentUserLevel = roleHierarchy[currentUser.role] ?? 0;
+    final targetUserLevel = roleHierarchy[targetEmployee.role] ?? 0;
+
+    return (currentUserLevel > targetUserLevel) ||
+        (currentUser.id == targetEmployee.id);
+  }
 
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    _profileCubit = ProfileCubit();
+    if (widget.employeeId == null) {
+      _profileCubit.loadProfile();
+    } else {
+      _profileCubit.loadProfileById(widget.employeeId!);
+    }
+    loadTabs();
+    _loadCurrentUser();
   }
 
-  Future<void> _loadProfile() async {
-    try {
-      final authDataSource = getIt<AuthRemoteDataSource>();
-      final info = await authDataSource.getAuthInfo();
-      final employee = info['employee'] as Map<String, dynamic>?;
+  Future<void> _loadCurrentUser() async {
+    currentUser = await getCurrentUser(dataSource);
+    if (mounted) setState(() {});
+  }
 
-      if (employee == null) {
-        setState(() {
-          _error = 'Данные пользователя не найдены';
-          _loading = false;
-        });
-        return;
+  void loadTabs() {
+    setState(() {
+      _tabItems = [
+        ProfileTabItem(
+          title: 'Мой профиль',
+          content: BlocProvider.value(
+            value: _profileCubit,
+            child: MyProfileScreen(
+              employeeId: widget.employeeId,
+              refresh: loadTabs,
+            ),
+          ),
+        ),
+      ];
+
+      if (_userStorage.hasViewContent([
+        EmployeeRole.superAdmin,
+        EmployeeRole.director,
+        EmployeeRole.admin,
+      ])) {
+        _tabItems.add(
+          ProfileTabItem(
+            title: 'Активные сессии',
+            content: ActiveSessionsScreen(),
+          ),
+        );
       }
 
-      final roleStr = employee['role']?.toString() ?? '';
-      final role = EmployeeRoleMapper.fromApi(roleStr);
+      if (_userStorage.hasViewContent([
+        EmployeeRole.superAdmin,
+        EmployeeRole.director,
+        EmployeeRole.admin,
+      ])) {
+        _tabItems.add(
+          ProfileTabItem(title: 'Все пользователи', content: EmployeesScreen()),
+        );
+      }
 
-      final permissionsList = (employee['permissions'] as List?) ?? [];
-      final permissions = permissionsList
-          .map((p) => PermissionMapper.fromApi(p.toString()))
-          .toList();
-
-      print('✅ Роль в экране: $role');
-      print('✅ Права: $permissions');
-
-      setState(() {
-        _employee = employee;
-        _role = role;
-        _permissions = permissions;
-        _loading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = 'Ошибка загрузки профиля: $e';
-        _loading = false;
-      });
-    }
+      if (_userStorage.hasViewContent([
+        EmployeeRole.superAdmin,
+        EmployeeRole.director,
+      ])) {
+        _tabItems.add(
+          ProfileTabItem(title: 'О компании', content: CompanyScreen()),
+        );
+      }
+    });
   }
 
-  String _roleLabel(EmployeeRole? role) {
-    if (role == null) return 'Неизвестно';
-    switch (role) {
-      case EmployeeRole.accountant:
-        return 'Бухгалтер';
-      case EmployeeRole.employee:
-        return 'Сотрудник';
-      case EmployeeRole.admin:
-        return 'Администратор';
-      case EmployeeRole.superAdmin:
-        return 'Суперадминистратор';
-      case EmployeeRole.director:
-        return 'Директор';
-    }
+  @override
+  void dispose() {
+    _profileCubit.close();
+    super.dispose();
   }
 
-  String _permissionLabel(Permission p) {
-    switch (p) {
-      case Permission.createCredits:
-        return 'Создание кредитов';
-      case Permission.deleteCredits:
-        return 'Удаление кредитов';
-    }
-  }
-
-  String? _resolvePhotoUrl(String? path) {
-    if (path == null || path.isEmpty) return null;
-    if (path.startsWith('http')) return path;
-    return 'https://web.waypay.one:5001$path';
-  }
-
-  String _getInitials(String? name) {
-    if (name == null || name.trim().isEmpty) return '?';
-    final parts = name.trim().split(' ');
-    return parts.map((p) => p[0].toUpperCase()).take(2).join();
-  }
-
-  Color _stringToColor(String str) {
-    int hash = 0;
-    for (var i = 0; i < str.length; i++) {
-      hash = str.codeUnitAt(i) + ((hash << 5) - hash);
-    }
-    final hue = hash % 360;
-    return HSLColor.fromAHSL(1.0, hue.toDouble(), 0.6, 0.6).toColor();
-  }
-
-  Widget _buildAvatar(String? photoPath, String? name) {
-    final resolvedUrl = _resolvePhotoUrl(photoPath);
-    if (resolvedUrl != null) {
-      return CircleAvatar(
-        radius: 40,
-        backgroundImage: NetworkImage(resolvedUrl),
-      );
-    }
-    final initials = _getInitials(name);
-    final color = _stringToColor(initials);
-    return CircleAvatar(
-      radius: 40,
-      backgroundColor: color,
-      child: Text(
-        initials,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
+  Widget _buildTabItem(int index) {
+    final bool isSelected = index == _selectedIndex;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
+      child: Opacity(
+        opacity: 1,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? Color(AppColors.tabSelected)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Center(
+            child: Text(
+              _tabItems[index].title,
+              style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String? value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(width: 120, child: Text('$label:')),
-          Expanded(child: Text(value ?? '—')),
-        ],
-      ),
-    );
+  Widget _buildTabContent(int index) => _tabItems[index].content;
+
+  Future<void> _logout() async {
+    await _tokenStorage.clearAll();
+    if (!mounted) return;
+    context.pushReplacementNamed(Routes.phoneAuthScreen.toName);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Профиль')),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-          ? Center(child: Text(_error!))
-          : _employee == null
-          ? const Center(child: Text('Нет данных о пользователе'))
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: _buildAvatar(
-                      _employee!['photoPath'],
-                      _employee!['fullName'],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInfoRow('ID', _employee!['id']?.toString()),
-                  _buildInfoRow('ФИО', _employee!['fullName']),
-                  _buildInfoRow('Телефон', _employee!['phone']),
-                  _buildInfoRow('Адрес', _employee!['address']),
-                  _buildInfoRow('Роль', _roleLabel(_role)),
-                  _buildInfoRow(
-                    'Мин. надбавка',
-                    _employee!['minSurcharge']?.toString(),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Права:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  if (_permissions.isEmpty)
-                    const Text('Нет прав')
-                  else
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: _permissions
-                          .map((p) => Text('- ${_permissionLabel(p)}'))
-                          .toList(),
-                    ),
-                ],
-              ),
+      drawer: const AppDrawer(),
+      backgroundColor: Color(AppColors.background),
+      appBar: AppBar(
+        title: Text(
+          'Профиль',
+          style: AppStyle.manrope(size: 25, weight: FontWeight.w600),
+        ),
+        backgroundColor: Color(AppColors.background),
+        surfaceTintColor: Colors.transparent,
+        iconTheme: IconThemeData(color: Color(AppColors.darkGrey)),
+        actions: [
+          if (_selectedIndex == 0)
+            BlocBuilder<ProfileCubit, ProfileState>(
+              bloc: _profileCubit,
+              builder: (context, state) {
+                if (state is ProfileLoaded && currentUser != null) {
+                  final targetEmployee = state.employee;
+
+                  final editable = canEditEmployee(
+                    currentUser: currentUser!,
+                    targetEmployee: targetEmployee,
+                  );
+
+                  if (editable) {
+                    return IconButton(
+                      icon: const Icon(
+                        Icons.edit,
+                        color: Color(AppColors.darkGrey),
+                      ),
+                      tooltip: 'Редактировать',
+                      onPressed: () async {
+                        await showDialog(
+                          context: context,
+                          builder: (context) => BlocProvider.value(
+                            value: _profileCubit,
+                            child: EditProfileModal(currentUser: currentUser!),
+                          ),
+                        );
+                        if (widget.employeeId == null) {
+                          _profileCubit.loadProfile();
+                        } else {
+                          _profileCubit.loadProfileById(widget.employeeId!);
+                        }
+                      },
+                    );
+                  }
+                }
+                return const SizedBox.shrink();
+              },
             ),
+          IconButton(
+            icon: const Icon(Icons.logout, color: Color(AppColors.darkGrey)),
+            tooltip: 'Выйти',
+            onPressed: _logout,
+          ),
+        ],
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+          BlocBuilder<ProfileCubit, ProfileState>(
+            bloc: _profileCubit,
+            builder: (context, state) {
+              if (state is ProfileLoaded) {
+                if (state.myProfile) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 20,
+                    ),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Container(
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
+                            children: List.generate(
+                              _tabItems.length,
+                              (index) => Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                child: _buildTabItem(index),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                } else {
+                  return SizedBox.shrink();
+                }
+              } else {
+                return SizedBox.shrink();
+              }
+            },
+          ),
+          Expanded(child: _buildTabContent(_selectedIndex)),
+        ],
+      ),
     );
   }
+}
+
+class ProfileTabItem {
+  final String title;
+  final Widget content;
+
+  ProfileTabItem({required this.title, required this.content});
 }

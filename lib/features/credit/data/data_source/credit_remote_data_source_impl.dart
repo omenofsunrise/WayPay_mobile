@@ -1,0 +1,78 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:waypay/features/credit/data/data_source/credit_remote_data_source.dart';
+import 'package:waypay/features/credit/data/models/credit_response_model.dart';
+import 'package:waypay/features/credit/data/models/get_query_credits.dart';
+import 'package:waypay/features/credit/data/models/credit_model.dart';
+
+class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
+  final Dio dio;
+
+  CreditRemoteDataSourceImpl(this.dio);
+
+  @override
+  Future<CreditResponseModel> getCredits(GetCreditsQuery query) async {
+    try {
+      final response = await dio.get('/api/Credit', queryParameters: query.toQueryParams());
+
+      if (response.data is Map<String, dynamic>) {
+        return CreditResponseModel.fromJson(response.data);
+      } else {
+        throw Exception('Неожиданный формат ответа');
+      }
+    } on DioException catch (e) {
+      throw Exception('Ошибка загрузки договоров: ${e.message}');
+    }
+  }
+
+  @override
+  Future<CreditModel> getCreditById(int id) async {
+    try {
+      final response = await dio.get('/api/Credit/$id');
+
+      if (response.data is Map<String, dynamic>) {
+        return CreditModel.fromJson(response.data);
+      } else {
+        throw Exception('Неожиданный формат ответа');
+      }
+    } on DioException catch (e) {
+      throw Exception('Ошибка загрузки договора по id: ${e.message}');
+    }
+  }
+
+  @override
+  Future<void> toggleFavourite(int creditId) async {
+    try {
+      final response = await dio.put('/api/Credit/$creditId/toggle-favourite');
+
+      if (response.statusCode != 200) {
+        throw Exception('Ошибка при обновлении избранного');
+      }
+    } on DioException catch (e) {
+      throw Exception('Ошибка при обновлении избранного: ${e.message}');
+    }
+  }
+
+  @override
+  Future<void> deleteCreditById(int id) async {
+    try {
+      final response = await dio.delete('/api/Credit/$id');
+      debugPrint('📬 Ответ от сервера: ${response.statusCode} ${response.statusMessage}');
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Ошибка при удалении договора');
+      }
+    } on DioException catch (e) {
+      throw Exception('Ошибка при удалении договора: ${e.message}');
+    }
+  }
+
+  @override
+  Future<CreditResponseModel> getCreditsByInvestorId(int investorId, GetCreditsQuery query) async {
+    try {
+      final response = await dio.get('/api/Credit/investor/$investorId', queryParameters: query.toQueryParams());
+      return CreditResponseModel.fromJson(response.data);
+    } on DioException catch (e) {
+      throw Exception('Ошибка загрузки кредитов инвестора: ${e.message}');
+    }
+  }
+}

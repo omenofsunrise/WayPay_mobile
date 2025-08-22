@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
 import 'token_storage.dart';
 
-Dio createDio() {
+Dio createDio({String baseUrl = 'http://test.waypay.one:5000'}) {
   final dio = Dio(
     BaseOptions(
-      baseUrl: 'https://web.waypay.one:5001',
+      baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       headers: {'Content-Type': 'application/json'},
@@ -23,41 +23,6 @@ Dio createDio() {
         return handler.next(options);
       },
       onError: (error, handler) async {
-        if (error.response?.statusCode == 401) {
-          final refreshToken = await tokenStorage.getRefreshToken();
-          final accessToken = await tokenStorage.getAccessToken();
-
-          if (refreshToken != null && accessToken != null) {
-            try {
-              final refreshResponse = await dio.post(
-                '/api/Auth/refresh',
-                data: {
-                  'accessToken': accessToken,
-                  'refreshToken': refreshToken,
-                },
-                options: Options(
-                  headers: {'Authorization': 'Bearer $accessToken'},
-                ),
-              );
-
-              final newAccessToken =
-                  refreshResponse.data['accessToken'] as String;
-              await tokenStorage.saveTokens(
-                accessToken: newAccessToken,
-                refreshToken: refreshToken,
-              );
-
-              final opts = error.requestOptions;
-              opts.headers['Authorization'] = 'Bearer $newAccessToken';
-
-              final response = await dio.fetch(opts);
-              return handler.resolve(response);
-            } catch (refreshError) {
-              await tokenStorage.clearAll();
-              return handler.next(error);
-            }
-          }
-        }
         return handler.next(error);
       },
     ),

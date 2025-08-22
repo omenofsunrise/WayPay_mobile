@@ -17,6 +17,7 @@ class InvestorsBloc extends Bloc<InvestorsEvent, InvestorsState> {
     on<LoadInvestorsEvent>(_onLoadInvestors);
     on<SearchInvestorsEvent>(_onSearchInvestors);
     on<ResetSearchInvestorsEvent>(_onResetSearchInvestors);
+    on<ToggleInvestorBlockStatusEvent>(_onToggleInvestorBlockStatus);
   }
 
   Future<void> _onLoadInvestors(
@@ -66,5 +67,31 @@ class InvestorsBloc extends Bloc<InvestorsEvent, InvestorsState> {
   ) async {
     _searchQuery = null;
     add(LoadInvestorsEvent(refresh: true, page: 1));
+  }
+
+  Future<void> _onToggleInvestorBlockStatus(
+    ToggleInvestorBlockStatusEvent event,
+    Emitter<InvestorsState> emit,
+  ) async {
+    if (state is InvestorsLoaded) {
+      final currentState = state as InvestorsLoaded;
+
+      final updatedInvestors = currentState.investors.map((inv) {
+        if (inv.id == event.investorId) {
+          return inv.copyWith(isBlocked: !inv.isBlocked);
+        }
+        return inv;
+      }).toList();
+
+      emit(
+        InvestorsLoaded(
+          investors: updatedInvestors,
+          hasMoreData: currentState.hasMoreData,
+          totalCount: currentState.totalCount,
+          perPage: currentState.perPage,
+          currentPage: currentState.currentPage,
+        ),
+      );
+    }
   }
 }

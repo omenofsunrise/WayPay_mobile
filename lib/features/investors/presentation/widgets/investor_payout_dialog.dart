@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/widgets/default_button.dart';
 
 class InvestorPayoutDialog extends StatefulWidget {
@@ -75,7 +74,7 @@ class _InvestorPayoutDialogState extends State<InvestorPayoutDialog> {
                   Expanded(
                     child: DefaultButton(
                       text: 'Отмена',
-                      color: const Color(AppColors.greyLight),
+                      isGreen: false,
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -83,7 +82,7 @@ class _InvestorPayoutDialogState extends State<InvestorPayoutDialog> {
                   Expanded(
                     child: DefaultButton(
                       text: 'Выплатить',
-                      color: const Color(AppColors.primary),
+                      isGreen: true,
                       onPressed: () {
                         final value = double.tryParse(_controller.text);
                         if (value == null || value <= 0) {

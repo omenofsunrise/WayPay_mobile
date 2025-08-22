@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:waypay/features/investors/data/data_sources/investors_remote_data_source.dart';
+import 'package:waypay/features/investors/data/models/investor_payout_model.dart';
 import 'package:waypay/features/investors/data/models/investor_payout_request.dart';
 import 'package:waypay/features/investors/data/models/investor_payout_response.dart';
 import 'package:waypay/features/investors/data/models/investors_model.dart';
@@ -34,10 +35,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       print('🌐 Запрос к API: /api/Investor');
       print('📋 Параметры: $queryParams');
 
-      final response = await dio.get(
-        '/api/Investor',
-        queryParameters: queryParams,
-      );
+      final response = await dio.get('/api/Investor', queryParameters: queryParams);
 
       print('✅ Ответ API: ${response.statusCode}');
       print('📄 Данные: ${response.data}');
@@ -155,10 +153,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       print('🌐 PUT /api/Investor/$id/add-investment');
       print('📦 Payload: $payload');
 
-      final response = await dio.put(
-        '/api/Investor/$id/add-investment',
-        data: payload,
-      );
+      final response = await dio.put('/api/Investor/$id/add-investment', data: payload);
 
       print('✅ Инвестиция добавлена: ${response.statusCode}');
     } on DioException catch (e) {
@@ -184,9 +179,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
     try {
       await dio.patch('/api/Investor/clear/$id');
     } on DioException catch (e) {
-      throw Exception(
-        'Не удалось аннулировать инвестора.\n${e.response?.data}',
-      );
+      throw Exception('Не удалось аннулировать инвестора.\n${e.response?.data}');
     }
   }
 
@@ -205,23 +198,35 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   }
 
   @override
-  Future<InvestorPayoutResponse> createInvestorPayout({
-    required int investorId,
-    required double amount,
-  }) async {
+  Future<InvestorPayoutResponse> createInvestorPayout({required int investorId, required double amount}) async {
     try {
       final response = await dio.post(
         '/api/InvestorPayouts',
-        data: InvestorPayoutRequest(
-          investorId: investorId,
-          amount: amount,
-        ).toJson(),
+        data: InvestorPayoutRequest(investorId: investorId, amount: amount).toJson(),
       );
 
       return InvestorPayoutResponse.fromJson(response.data);
     } on DioException catch (e) {
       print('❌ Ошибка создания выплаты: ${e.response?.data}');
       throw Exception('Ошибка выплаты: ${e.message}');
+    }
+  }
+
+  @override
+  Future<List<InvestorPayoutModel>> getInvestorPayoutsByInvestorId(int investorId) async {
+    try {
+      final response = await dio.get('/api/InvestorPayouts/investor/$investorId');
+
+      print('✅ Выплаты инвестора получены: ${response.data}');
+
+      if (response.data is List) {
+        return (response.data as List).map((e) => InvestorPayoutModel.fromJson(e)).toList();
+      } else {
+        throw Exception('Неожиданный формат ответа API');
+      }
+    } on DioException catch (e) {
+      print('❌ Ошибка получения выплат инвестора: ${e.response?.data}');
+      throw Exception('Ошибка получения выплат инвестора: ${e.message}');
     }
   }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:waypay/core/di/dependency_injection.dart';
 import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:waypay/core/models/employee_role.dart';
 import 'package:waypay/core/storage/user_storage.dart';
+import 'package:waypay/features/profile/data/models/employee.dart';
 
 class Refresher extends StatelessWidget {
   final Widget content;
@@ -29,9 +29,7 @@ class Refresher extends StatelessWidget {
       await userStorage.saveRole(role);
 
       final permissionsList = (employee['permissions'] as List?) ?? [];
-      final permissions = permissionsList
-          .map((p) => PermissionMapper.fromApi(p.toString()))
-          .toList();
+      final permissions = permissionsList.map((p) => PermissionMapper.fromApi(p.toString())).toList();
       await userStorage.savePermissions(permissions);
 
       debugPrint('✅ Роль обновлена: $role, права: $permissions');

@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay/core/di/dependency_injection.dart';
 import 'package:waypay/core/storage/user_storage.dart';
-import 'package:waypay/core/models/employee_role.dart';
 import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:waypay/features/auth/data/models/start_auth_request_model.dart';
 import 'package:waypay/features/auth/data/models/call_confirm_request_model.dart';
+import 'package:waypay/features/profile/data/models/employee.dart';
 
 part 'auth_state.dart';
 

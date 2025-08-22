@@ -5,6 +5,9 @@ enum Routes {
   pinCodeScreen,
   investorsScreen,
   profileScreen,
+  productScreen,
+  budgetScreen,
+  creditsScreen,
 }
 
 extension RoutesExtension on Routes {
@@ -22,6 +25,12 @@ extension RoutesExtension on Routes {
         return '/investors_screen';
       case Routes.profileScreen:
         return '/profile_screen';
+      case Routes.productScreen:
+        return '/product_screen';
+      case Routes.budgetScreen:
+        return '/budget_screen';
+      case Routes.creditsScreen:
+        return '/credits_screen';
     }
   }
 
@@ -39,6 +48,12 @@ extension RoutesExtension on Routes {
         return 'INVESTORS_SCREEN';
       case Routes.profileScreen:
         return 'PROFILE_SCREEN';
+      case Routes.productScreen:
+        return 'PRODUCT_SCREEN';
+      case Routes.budgetScreen:
+        return 'BUDGET_SCREEN';
+      case Routes.creditsScreen:
+        return 'CREDITS_SCREEN';
     }
   }
 }

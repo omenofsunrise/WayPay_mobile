@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:waypay/core/models/employee_role.dart';
+import 'package:waypay/features/profile/data/models/employee.dart';
 
 class UserStorage {
   static final UserStorage _instance = UserStorage._internal();
@@ -108,6 +108,31 @@ class UserStorage {
     return role == EmployeeRole.superAdmin ||
         role == EmployeeRole.director ||
         role == EmployeeRole.admin;
+  }
+
+  bool canViewContent() {
+    final role = roleNotifier.value;
+    debugPrint('✅ Проверка canSeeInvestorNamesSync: $role');
+    return role == EmployeeRole.superAdmin || role == EmployeeRole.director;
+  }
+
+  bool hasViewContent(List<EmployeeRole> roles) {
+    final role = roleNotifier.value;
+    debugPrint(
+      '✅ Проверка canViewAdminContent: текущая роль=$role, допустимые роли=$roles',
+    );
+    return role != null && roles.contains(role);
+  }
+
+  bool hasPermission(Permission permission) {
+    final perms = permissionsNotifier.value;
+    final hasPermission = perms.contains(permission);
+
+    debugPrint(
+      '✅ Проверка canPermission (только пермишены): нужное=$permission, есть=$hasPermission',
+    );
+
+    return hasPermission;
   }
 
   bool _hasAllPrivileges(EmployeeRole? role) {

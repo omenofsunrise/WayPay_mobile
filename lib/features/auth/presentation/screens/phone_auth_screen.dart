@@ -104,8 +104,33 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                               color: const Color(AppColors.black),
                             ),
                             prefix: const Text('8'),
-                            border: OutlineInputBorder(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 14,
+                            ),
+                            enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(
+                                color: Color(AppColors.primary),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(
+                                color: Color(AppColors.primary),
+                                width: 2,
+                              ),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(color: Colors.red),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(
+                                color: Colors.red,
+                                width: 2,
+                              ),
                             ),
                           ),
                           validator: (value) {
@@ -117,6 +142,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                             return null;
                           },
                         ),
+
                         if (state is AuthError)
                           Padding(
                             padding: const EdgeInsets.only(top: 8),
@@ -132,7 +158,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                             ? const Center(child: CircularProgressIndicator())
                             : DefaultButton(
                                 text: 'Подтвердить',
-                                color: const Color(AppColors.primaryLight),
+                                isGreen: true,
                                 onPressed: () {
                                   if (_formKey.currentState!.validate()) {
                                     final formattedPhone =

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:waypay/assets/resources.dart' show Images;
+import 'package:waypay/core/di/dependency_injection.dart';
 import 'package:waypay/core/network/token_storage.dart';
+import 'package:waypay/core/network/dio_client.dart';
+import 'package:waypay/core/storage/user_storage.dart';
+import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source_impl.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/features/profile/data/models/employee.dart';
 import 'package:waypay/routes/routes.dart';
 
 class PinCodeScreen extends StatefulWidget {
@@ -14,8 +20,9 @@ class PinCodeScreen extends StatefulWidget {
 }
 
 class _PinCodeScreenState extends State<PinCodeScreen> {
-  final _pinController = TextEditingController();
+  final List<String> _pin = [];
   final _tokenStorage = TokenStorage();
+
   String? _firstPin;
   String? _errorMessage;
   bool _isSecondStep = false;
@@ -38,45 +45,102 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
     }
   }
 
-  void _onSubmit() async {
-    final pin = _pinController.text;
+  void _onKeyboardTap(String value) {
+    if (value == 'back') {
+      if (_pin.isNotEmpty) {
+        setState(() => _pin.removeLast());
+      }
+    } else {
+      if (_pin.length < 5) {
+        setState(() => _pin.add(value));
+        if (_pin.length == 5) {
+          _onSubmit();
+        }
+      }
+    }
+  }
 
-    if (pin.length < 4) {
+  Future<void> _updateUserRole() async {
+    debugPrint("🔄 Обновление роли...");
+    final authDataSource = getIt<AuthRemoteDataSource>();
+    final userStorage = UserStorage();
+
+    try {
+      final info = await authDataSource.getAuthInfo();
+      final employee = info['employee'] as Map<String, dynamic>?;
+
+      if (employee == null) {
+        debugPrint('⚠️ Нет данных о пользователе');
+        return;
+      }
+
+      final roleStr = employee['role']?.toString() ?? '';
+      final role = EmployeeRoleMapper.fromApi(roleStr);
+      await userStorage.saveRole(role);
+
+      final permissionsList = (employee['permissions'] as List?) ?? [];
+      final permissions = permissionsList
+          .map((p) => PermissionMapper.fromApi(p.toString()))
+          .toList();
+      await userStorage.savePermissions(permissions);
+
+      debugPrint('✅ Роль обновлена: $role, права: $permissions');
+    } catch (e) {
+      debugPrint('❌ Ошибка при обновлении роли: $e');
+    }
+  }
+
+  Future<void> _onSubmit() async {
+    final pin = _pin.join();
+
+    if (pin.length < 5) {
       setState(() {
-        _errorMessage = 'Пин-код должен содержать минимум 4 цифры';
+        _errorMessage = 'Пин-код должен содержать минимум 5 цифры';
       });
       return;
     }
 
     if (_isExistingUser) {
       if (_savedPin == pin) {
-        context.pushReplacementNamed(Routes.investorsScreen.toName);
+        await _updateUserRole();
+        if (!mounted) return;
+        context.pushReplacementNamed(Routes.creditsScreen.toName);
       } else {
         setState(() {
           _errorMessage = 'Неверный пин-код';
-          _pinController.clear();
+          _pin.clear();
         });
       }
     } else {
       if (!_isSecondStep) {
         setState(() {
           _firstPin = pin;
-          _pinController.clear();
+          _pin.clear();
           _isSecondStep = true;
           _errorMessage = null;
         });
       } else {
         if (_firstPin == pin) {
-          await _tokenStorage.savePinCode(pin);
-          await _tokenStorage.setAuthenticated(true);
+          final dio = createDio(baseUrl: 'http://test.waypay.one:5000');
+          final authDataSource = AuthRemoteDataSourceImpl(dio);
 
-          if (mounted) {
-            context.pushReplacementNamed(Routes.investorsScreen.toName);
+          try {
+            await authDataSource.setupPin(pin);
+            await _tokenStorage.savePinCode(pin);
+            await _tokenStorage.setAuthenticated(true);
+            await _updateUserRole();
+            if (mounted) {
+              context.pushReplacementNamed(Routes.creditsScreen.toName);
+            }
+          } catch (e) {
+            setState(() {
+              _errorMessage = e.toString();
+            });
           }
         } else {
           setState(() {
             _errorMessage = 'Пин-коды не совпадают';
-            _pinController.clear();
+            _pin.clear();
             _isSecondStep = false;
             _firstPin = null;
           });
@@ -85,14 +149,69 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    _pinController.dispose();
-    super.dispose();
+  Widget _buildPinDots() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(5, (index) {
+        final filled = index < _pin.length;
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 6),
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: filled ? const Color(AppColors.primary) : Colors.grey[400],
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildKey(String value) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => _onKeyboardTap(value),
+          child: Container(
+            alignment: Alignment.center,
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              border: value != 'back'
+                  ? Border.all(color: const Color(AppColors.primary))
+                  : null,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: value == 'back'
+                ? const Icon(
+                    Icons.backspace_outlined,
+                    color: Color(AppColors.primary),
+                  )
+                : Text(
+                    value,
+                    style: AppStyle.medium20.copyWith(
+                      color: const Color(AppColors.primary),
+                    ),
+                  ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final keys = [
+      ['1', '2', '3'],
+      ['4', '5', '6'],
+      ['7', '8', '9'],
+      ['empty', '0', 'back'],
+    ];
+
     String title;
     if (_isExistingUser) {
       title = 'Введите пин-код';
@@ -103,45 +222,57 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('ПИН-код', style: AppStyle.medium20),
-        automaticallyImplyLeading: !_isExistingUser,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
+      backgroundColor: Colors.white,
+      body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(title, style: AppStyle.medium20),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _pinController,
-              keyboardType: TextInputType.number,
-              obscureText: true,
-              maxLength: 6,
-              autofocus: true,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'ПИН-код',
-                labelStyle: AppStyle.regular14.copyWith(
-                  color: const Color(AppColors.black),
-                ),
+            const SizedBox(height: 32),
+            Center(
+              child: Image.asset(
+                Images.backgroundLogo,
+                height: 107,
+                width: 107,
               ),
             ),
-            if (_errorMessage != null) ...[
-              Text(
-                _errorMessage!,
-                style: AppStyle.regular14.copyWith(
-                  color: const Color(AppColors.red),
-                ),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(title, style: AppStyle.medium20),
+                  const SizedBox(height: 24),
+                  _buildPinDots(),
+                  if (_errorMessage != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      _errorMessage!,
+                      style: AppStyle.regular14.copyWith(
+                        color: const Color(AppColors.red),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-            ],
-            const SizedBox(height: 24),
-            DefaultButton(
-              text: 'Продолжить',
-              color: const Color(AppColors.primaryLight),
-              onPressed: _onSubmit,
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                children: keys.map((row) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: row.map((key) {
+                      if (key == 'empty') {
+                        return Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: const SizedBox(width: 60, height: 60),
+                        );
+                      }
+                      return _buildKey(key);
+                    }).toList(),
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 24),
           ],
         ),
       ),

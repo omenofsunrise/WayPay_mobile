@@ -58,4 +58,38 @@ class InvestorsModel {
       isCompany: json['isCompany'] as bool?,
     );
   }
+
+  InvestorsModel copyWith({
+    int? id,
+    String? nickname,
+    String? fullName,
+    String? phoneNumber,
+    int? investorPie,
+    double? investmentAmount,
+    double? balance,
+    bool? isBlocked,
+    DateTime? createdAt,
+    double? investment,
+    int? activeCreditsAmount,
+    double? investorIncome,
+    double? selfIncome,
+    bool? isCompany,
+  }) {
+    return InvestorsModel(
+      id: id ?? this.id,
+      nickname: nickname ?? this.nickname,
+      fullName: fullName ?? this.fullName,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      investorPie: investorPie ?? this.investorPie,
+      investmentAmount: investmentAmount ?? this.investmentAmount,
+      balance: balance ?? this.balance,
+      isBlocked: isBlocked ?? this.isBlocked,
+      createdAt: createdAt ?? this.createdAt,
+      investment: investment ?? this.investment,
+      activeCreditsAmount: activeCreditsAmount ?? this.activeCreditsAmount,
+      investorIncome: investorIncome ?? this.investorIncome,
+      selfIncome: selfIncome ?? this.selfIncome,
+      isCompany: isCompany ?? this.isCompany,
+    );
+  }
 }
