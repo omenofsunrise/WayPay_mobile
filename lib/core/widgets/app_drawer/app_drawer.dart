@@ -166,7 +166,7 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
                     if (_userStorage.hasViewContent([EmployeeRole.superAdmin]))
                       ListTile(
-                        leading: SvgPicture.asset(SvgIcons.blogLogo, height: 24, width: 24),
+                        leading: SvgPicture.asset(SvgIcons.shield_person, height: 24, width: 24),
                         title: Text(
                           'Админка',
                           style: AppStyle.medium16.copyWith(color: const Color(AppColors.background)),

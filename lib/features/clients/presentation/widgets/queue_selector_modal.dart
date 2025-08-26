@@ -95,7 +95,7 @@ class _QueueSelectorModalContentState extends State<_QueueSelectorModalContent> 
   Widget build(BuildContext context) {
     return AppModal(
       title: 'Добавить в очередь',
-      backgroundColor: Colors.white,
+      backgroundColor: Color(AppColors.background),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -213,7 +213,7 @@ class _QueueSelectorModalContentState extends State<_QueueSelectorModalContent> 
 
     return AppModal(
       title: 'Выберите клиента',
-      backgroundColor: Colors.white,
+      backgroundColor: Color(AppColors.background),
       content: StatefulBuilder(
         builder: (context, setState) {
           return Column(

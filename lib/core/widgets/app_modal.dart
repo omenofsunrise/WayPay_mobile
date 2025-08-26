@@ -32,9 +32,7 @@ class AppModal extends StatelessWidget {
       child: Padding(
         padding: contentPadding,
         child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
-          ),
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -47,9 +45,7 @@ class AppModal extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.left,
-                      style: AppStyle.medium20.copyWith(
-                        color: Color(AppColors.black),
-                      ),
+                      style: AppStyle.medium20.copyWith(color: Color(AppColors.black)),
                     ),
                   ),
                   if (menu != null)
@@ -76,10 +72,7 @@ class AppModal extends StatelessWidget {
 
               if (actions != null && actions!.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: actions!,
-                ),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: actions!),
               ],
             ],
           ),

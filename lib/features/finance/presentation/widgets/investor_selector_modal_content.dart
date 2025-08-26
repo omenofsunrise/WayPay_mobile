@@ -10,22 +10,15 @@ import 'package:waypay/features/investors/data/models/investors_model.dart';
 import 'package:waypay/features/investors/presentation/bloc/investors_bloc.dart';
 
 class InvestorSelectorModalContent extends StatefulWidget {
-  final void Function(
-    InvestorsModel selectedInvestor,
-    double amount,
-    String? comment,
-  )
-  onSave;
+  final void Function(InvestorsModel selectedInvestor, double amount, String? comment) onSave;
 
   const InvestorSelectorModalContent({super.key, required this.onSave});
 
   @override
-  State<InvestorSelectorModalContent> createState() =>
-      _InvestorSelectorModalContentState();
+  State<InvestorSelectorModalContent> createState() => _InvestorSelectorModalContentState();
 }
 
-class _InvestorSelectorModalContentState
-    extends State<InvestorSelectorModalContent> {
+class _InvestorSelectorModalContentState extends State<InvestorSelectorModalContent> {
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _commentController = TextEditingController();
@@ -61,7 +54,7 @@ class _InvestorSelectorModalContentState
   Widget build(BuildContext context) {
     return AppModal(
       title: 'Добавить приход',
-      backgroundColor: Colors.white,
+      backgroundColor: Color(AppColors.background),
       content: Container(
         color: Colors.white,
         child: Column(
@@ -72,20 +65,14 @@ class _InvestorSelectorModalContentState
               decoration: InputDecoration(
                 hintText: 'Поиск по имени...',
                 prefixIcon: const Icon(Icons.search, color: Colors.black54),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 14,
-                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: Color(AppColors.primary)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: Color(AppColors.primary),
-                    width: 2,
-                  ),
+                  borderSide: BorderSide(color: Color(AppColors.primary), width: 2),
                 ),
                 errorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -102,13 +89,9 @@ class _InvestorSelectorModalContentState
                 if (_debounce?.isActive ?? false) _debounce!.cancel();
                 _debounce = Timer(const Duration(milliseconds: 500), () {
                   if (value.trim().isNotEmpty) {
-                    context.read<InvestorsBloc>().add(
-                      SearchInvestorsEvent(value.trim()),
-                    );
+                    context.read<InvestorsBloc>().add(SearchInvestorsEvent(value.trim()));
                   } else {
-                    context.read<InvestorsBloc>().add(
-                      LoadInvestorsEvent(page: 1),
-                    );
+                    context.read<InvestorsBloc>().add(LoadInvestorsEvent(page: 1));
                   }
                 });
               },
@@ -123,19 +106,13 @@ class _InvestorSelectorModalContentState
                   }
                   if (state is InvestorsError) {
                     return Center(
-                      child: Text(
-                        'Ошибка: ${state.message}',
-                        style: const TextStyle(color: Colors.black),
-                      ),
+                      child: Text('Ошибка: ${state.message}', style: const TextStyle(color: Colors.black)),
                     );
                   }
                   if (state is InvestorsLoaded) {
                     if (state.investors.isEmpty) {
                       return const Center(
-                        child: Text(
-                          'Инвесторы не найдены',
-                          style: TextStyle(color: Colors.black),
-                        ),
+                        child: Text('Инвесторы не найдены', style: TextStyle(color: Colors.black)),
                       );
                     }
                     return Column(
@@ -145,30 +122,20 @@ class _InvestorSelectorModalContentState
                             itemCount: state.investors.length,
                             itemBuilder: (context, index) {
                               final investor = state.investors[index];
-                              final isSelected =
-                                  investor.id == _selectedInvestor?.id;
+                              final isSelected = investor.id == _selectedInvestor?.id;
                               return GestureDetector(
                                 onTap: () => _onInvestorTap(investor),
                                 child: Container(
-                                  margin: const EdgeInsets.symmetric(
-                                    vertical: 4,
-                                  ),
+                                  margin: const EdgeInsets.symmetric(vertical: 4),
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? Colors.grey.shade200
-                                        : Colors.white,
+                                    color: isSelected ? Colors.grey.shade200 : Colors.white,
                                     border: Border.all(
-                                      color: isSelected
-                                          ? const Color(AppColors.primary)
-                                          : Colors.grey.shade300,
+                                      color: isSelected ? const Color(AppColors.primary) : Colors.grey.shade300,
                                     ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Text(
-                                    investor.nickname,
-                                    style: const TextStyle(color: Colors.black),
-                                  ),
+                                  child: Text(investor.nickname, style: const TextStyle(color: Colors.black)),
                                 ),
                               );
                             },
@@ -179,9 +146,7 @@ class _InvestorSelectorModalContentState
                           currentPage: state.currentPage,
                           totalPages: state.totalPages,
                           onPageSelected: (page) {
-                            context.read<InvestorsBloc>().add(
-                              LoadInvestorsEvent(page: page),
-                            );
+                            context.read<InvestorsBloc>().add(LoadInvestorsEvent(page: page));
                           },
                         ),
                       ],
@@ -195,9 +160,8 @@ class _InvestorSelectorModalContentState
 
             ValueListenableBuilder<String?>(
               valueListenable: investorError,
-              builder: (_, error, __) => error != null
-                  ? Text(error, style: const TextStyle(color: Colors.red))
-                  : const SizedBox(),
+              builder: (_, error, __) =>
+                  error != null ? Text(error, style: const TextStyle(color: Colors.red)) : const SizedBox(),
             ),
             const SizedBox(height: 8),
 
@@ -210,20 +174,14 @@ class _InvestorSelectorModalContentState
                   labelText: 'Сумма',
                   hintText: '0.0',
                   errorText: error,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 14,
-                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(color: Color(AppColors.primary)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: Color(AppColors.primary),
-                      width: 2,
-                    ),
+                    borderSide: BorderSide(color: Color(AppColors.primary), width: 2),
                   ),
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -243,20 +201,14 @@ class _InvestorSelectorModalContentState
               controller: _commentController,
               decoration: InputDecoration(
                 labelText: 'Комментарий (необязательно)',
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 14,
-                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: Color(AppColors.primary)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: Color(AppColors.primary),
-                    width: 2,
-                  ),
+                  borderSide: BorderSide(color: Color(AppColors.primary), width: 2),
                 ),
                 errorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -274,11 +226,7 @@ class _InvestorSelectorModalContentState
             Row(
               children: [
                 Expanded(
-                  child: DefaultButton(
-                    text: 'Отмена',
-                    isGreen: false,
-                    onPressed: () => context.pop(),
-                  ),
+                  child: DefaultButton(text: 'Отмена', isGreen: false, onPressed: () => context.pop()),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -294,9 +242,7 @@ class _InvestorSelectorModalContentState
                         return;
                       }
                       final amountText = _amountController.text.trim();
-                      if (amountText.isEmpty ||
-                          double.tryParse(amountText) == null ||
-                          double.parse(amountText) <= 0) {
+                      if (amountText.isEmpty || double.tryParse(amountText) == null || double.parse(amountText) <= 0) {
                         amountError.value = 'Введите корректную сумму';
                         return;
                       }
@@ -304,9 +250,7 @@ class _InvestorSelectorModalContentState
                       widget.onSave(
                         _selectedInvestor!,
                         double.parse(amountText),
-                        _commentController.text.trim().isEmpty
-                            ? null
-                            : _commentController.text.trim(),
+                        _commentController.text.trim().isEmpty ? null : _commentController.text.trim(),
                       );
                       context.pop();
                     },

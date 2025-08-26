@@ -25,6 +25,7 @@ class AppFormModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Color(AppColors.background),
       insetPadding: const EdgeInsets.all(20),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
@@ -33,12 +34,7 @@ class AppFormModal extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                title,
-                style: AppStyle.medium20.copyWith(
-                  color: Color(AppColors.primary),
-                ),
-              ),
+              Text(title, style: AppStyle.medium20.copyWith(color: Color(AppColors.primary))),
               const SizedBox(height: 16),
               ...fields.map(
                 (f) => Padding(
@@ -51,10 +47,7 @@ class AppFormModal extends StatelessWidget {
                           padding: const EdgeInsets.only(bottom: 6),
                           child: Text(
                             f.label!,
-                            style: AppStyle.medium16.copyWith(
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: AppStyle.medium16.copyWith(color: Colors.black87, fontWeight: FontWeight.w500),
                           ),
                         ),
                       TextField(
@@ -63,13 +56,8 @@ class AppFormModal extends StatelessWidget {
                         obscureText: f.obscureText,
                         decoration: InputDecoration(
                           hintText: f.placeholder,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 14,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                       ),
                     ],
@@ -88,11 +76,7 @@ class AppFormModal extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: DefaultButton(
-                      text: saveText,
-                      color: const Color(AppColors.primary),
-                      onPressed: onSave,
-                    ),
+                    child: DefaultButton(text: saveText, color: const Color(AppColors.primary), onPressed: onSave),
                   ),
                 ],
               ),

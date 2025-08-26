@@ -51,29 +51,31 @@ class _InvestitionTableState extends State<InvestitionTable> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Table(
-                  columnWidths: const {0: FlexColumnWidth(), 1: FlexColumnWidth()},
-                  border: TableBorder.all(color: Color(AppColors.borderColor), borderRadius: BorderRadius.circular(10)),
-                  children: [
-                    TableRow(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 17),
-                          child: Center(
-                            child: Text('Дата', style: AppStyle.manrope(size: 15, weight: FontWeight.w600)),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
-                            child: Text('Сумма, руб', style: AppStyle.manrope(size: 15, weight: FontWeight.w600)),
-                          ),
-                        ),
-                      ],
+                if (_isExpanded)
+                  Table(
+                    columnWidths: const {0: FlexColumnWidth(), 1: FlexColumnWidth()},
+                    border: TableBorder.all(
+                      color: Color(AppColors.borderColor),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    ...List.generate(
-                      _isExpanded ? rowCount : (rowCount > 0 ? 1 : 0), // одна свежая строка, если свернуто
-                      (index) {
+                    children: [
+                      TableRow(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 17),
+                            child: Center(
+                              child: Text('Дата', style: AppStyle.manrope(size: 15, weight: FontWeight.w600)),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                              child: Text('Сумма, руб', style: AppStyle.manrope(size: 15, weight: FontWeight.w600)),
+                            ),
+                          ),
+                        ],
+                      ),
+                      ...List.generate(rowCount, (index) {
                         final month = periodsDesc[index].periodName;
                         final sum = periodsDesc[index].value.toInt();
 
@@ -107,10 +109,9 @@ class _InvestitionTableState extends State<InvestitionTable> {
                             ),
                           ],
                         );
-                      },
-                    ),
-                  ],
-                ),
+                      }),
+                    ],
+                  ),
               ],
             ),
           );

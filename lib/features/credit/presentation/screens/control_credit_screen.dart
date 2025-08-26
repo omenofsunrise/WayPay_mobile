@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +15,7 @@ import 'package:waypay/features/credit/presentation/bloc/credit_event.dart';
 import 'package:waypay/features/credit/presentation/bloc/credit_state.dart';
 import 'package:waypay/features/credit/presentation/widgets/credit_filters.dart';
 import 'package:waypay/features/credit/presentation/widgets/credit_modal.dart';
+import 'package:waypay/features/credit/presentation/widgets/credit_tab.dart';
 import 'package:waypay/features/profile/data/models/employee.dart';
 
 class ControlCreditsScreen extends StatefulWidget {
@@ -22,8 +24,6 @@ class ControlCreditsScreen extends StatefulWidget {
   @override
   State<ControlCreditsScreen> createState() => _ControlCreditsScreenState();
 }
-
-enum CreditTab { all, favourite, debtors, archived }
 
 class _ControlCreditsScreenState extends State<ControlCreditsScreen> {
   final _searchController = TextEditingController();
@@ -57,42 +57,75 @@ class _ControlCreditsScreenState extends State<ControlCreditsScreen> {
     );
   }
 
-  void _onTabSelected(CreditTab tab) {
-    setState(() => _selectedTab = tab);
-    _loadCredits();
-  }
+  String _formatDate(DateTime date) => DateFormat('dd-MM-yyyy').format(date);
 
-  String _formatCurrency(num value) {
-    return NumberFormat.currency(
-      locale: 'ru_RU',
-      symbol: '₽',
-      decimalDigits: 0,
-    ).format(value);
-  }
-
-  String _formatDate(DateTime date) {
-    return DateFormat('dd-MM-yyyy').format(date);
-  }
-
-  void _openFilterSheet(BuildContext context) {
-    showModalBottomSheet(
+  void _openFilterModal(BuildContext context) {
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(AppColors.background),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 16,
-          right: 16,
-          top: 24,
-        ),
-        child: const CreditFilters(
-          showIncomeFilters: true,
-          showClientInvestorFilters: false,
-        ),
+      builder: (context) {
+        return Dialog(
+          backgroundColor: const Color(AppColors.background),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 16,
+              right: 16,
+              top: 24,
+            ),
+            child: const CreditFilters(
+              showIncomeFilters: true,
+              showClientInvestorFilters: false,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // маленькая кнопка в AppBar для выбора вкладки
+  Widget _smallTabButton() {
+    return PopupMenuButton<CreditTab>(
+      tooltip: 'Вкладка',
+      icon: const Icon(Icons.segment, color: Colors.white),
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onSelected: (tab) {
+        setState(() => _selectedTab = tab);
+        _loadCredits();
+      },
+      itemBuilder: (context) => <PopupMenuEntry<CreditTab>>[
+        _menuItem(CreditTab.all, 'Все договоры'),
+        _menuItem(CreditTab.favourite, 'Важные'),
+        _menuItem(CreditTab.debtors, 'Должники'),
+        _menuItem(CreditTab.archived, 'В архиве'),
+      ],
+    );
+  }
+
+  PopupMenuItem<CreditTab> _menuItem(CreditTab tab, String title) {
+    final isSelected = tab == _selectedTab;
+    return PopupMenuItem<CreditTab>(
+      value: tab,
+      child: Row(
+        children: [
+          Icon(
+            isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+            color: isSelected ? const Color(AppColors.primary) : Colors.grey,
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Text(
+            title,
+            style: AppStyle.manrope(
+              size: 14,
+              weight: FontWeight.w500,
+              color: Colors.black,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -111,9 +144,10 @@ class _ControlCreditsScreenState extends State<ControlCreditsScreen> {
           style: AppStyle.medium20.copyWith(color: Colors.white),
         ),
         actions: [
+          _smallTabButton(), // ← маленькая кнопка-меню
           IconButton(
             icon: const Icon(Icons.filter_alt, color: Colors.white),
-            onPressed: () => _openFilterSheet(context),
+            onPressed: () => _openFilterModal(context),
           ),
         ],
       ),
@@ -121,25 +155,9 @@ class _ControlCreditsScreenState extends State<ControlCreditsScreen> {
         valueListenable: UserStorage().roleNotifier,
         builder: (context, role, _) {
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                color: const Color(AppColors.primary),
-                padding: const EdgeInsets.all(16),
-                child: BlocBuilder<CreditBloc, CreditState>(
-                  builder: (context, state) {
-                    final total = state is CreditLoaded ? state.totalCount : 0;
-                    return Text(
-                      'Всего договоров: $total',
-                      style: AppStyle.inter(
-                        size: 24,
-                        weight: FontWeight.w300,
-                        color: Colors.white,
-                      ),
-                    );
-                  },
-                ),
-              ),
-              _buildTabBar(),
+              // CreditTabDropdown удалён — выбор через кнопку в AppBar
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
@@ -216,7 +234,7 @@ class _ControlCreditsScreenState extends State<ControlCreditsScreen> {
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
-                                                Spacer(),
+                                                const Spacer(),
                                                 GestureDetector(
                                                   onTap: () {
                                                     context
@@ -237,7 +255,7 @@ class _ControlCreditsScreenState extends State<ControlCreditsScreen> {
                                                     size: 20,
                                                   ),
                                                 ),
-                                                SizedBox(width: 4),
+                                                const SizedBox(width: 4),
                                                 Text(
                                                   _formatDate(
                                                     credit.creditDate,
@@ -249,7 +267,6 @@ class _ControlCreditsScreenState extends State<ControlCreditsScreen> {
                                                 ),
                                               ],
                                             ),
-
                                             Text(
                                               credit.employeeName,
                                               style: const TextStyle(
@@ -290,78 +307,6 @@ class _ControlCreditsScreenState extends State<ControlCreditsScreen> {
             ],
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildMoney(String label, num value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-        const SizedBox(height: 2),
-        Text(
-          _formatCurrency(value),
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTabBar() {
-    return Container(
-      color: Color(AppColors.primary),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _buildTabItem('Все договоры', CreditTab.all, Icons.article),
-            _buildTabItem('Важные', CreditTab.favourite, Icons.star_border),
-            _buildTabItem(
-              'Должники',
-              CreditTab.debtors,
-              Icons.download_rounded,
-            ),
-            _buildTabItem(
-              'В архиве',
-              CreditTab.archived,
-              Icons.hourglass_empty,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabItem(String label, CreditTab tab, IconData icon) {
-    final isSelected = _selectedTab == tab;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: GestureDetector(
-        onTap: () => _onTabSelected(tab),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? const Color(AppColors.primaryLight)
-                : Colors.white,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, size: 16),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: isSelected ? Colors.black : Colors.black87,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:waypay/core/storage/user_storage.dart';
+
+import 'package:waypay/core/theme/app_colors.dart';
+import 'package:waypay/core/theme/app_style.dart';
 import 'package:waypay/core/widgets/helpers.dart';
 import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
+
 import 'package:waypay/features/blog/data/models/comment_attachment_response.dart';
 import 'package:waypay/features/blog/data/models/comment_response.dart';
 import 'package:waypay/features/blog/data/data_sources/blog_remote_data_sources.dart';
@@ -17,13 +20,13 @@ import 'package:waypay/features/blog/presentation/bloc/comment_bloc.dart';
 import 'package:waypay/features/blog/presentation/bloc/comment_event.dart';
 import 'package:waypay/features/blog/presentation/bloc/comment_state.dart';
 import 'package:waypay/core/di/dependency_injection.dart';
+import 'package:waypay/features/profile/data/models/employee.dart';
 
 class CommentsScreen extends StatefulWidget {
   final int postId;
   final bool isAuthor;
-  final String? currentUserAvatar;
 
-  const CommentsScreen({super.key, required this.postId, this.currentUserAvatar, required this.isAuthor});
+  const CommentsScreen({super.key, required this.postId, required this.isAuthor});
 
   @override
   State<CommentsScreen> createState() => _CommentsScreenState();
@@ -37,6 +40,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
   final List<File> _localFiles = [];
   final List<CommentAttachmentResponse> _serverAttachments = [];
 
+  Employee? _currentEmployee;
   int? _replyToCommentId;
   int? _editingCommentId;
   final _imagePicker = ImagePicker();
@@ -44,7 +48,21 @@ class _CommentsScreenState extends State<CommentsScreen> {
   @override
   void initState() {
     super.initState();
+    _loadEmployee();
     context.read<CommentBloc>().add(LoadComments(widget.postId));
+  }
+
+  Future<void> _loadEmployee() async {
+    try {
+      final dataSourceAuth = getIt<AuthRemoteDataSource>();
+      final info = await dataSourceAuth.getAuthInfo();
+      final employeeJson = info['employee'] as Map<String, dynamic>?;
+      setState(() {
+        _currentEmployee = employeeJson != null ? Employee.fromJson(employeeJson) : null;
+      });
+    } catch (e) {
+      print('Ошибка загрузки сотрудника: $e');
+    }
   }
 
   String _resolveUrl(String? url, {bool isAvatar = false}) {
@@ -281,7 +299,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
               onSend: _sendComment,
               onPickImage: _pickImage,
               onPickFile: _pickFile,
-              avatar: buildAvatar(photoPath: widget.currentUserAvatar, radius: 20),
+              avatar: buildAvatar(photoPath: _currentEmployee?.photoPath ?? '', radius: 20),
               isEditing: isEditing,
               replyToCommentId: _replyToCommentId,
             ),
@@ -294,65 +312,82 @@ class _CommentsScreenState extends State<CommentsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      // зелёная шапка
+      backgroundColor: const Color(AppColors.primary),
       appBar: AppBar(
-        title: const Text('Комментарии'),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(AppColors.primary),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context, true);
+          },
+        ),
         surfaceTintColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.black),
+        centerTitle: false,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text('Комментарии', style: AppStyle.medium20.copyWith(color: const Color(AppColors.background))),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: BlocBuilder<CommentBloc, CommentState>(
-              builder: (context, state) {
-                if (state is CommentLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (state is CommentError) {
-                  return Center(child: Text('Ошибка: ${state.message}'));
-                }
-                if (state is CommentLoaded) {
-                  final comments = state.comments;
-                  if (comments.isEmpty) {
-                    return const Center(child: Text('Комментариев пока нет'));
-                  }
 
-                  final Map<int, CommentResponse> commentById = {};
-                  void _collect(CommentResponse comment) {
-                    commentById[comment.id] = comment;
-                    for (final reply in comment.replies ?? []) {
-                      _collect(reply);
+      // контент — светлый фон со скруглением
+      body: Container(
+        decoration: const BoxDecoration(
+          color: Color(AppColors.background), // #F9FAFA
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: BlocBuilder<CommentBloc, CommentState>(
+                builder: (context, state) {
+                  if (state is CommentLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (state is CommentError) {
+                    return Center(child: Text('Ошибка: ${state.message}'));
+                  }
+                  if (state is CommentLoaded) {
+                    final comments = state.comments;
+                    if (comments.isEmpty) {
+                      return const Center(child: Text('Комментариев пока нет'));
                     }
-                  }
 
-                  for (final comment in comments) {
-                    _collect(comment);
-                  }
+                    final Map<int, CommentResponse> commentById = {};
+                    void collect(CommentResponse c) {
+                      commentById[c.id] = c;
+                      for (final r in c.replies ?? []) {
+                        collect(r);
+                      }
+                    }
 
-                  return ListView.builder(
-                    key: const PageStorageKey('comments_list'),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                    itemCount: comments.length,
-                    itemBuilder: (context, index) {
-                      final comment = comments[index];
-                      return CommentTile(
-                        key: ValueKey(comment.id),
-                        comment: comment,
-                        onReply: _setReplyTo,
-                        isUserPost: widget.isAuthor,
-                        onEdit: (id, text, attachments) => _startEditingComment(id, text, attachments),
-                        commentById: commentById,
-                      );
-                    },
-                  );
-                }
-                return const SizedBox();
-              },
+                    for (final c in comments) {
+                      collect(c);
+                    }
+
+                    return ListView.builder(
+                      key: const PageStorageKey('comments_list'),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                      itemCount: comments.length,
+                      itemBuilder: (context, index) {
+                        final comment = comments[index];
+                        return CommentTile(
+                          key: ValueKey(comment.id),
+                          comment: comment,
+                          onReply: _setReplyTo,
+                          isUserPost: widget.isAuthor,
+                          onEdit: (id, text, attachments) => _startEditingComment(id, text, attachments),
+                          commentById: commentById,
+                        );
+                      },
+                    );
+                  }
+                  return const SizedBox();
+                },
+              ),
             ),
-          ),
-          _buildInputBar(),
-        ],
+            _buildInputBar(),
+          ],
+        ),
       ),
     );
   }

@@ -9,15 +9,14 @@ class UserTypeSelectionScreen extends StatefulWidget {
   const UserTypeSelectionScreen({super.key});
 
   @override
-  State<UserTypeSelectionScreen> createState() =>
-      _UserTypeSelectionScreenState();
+  State<UserTypeSelectionScreen> createState() => _UserTypeSelectionScreenState();
 }
 
 class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(AppColors.background),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(18),
@@ -34,10 +33,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen> {
                       text: "Я клиент",
                       isGreen: true,
                       onPressed: () {
-                        context.pushNamed(
-                          Routes.phoneAuthScreen.toName,
-                          extra: 'customer',
-                        );
+                        context.pushNamed(Routes.phoneAuthScreen.toName, extra: 'customer');
                       },
                     ),
                     const SizedBox(height: 18),
@@ -45,10 +41,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen> {
                       text: "Я сотрудник",
                       isGreen: true,
                       onPressed: () {
-                        context.pushNamed(
-                          Routes.phoneAuthScreen.toName,
-                          extra: 'employee',
-                        );
+                        context.pushNamed(Routes.phoneAuthScreen.toName, extra: 'employee');
                       },
                     ),
                   ],

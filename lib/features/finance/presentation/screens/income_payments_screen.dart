@@ -5,10 +5,11 @@ import 'package:waypay/core/storage/user_storage.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
 import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
+import 'package:waypay/core/widgets/app_modal.dart';
+import 'package:waypay/core/widgets/default_button.dart';
 import 'package:waypay/core/widgets/pagination_widget.dart';
 import 'package:waypay/core/widgets/refresh.dart';
 import 'package:waypay/features/finance/presentation/widgets/payment_card.dart';
-import 'package:waypay/features/finance/presentation/widgets/simple_dropdown.dart';
 import 'package:waypay/features/payment/presentation/bloc/expected/payment_bloc.dart';
 import 'package:waypay/features/profile/data/models/employee.dart';
 
@@ -33,7 +34,16 @@ class _IncomePaymentsScreenState extends State<IncomePaymentsScreen> {
   void initState() {
     super.initState();
     _updateDates();
-    _loadPaymentsByMonthYear();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadPaymentsByMonthYear();
+    });
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _updateDates() {
@@ -46,6 +56,221 @@ class _IncomePaymentsScreenState extends State<IncomePaymentsScreen> {
     context.read<PaymentBloc>().add(
       LoadPayment(refresh: true, dateFrom: _dateFrom, dateTo: _dateTo),
     );
+  }
+
+  void _openFilterModal(BuildContext context) {
+    int tempMonth = _selectedMonth;
+    int tempYear = _selectedYear;
+    final TextEditingController tempController = TextEditingController(
+      text: _searchController.text,
+    );
+
+    final paymentBloc = context.read<PaymentBloc>();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AppModal(
+          title: 'Фильтры',
+          backgroundColor: const Color(AppColors.background),
+          contentPadding: const EdgeInsets.all(16),
+          content: StatefulBuilder(
+            builder: (context, setModalState) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: tempController,
+                    style: const TextStyle(color: Colors.black),
+                    decoration: InputDecoration(
+                      hintText: 'Поиск по клиенту...',
+                      hintStyle: const TextStyle(color: Colors.black54),
+                      prefixIcon: const Icon(Icons.search, color: Colors.black),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                      ),
+                    ),
+                    onChanged: (value) {
+                      if (_debounce?.isActive ?? false) _debounce!.cancel();
+                      _debounce = Timer(const Duration(milliseconds: 500), () {
+                        if (value.trim().isNotEmpty) {
+                          paymentBloc.add(SearchPayment(value.trim()));
+                        } else {
+                          _updateDates();
+                          paymentBloc.add(
+                            LoadPayment(
+                              refresh: true,
+                              dateFrom: _dateFrom,
+                              dateTo: _dateTo,
+                            ),
+                          );
+                        }
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  Text(
+                    'Период',
+                    style: AppStyle.manrope16.copyWith(
+                      color: const Color(AppColors.black),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<int>(
+                          value: tempMonth,
+                          dropdownColor: Colors.white,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          icon: const Icon(Icons.arrow_drop_down),
+                          items: List.generate(12, (i) => i + 1)
+                              .map(
+                                (m) => DropdownMenuItem(
+                                  value: m,
+                                  child: Text(_monthName(m)),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (v) {
+                            if (v == null) return;
+                            setModalState(() => tempMonth = v);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: DropdownButtonFormField<int>(
+                          value: tempYear,
+                          dropdownColor: Colors.white,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          icon: const Icon(Icons.arrow_drop_down),
+                          items: List.generate(5, (i) => 2023 + i)
+                              .map(
+                                (y) => DropdownMenuItem(
+                                  value: y,
+                                  child: Text(y.toString()),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (v) {
+                            if (v == null) return;
+                            setModalState(() => tempYear = v);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+          actions: [
+            DefaultButton(
+              text: 'Сбросить',
+              onPressed: () {
+                tempController.clear();
+                tempMonth = DateTime.now().month;
+                tempYear = DateTime.now().year;
+
+                setState(() {
+                  _selectedMonth = tempMonth;
+                  _selectedYear = tempYear;
+                  _searchController.clear();
+                });
+
+                _updateDates();
+                paymentBloc.add(
+                  LoadPayment(
+                    refresh: true,
+                    dateFrom: _dateFrom,
+                    dateTo: _dateTo,
+                  ),
+                );
+
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(width: 12),
+            DefaultButton(
+              text: 'Применить',
+              isGreen: true,
+              onPressed: () {
+                setState(() {
+                  _selectedMonth = tempMonth;
+                  _selectedYear = tempYear;
+                  _searchController.text = tempController.text;
+                });
+
+                _updateDates();
+                final query = _searchController.text.trim();
+                if (query.isNotEmpty) {
+                  paymentBloc.add(SearchPayment(query));
+                } else {
+                  paymentBloc.add(
+                    LoadPayment(
+                      refresh: true,
+                      dateFrom: _dateFrom,
+                      dateTo: _dateTo,
+                    ),
+                  );
+                }
+
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _monthName(int m) {
+    const monthNames = [
+      'Январь',
+      'Февраль',
+      'Март',
+      'Апрель',
+      'Май',
+      'Июнь',
+      'Июль',
+      'Август',
+      'Сентябрь',
+      'Октябрь',
+      'Ноябрь',
+      'Декабрь',
+    ];
+    return monthNames[m - 1];
   }
 
   @override
@@ -63,153 +288,18 @@ class _IncomePaymentsScreenState extends State<IncomePaymentsScreen> {
             color: const Color(AppColors.background),
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_alt, color: Colors.white),
+            onPressed: () => _openFilterModal(context),
+          ),
+        ],
       ),
       body: ValueListenableBuilder<EmployeeRole?>(
         valueListenable: UserStorage().roleNotifier,
         builder: (context, role, _) {
           return Column(
             children: [
-              Container(
-                color: const Color(AppColors.primary),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    BlocBuilder<PaymentBloc, PaymentState>(
-                      builder: (context, state) {
-                        final total = state is PaymentLoaded
-                            ? state.totalCount
-                            : 0;
-                        return Text(
-                          'Всего платежей: $total',
-                          style: AppStyle.inter(
-                            size: 24,
-                            weight: FontWeight.w300,
-                            color: const Color(AppColors.background),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SimpleDropdown<int>(
-                            items: List.generate(12, (index) => index + 1),
-                            labelBuilder: (month) {
-                              const monthNames = [
-                                'Январь',
-                                'Февраль',
-                                'Март',
-                                'Апрель',
-                                'Май',
-                                'Июнь',
-                                'Июль',
-                                'Август',
-                                'Сентябрь',
-                                'Октябрь',
-                                'Ноябрь',
-                                'Декабрь',
-                              ];
-                              return monthNames[month - 1];
-                            },
-                            initialValue: _selectedMonth,
-                            onChanged: (month) {
-                              if (month == null) return;
-                              setState(() => _selectedMonth = month);
-                              _loadPaymentsByMonthYear();
-                            },
-                          ),
-                        ),
-
-                        Expanded(
-                          child: SimpleDropdown<int>(
-                            items: List.generate(5, (index) => 2023 + index),
-                            labelBuilder: (year) => '$year',
-                            initialValue: _selectedYear,
-                            onChanged: (year) {
-                              if (year == null) return;
-                              setState(() => _selectedYear = year);
-                              _loadPaymentsByMonthYear();
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _searchController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: 'Поиск по клиенту...',
-                        hintStyle: const TextStyle(color: Colors.white),
-                        prefixIcon: const Icon(
-                          Icons.search,
-                          color: Colors.white,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.white),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.white),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.white),
-                        ),
-                      ),
-                      onChanged: (value) {
-                        if (_debounce?.isActive ?? false) _debounce!.cancel();
-                        _debounce = Timer(
-                          const Duration(milliseconds: 500),
-                          () {
-                            final bloc = context.read<PaymentBloc>();
-                            if (value.isNotEmpty) {
-                              bloc.add(SearchPayment(value));
-                            } else {
-                              _loadPaymentsByMonthYear();
-                            }
-                          },
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    BlocBuilder<PaymentBloc, PaymentState>(
-                      builder: (context, state) {
-                        int totalIncome = 0;
-                        int totalPayments = 0;
-                        if (state is PaymentLoaded) {
-                          totalIncome = state.totalIncome;
-                          totalPayments = state.totalPayments.toInt();
-                        }
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Всего доход: $totalIncome ₽',
-                              style: AppStyle.manrope(
-                                size: 14,
-                                weight: FontWeight.w400,
-                                color: Color(AppColors.background),
-                              ),
-                            ),
-                            Text(
-                              'Всего выплат: $totalPayments ₽',
-                              style: AppStyle.manrope(
-                                size: 14,
-                                weight: FontWeight.w400,
-                                color: Color(AppColors.background),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
@@ -270,7 +360,12 @@ class _IncomePaymentsScreenState extends State<IncomePaymentsScreen> {
                                 totalPages: state.totalPages,
                                 onPageSelected: (page) {
                                   context.read<PaymentBloc>().add(
-                                    LoadPayment(page: page, refresh: true),
+                                    LoadPayment(
+                                      page: page,
+                                      refresh: true,
+                                      dateFrom: _dateFrom,
+                                      dateTo: _dateTo,
+                                    ),
                                   );
                                 },
                               ),

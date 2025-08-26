@@ -27,7 +27,6 @@ class _CompanyScreenState extends State<CompanyScreen> {
   final phoneController = TextEditingController();
 
   File? _newImageFile;
-
   late CompanyModel _initialCompany;
 
   @override
@@ -77,17 +76,22 @@ class _CompanyScreenState extends State<CompanyScreen> {
 
         if (state is CompanyLoaded && state.companies.isNotEmpty) {
           final CompanyModel company = state.companies.first;
-
           _initialCompany = company;
 
+          // Заполняем поля, телефон без ведущей "8"
           nameController.text = company.name;
           chiefController.text = company.chief;
           cityController.text = company.city;
           addressController.text = company.officeAddress;
           innController.text = company.inn;
           emailController.text = company.email;
-          phoneController.text = company.phone;
           bankController.text = company.bank;
+
+          String rawPhone = company.phone;
+          if (rawPhone.startsWith('8')) {
+            rawPhone = rawPhone.substring(1); // убираем ведущую 8
+          }
+          phoneController.text = rawPhone;
 
           return _buildFormUI(company);
         }
@@ -150,11 +154,13 @@ class _CompanyScreenState extends State<CompanyScreen> {
           const SizedBox(height: 20),
           LabeledTextField(label: 'Email', controller: emailController),
           const SizedBox(height: 20),
+          // Телефон с prefix '8 '
           LabeledTextField(
             label: 'Телефон',
             controller: phoneController,
             keyboardType: TextInputType.phone,
             format: LabeledTextFieldFormat.phone,
+            prefix: const Text('8 '),
           ),
           const SizedBox(height: 20),
           LabeledTextField(label: 'Рассчётный счёт', controller: bankController),
@@ -177,7 +183,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
                     final updatedCompany = _initialCompany.copyWith(
                       name: nameController.text.trim(),
                       chief: chiefController.text.trim(),
-                      phone: phoneController.text.trim(),
+                      phone: '8${phoneController.text.trim()}', // добавляем 8 перед отправкой
                       city: cityController.text.trim(),
                       officeAddress: addressController.text.trim(),
                       bank: bankController.text.trim(),
@@ -196,7 +202,6 @@ class _CompanyScreenState extends State<CompanyScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ошибка при обновлении: $e')));
                     }
                   },
-
                   color: Color(AppColors.primary),
                 ),
               ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +9,7 @@ import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
 import 'package:waypay/core/widgets/default_button.dart';
 import 'package:waypay/core/widgets/pagination_widget.dart';
 import 'package:waypay/core/widgets/refresh.dart';
+import 'package:waypay/core/widgets/app_modal.dart';
 import 'package:waypay/features/clients/data/models/queue/queue_request_model.dart';
 import 'package:waypay/features/clients/presentation/bloc/queue/queue_bloc.dart';
 import 'package:waypay/features/clients/presentation/widgets/queue_card.dart';
@@ -23,6 +26,26 @@ class QueueScreen extends StatefulWidget {
 class _QueueScreenState extends State<QueueScreen> {
   final _searchController = TextEditingController();
   final _tokenStorage = TokenStorage();
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<QueueBloc>().add(
+        LoadQueue(refresh: true, page: 1, pageSize: 10),
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
 
   Future<void> _logout() async {
     await _tokenStorage.clearAll();
@@ -31,61 +54,123 @@ class _QueueScreenState extends State<QueueScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
+  void _openFilterModal() {
+    final queueBloc = context.read<QueueBloc>();
+    final tempController = TextEditingController(text: _searchController.text);
+
+    showDialog(
+      context: context,
+      builder: (_) => AppModal(
+        title: 'Фильтры',
+        backgroundColor: const Color(AppColors.background),
+        contentPadding: const EdgeInsets.all(16),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: tempController,
+              decoration: InputDecoration(
+                hintText: 'Поиск по имени...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+              onChanged: (value) {
+                if (_debounce?.isActive ?? false) _debounce!.cancel();
+                _debounce = Timer(const Duration(milliseconds: 500), () {
+                  final q = value.trim();
+                  if (q.isNotEmpty) {
+                    queueBloc.add(SearchQueue(q, pageSize: 10));
+                  } else {
+                    queueBloc.add(
+                      LoadQueue(refresh: true, page: 1, pageSize: 10),
+                    );
+                  }
+                });
+              },
+            ),
+          ],
+        ),
+        actions: [
+          DefaultButton(
+            text: 'Сбросить',
+            onPressed: () {
+              tempController.clear();
+              setState(() => _searchController.clear());
+              queueBloc.add(LoadQueue(refresh: true, page: 1, pageSize: 10));
+              Navigator.pop(context);
+            },
+          ),
+          const SizedBox(width: 12),
+          DefaultButton(
+            text: 'Применить',
+            isGreen: true,
+            onPressed: () {
+              setState(() => _searchController.text = tempController.text);
+              final q = _searchController.text.trim();
+              if (q.isNotEmpty) {
+                queueBloc.add(SearchQueue(q, pageSize: 10));
+              } else {
+                queueBloc.add(LoadQueue(refresh: true, page: 1, pageSize: 10));
+              }
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openAddToQueueModal() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return BlocProvider.value(
+          value: context.read<QueueBloc>(),
+          child: QueueSelectorModal(
+            onSave: (selectedClient, amount, highPriority) {
+              final request = QueueRequestModel(
+                sum: amount.toDouble(),
+                clientId: selectedClient.id,
+                priority: highPriority ? 1 : 0,
+              );
+              context.read<QueueBloc>().add(AddQueueItem(request));
+            },
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: AppDrawer(),
-      backgroundColor: Color(AppColors.primary),
+      drawer: const AppDrawer(),
+      backgroundColor: const Color(AppColors.primary),
       appBar: AppBar(
-        backgroundColor: Color(AppColors.primary),
+        backgroundColor: const Color(AppColors.primary),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         title: const Text('Очередь', style: TextStyle(color: Colors.white)),
+        actions: [
+          IconButton(
+            tooltip: 'Добавить в очередь',
+            icon: const Icon(Icons.add, color: Colors.white),
+            onPressed: _openAddToQueueModal,
+          ),
+          IconButton(
+            tooltip: 'Фильтры',
+            icon: const Icon(Icons.filter_alt, color: Colors.white),
+            onPressed: _openFilterModal,
+          ),
+        ],
       ),
       body: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Color(AppColors.primary),
-            child: TextField(
-              controller: _searchController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Поиск по имени...',
-                hintStyle: const TextStyle(color: Colors.white),
-                prefixIcon: const Icon(Icons.search, color: Colors.white),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.white),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.white),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.white),
-                ),
-              ),
-              onChanged: (value) {
-                if (value.trim().isNotEmpty) {
-                  context.read<QueueBloc>().add(
-                    SearchQueue(value.trim(), pageSize: 10),
-                  );
-                } else {
-                  context.read<QueueBloc>().add(
-                    LoadQueue(refresh: true, page: 1, pageSize: 10),
-                  );
-                }
-              },
-            ),
-          ),
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
@@ -151,8 +236,16 @@ class _QueueScreenState extends State<QueueScreen> {
                               ? const Center(child: Text('Очередь пуста'))
                               : Refresher(
                                   onRefresh: () async {
-                                    final bloc = context.read<QueueBloc>();
-                                    bloc.add(LoadQueue(refresh: true, page: 1));
+                                    context.read<QueueBloc>().add(
+                                      LoadQueue(
+                                        refresh: true,
+                                        page: 1,
+                                        pageSize: 10,
+                                        search: _searchController.text.isEmpty
+                                            ? null
+                                            : _searchController.text,
+                                      ),
+                                    );
                                   },
                                   content: ListView.builder(
                                     padding: const EdgeInsets.all(16),
@@ -167,6 +260,10 @@ class _QueueScreenState extends State<QueueScreen> {
                                               refresh: true,
                                               page: 1,
                                               pageSize: 10,
+                                              search:
+                                                  _searchController.text.isEmpty
+                                                  ? null
+                                                  : _searchController.text,
                                             ),
                                           );
                                         },
@@ -175,43 +272,7 @@ class _QueueScreenState extends State<QueueScreen> {
                                   ),
                                 ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: DefaultButton(
-                            text: 'Добавить в очередь',
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (dialogContext) {
-                                  return BlocProvider.value(
-                                    value: context.read<QueueBloc>(),
-                                    child: BlocProvider(
-                                      create: (_) => QueueBloc(),
-                                      child: QueueSelectorModal(
-                                        onSave:
-                                            (
-                                              selectedClient,
-                                              amount,
-                                              highPriority,
-                                            ) {
-                                              final request = QueueRequestModel(
-                                                sum: amount.toDouble(),
-                                                clientId: selectedClient.id,
-                                                priority: highPriority ? 1 : 0,
-                                              );
-                                              context.read<QueueBloc>().add(
-                                                AddQueueItem(request),
-                                              );
-                                            },
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            isGreen: true,
-                          ),
-                        ),
+
                         if (state.totalPages > 1)
                           PaginationWidget(
                             currentPage: state.currentPage,

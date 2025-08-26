@@ -79,9 +79,7 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
       await userStorage.saveRole(role);
 
       final permissionsList = (employee['permissions'] as List?) ?? [];
-      final permissions = permissionsList
-          .map((p) => PermissionMapper.fromApi(p.toString()))
-          .toList();
+      final permissions = permissionsList.map((p) => PermissionMapper.fromApi(p.toString())).toList();
       await userStorage.savePermissions(permissions);
 
       debugPrint('✅ Роль обновлена: $role, права: $permissions');
@@ -181,22 +179,12 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              border: value != 'back'
-                  ? Border.all(color: const Color(AppColors.primary))
-                  : null,
+              border: value != 'back' ? Border.all(color: const Color(AppColors.primary)) : null,
               borderRadius: BorderRadius.circular(12),
             ),
             child: value == 'back'
-                ? const Icon(
-                    Icons.backspace_outlined,
-                    color: Color(AppColors.primary),
-                  )
-                : Text(
-                    value,
-                    style: AppStyle.medium20.copyWith(
-                      color: const Color(AppColors.primary),
-                    ),
-                  ),
+                ? const Icon(Icons.backspace_outlined, color: Color(AppColors.primary))
+                : Text(value, style: AppStyle.medium20.copyWith(color: const Color(AppColors.primary))),
           ),
         ),
       ),
@@ -222,18 +210,12 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(AppColors.background),
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 32),
-            Center(
-              child: Image.asset(
-                Images.backgroundLogo,
-                height: 107,
-                width: 107,
-              ),
-            ),
+            Center(child: Image.asset(Images.backgroundLogo, height: 107, width: 107)),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -243,12 +225,7 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
                   _buildPinDots(),
                   if (_errorMessage != null) ...[
                     const SizedBox(height: 12),
-                    Text(
-                      _errorMessage!,
-                      style: AppStyle.regular14.copyWith(
-                        color: const Color(AppColors.red),
-                      ),
-                    ),
+                    Text(_errorMessage!, style: AppStyle.regular14.copyWith(color: const Color(AppColors.red))),
                   ],
                 ],
               ),
@@ -261,10 +238,7 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: row.map((key) {
                       if (key == 'empty') {
-                        return Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: const SizedBox(width: 60, height: 60),
-                        );
+                        return Padding(padding: const EdgeInsets.all(8), child: const SizedBox(width: 60, height: 60));
                       }
                       return _buildKey(key);
                     }).toList(),

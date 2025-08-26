@@ -9,12 +9,11 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
   BlogBloc() : super(BlogInitial()) {
     on<LoadBlogPosts>(_onLoadPosts);
     on<ToggleLikePost>(_onToggleLikePost);
+    on<LoadBlogPostById>(_onLoadPostById);
+    on<ToggleLikeChatPost>(_onToggleLikeChatPost);
   }
 
-  Future<void> _onLoadPosts(
-    LoadBlogPosts event,
-    Emitter<BlogState> emit,
-  ) async {
+  Future<void> _onLoadPosts(LoadBlogPosts event, Emitter<BlogState> emit) async {
     emit(BlogLoading());
 
     try {
@@ -31,10 +30,19 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
     }
   }
 
-  Future<void> _onToggleLikePost(
-    ToggleLikePost event,
-    Emitter<BlogState> emit,
-  ) async {
+  Future<void> _onLoadPostById(LoadBlogPostById event, Emitter<BlogState> emit) async {
+    emit(BlogLoading());
+
+    try {
+      final post = await getIt<BlogRemoteDataSources>().getBlogPostById(event.postId);
+
+      emit(BlogPostLoaded(post));
+    } catch (e) {
+      emit(BlogError(e.toString()));
+    }
+  }
+
+  Future<void> _onToggleLikePost(ToggleLikePost event, Emitter<BlogState> emit) async {
     if (state is BlogLoaded) {
       final current = state as BlogLoaded;
 
@@ -50,6 +58,26 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
       }).toList();
 
       emit(BlogLoaded(current.posts.copyWith(items: updated)));
+    }
+
+    try {
+      await getIt<BlogRemoteDataSources>().likePost(event.postId);
+    } catch (_) {}
+  }
+
+  Future<void> _onToggleLikeChatPost(ToggleLikeChatPost event, Emitter<BlogState> emit) async {
+    if (state is BlogPostLoaded) {
+      final current = state as BlogPostLoaded;
+
+      if (current.post.id == event.postId) {
+        final alreadyLiked = current.post.isLikedByCurrentUser;
+        final updatedPost = current.post.copyWith(
+          isLikedByCurrentUser: !alreadyLiked,
+          likesCount: alreadyLiked ? current.post.likesCount - 1 : current.post.likesCount + 1,
+        );
+
+        emit(BlogPostLoaded(updatedPost));
+      }
     }
 
     try {

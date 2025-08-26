@@ -38,8 +38,10 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
 
-    context.read<BudgetIncomeBloc>().add(LoadBudgetIncomeEvent());
-    context.read<BudgetExpenseBloc>().add(LoadBudgetExpenseEvent());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BudgetIncomeBloc>().add(LoadBudgetIncomeEvent(month: selectedMonth, year: selectedYear));
+      context.read<BudgetExpenseBloc>().add(LoadBudgetExpenseEvent(month: selectedMonth, year: selectedYear));
+    });
   }
 
   String formatAmount(num amount) {
@@ -59,6 +61,125 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
     _loadData(false, selectedMonth, selectedYear);
   }
 
+  // === МОДАЛКА ФИЛЬТРОВ МЕСЯЦ/ГОД ===
+  void _openFilterModal() {
+    int tempMonth = selectedMonth;
+    int tempYear = selectedYear;
+
+    // берём блоки заранее (чтобы не зависеть от контекста диалога)
+    final incomeBloc = context.read<BudgetIncomeBloc>();
+    final expenseBloc = context.read<BudgetExpenseBloc>();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AppModal(
+        title: 'Фильтры',
+        backgroundColor: const Color(AppColors.background),
+        contentPadding: const EdgeInsets.all(16),
+        content: StatefulBuilder(
+          builder: (context, setModalState) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Период', style: AppStyle.manrope16.copyWith(color: const Color(AppColors.black))),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<int>(
+                        value: tempMonth,
+                        dropdownColor: Colors.white,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        icon: const Icon(Icons.arrow_drop_down),
+                        items: List.generate(12, (i) => i + 1)
+                            .map(
+                              (m) => DropdownMenuItem(
+                                value: m,
+                                child: Text(
+                                  toBeginningOfSentenceCase(DateFormat.MMMM('ru_RU').format(DateTime(0, m)))!,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (v) {
+                          if (v == null) return;
+                          setModalState(() => tempMonth = v);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: DropdownButtonFormField<int>(
+                        value: tempYear,
+                        dropdownColor: Colors.white,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        icon: const Icon(Icons.arrow_drop_down),
+                        items: List.generate(
+                          5,
+                          (i) => DateTime.now().year - 2 + i,
+                        ).map((y) => DropdownMenuItem(value: y, child: Text(y.toString()))).toList(),
+                        onChanged: (v) {
+                          if (v == null) return;
+                          setModalState(() => tempYear = v);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          DefaultButton(
+            text: 'Сбросить',
+            onPressed: () {
+              final now = DateTime.now();
+              tempMonth = now.month;
+              tempYear = now.year;
+
+              setState(() {
+                selectedMonth = tempMonth;
+                selectedYear = tempYear;
+              });
+
+              incomeBloc.add(LoadBudgetIncomeEvent(month: tempMonth, year: tempYear));
+              expenseBloc.add(LoadBudgetExpenseEvent(month: tempMonth, year: tempYear));
+
+              Navigator.pop(context);
+            },
+          ),
+          const SizedBox(width: 12),
+          DefaultButton(
+            text: 'Применить',
+            isGreen: true,
+            onPressed: () {
+              setState(() {
+                selectedMonth = tempMonth;
+                selectedYear = tempYear;
+              });
+
+              incomeBloc.add(LoadBudgetIncomeEvent(month: tempMonth, year: tempYear));
+              expenseBloc.add(LoadBudgetExpenseEvent(month: tempMonth, year: tempYear));
+
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showAddBudgetOutcomeModal() async {
     final amountController = TextEditingController();
     final commentController = TextEditingController();
@@ -67,6 +188,7 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
     await showDialog(
       context: context,
       builder: (dialogContext) => AppModal(
+        backgroundColor: Color(AppColors.background),
         title: 'Добавить расход',
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,7 +253,9 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                         if (!context.mounted) return;
                         Navigator.pop(context);
 
-                        context.read<BudgetExpenseBloc>().add(LoadBudgetExpenseEvent());
+                        context.read<BudgetExpenseBloc>().add(
+                          LoadBudgetExpenseEvent(month: selectedMonth, year: selectedYear),
+                        );
 
                         ScaffoldMessenger.of(
                           context,
@@ -142,6 +266,7 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                         showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
+                            backgroundColor: Color(AppColors.background),
                             title: const Text('Ошибка'),
                             content: Text('Не удалось добавить расход.\n$e'),
                             actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Ок'))],
@@ -177,7 +302,7 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
 
             if (!mounted) return;
             Navigator.pop(context);
-            context.read<BudgetIncomeBloc>().add(LoadBudgetIncomeEvent());
+            context.read<BudgetIncomeBloc>().add(LoadBudgetIncomeEvent(month: selectedMonth, year: selectedYear));
 
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Приход успешно добавлен')));
           } catch (e) {
@@ -186,6 +311,7 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
             showDialog(
               context: context,
               builder: (_) => AlertDialog(
+                backgroundColor: Color(AppColors.background),
                 title: const Text('Ошибка'),
                 content: Text('Не удалось добавить приход.\n$e'),
                 actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Ок'))],
@@ -207,71 +333,16 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
         backgroundColor: const Color(AppColors.primary),
         elevation: 0,
         title: Text('Бюджет', style: AppStyle.medium20.copyWith(color: const Color(AppColors.background))),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_alt, color: Colors.white),
+            onPressed: _openFilterModal,
+          ),
+        ],
       ),
       body: Column(
         children: [
-          Container(
-            color: const Color(AppColors.primary),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<int>(
-                    value: selectedMonth,
-                    dropdownColor: Colors.white,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    icon: const Icon(Icons.arrow_drop_down),
-                    items: List.generate(12, (i) => i + 1)
-                        .map(
-                          (m) =>
-                              DropdownMenuItem(value: m, child: Text(DateFormat.MMMM('ru_RU').format(DateTime(0, m)))),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          selectedMonth = value;
-                        });
-                        _loadBothTabs();
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DropdownButtonFormField<int>(
-                    value: selectedYear,
-                    dropdownColor: Colors.white,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    icon: const Icon(Icons.arrow_drop_down),
-                    items: List.generate(
-                      5,
-                      (i) => DateTime.now().year - 2 + i,
-                    ).map((y) => DropdownMenuItem(value: y, child: Text(y.toString()))).toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          selectedYear = value;
-                        });
-                        _loadBothTabs();
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-
+          // 🔻 Блок с выпадающими списками месяца/года удалён. Теперь только через модалку.
           BlocBuilder<BudgetIncomeBloc, BudgetIncomeState>(
             builder: (context, incomeState) {
               return BlocBuilder<BudgetExpenseBloc, BudgetExpenseState>(
@@ -330,11 +401,15 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                           currentPage: state.currentPage,
                           totalPages: state.totalPages,
                           onPageSelected: (page) {
-                            context.read<BudgetIncomeBloc>().add(LoadBudgetIncomeEvent(page: page));
+                            context.read<BudgetIncomeBloc>().add(
+                              LoadBudgetIncomeEvent(page: page, month: selectedMonth, year: selectedYear),
+                            );
                           },
                           onAddPressed: _showAddBudgetIncomeModal,
                           onRefresh: () async {
-                            context.read<BudgetIncomeBloc>().add(LoadBudgetIncomeEvent(page: state.currentPage));
+                            context.read<BudgetIncomeBloc>().add(
+                              LoadBudgetIncomeEvent(page: state.currentPage, month: selectedMonth, year: selectedYear),
+                            );
                           },
                         );
                       }
@@ -369,11 +444,15 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                           currentPage: state.currentPage,
                           totalPages: state.totalPages,
                           onPageSelected: (page) {
-                            context.read<BudgetExpenseBloc>().add(LoadBudgetExpenseEvent(page: page));
+                            context.read<BudgetExpenseBloc>().add(
+                              LoadBudgetExpenseEvent(page: page, month: selectedMonth, year: selectedYear),
+                            );
                           },
                           onAddPressed: _showAddBudgetOutcomeModal,
                           onRefresh: () async {
-                            context.read<BudgetExpenseBloc>().add(LoadBudgetExpenseEvent(page: state.currentPage));
+                            context.read<BudgetExpenseBloc>().add(
+                              LoadBudgetExpenseEvent(page: state.currentPage, month: selectedMonth, year: selectedYear),
+                            );
                           },
                         );
                       }
@@ -422,18 +501,7 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                   ),
           ),
         ),
-        // if (userStorage.hasViewContent([
-        //   EmployeeRole.superAdmin,
-        //   EmployeeRole.director,
-        // ]))
-        //   Padding(
-        //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        //     child: DefaultButton(
-        //       text: 'Добавить',
-        //       isGreen: true,
-        //       onPressed: onAddPressed,
-        //     ),
-        //   ),
+        // Кнопку "Добавить" оставил как в исходнике (закомментирована). Включите при необходимости.
         if (hasData)
           Padding(
             padding: const EdgeInsets.only(top: 8, bottom: 16),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay/core/storage/user_storage.dart';
+import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/widgets/form_modal/app_form_modal.dart';
 import 'package:waypay/core/widgets/form_modal/form_field_config.dart';
 import 'package:waypay/core/widgets/app_modal.dart';
@@ -41,6 +42,7 @@ class ProductCard extends StatelessWidget {
               context: context,
               builder: (_) => AppModal(
                 title: 'О продукте',
+                backgroundColor: Color(AppColors.background),
                 menuItems: canManage
                     ? [
                         PopupMenuItem(
@@ -80,6 +82,7 @@ class ProductCard extends StatelessWidget {
                                     showDialog(
                                       context: context,
                                       builder: (_) => AlertDialog(
+                                        backgroundColor: Color(AppColors.background),
                                         title: const Text('Ошибка'),
                                         content: Text('Не удалось обновить продукт.\n$e'),
                                         actions: [TextButton(onPressed: () => context.pop(), child: const Text('Ок'))],
@@ -98,6 +101,7 @@ class ProductCard extends StatelessWidget {
                             final confirm = await showDialog<bool>(
                               context: context,
                               builder: (_) => AlertDialog(
+                                backgroundColor: Color(AppColors.background),
                                 title: const Text('Удаление продукта'),
                                 content: const Text('Вы уверены, что хотите удалить этот продукт?'),
                                 actions: [
@@ -122,6 +126,7 @@ class ProductCard extends StatelessWidget {
                                 showDialog(
                                   context: context,
                                   builder: (_) => AlertDialog(
+                                    backgroundColor: Color(AppColors.background),
                                     title: const Text('Ошибка'),
                                     content: Text('Не удалось удалить продукт.\n$e'),
                                     actions: [TextButton(onPressed: () => context.pop(), child: const Text('Ок'))],

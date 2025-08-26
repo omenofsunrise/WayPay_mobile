@@ -41,13 +41,7 @@ class _ProfileBlogScreenState extends State<ProfileBlogScreen> {
     _loadUserId();
 
     _blogBloc = BlogBloc();
-    _blogBloc.add(
-      LoadBlogPosts(
-        feedType: FeedType.all,
-        sortType: SortType.date,
-        authorId: widget.id,
-      ),
-    );
+    _blogBloc.add(LoadBlogPosts(feedType: FeedType.all, sortType: SortType.date, authorId: widget.id));
   }
 
   @override
@@ -90,11 +84,7 @@ class _ProfileBlogScreenState extends State<ProfileBlogScreen> {
                   spacing: 16,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red,
-                    ),
+                    const Icon(Icons.error_outline, size: 64, color: Colors.red),
                     Text(
                       state.message,
                       textAlign: TextAlign.center,
@@ -105,9 +95,7 @@ class _ProfileBlogScreenState extends State<ProfileBlogScreen> {
                         if (state.message.contains('Сессия')) {
                           _logout();
                         } else {
-                          context.read<ProfileBlogCubit>().loadProfile(
-                            widget.id,
-                          );
+                          context.read<ProfileBlogCubit>().loadProfile(widget.id);
                         }
                       },
                       child: const Text('Повторить'),
@@ -125,20 +113,11 @@ class _ProfileBlogScreenState extends State<ProfileBlogScreen> {
             return Refresher(
               onRefresh: () async {
                 context.read<ProfileBlogCubit>().loadProfile(widget.id);
-                _blogBloc.add(
-                  LoadBlogPosts(
-                    feedType: FeedType.all,
-                    sortType: SortType.date,
-                    authorId: widget.id,
-                  ),
-                );
+                _blogBloc.add(LoadBlogPosts(feedType: FeedType.all, sortType: SortType.date, authorId: widget.id));
               },
               content: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 30,
-                  horizontal: 16,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -150,12 +129,7 @@ class _ProfileBlogScreenState extends State<ProfileBlogScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 4),
                         child: GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const CreatePostScreen(),
-                              ),
-                            );
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const CreatePostScreen()));
                           },
                           child: SizedBox(
                             height: 40,
@@ -163,9 +137,7 @@ class _ProfileBlogScreenState extends State<ProfileBlogScreen> {
                               decoration: BoxDecoration(
                                 color: Color(AppColors.background),
                                 borderRadius: BorderRadius.circular(5),
-                                border: Border.all(
-                                  color: Color(AppColors.greyLight),
-                                ),
+                                border: Border.all(color: Color(AppColors.greyLight)),
                               ),
                               child: Center(
                                 child: Text(
@@ -187,14 +159,10 @@ class _ProfileBlogScreenState extends State<ProfileBlogScreen> {
                       child: BlocBuilder<BlogBloc, BlogState>(
                         builder: (context, state) {
                           if (state is BlogLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
+                            return const Center(child: CircularProgressIndicator());
                           }
                           if (state is BlogError) {
-                            return Center(
-                              child: Text('Ошибка: ${state.message}'),
-                            );
+                            return Center(child: Text('Ошибка: ${state.message}'));
                           }
                           if (state is BlogLoaded) {
                             final posts = state.posts.items ?? [];
@@ -205,21 +173,14 @@ class _ProfileBlogScreenState extends State<ProfileBlogScreen> {
                               children: posts
                                   .map(
                                     (post) => Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 12,
-                                      ),
+                                      padding: const EdgeInsets.only(bottom: 12),
                                       child: PostCard(
                                         id: post.id,
                                         authorId: post.authorId,
-                                        author:
-                                            post.authorName ?? 'Неизвестный',
-                                        timeAgo: DateFormat(
-                                          'dd.MM.yyyy HH:mm',
-                                        ).format(post.createdAt),
+                                        author: post.authorName ?? 'Неизвестный',
+                                        timeAgo: DateFormat('dd.MM.yyyy HH:mm').format(post.createdAt),
                                         text: post.content ?? '',
-                                        imageUrl:
-                                            (post.imageUrls != null &&
-                                                post.imageUrls!.isNotEmpty)
+                                        imageUrl: (post.imageUrls != null && post.imageUrls!.isNotEmpty)
                                             ? post.imageUrls!.first
                                             : null,
                                         likes: post.likesCount,
@@ -228,19 +189,13 @@ class _ProfileBlogScreenState extends State<ProfileBlogScreen> {
                                         isLiked: post.isLikedByCurrentUser,
                                         isAuthor: post.isAuthor,
                                         onLikePressed: () {
-                                          context.read<BlogBloc>().add(
-                                            ToggleLikePost(post.id),
-                                          );
+                                          context.read<BlogBloc>().add(ToggleLikePost(post.id));
                                         },
                                         onCommentsPressed: () {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (_) => CommentsScreen(
-                                                postId: post.id,
-                                                currentUserAvatar: avatar,
-                                                isAuthor: post.isAuthor,
-                                              ),
+                                              builder: (_) => CommentsScreen(postId: post.id, isAuthor: post.isAuthor),
                                             ),
                                           );
                                         },

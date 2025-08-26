@@ -74,22 +74,26 @@ class _CreditCountState extends State<CreditCount> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Table(
-                  columnWidths: const {0: FlexColumnWidth(1), 1: FlexColumnWidth(1)},
-                  border: TableBorder.all(color: Color(AppColors.borderColor), borderRadius: BorderRadius.circular(10)),
-                  children: [
-                    TableRow(children: [_buildHeaderCell('Месяц'), _buildHeaderCell('Количество')]),
-                    ...List.generate(_isExpanded ? rowCount : (rowCount > 0 ? 1 : 0), (index) {
-                      final e = statsDesc[index];
-                      return TableRow(
-                        children: [
-                          _buildDataCell(_monthName(e.month), isMonth: true),
-                          _buildDataCell(numberFormatter.format(e.count)),
-                        ],
-                      );
-                    }),
-                  ],
-                ),
+                if (_isExpanded)
+                  Table(
+                    columnWidths: const {0: FlexColumnWidth(1), 1: FlexColumnWidth(1)},
+                    border: TableBorder.all(
+                      color: Color(AppColors.borderColor),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    children: [
+                      TableRow(children: [_buildHeaderCell('Месяц'), _buildHeaderCell('Количество')]),
+                      ...List.generate(rowCount, (index) {
+                        final e = statsDesc[index];
+                        return TableRow(
+                          children: [
+                            _buildDataCell(_monthName(e.month), isMonth: true),
+                            _buildDataCell(numberFormatter.format(e.count)),
+                          ],
+                        );
+                      }),
+                    ],
+                  ),
               ],
             ),
           );

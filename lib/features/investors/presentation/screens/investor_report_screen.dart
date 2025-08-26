@@ -142,7 +142,7 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
                             crossAxisCount: 2,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
-                            childAspectRatio: 1,
+                            childAspectRatio: 0.8,
                             children: [
                               if (reportData?['isCompany'] == false) ...[
                                 _buildCard(

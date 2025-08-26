@@ -64,6 +64,7 @@ class _ScheduleCardState extends State<ScheduleCard> {
     showDialog(
       context: context,
       builder: (_) => AppModal(
+        backgroundColor: Color(AppColors.background),
         title: 'Информация',
         content: SingleChildScrollView(
           child: Column(

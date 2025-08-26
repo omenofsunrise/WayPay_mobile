@@ -41,6 +41,77 @@ class _ProductsScreenState extends State<ProductsScreen> {
     super.dispose();
   }
 
+  void _openFilterModal() {
+    final productsBloc = context.read<ProductsBloc>();
+    final tempController = TextEditingController(text: _searchController.text);
+
+    showDialog(
+      context: context,
+      builder: (_) => AppModal(
+        title: 'Фильтры',
+        backgroundColor: const Color(AppColors.background),
+        contentPadding: const EdgeInsets.all(16),
+        content: StatefulBuilder(
+          builder: (context, setModalState) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: tempController,
+                  decoration: InputDecoration(
+                    hintText: 'Поиск продуктов...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                  onChanged: (value) {
+                    if (_debounce?.isActive ?? false) _debounce!.cancel();
+                    _debounce = Timer(const Duration(milliseconds: 500), () {
+                      final q = value.trim();
+                      if (q.isNotEmpty) {
+                        productsBloc.add(SearchProductsEvent(q));
+                      } else {
+                        productsBloc.add(ResetSearchProductsEvent());
+                      }
+                    });
+                  },
+                ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          DefaultButton(
+            text: 'Сбросить',
+            onPressed: () {
+              tempController.clear();
+              setState(() => _searchController.clear());
+              productsBloc.add(ResetSearchProductsEvent());
+              Navigator.pop(context);
+            },
+          ),
+          const SizedBox(width: 12),
+          DefaultButton(
+            text: 'Применить',
+            isGreen: true,
+            onPressed: () {
+              setState(() => _searchController.text = tempController.text);
+              final q = _searchController.text.trim();
+              if (q.isNotEmpty) {
+                productsBloc.add(SearchProductsEvent(q));
+              } else {
+                productsBloc.add(ResetSearchProductsEvent());
+              }
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showAddProductModal() {
     final nameController = TextEditingController();
     final ValueNotifier<String?> nameError = ValueNotifier(null);
@@ -59,6 +130,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
       builder: (dialogContext) => StatefulBuilder(
         builder: (innerDialogContext, setState) {
           return AppModal(
+            backgroundColor: Color(AppColors.background),
             title: 'Добавить продукт',
             content: Column(
               children: [
@@ -70,22 +142,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       labelText: 'Название продукта',
                       errorText: error,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Color(AppColors.primary)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Color(AppColors.primary), width: 2),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Colors.red),
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Colors.red, width: 2),
-                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                     style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
                   ),
@@ -144,14 +201,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                               builder: (_) => AlertDialog(
                                 title: const Text('Ошибка'),
                                 content: Text('Не удалось создать продукт.\n$e'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: const Text('Ок'),
-                                  ),
-                                ],
+                                actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Ок'))],
                               ),
                             );
                           }
@@ -170,80 +220,39 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: const AppDrawer(),
-      backgroundColor: const Color(AppColors.primary),
-      appBar: AppBar(
-        surfaceTintColor: Colors.transparent,
-        backgroundColor: const Color(AppColors.primary),
-        elevation: 0,
-        title: Text('Продукты', style: AppStyle.medium20.copyWith(color: const Color(AppColors.background))),
-      ),
-      body: ValueListenableBuilder<EmployeeRole?>(
-        valueListenable: UserStorage().roleNotifier,
-        builder: (context, role, _) {
-          final canAddProduct = UserStorage().hasViewContent([
-            EmployeeRole.employee,
-            EmployeeRole.director,
-            EmployeeRole.admin,
-            EmployeeRole.superAdmin,
-          ]);
-          return Column(
-            children: [
-              Container(
-                color: const Color(AppColors.primary),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    BlocBuilder<ProductsBloc, ProductsState>(
-                      builder: (context, state) {
-                        final total = state is ProductsLoaded ? state.totalCount : 0;
-                        return Text(
-                          'Всего продуктов: $total',
-                          style: AppStyle.inter(
-                            size: 24,
-                            weight: FontWeight.w300,
-                            color: const Color(AppColors.background),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _searchController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: 'Поиск продуктов...',
-                        hintStyle: const TextStyle(color: Colors.white),
-                        prefixIcon: const Icon(Icons.search, color: Colors.white),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.white),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.white),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.white),
-                        ),
-                      ),
-                      onChanged: (value) {
-                        if (_debounce?.isActive ?? false) _debounce!.cancel();
-                        _debounce = Timer(const Duration(milliseconds: 500), () {
-                          final bloc = context.read<ProductsBloc>();
-                          if (value.isNotEmpty) {
-                            bloc.add(SearchProductsEvent(value));
-                          } else {
-                            bloc.add(ResetSearchProductsEvent());
-                          }
-                        });
-                      },
-                    ),
-                  ],
+    return ValueListenableBuilder<EmployeeRole?>(
+      valueListenable: UserStorage().roleNotifier,
+      builder: (context, role, _) {
+        final canAddProduct = UserStorage().hasViewContent([
+          EmployeeRole.employee,
+          EmployeeRole.director,
+          EmployeeRole.admin,
+          EmployeeRole.superAdmin,
+        ]);
+
+        return Scaffold(
+          drawer: const AppDrawer(),
+          backgroundColor: const Color(AppColors.primary),
+          appBar: AppBar(
+            surfaceTintColor: Colors.transparent,
+            backgroundColor: const Color(AppColors.primary),
+            elevation: 0,
+            title: Text('Продукты', style: AppStyle.medium20.copyWith(color: const Color(AppColors.background))),
+            actions: [
+              if (canAddProduct)
+                IconButton(
+                  tooltip: 'Добавить продукт',
+                  icon: const Icon(Icons.add, color: Colors.white),
+                  onPressed: _showAddProductModal,
                 ),
+              IconButton(
+                icon: const Icon(Icons.filter_alt, color: Colors.white),
+                onPressed: _openFilterModal,
               ),
+            ],
+          ),
+          body: Column(
+            children: [
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
@@ -303,15 +312,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                 ),
                               ),
                             ),
-                            if (canAddProduct)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                child: DefaultButton(
-                                  text: 'Добавить продукт',
-                                  isGreen: true,
-                                  onPressed: _showAddProductModal,
-                                ),
-                              ),
+
                             Padding(
                               padding: const EdgeInsets.only(top: 8, bottom: 16),
                               child: PaginationWidget(
@@ -332,9 +333,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 ),
               ),
             ],
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

@@ -35,6 +35,16 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
   Timer? _debounce;
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<InvestorsBloc>().add(LoadInvestorsEvent());
+    });
+  }
+
+  @override
   void dispose() {
     _debounce?.cancel();
     _searchController.dispose();
@@ -47,6 +57,73 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
     context.pushReplacementNamed(Routes.phoneAuthScreen.toName);
   }
 
+  void _openFilterModal() {
+    final investorsBloc = context.read<InvestorsBloc>();
+    final tempController = TextEditingController(text: _searchController.text);
+
+    showDialog(
+      context: context,
+      builder: (_) => AppModal(
+        title: 'Фильтры',
+        backgroundColor: const Color(AppColors.background),
+        contentPadding: const EdgeInsets.all(16),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: tempController,
+              decoration: InputDecoration(
+                hintText: 'Поиск инвесторов...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+              onChanged: (value) {
+                if (_debounce?.isActive ?? false) _debounce!.cancel();
+                _debounce = Timer(const Duration(milliseconds: 500), () {
+                  final q = value.trim();
+                  if (q.isNotEmpty) {
+                    investorsBloc.add(SearchInvestorsEvent(q));
+                  } else {
+                    investorsBloc.add(ResetSearchInvestorsEvent());
+                  }
+                });
+              },
+            ),
+          ],
+        ),
+        actions: [
+          DefaultButton(
+            text: 'Сбросить',
+            onPressed: () {
+              tempController.clear();
+              setState(() => _searchController.clear());
+              investorsBloc.add(ResetSearchInvestorsEvent());
+              Navigator.pop(context);
+            },
+          ),
+          const SizedBox(width: 12),
+          DefaultButton(
+            text: 'Применить',
+            isGreen: true,
+            onPressed: () {
+              setState(() => _searchController.text = tempController.text);
+              final q = _searchController.text.trim();
+              if (q.isNotEmpty) {
+                investorsBloc.add(SearchInvestorsEvent(q));
+              } else {
+                investorsBloc.add(ResetSearchInvestorsEvent());
+              }
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showAddInvestorModal() {
     final nicknameController = TextEditingController();
     final fullNameController = TextEditingController();
@@ -54,10 +131,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
     final pieController = TextEditingController();
     final investmentController = TextEditingController();
 
-    final phoneFormatter = MaskTextInputFormatter(
-      mask: '8 (###) ###-##-##',
-      filter: {"#": RegExp(r'\d')},
-    );
+    final phoneFormatter = MaskTextInputFormatter(mask: '8 (###) ###-##-##', filter: {"#": RegExp(r'\d')});
 
     final ValueNotifier<String?> nicknameError = ValueNotifier(null);
     final ValueNotifier<String?> fullNameError = ValueNotifier(null);
@@ -101,9 +175,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
         investmentError.value = 'Введите сумму';
         isValid = false;
       } else {
-        final investmentValue = double.tryParse(
-          investmentController.text.trim(),
-        );
+        final investmentValue = double.tryParse(investmentController.text.trim());
         if (investmentValue == null || investmentValue < 0) {
           investmentError.value = 'Введите корректное число';
           isValid = false;
@@ -118,16 +190,14 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
       builder: (dialogContext) => StatefulBuilder(
         builder: (innerDialogContext, setState) {
           return AppModal(
+            backgroundColor: Color(AppColors.background),
             title: 'Добавить инвестора',
             content: Column(
               children: [
                 ValueListenableBuilder<String?>(
                   valueListenable: nicknameError,
-                  builder: (_, error, __) => LabeledTextField(
-                    label: 'Никнейм',
-                    controller: nicknameController,
-                    errorText: error,
-                  ),
+                  builder: (_, error, __) =>
+                      LabeledTextField(label: 'Никнейм', controller: nicknameController, errorText: error),
                 ),
                 ValueListenableBuilder<String?>(
                   valueListenable: fullNameError,
@@ -140,11 +210,8 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                 ),
                 ValueListenableBuilder<String?>(
                   valueListenable: phoneError,
-                  builder: (_, error, __) => _buildPhoneField(
-                    controller: phoneController,
-                    formatter: phoneFormatter,
-                    errorText: error,
-                  ),
+                  builder: (_, error, __) =>
+                      _buildPhoneField(controller: phoneController, formatter: phoneFormatter, errorText: error),
                 ),
                 ValueListenableBuilder<String?>(
                   valueListenable: pieError,
@@ -163,9 +230,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                     controller: investmentController,
                     keyboardType: TextInputType.number,
                     errorText: error,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                    ],
+                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -199,44 +264,30 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (_) => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
+                            builder: (_) => const Center(child: CircularProgressIndicator()),
                           );
 
                           try {
-                            await getIt<InvestorsRemoteDataSource>()
-                                .createInvestor(
-                                  nickname: nicknameController.text.trim(),
-                                  fullName: fullNameController.text.trim(),
-                                  phoneNumber:
-                                      phoneController.text.trim().isEmpty
-                                      ? null
-                                      : phoneFormatter.getUnmaskedText(),
-                                  investorPie:
-                                      int.tryParse(pieController.text.trim()) ??
-                                      0,
-                                  investmentAmount:
-                                      double.tryParse(
-                                        investmentController.text.trim(),
-                                      ) ??
-                                      0.0,
-                                );
+                            await getIt<InvestorsRemoteDataSource>().createInvestor(
+                              nickname: nicknameController.text.trim(),
+                              fullName: fullNameController.text.trim(),
+                              phoneNumber: phoneController.text.trim().isEmpty
+                                  ? null
+                                  : phoneFormatter.getUnmaskedText(),
+                              investorPie: int.tryParse(pieController.text.trim()) ?? 0,
+                              investmentAmount: double.tryParse(investmentController.text.trim()) ?? 0.0,
+                            );
 
                             if (!context.mounted) return;
                             Navigator.pop(context);
 
                             if (!context.mounted) return;
-                            context.read<InvestorsBloc>().add(
-                              LoadInvestorsEvent(refresh: true, page: 1),
-                            );
+                            context.read<InvestorsBloc>().add(LoadInvestorsEvent(refresh: true, page: 1));
 
                             if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Инвестор успешно создан'),
-                              ),
-                            );
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(const SnackBar(content: Text('Инвестор успешно создан')));
                           } catch (e) {
                             if (!context.mounted) return;
                             Navigator.pop(context);
@@ -246,9 +297,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                               context: context,
                               builder: (_) => AlertDialog(
                                 title: const Text('Ошибка'),
-                                content: Text(
-                                  'Не удалось создать инвестора.\n$e',
-                                ),
+                                content: Text('Не удалось создать инвестора.\n$e'),
                                 actions: [
                                   TextButton(
                                     onPressed: () {
@@ -283,94 +332,24 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
         surfaceTintColor: Colors.transparent,
         backgroundColor: const Color(AppColors.primary),
         elevation: 0,
-        title: Text(
-          'Инвесторы',
-          style: AppStyle.medium20.copyWith(
-            color: const Color(AppColors.background),
+        title: Text('Инвесторы', style: AppStyle.medium20.copyWith(color: const Color(AppColors.background))),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_alt, color: Colors.white),
+            onPressed: _openFilterModal,
           ),
-        ),
+        ],
       ),
       body: ValueListenableBuilder<EmployeeRole?>(
         valueListenable: UserStorage().roleNotifier,
         builder: (context, role, _) {
-          final canAddInvestor = UserStorage().canViewAdminContent();
           return Column(
             children: [
-              Container(
-                color: const Color(AppColors.primary),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    BlocBuilder<InvestorsBloc, InvestorsState>(
-                      builder: (context, state) {
-                        double totalAmount = 0;
-                        if (state is InvestorsLoaded) {
-                          totalAmount = state.investors.fold(
-                            0,
-                            (sum, investor) => sum + investor.balance,
-                          );
-                        }
-                        return Text(
-                          'Всего: ${totalAmount.toStringAsFixed(0)} ₽',
-                          style: AppStyle.inter(
-                            size: 24,
-                            weight: FontWeight.w300,
-                            color: const Color(AppColors.background),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _searchController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: 'Поиск счетов...',
-                        hintStyle: const TextStyle(color: Colors.white),
-                        prefixIcon: const Icon(
-                          Icons.search,
-                          color: Colors.white,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.white),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.white),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.white),
-                        ),
-                      ),
-                      onChanged: (value) {
-                        if (_debounce?.isActive ?? false) _debounce!.cancel();
-                        _debounce = Timer(
-                          const Duration(milliseconds: 500),
-                          () {
-                            if (!context.mounted) return;
-                            final bloc = context.read<InvestorsBloc>();
-                            if (value.isNotEmpty) {
-                              bloc.add(SearchInvestorsEvent(value));
-                            } else {
-                              bloc.add(ResetSearchInvestorsEvent());
-                            }
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
                     color: Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
                   ),
                   child: BlocBuilder<InvestorsBloc, InvestorsState>(
                     builder: (context, state) {
@@ -385,26 +364,17 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(
-                                  Icons.error_outline,
-                                  size: 64,
-                                  color: Color(AppColors.red),
-                                ),
+                                const Icon(Icons.error_outline, size: 64, color: Color(AppColors.red)),
                                 const SizedBox(height: 16),
                                 const Text(
                                   'Ошибка загрузки',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   state.message,
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Color(AppColors.red),
-                                  ),
+                                  style: const TextStyle(color: Color(AppColors.red)),
                                 ),
                                 const SizedBox(height: 16),
                                 if (state.message.contains('Сессия истекла') ||
@@ -412,9 +382,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                                   ElevatedButton(
                                     onPressed: _logout,
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(
-                                        AppColors.red,
-                                      ),
+                                      backgroundColor: const Color(AppColors.red),
                                       foregroundColor: Colors.white,
                                     ),
                                     child: const Text('Войти заново'),
@@ -424,9 +392,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                                 ElevatedButton(
                                   onPressed: () {
                                     if (!context.mounted) return;
-                                    context.read<InvestorsBloc>().add(
-                                      LoadInvestorsEvent(refresh: true),
-                                    );
+                                    context.read<InvestorsBloc>().add(LoadInvestorsEvent(refresh: true));
                                   },
                                   child: const Text('Повторить'),
                                 ),
@@ -452,52 +418,34 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                                   if (currentState is InvestorsLoaded) {
                                     currentPage = currentState.currentPage;
                                   }
-                                  bloc.add(
-                                    LoadInvestorsEvent(
-                                      refresh: true,
-                                      page: currentPage,
-                                    ),
-                                  );
+                                  bloc.add(LoadInvestorsEvent(refresh: true, page: currentPage));
                                 },
                                 content: ListView.builder(
                                   padding: const EdgeInsets.all(16),
                                   itemCount: state.investors.length,
                                   itemBuilder: (context, index) {
-                                    return InvestorCard(
-                                      investor: state.investors[index],
-                                    );
+                                    return InvestorCard(investor: state.investors[index]);
                                   },
                                 ),
                               ),
                             ),
-                            // if (canAddInvestor)
-                            //   Padding(
-                            //     padding: const EdgeInsets.symmetric(
-                            //       horizontal: 16,
-                            //       vertical: 8,
-                            //     ),
-                            //     child: DefaultButton(
-                            //       text: 'Добавить инвестора',
-                            //       isGreen: true,
-                            //       onPressed: _showAddInvestorModal,
-                            //     ),
+                            // Если нужна кнопка добавления — раскомментируйте блок ниже
+                            // Padding(
+                            //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            //   child: DefaultButton(
+                            //     text: 'Добавить инвестора',
+                            //     isGreen: true,
+                            //     onPressed: _showAddInvestorModal,
                             //   ),
+                            // ),
                             Padding(
-                              padding: const EdgeInsets.only(
-                                top: 8,
-                                bottom: 16,
-                              ),
+                              padding: const EdgeInsets.only(top: 8, bottom: 16),
                               child: PaginationWidget(
                                 currentPage: state.currentPage,
                                 totalPages: state.totalPages,
                                 onPageSelected: (page) {
                                   if (!context.mounted) return;
-                                  context.read<InvestorsBloc>().add(
-                                    LoadInvestorsEvent(
-                                      refresh: true,
-                                      page: page,
-                                    ),
-                                  );
+                                  context.read<InvestorsBloc>().add(LoadInvestorsEvent(refresh: true, page: page));
                                 },
                               ),
                             ),
@@ -529,10 +477,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
         children: [
           Text(
             'Телефон',
-            style: AppStyle.medium16.copyWith(
-              color: Colors.black87,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppStyle.medium16.copyWith(color: Colors.black87, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 10),
           TextField(
@@ -542,20 +487,14 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
             decoration: InputDecoration(
               hintText: 'Телефон',
               errorText: errorText,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 14,
-              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: Color(AppColors.primary)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: Color(AppColors.primary),
-                  width: 2,
-                ),
+                borderSide: BorderSide(color: Color(AppColors.primary), width: 2),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),

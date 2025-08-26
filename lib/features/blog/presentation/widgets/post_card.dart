@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -9,6 +11,9 @@ import 'package:waypay/core/widgets/helpers.dart';
 import 'package:waypay/features/blog/data/data_sources/blog_remote_data_sources.dart';
 import 'package:waypay/features/blog/presentation/screens/blog_profile_screen.dart';
 import 'package:waypay/features/blog/presentation/widgets/image_modal_viewer.dart';
+import 'package:waypay/features/chat/data/data_source/chat/chat_remote_data_source.dart';
+import 'package:waypay/features/chat/data/data_source/message/message_remote_data_source.dart';
+import 'package:waypay/features/chat/data/models/chat/chat_response.dart';
 
 class PostCard extends StatefulWidget {
   final int id;
@@ -17,10 +22,8 @@ class PostCard extends StatefulWidget {
   final String timeAgo;
   final String text;
 
-  /// Если у поста одно изображение
   final String? imageUrl;
-
-  /// Если у поста несколько изображений
+  final bool? isChat;
   final List<String> imageUrls;
 
   final String? fileName;
@@ -55,6 +58,7 @@ class PostCard extends StatefulWidget {
     required this.isLiked,
     this.onLikePressed = _noop,
     this.onCommentsPressed,
+    this.isChat,
   });
 
   static void _noop() {}
@@ -124,7 +128,6 @@ class _PostCardState extends State<PostCard> {
 
   @override
   Widget build(BuildContext context) {
-    // Список урлов (с учётом одиночного imageUrl)
     final List<String> rawUrls = widget.imageUrls.isNotEmpty
         ? widget.imageUrls
         : (widget.imageUrl != null && widget.imageUrl!.isNotEmpty)
@@ -146,7 +149,6 @@ class _PostCardState extends State<PostCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Автор
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -157,38 +159,54 @@ class _PostCardState extends State<PostCard> {
                       MaterialPageRoute(builder: (context) => ProfileBlogScreen(id: widget.authorId)),
                     );
                   },
-                  child: buildAvatar(photoPath: widget.authorAvatarPath, fullName: widget.author, radius: 20),
+                  child: buildAvatar(
+                    photoPath: widget.authorAvatarPath,
+                    fullName: widget.author,
+                    radius: widget.isChat == null ? 20 : 15,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(widget.author, style: AppStyle.manrope(size: 14, weight: FontWeight.w600)),
-                      Text(widget.timeAgo, style: AppStyle.manrope(size: 14, weight: FontWeight.w400)),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => ProfileBlogScreen(id: widget.authorId)),
+                          );
+                        },
+                        child: Text(
+                          widget.author,
+                          style: AppStyle.manrope(size: widget.isChat == null ? 14 : 11, weight: FontWeight.w600),
+                        ),
+                      ),
+                      Text(
+                        widget.timeAgo,
+                        style: AppStyle.manrope(size: widget.isChat == null ? 14 : 11, weight: FontWeight.w400),
+                      ),
                     ],
                   ),
                 ),
-                if (widget.isAuthor == true) _buildMenu(context),
+                if (widget.isAuthor == true && widget.isChat == null) _buildMenu(context),
               ],
             ),
             const SizedBox(height: 8),
-
-            // Текст
             if (widget.text.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(widget.text, style: AppStyle.manrope(size: 14, weight: FontWeight.w400)),
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  widget.text,
+                  style: AppStyle.manrope(size: widget.isChat == null ? 14 : 11, weight: FontWeight.w400),
+                ),
               ),
-
-            // Медиа (с кэшем + префетч)
             if (resolvedUrls.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _ImagesBlockCached(urls: resolvedUrls, onTapImage: (url) => ImageModalViewer.show(context, url)),
               ),
 
-            // Файл (если есть)
             if (widget.fileName != null && widget.fileThumbnail != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
@@ -211,7 +229,6 @@ class _PostCardState extends State<PostCard> {
                 ),
               ),
 
-            // Действия
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -253,7 +270,16 @@ class _PostCardState extends State<PostCard> {
                     ],
                   ),
                 ),
-                const Icon(Icons.share, size: 20, color: Color(AppColors.darkGrey)),
+                if (widget.isChat == null)
+                  GestureDetector(
+                    onTap: () async {
+                      final ok = await showSharePostDialog(context, postId: widget.id);
+                      if (ok == true && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Пост отправлен')));
+                      }
+                    },
+                    child: const Icon(Icons.share, size: 20, color: Color(AppColors.darkGrey)),
+                  ),
               ],
             ),
           ],
@@ -263,9 +289,6 @@ class _PostCardState extends State<PostCard> {
   }
 }
 
-/// Блок изображений с кэшированием и префетчем соседних.
-/// ВАЖНО: лениво создаём CacheManager и префетчим в didChangeDependencies,
-/// чтобы не ловить ошибки channel/path_provider и MediaQuery в initState.
 class _ImagesBlockCached extends StatefulWidget {
   final List<String> urls;
   final void Function(String url)? onTapImage;
@@ -288,7 +311,7 @@ class _ImagesBlockCachedState extends State<_ImagesBlockCached> {
     super.didChangeDependencies();
     if (!_initialized) {
       _mediaCache = CacheManager(Config('postMediaCache', stalePeriod: Duration(days: 14), maxNrOfCacheObjects: 300));
-      // первичный префетч — безопасно здесь
+
       _prefetch(_index);
       _prefetch(_index + 1);
       _initialized = true;
@@ -343,6 +366,7 @@ class _ImagesBlockCachedState extends State<_ImagesBlockCached> {
             child: PageView.builder(
               controller: _controller,
               itemCount: widget.urls.length,
+
               onPageChanged: (i) {
                 setState(() => _index = i);
                 _prefetch(i - 1);
@@ -356,8 +380,6 @@ class _ImagesBlockCachedState extends State<_ImagesBlockCached> {
           ),
         ),
         const SizedBox(height: 8),
-
-        // Индикаторы
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(widget.urls.length, (i) {
@@ -375,6 +397,270 @@ class _ImagesBlockCachedState extends State<_ImagesBlockCached> {
           }),
         ),
       ],
+    );
+  }
+}
+
+Future<bool?> showSharePostDialog(BuildContext context, {required int postId}) {
+  return showDialog<bool>(
+    context: context,
+    barrierDismissible: true,
+    builder: (_) => _SharePostDialog(postId: postId),
+  );
+}
+
+class _SharePostDialog extends StatefulWidget {
+  final int postId;
+  const _SharePostDialog({required this.postId});
+
+  @override
+  State<_SharePostDialog> createState() => _SharePostDialogState();
+}
+
+class _SharePostDialogState extends State<_SharePostDialog> {
+  final _msgCtrl = TextEditingController();
+  final _searchCtrl = TextEditingController();
+  final _selected = <int>{};
+
+  late final ChatRemoteDataSource _chatApi = getIt<ChatRemoteDataSource>();
+  late final MessageRemoteDataSource _msgApi = getIt<MessageRemoteDataSource>();
+
+  List<ChatResponse> _all = [];
+  List<ChatResponse> _filtered = [];
+  bool _loading = true;
+  bool _sending = false;
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadChats();
+    _searchCtrl.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _msgCtrl.dispose();
+    _searchCtrl.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadChats({String? q}) async {
+    setState(() => _loading = true);
+    try {
+      final data = await _chatApi.getMyChats(search: q);
+      setState(() {
+        _all = data;
+        _filtered = data;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Не удалось загрузить чаты: $e')));
+    }
+  }
+
+  void _onSearchChanged() {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () async {
+      final q = _searchCtrl.text.trim();
+
+      await _loadChats(q: q.isEmpty ? null : q);
+    });
+  }
+
+  Future<void> _send() async {
+    if (_selected.isEmpty || _sending) return;
+    setState(() => _sending = true);
+
+    try {
+      final msg = _msgCtrl.text.trim().isEmpty ? null : _msgCtrl.text.trim();
+      for (final chatId in _selected) {
+        await _msgApi.sendMessage(chatId, text: msg, postId: widget.postId, attachments: const []);
+      }
+      if (!mounted) return;
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _sending = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ошибка отправки: $e')));
+    }
+  }
+
+  Widget _chatTile(ChatResponse c) {
+    final checked = _selected.contains(c.id);
+    return InkWell(
+      onTap: () {
+        setState(() {
+          if (checked) {
+            _selected.remove(c.id);
+          } else {
+            _selected.add(c.id);
+          }
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          children: [
+            Checkbox(
+              value: checked,
+              onChanged: (_) {
+                setState(() {
+                  if (checked) {
+                    _selected.remove(c.id);
+                  } else {
+                    _selected.add(c.id);
+                  }
+                });
+              },
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            ),
+            const SizedBox(width: 8),
+            buildAvatar(fullName: c.name ?? 'Чат', radius: 18, photoPath: c.avatarPath),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    c.name ?? 'Чат ${c.id}',
+                    style: AppStyle.manrope(size: 14, weight: FontWeight.w600),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    c.lastMessage?.text?.trim().isNotEmpty == true
+                        ? (c.lastMessage!.text!.length > 40
+                              ? '${c.lastMessage!.text!.substring(0, 40)}…'
+                              : c.lastMessage!.text!)
+                        : 'Нет сообщений',
+                    style: AppStyle.manrope(size: 13, weight: FontWeight.w400, color: const Color(AppColors.darkGrey)),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final canSend = _selected.isNotEmpty && !_sending;
+
+    return Dialog(
+      backgroundColor: Color(AppColors.background),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8, minWidth: 340),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 8, 8),
+              child: Row(
+                children: [
+                  Text('Поделиться постом', style: AppStyle.manrope(size: 18, weight: FontWeight.w700)),
+                  const Spacer(),
+                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context, false)),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _msgCtrl,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        hintText: 'Добавьте сообщение к посту (необязательно)',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.all(12),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    TextField(
+                      controller: _searchCtrl,
+                      decoration: InputDecoration(
+                        hintText: 'Поиск чатов...',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    Expanded(
+                      child: _loading
+                          ? const Center(child: CircularProgressIndicator())
+                          : _filtered.isEmpty
+                          ? const Center(child: Text('Чатов не найдено'))
+                          : ListView.separated(
+                              itemCount: _filtered.length,
+                              separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade200),
+                              itemBuilder: (_, i) => _chatTile(_filtered[i]),
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF7F7F7),
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                border: Border(top: BorderSide(color: Colors.grey.shade200)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _selected.isEmpty ? 'Выберите чаты для отправки' : 'Выбрано чатов: ${_selected.length}',
+                      style: AppStyle.manrope(
+                        size: 14,
+                        weight: FontWeight.w400,
+                        color: const Color(AppColors.darkGrey),
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: canSend ? _send : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(AppColors.comfPayment),
+                      disabledBackgroundColor: Colors.grey.shade300,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: _sending
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Text('Отправить'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

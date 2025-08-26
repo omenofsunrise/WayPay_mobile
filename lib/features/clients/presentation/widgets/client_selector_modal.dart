@@ -16,8 +16,7 @@ class ClientSelectorModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ClientsBloc>(
-      create: (_) =>
-          ClientsBloc()..add(LoadClients(refresh: true, page: 1, pageSize: 10)),
+      create: (_) => ClientsBloc()..add(LoadClients(refresh: true, page: 1, pageSize: 10)),
       child: ClientSelectorModalContent(onSave: onSave),
     );
   }
@@ -29,21 +28,17 @@ class ClientSelectorModalContent extends StatefulWidget {
   const ClientSelectorModalContent({super.key, required this.onSave});
 
   @override
-  State<ClientSelectorModalContent> createState() =>
-      _ClientSelectorModalContentState();
+  State<ClientSelectorModalContent> createState() => _ClientSelectorModalContentState();
 }
 
-class _ClientSelectorModalContentState
-    extends State<ClientSelectorModalContent> {
+class _ClientSelectorModalContentState extends State<ClientSelectorModalContent> {
   final TextEditingController _searchController = TextEditingController();
   ClientModel? _selectedClient;
 
   @override
   void initState() {
     super.initState();
-    context.read<ClientsBloc>().add(
-      LoadClients(refresh: true, page: 1, pageSize: 10),
-    );
+    context.read<ClientsBloc>().add(LoadClients(refresh: true, page: 1, pageSize: 10));
   }
 
   @override
@@ -62,7 +57,7 @@ class _ClientSelectorModalContentState
   Widget build(BuildContext context) {
     return AppModal(
       title: 'Выберите клиента',
-      backgroundColor: Colors.white,
+      backgroundColor: Color(AppColors.background),
       content: Container(
         color: Colors.white,
         child: Column(
@@ -73,20 +68,14 @@ class _ClientSelectorModalContentState
               decoration: InputDecoration(
                 hintText: 'Поиск по имени...',
                 prefixIcon: const Icon(Icons.search, color: Colors.black54),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 14,
-                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: Color(AppColors.primary)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: Color(AppColors.primary),
-                    width: 2,
-                  ),
+                  borderSide: BorderSide(color: Color(AppColors.primary), width: 2),
                 ),
                 errorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -101,13 +90,9 @@ class _ClientSelectorModalContentState
               ),
               onChanged: (value) {
                 if (value.trim().isNotEmpty) {
-                  context.read<ClientsBloc>().add(
-                    SearchClients(value.trim(), pageSize: 10),
-                  );
+                  context.read<ClientsBloc>().add(SearchClients(value.trim(), pageSize: 10));
                 } else {
-                  context.read<ClientsBloc>().add(
-                    LoadClients(refresh: true, page: 1, pageSize: 10),
-                  );
+                  context.read<ClientsBloc>().add(LoadClients(refresh: true, page: 1, pageSize: 10));
                 }
               },
             ),
@@ -121,19 +106,13 @@ class _ClientSelectorModalContentState
                   }
                   if (state is ClientsError) {
                     return Center(
-                      child: Text(
-                        'Ошибка: ${state.message}',
-                        style: const TextStyle(color: Colors.black),
-                      ),
+                      child: Text('Ошибка: ${state.message}', style: const TextStyle(color: Colors.black)),
                     );
                   }
                   if (state is ClientsLoaded) {
                     if (state.clients.isEmpty) {
                       return const Center(
-                        child: Text(
-                          'Клиенты не найдены',
-                          style: TextStyle(color: Colors.black),
-                        ),
+                        child: Text('Клиенты не найдены', style: TextStyle(color: Colors.black)),
                       );
                     }
                     return Column(
@@ -147,25 +126,16 @@ class _ClientSelectorModalContentState
                               return GestureDetector(
                                 onTap: () => _onClientTap(client),
                                 child: Container(
-                                  margin: const EdgeInsets.symmetric(
-                                    vertical: 4,
-                                  ),
+                                  margin: const EdgeInsets.symmetric(vertical: 4),
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? Colors.grey.shade200
-                                        : Colors.white,
+                                    color: isSelected ? Colors.grey.shade200 : Colors.white,
                                     border: Border.all(
-                                      color: isSelected
-                                          ? const Color(AppColors.primary)
-                                          : Colors.grey.shade300,
+                                      color: isSelected ? const Color(AppColors.primary) : Colors.grey.shade300,
                                     ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Text(
-                                    client.fullName,
-                                    style: const TextStyle(color: Colors.black),
-                                  ),
+                                  child: Text(client.fullName, style: const TextStyle(color: Colors.black)),
                                 ),
                               );
                             },
@@ -175,11 +145,7 @@ class _ClientSelectorModalContentState
                         Row(
                           children: [
                             Expanded(
-                              child: DefaultButton(
-                                text: 'Отмена',
-                                isGreen: false,
-                                onPressed: () => context.pop(),
-                              ),
+                              child: DefaultButton(text: 'Отмена', isGreen: false, onPressed: () => context.pop()),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -196,9 +162,10 @@ class _ClientSelectorModalContentState
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 12),
                         PaginationWidget(
                           currentPage: state.currentPage,
+                          isCompact: true,
                           totalPages: state.totalPages,
                           onPageSelected: (page) {
                             context.read<ClientsBloc>().add(
@@ -206,9 +173,7 @@ class _ClientSelectorModalContentState
                                 refresh: true,
                                 page: page,
                                 pageSize: 10,
-                                search: _searchController.text.isEmpty
-                                    ? null
-                                    : _searchController.text,
+                                search: _searchController.text.isEmpty ? null : _searchController.text,
                               ),
                             );
                           },

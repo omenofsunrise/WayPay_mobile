@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:waypay/features/blog/data/models/blog_post_response.dart';
 import 'package:waypay/features/blog/data/models/blog_post_response_paged_result.dart';
 
 abstract class BlogState extends Equatable {
@@ -26,4 +27,12 @@ class BlogError extends BlogState {
 
   @override
   List<Object?> get props => [message];
+}
+
+class BlogPostLoaded extends BlogState {
+  final BlogPostResponse post;
+  const BlogPostLoaded(this.post);
+
+  @override
+  List<Object?> get props => [post];
 }

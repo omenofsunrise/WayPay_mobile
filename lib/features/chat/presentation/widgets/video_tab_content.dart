@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:chewie/chewie.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:waypay/core/theme/app_style.dart';
 import 'package:waypay/features/chat/data/models/chat/chat_response.dart';
@@ -28,16 +29,14 @@ class _VideosTabContentState extends State<VideosTabContent> {
   @override
   void initState() {
     super.initState();
-    bloc = ChatVideosBloc(chatId: widget.chatId)
-      ..add(LoadPage<MessageAttachmentResponse>());
+    bloc = ChatVideosBloc(chatId: widget.chatId)..add(LoadPage<MessageAttachmentResponse>());
     _scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
     final state = bloc.state;
     if (state is PagedLoaded<MessageAttachmentResponse> && state.hasMore) {
-      if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200) {
+      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
         bloc.add(LoadPage<MessageAttachmentResponse>());
       }
     }
@@ -50,9 +49,7 @@ class _VideosTabContentState extends State<VideosTabContent> {
     super.dispose();
   }
 
-  Map<String, List<MessageAttachmentResponse>> _groupByMonth(
-    List<MessageAttachmentResponse> items,
-  ) {
+  Map<String, List<MessageAttachmentResponse>> _groupByMonth(List<MessageAttachmentResponse> items) {
     const months = [
       'Январь',
       'Февраль',
@@ -94,17 +91,16 @@ class _VideosTabContentState extends State<VideosTabContent> {
 
       return thumbData;
     } catch (e) {
-      print('Ошибка генерации превью: $e');
       return null;
     }
   }
 
   Widget _buildVideo(MessageAttachmentResponse video) {
     final url = video.fileUrl ?? '';
-    final name = video.fileName ?? url.split('/').last;
 
     return GestureDetector(
-      onTap: () => _downloadAndOpenFile(url, name),
+      onTap: () => _openVideoPlayer(url),
+
       child: FutureBuilder<Uint8List?>(
         future: _getVideoThumbnail(url),
         builder: (context, snapshot) {
@@ -116,20 +112,9 @@ class _VideosTabContentState extends State<VideosTabContent> {
           return Stack(
             children: [
               thumbData != null
-                  ? Image.memory(
-                      thumbData,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                    )
+                  ? Image.memory(thumbData, fit: BoxFit.cover, width: double.infinity, height: double.infinity)
                   : Container(color: Colors.grey[300]),
-              const Center(
-                child: Icon(
-                  Icons.play_circle_outline,
-                  size: 40,
-                  color: Colors.white,
-                ),
-              ),
+              const Center(child: Icon(Icons.play_circle_outline, size: 40, color: Colors.white)),
             ],
           );
         },
@@ -144,30 +129,52 @@ class _VideosTabContentState extends State<VideosTabContent> {
     return '$_filesBase/$url';
   }
 
-  Future<void> _downloadAndOpenFile(String url, String fileName) async {
-    try {
-      final dir = await getTemporaryDirectory();
-      final safeName = fileName.trim().isEmpty ? 'file' : fileName;
-      final filePath = '${dir.path}/$safeName';
+  Future<void> _openVideoPlayer(String url) async {
+    final dir = await getTemporaryDirectory();
+    final filePath = '${dir.path}/${url.split('/').last}';
 
-      final response = await Dio().download(_resolveUrl(url), filePath);
-      if (response.statusCode == 200) {
-        final result = await OpenFilex.open(filePath);
-        if (result.type != ResultType.done) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Не удалось открыть файл: ${result.message}'),
-            ),
-          );
-        }
-      } else {
-        throw Exception('HTTP ${response.statusCode}');
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ошибка при загрузке или открытии файла')),
-      );
+    if (!File(filePath).existsSync()) {
+      await Dio().download(_resolveUrl(url), filePath);
     }
+
+    final controller = VideoPlayerController.file(File(filePath));
+    await controller.initialize();
+
+    final chewie = ChewieController(
+      videoPlayerController: controller,
+      autoPlay: true,
+      looping: false,
+      allowMuting: true,
+      allowPlaybackSpeedChanging: true,
+      materialProgressColors: ChewieProgressColors(
+        playedColor: Colors.white,
+        handleColor: Colors.white,
+        backgroundColor: Colors.white24,
+        bufferedColor: Colors.white54,
+      ),
+    );
+
+    if (!mounted) return;
+    await showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.9),
+      builder: (_) => GestureDetector(
+        onTap: () => Navigator.pop(context),
+        child: Container(
+          color: Colors.black,
+          alignment: Alignment.center,
+          child: AspectRatio(
+            aspectRatio: controller.value.aspectRatio == 0 ? 16 / 9 : controller.value.aspectRatio,
+            child: Chewie(controller: chewie),
+          ),
+        ),
+      ),
+    );
+
+    await chewie.pause();
+    await controller.pause();
+    chewie.dispose();
+    await controller.dispose();
   }
 
   @override
@@ -185,10 +192,7 @@ class _VideosTabContentState extends State<VideosTabContent> {
 
           if (state is PagedError<MessageAttachmentResponse>) {
             return Center(
-              child: Text(
-                state.message,
-                style: AppStyle.manrope(size: 16, weight: FontWeight.w600),
-              ),
+              child: Text(state.message, style: AppStyle.manrope(size: 16, weight: FontWeight.w600)),
             );
           }
 
@@ -199,10 +203,7 @@ class _VideosTabContentState extends State<VideosTabContent> {
 
           if (items.isEmpty) {
             return Center(
-              child: Text(
-                'Нет видео',
-                style: AppStyle.manrope(size: 16, weight: FontWeight.w600),
-              ),
+              child: Text('Нет видео', style: AppStyle.manrope(size: 16, weight: FontWeight.w600)),
             );
           }
 
@@ -218,34 +219,22 @@ class _VideosTabContentState extends State<VideosTabContent> {
 
                 return [
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Text(
-                      monthName,
-                      style: AppStyle.manrope(
-                        size: 16,
-                        weight: FontWeight.w500,
-                      ),
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Text(monthName, style: AppStyle.manrope(size: 16, weight: FontWeight.w500)),
                   ),
                   GridView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: (MediaQuery.of(context).size.width ~/ 130)
-                          .clamp(1, 10),
+                      crossAxisCount: (MediaQuery.of(context).size.width ~/ 130).clamp(1, 10),
                       mainAxisSpacing: 8,
                       crossAxisSpacing: 8,
                       childAspectRatio: 1,
                     ),
                     itemCount: videos.length,
-                    itemBuilder: (context, index) => Container(
-                      color: Colors.grey[300],
-                      child: _buildVideo(videos[index]),
-                    ),
+                    itemBuilder: (context, index) =>
+                        Container(color: Colors.grey[300], child: _buildVideo(videos[index])),
                   ),
                 ];
               }),

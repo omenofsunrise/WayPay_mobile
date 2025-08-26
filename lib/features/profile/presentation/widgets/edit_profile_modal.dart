@@ -169,6 +169,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
       final confirm = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
+          backgroundColor: Color(AppColors.background),
           title: const Text('Удалить фото?'),
           content: const Text('Вы уверены, что хотите удалить фото?'),
           actions: [

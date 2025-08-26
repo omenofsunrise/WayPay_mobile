@@ -32,4 +32,5 @@ class SvgIcons {
   static const String investorCash = 'assets/icons/investor_cahs.svg';
   static const String investorIcon = 'assets/icons/investor_icon.svg';
   static const String investorPercent = 'assets/icons/investor_percent.svg';
+  static const String shield_person = 'assets/icons/shield_person.svg';
 }

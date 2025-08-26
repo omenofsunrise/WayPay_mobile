@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay/core/di/dependency_injection.dart';
+import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/widgets/form_modal/labeled_container.dart';
 import 'package:waypay/features/profile/data/models/employee.dart';
 import 'package:waypay/core/storage/user_storage.dart';
@@ -70,6 +71,7 @@ class _PaymentCardState extends State<PaymentCard> {
       builder: (_) {
         final UserStorage userStorage = UserStorage();
         return AppModal(
+          backgroundColor: Color(AppColors.background),
           menuItems: [
             if (userStorage.hasViewContent([EmployeeRole.accountant]) && !payment.accepted)
               PopupMenuItem(child: const Text('Подтвердить'), onTap: () => _handleConfirmPayment(context, payment.id)),
@@ -82,7 +84,7 @@ class _PaymentCardState extends State<PaymentCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 LabeledContainer(label: 'Договор №', text: payment.creditId.toString()),
-                LabeledContainer(label: 'ФИО', text: payment.creditId.toString()),
+                LabeledContainer(label: 'ФИО', text: payment.clientFullName.toString()),
                 LabeledContainer(label: 'Платеж', text: _formatCurrency(payment.paymentAmount)),
                 LabeledContainer(label: 'Дата платежа', text: _formatDate(payment.paymentDate)),
                 LabeledContainer(label: 'Тип платежа', text: payment.type == PaymentType.card ? 'Картой' : 'Наличкой'),

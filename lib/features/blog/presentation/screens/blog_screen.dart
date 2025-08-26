@@ -76,7 +76,6 @@ class _BlogScreenState extends State<BlogScreen> {
 
   PopupMenuItem<SortType> _buildSortItem(SortType value, String title) {
     final isSelected = _selectedSort == value;
-
     return PopupMenuItem(
       value: value,
       child: InkWell(
@@ -93,19 +92,12 @@ class _BlogScreenState extends State<BlogScreen> {
           child: Row(
             children: [
               Icon(
-                isSelected
-                    ? Icons.radio_button_checked
-                    : Icons.radio_button_off,
-                color: isSelected ? Colors.teal : Colors.grey,
+                isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                color: isSelected ? const Color(AppColors.primary) : Colors.grey,
                 size: 20,
               ),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                ),
-              ),
+              Text(title, style: TextStyle(fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal)),
             ],
           ),
         ),
@@ -115,7 +107,6 @@ class _BlogScreenState extends State<BlogScreen> {
 
   PopupMenuItem<FeedType> _buildFeedItem(FeedType value, String title) {
     final isSelected = _selectedFeed == value;
-
     return PopupMenuItem(
       value: value,
       child: InkWell(
@@ -132,17 +123,12 @@ class _BlogScreenState extends State<BlogScreen> {
           child: Row(
             children: [
               Icon(
-                isSelected ? Icons.check_circle : Icons.circle_outlined,
+                isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
                 size: 20,
-                color: isSelected ? Colors.teal : Colors.grey,
+                color: isSelected ? const Color(AppColors.primary) : Colors.grey,
               ),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                ),
-              ),
+              Text(title, style: TextStyle(fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal)),
             ],
           ),
         ),
@@ -152,13 +138,18 @@ class _BlogScreenState extends State<BlogScreen> {
 
   Widget _buildSearchOrTitle() {
     if (_isSearching) {
+      // поле поиска стилизовано под зелёную шапку (белый текст/иконки)
       return Expanded(
         child: TextField(
           controller: _searchController,
           autofocus: true,
+          style: const TextStyle(color: Colors.white),
+          cursorColor: Colors.white,
           decoration: const InputDecoration(
             hintText: 'Поиск...',
+            hintStyle: TextStyle(color: Colors.white70),
             border: InputBorder.none,
+            isDense: true,
           ),
           textInputAction: TextInputAction.search,
           onChanged: (value) {
@@ -174,6 +165,7 @@ class _BlogScreenState extends State<BlogScreen> {
       );
     }
 
+    // заголовок-меню со списком лент, белый текст/стрелка
     return PopupMenuButton<FeedType>(
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -189,12 +181,12 @@ class _BlogScreenState extends State<BlogScreen> {
           Expanded(
             child: Text(
               _titleForFeed(_selectedFeed),
-              style: AppStyle.manrope(size: 25, weight: FontWeight.w600),
+              style: AppStyle.manrope(size: 25, weight: FontWeight.w600, color: Colors.white),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
           ),
-          const Icon(Icons.arrow_drop_down, color: Colors.black),
+          const Icon(Icons.arrow_drop_down, color: Colors.white),
         ],
       ),
     );
@@ -210,20 +202,25 @@ class _BlogScreenState extends State<BlogScreen> {
 
   @override
   Widget build(BuildContext context) {
+    const lightBg = Color(0xFFF9FAFA); // общий фон контента
+
     return Scaffold(
       drawer: const AppDrawer(),
-      backgroundColor: Color(AppColors.lightGreyBackground),
+
+      // зелёная шапка и фон под ней (чтобы было видно скругление контейнера контента)
+      backgroundColor: const Color(AppColors.primary),
+
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Color(AppColors.darkGrey)),
+        backgroundColor: const Color(AppColors.primary),
+        iconTheme: const IconThemeData(color: Colors.white),
         titleSpacing: 0,
         title: _buildSearchOrTitle(),
         actions: [
           if (_isSearching)
             IconButton(
-              icon: const Icon(Icons.close, color: Color(AppColors.darkGrey)),
+              icon: const Icon(Icons.close, color: Colors.white),
               onPressed: () {
                 setState(() {
                   _isSearching = false;
@@ -235,7 +232,7 @@ class _BlogScreenState extends State<BlogScreen> {
             )
           else
             IconButton(
-              icon: const Icon(Icons.search, color: Color(AppColors.darkGrey)),
+              icon: const Icon(Icons.search, color: Colors.white),
               onPressed: () {
                 setState(() {
                   _isSearching = true;
@@ -244,13 +241,8 @@ class _BlogScreenState extends State<BlogScreen> {
             ),
           PopupMenuButton<SortType>(
             color: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            icon: const Icon(
-              Icons.filter_list,
-              color: Color(AppColors.darkGrey),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            icon: const Icon(Icons.filter_list, color: Colors.white),
             itemBuilder: (context) => [
               _buildSortItem(SortType.date, 'По дате публикации'),
               _buildSortItem(SortType.likes, 'По количеству лайков'),
@@ -259,130 +251,110 @@ class _BlogScreenState extends State<BlogScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: GestureDetector(
-              onTap: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CreatePostScreen(),
-                  ),
-                );
 
-                if (result == true) {
-                  _load();
-                }
-              },
-
-              child: SizedBox(
-                height: 40,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Color(AppColors.background),
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(color: Color(AppColors.greyLight)),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '+ Создать пост',
-                      style: AppStyle.manrope(
-                        size: 14,
-                        weight: FontWeight.w500,
-                        color: Color(AppColors.comfPayment),
+      // контентная область: светлый фон + скруглённый верх
+      body: Container(
+        decoration: const BoxDecoration(
+          color: lightBg,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: GestureDetector(
+                onTap: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CreatePostScreen()),
+                  );
+                  if (result == true) _load();
+                },
+                child: SizedBox(
+                  height: 40,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white, // кнопка белая
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Color(AppColors.greyLight)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '+ Создать пост',
+                        style: AppStyle.manrope(size: 14, weight: FontWeight.w500, color: Color(AppColors.comfPayment)),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: BlocBuilder<BlogBloc, BlogState>(
-              builder: (context, state) {
-                if (state is BlogLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (state is BlogError) {
-                  return Center(child: Text('Ошибка: ${state.message}'));
-                }
-                if (state is BlogLoaded) {
-                  final posts = state.posts.items ?? [];
-                  if (posts.isEmpty) {
-                    return const Center(child: Text('Нет постов'));
+            const SizedBox(height: 8),
+            Expanded(
+              child: BlocBuilder<BlogBloc, BlogState>(
+                builder: (context, state) {
+                  if (state is BlogLoading) {
+                    return const Center(child: CircularProgressIndicator());
                   }
-                  return Refresher(
-                    onRefresh: () async {
-                      _load();
-                    },
-                    content: ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(8),
-                      itemCount: posts.length,
-                      itemBuilder: (context, index) {
-                        final post = posts[index];
-                        return PostCard(
-                          id: post.id,
-                          authorId: post.authorId,
-                          author: post.authorName ?? 'Неизвестный',
-                          timeAgo: DateFormat(
-                            'dd.MM.yyyy HH:mm',
-                          ).format(post.createdAt),
-                          text: post.content ?? '',
-                          imageUrls: post.imageUrls ?? [],
-                          likes: post.likesCount,
-                          comments: post.commentsCount,
-                          authorAvatarPath: post.authorAvatarPath,
-                          isLiked: post.isLikedByCurrentUser,
-                          isAuthor: post.isAuthor,
-                          onLikePressed: () {
-                            context.read<BlogBloc>().add(
-                              ToggleLikePost(post.id),
-                            );
-                          },
-                          onCommentsPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => CommentsScreen(
-                                  postId: post.id,
-                                  currentUserAvatar: avatar,
-                                  isAuthor: post.isAuthor,
+                  if (state is BlogError) {
+                    return Center(child: Text('Ошибка: ${state.message}'));
+                  }
+                  if (state is BlogLoaded) {
+                    final posts = state.posts.items ?? [];
+                    if (posts.isEmpty) {
+                      return const Center(child: Text('Нет постов'));
+                    }
+                    return Refresher(
+                      onRefresh: () async => _load(),
+                      content: ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(8),
+                        itemCount: posts.length,
+                        itemBuilder: (context, index) {
+                          final post = posts[index];
+                          return PostCard(
+                            id: post.id,
+                            authorId: post.authorId,
+                            author: post.authorName ?? 'Неизвестный',
+                            timeAgo: DateFormat('dd.MM.yyyy HH:mm').format(post.createdAt),
+                            text: post.content ?? '',
+                            imageUrls: post.imageUrls ?? [],
+                            likes: post.likesCount,
+                            comments: post.commentsCount,
+                            authorAvatarPath: post.authorAvatarPath,
+                            isLiked: post.isLikedByCurrentUser,
+                            isAuthor: post.isAuthor,
+                            onLikePressed: () {
+                              context.read<BlogBloc>().add(ToggleLikePost(post.id));
+                            },
+                            onCommentsPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => CommentsScreen(postId: post.id, isAuthor: post.isAuthor),
                                 ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  );
-                }
-                return const SizedBox();
-              },
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  }
+                  return const SizedBox();
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _scrollController.animateTo(
-            0,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
+          _scrollController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
         },
-        shape: const CircleBorder(
-          side: BorderSide(color: Color(AppColors.greyLight)),
-        ),
-        backgroundColor: Color(AppColors.background),
-        child: const Icon(
-          Icons.arrow_upward,
-          color: Color(AppColors.greyLight),
-        ),
+        shape: const CircleBorder(side: BorderSide(color: Color(AppColors.greyLight))),
+        backgroundColor: Colors.white, // белая кнопка
+        child: const Icon(Icons.arrow_upward, color: Color(AppColors.greyLight)),
       ),
     );
   }

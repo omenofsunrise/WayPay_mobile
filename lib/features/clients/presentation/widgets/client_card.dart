@@ -46,6 +46,7 @@ class _ClientCardState extends State<ClientCard> {
     showDialog(
       context: context,
       builder: (_) => AppModal(
+        backgroundColor: Color(AppColors.background),
         title: 'О клиенте',
         menuItems: [
           PopupMenuItem(
@@ -250,6 +251,7 @@ class _ClientCardState extends State<ClientCard> {
       builder: (_) => StatefulBuilder(
         builder: (context, setState) {
           return AppModal(
+            backgroundColor: Color(AppColors.background),
             title: 'Редактировать клиента',
             content: SingleChildScrollView(
               child: Column(

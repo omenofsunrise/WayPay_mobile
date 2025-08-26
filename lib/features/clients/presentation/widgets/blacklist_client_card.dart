@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay/core/di/dependency_injection.dart';
 import 'package:waypay/core/storage/user_storage.dart';
+import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/widgets/app_modal.dart';
 import 'package:waypay/core/widgets/default_button.dart';
 import 'package:waypay/core/widgets/form_modal/labeled_container.dart';
@@ -55,6 +56,7 @@ class _BlacklistClientCardState extends State<BlacklistClientCard> {
     showDialog(
       context: context,
       builder: (_) => AppModal(
+        backgroundColor: Color(AppColors.background),
         title: 'Данные',
         content: SingleChildScrollView(
           child: Column(

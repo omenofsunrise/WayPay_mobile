@@ -32,58 +32,60 @@ class ChatTile extends StatelessWidget {
       return '$sender: $text';
     }();
 
-    return Row(
-      children: [
-        buildAvatar(fullName: chatName, radius: 28, photoPath: avatarPath),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      chatName,
-                      style: AppStyle.manrope(size: 14, weight: FontWeight.w600, color: const Color(AppColors.black)),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  if (isUnreaded)
-                    Row(
-                      children: [
-                        const SizedBox(
-                          width: 8,
-                          height: 8,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(color: Color(AppColors.comfPayment), shape: BoxShape.circle),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                    ),
-                  if (time != null)
-                    Text(
-                      time!,
-                      style: AppStyle.manrope(
-                        size: 12,
-                        weight: FontWeight.w600,
-                        color: const Color(AppColors.darkGrey),
+    return SizedBox(
+      child: Row(
+        children: [
+          buildAvatar(fullName: chatName, radius: 28, photoPath: avatarPath),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        chatName,
+                        style: AppStyle.manrope(size: 14, weight: FontWeight.w600, color: const Color(AppColors.black)),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                ],
-              ),
-              Text(
-                subtitle,
-                style: AppStyle.manrope(size: 14, weight: FontWeight.w400, color: const Color(AppColors.darkGrey)),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-            ],
+                    const SizedBox(width: 8),
+                    if (isUnreaded)
+                      Row(
+                        children: [
+                          const SizedBox(
+                            width: 8,
+                            height: 8,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(color: Color(AppColors.comfPayment), shape: BoxShape.circle),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                      ),
+                    if (time != null)
+                      Text(
+                        time!,
+                        style: AppStyle.manrope(
+                          size: 12,
+                          weight: FontWeight.w600,
+                          color: const Color(AppColors.darkGrey),
+                        ),
+                      ),
+                  ],
+                ),
+                Text(
+                  subtitle,
+                  style: AppStyle.manrope(size: 14, weight: FontWeight.w400, color: const Color(AppColors.darkGrey)),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

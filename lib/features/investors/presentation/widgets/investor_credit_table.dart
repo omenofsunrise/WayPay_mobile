@@ -32,10 +32,11 @@ class _InvestorCreditsWidgetState extends State<InvestorCreditsWidget> {
     return '${value.toStringAsFixed(0)} ₽';
   }
 
-  void _showCreditModal(BuildContext context, CreditModel credit) async {
+  void _showCreditModal(BuildContext context, CreditModel credit) {
     showDialog(
       context: context,
       builder: (_) => AppModal(
+        backgroundColor: Color(AppColors.background),
         title: 'Договор №${credit.id}',
         content: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
@@ -74,18 +75,20 @@ class _InvestorCreditsWidgetState extends State<InvestorCreditsWidget> {
       },
       child: BlocBuilder<CreditBloc, CreditState>(
         builder: (context, state) {
-          Widget content;
+          final List<CreditModel> displayedCredits;
 
+          if (state is CreditLoaded && state.credits.isNotEmpty) {
+            displayedCredits = _isExpanded ? state.credits.cast<CreditModel>() : [state.credits.first];
+          } else {
+            displayedCredits = [];
+          }
+
+          Widget content;
           if (state is CreditLoading) {
             content = const Center(child: CircularProgressIndicator());
           } else if (state is CreditError) {
             content = Center(child: Text('Ошибка: ${state.message}'));
           } else if (state is CreditLoaded) {
-            final hasCredits = state.credits.isNotEmpty;
-            final List<CreditModel> displayedCredits = _isExpanded
-                ? state.credits.cast<CreditModel>()
-                : [state.credits.first];
-
             content = Column(
               children: [
                 Refresher(
@@ -121,7 +124,6 @@ class _InvestorCreditsWidgetState extends State<InvestorCreditsWidget> {
                                           style: AppStyle.manrope(size: 14, weight: FontWeight.w500),
                                         ),
                                         const Spacer(),
-                                        const SizedBox(width: 4),
                                         Text(
                                           _formatDate(credit.creditDate),
                                           style: const TextStyle(color: Colors.black54),
@@ -160,7 +162,7 @@ class _InvestorCreditsWidgetState extends State<InvestorCreditsWidget> {
                           ],
                   ),
                 ),
-                if (_isExpanded && hasCredits)
+                if (_isExpanded && state.credits.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     child: PaginationWidget(
@@ -189,14 +191,17 @@ class _InvestorCreditsWidgetState extends State<InvestorCreditsWidget> {
                 onTap: () => setState(() => _isExpanded = !_isExpanded),
                 child: Row(
                   children: [
-                    Text('Договоры', style: AppStyle.manrope(size: 16, weight: FontWeight.w600)),
+                    Text('Договоры', style: AppStyle.manrope(size: 15, weight: FontWeight.w400)),
                     const Spacer(),
-                    Icon(_isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down),
+                    Icon(
+                      _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                      color: Color(AppColors.grey),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              if (_isExpanded || content is! SizedBox) content,
+              if (_isExpanded) content,
             ],
           );
         },

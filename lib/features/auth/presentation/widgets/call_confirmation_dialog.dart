@@ -61,23 +61,18 @@ class _CallConfirmationDialogState extends State<CallConfirmationDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Color(AppColors.background),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Подтверждение авторизации',
-              style: AppStyle.semiBold20,
-              textAlign: TextAlign.center,
-            ),
+            Text('Подтверждение авторизации', style: AppStyle.semiBold20, textAlign: TextAlign.center),
             const SizedBox(height: 16),
             Text(
               'Для завершения авторизации позвоните на номер:',
-              style: AppStyle.medium16.copyWith(
-                color: const Color(AppColors.grey),
-              ),
+              style: AppStyle.medium16.copyWith(color: const Color(AppColors.grey)),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -96,19 +91,13 @@ class _CallConfirmationDialogState extends State<CallConfirmationDialog> {
             const SizedBox(height: 16),
             Text(
               'После звонка проверка будет происходить автоматически.',
-              style: AppStyle.medium16.copyWith(
-                color: const Color(AppColors.grey),
-              ),
+              style: AppStyle.medium16.copyWith(color: const Color(AppColors.grey)),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
-              child: DefaultButton(
-                onPressed: () => context.pop(),
-                text: 'Отмена',
-                isGreen: true,
-              ),
+              child: DefaultButton(onPressed: () => context.pop(), text: 'Отмена', isGreen: true),
             ),
           ],
         ),

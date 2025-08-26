@@ -60,7 +60,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       ),
                       const SizedBox(height: 21),
                       Center(
-                        child: Text(employee.fullName, style: AppStyle.inter(size: 20, weight: FontWeight.w500)),
+                        child: Text(
+                          employee.fullName,
+                          style: AppStyle.inter(size: 20, weight: FontWeight.w500),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                       const SizedBox(height: 15),
                       Center(

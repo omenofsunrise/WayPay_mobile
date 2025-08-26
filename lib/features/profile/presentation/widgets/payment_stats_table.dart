@@ -72,58 +72,29 @@ class _PaymentStatsProfileTableState extends State<PaymentStatsProfileTable> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Table(
-                  columnWidths: const {0: IntrinsicColumnWidth(), 1: FlexColumnWidth(1), 2: FlexColumnWidth(1)},
-                  border: TableBorder.all(color: Color(AppColors.borderColor), borderRadius: BorderRadius.circular(10)),
-                  children: [
-                    TableRow(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 17, horizontal: 4),
-                          child: Center(
-                            child: Text('Месяц', style: AppStyle.manrope(size: 15, weight: FontWeight.w600)),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
-                            child: Text(
-                              'Подтвержденные, руб',
-                              style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
-                            child: Text(
-                              'Неподтвержденные, руб',
-                              style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ],
+                if (_isExpanded)
+                  Table(
+                    columnWidths: const {0: IntrinsicColumnWidth(), 1: FlexColumnWidth(1), 2: FlexColumnWidth(1)},
+                    border: TableBorder.all(
+                      color: Color(AppColors.borderColor),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    ...List.generate(_isExpanded ? rowCount : (rowCount > 0 ? 1 : 0), (index) {
-                      final item = statsDesc[index];
-                      final date = _monthName(item.month);
-                      final confirmed = item.assumed.toInt();
-                      final unconfirmed = item.notAssumed.toInt();
-
-                      return TableRow(
+                    children: [
+                      TableRow(
                         children: [
                           Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 17, horizontal: 4),
+                            child: Center(
+                              child: Text('Месяц', style: AppStyle.manrope(size: 15, weight: FontWeight.w600)),
+                            ),
+                          ),
+                          Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Center(
                               child: Text(
-                                date,
-                                style: AppStyle.manrope(
-                                  size: 15,
-                                  weight: FontWeight.w400,
-                                  color: Color(AppColors.darkGrey),
-                                ),
+                                'Подтвержденные, руб',
+                                style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
+                                textAlign: TextAlign.center,
                               ),
                             ),
                           ),
@@ -131,33 +102,66 @@ class _PaymentStatsProfileTableState extends State<PaymentStatsProfileTable> {
                             padding: const EdgeInsets.all(8.0),
                             child: Center(
                               child: Text(
-                                currencyFormatter.format(confirmed),
-                                style: AppStyle.manrope(
-                                  size: 15,
-                                  weight: FontWeight.w400,
-                                  color: Color(AppColors.comfPayment),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Center(
-                              child: Text(
-                                currencyFormatter.format(unconfirmed),
-                                style: AppStyle.manrope(
-                                  size: 15,
-                                  weight: FontWeight.w400,
-                                  color: Color(AppColors.comfPayment),
-                                ),
+                                'Неподтвержденные, руб',
+                                style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
+                                textAlign: TextAlign.center,
                               ),
                             ),
                           ),
                         ],
-                      );
-                    }),
-                  ],
-                ),
+                      ),
+                      ...List.generate(rowCount, (index) {
+                        final item = statsDesc[index];
+                        final date = _monthName(item.month);
+                        final confirmed = item.assumed.toInt();
+                        final unconfirmed = item.notAssumed.toInt();
+
+                        return TableRow(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Center(
+                                child: Text(
+                                  date,
+                                  style: AppStyle.manrope(
+                                    size: 15,
+                                    weight: FontWeight.w400,
+                                    color: Color(AppColors.darkGrey),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Center(
+                                child: Text(
+                                  currencyFormatter.format(confirmed),
+                                  style: AppStyle.manrope(
+                                    size: 15,
+                                    weight: FontWeight.w400,
+                                    color: Color(AppColors.comfPayment),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Center(
+                                child: Text(
+                                  currencyFormatter.format(unconfirmed),
+                                  style: AppStyle.manrope(
+                                    size: 15,
+                                    weight: FontWeight.w400,
+                                    color: Color(AppColors.comfPayment),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }),
+                    ],
+                  ),
               ],
             ),
           );

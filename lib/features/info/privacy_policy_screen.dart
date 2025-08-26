@@ -20,7 +20,10 @@ class PrivacyPolicyScreen extends StatelessWidget {
         ),
         elevation: 0,
         centerTitle: true,
-        title: Text('Политика конфиденциальности', style: AppStyle.manrope(size: 18, weight: FontWeight.bold)),
+        title: Text(
+          'Политика конфиденциальности',
+          style: AppStyle.medium20.copyWith(color: const Color(AppColors.background)),
+        ),
       ),
       backgroundColor: Color(AppColors.background),
       body: SingleChildScrollView(

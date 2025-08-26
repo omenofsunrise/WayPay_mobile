@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:waypay/core/di/dependency_injection.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
 import 'package:waypay/core/widgets/form_modal/label_text_field.dart';
 import 'package:waypay/core/widgets/helpers.dart';
 import 'package:waypay/features/blog/data/models/profile_blog_model.dart';
 import 'package:waypay/features/blog/presentation/cubit/profile_blog_cubit.dart';
+import 'package:waypay/features/chat/data/data_source/chat/chat_remote_data_source.dart';
+import 'package:waypay/features/chat/data/data_source/message/message_remote_data_source.dart';
+import 'package:waypay/features/chat/data/service/chat_hub_service.dart';
+import 'package:waypay/features/chat/presentation/bloc/chat/chat_bloc.dart';
+import 'package:waypay/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
+import 'package:waypay/features/chat/presentation/screens/chat_screen.dart';
 import 'package:waypay/routes/routes.dart';
 
 class ProfileBlogCard extends StatefulWidget {
@@ -188,36 +195,67 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                   ),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-                child: GestureDetector(
-                  onTap: () {
-                    if (widget.user.id == widget.userId) {
-                      context.pushNamed(Routes.profileScreen.toName, extra: null);
-                    }
-                  },
-                  child: SizedBox(
-                    height: 30,
-                    width: double.infinity,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Color(AppColors.comfPayment),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Center(
-                        child: Text(
-                          widget.user.id == widget.userId ? 'Перейти к профилю' : 'Отправить сообщение',
-                          style: AppStyle.manrope(
-                            size: 14,
-                            weight: FontWeight.w400,
-                            color: Color(AppColors.background),
+              if (widget.user.id != widget.userId)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                  child: GestureDetector(
+                    onTap: () async {
+                      final chatApi = getIt<ChatRemoteDataSource>();
+
+                      try {
+                        final chat = await chatApi.getOrCreatePrivate(widget.user.id);
+                        if (!mounted) return;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BlocProvider(
+                              create: (_) => ChatBloc(
+                                messageApi: getIt<MessageRemoteDataSource>(),
+                                hub: getIt<ChatHubService>(),
+                                chatId: chat.id,
+                                chatApi: chatApi,
+                              )..add(const ChatStarted()),
+                              child: ChatScreen(
+                                chatId: chat.id,
+                                isGroup: chat.type != 'private_chat',
+                                chatName: chat.name,
+                                chatAvatarPath: chat.avatarPath,
+                                onChatUpdated: () {
+                                  context.read<ChatListBloc>().add(const ChatListRefreshed());
+                                },
+                              ),
+                            ),
+                          ),
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text('Ошибка при открытии чата: $e')));
+                      }
+                    },
+                    child: SizedBox(
+                      height: 30,
+                      width: double.infinity,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Color(AppColors.comfPayment),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Отправить сообщение',
+                            style: AppStyle.manrope(
+                              size: 14,
+                              weight: FontWeight.w400,
+                              color: Color(AppColors.background),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
+              if (widget.user.id == widget.userId) const SizedBox(height: 16),
             ],
           ),
         ),

@@ -343,7 +343,7 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
                                         }
                                       }
                                     : () {},
-                                color: Color(AppColors.primaryLight),
+                                color: Color(AppColors.primary),
                               ),
                             ),
                           ],

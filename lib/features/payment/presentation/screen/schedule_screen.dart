@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,8 @@ import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
 import 'package:waypay/core/widgets/pagination_widget.dart';
 import 'package:waypay/core/widgets/refresh.dart';
+import 'package:waypay/core/widgets/app_modal.dart';
+import 'package:waypay/core/widgets/default_button.dart';
 import 'package:waypay/features/payment/presentation/bloc/schedule/schedule_bloc.dart';
 import 'package:waypay/features/payment/presentation/widgets/schedule_card.dart';
 import 'package:waypay/routes/routes.dart';
@@ -20,6 +24,18 @@ class ScheduleScreen extends StatefulWidget {
 class _ScheduleScreenState extends State<ScheduleScreen> {
   final _searchController = TextEditingController();
   final _tokenStorage = TokenStorage();
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<ScheduleBloc>().add(
+        LoadSchedule(refresh: true, page: 1, pageSize: 10),
+      );
+    });
+  }
 
   Future<void> _logout() async {
     await _tokenStorage.clearAll();
@@ -30,62 +46,108 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _openFilterModal(BuildContext context) {
+    final scheduleBloc = context.read<ScheduleBloc>();
+    final tempController = TextEditingController(text: _searchController.text);
+
+    showDialog(
+      context: context,
+      builder: (_) => AppModal(
+        title: 'Фильтры',
+        backgroundColor: const Color(AppColors.background),
+        contentPadding: const EdgeInsets.all(16),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: tempController,
+              decoration: InputDecoration(
+                hintText: 'Поиск по имени...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+              onChanged: (value) {
+                if (_debounce?.isActive ?? false) _debounce!.cancel();
+                _debounce = Timer(const Duration(milliseconds: 500), () {
+                  final q = value.trim();
+                  if (q.isNotEmpty) {
+                    scheduleBloc.add(SearchSchedule(q, pageSize: 10));
+                  } else {
+                    scheduleBloc.add(
+                      LoadSchedule(refresh: true, page: 1, pageSize: 10),
+                    );
+                  }
+                });
+              },
+            ),
+          ],
+        ),
+        actions: [
+          DefaultButton(
+            text: 'Сбросить',
+            onPressed: () {
+              tempController.clear();
+              setState(() => _searchController.clear());
+              scheduleBloc.add(
+                LoadSchedule(refresh: true, page: 1, pageSize: 10),
+              );
+              Navigator.pop(context);
+            },
+          ),
+          const SizedBox(width: 12),
+          DefaultButton(
+            text: 'Применить',
+            isGreen: true,
+            onPressed: () {
+              setState(() => _searchController.text = tempController.text);
+              final q = _searchController.text.trim();
+              if (q.isNotEmpty) {
+                scheduleBloc.add(SearchSchedule(q, pageSize: 10));
+              } else {
+                scheduleBloc.add(
+                  LoadSchedule(refresh: true, page: 1, pageSize: 10),
+                );
+              }
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: AppDrawer(),
-      backgroundColor: Color(AppColors.primary),
+      drawer: const AppDrawer(),
+      backgroundColor: const Color(AppColors.primary),
       appBar: AppBar(
-        backgroundColor: Color(AppColors.primary),
+        backgroundColor: const Color(AppColors.primary),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         title: const Text(
           'Ожидаемые платежи',
           style: TextStyle(color: Colors.white),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_alt, color: Colors.white),
+            onPressed: () => _openFilterModal(context),
+          ),
+        ],
       ),
       body: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Color(AppColors.primary),
-            child: TextField(
-              controller: _searchController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Поиск по имени...',
-                hintStyle: const TextStyle(color: Colors.white),
-                prefixIcon: const Icon(Icons.search, color: Colors.white),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.white),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.white),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.white),
-                ),
-              ),
-              onChanged: (value) {
-                if (value.trim().isNotEmpty) {
-                  context.read<ScheduleBloc>().add(
-                    SearchSchedule(value.trim(), pageSize: 10),
-                  );
-                } else {
-                  context.read<ScheduleBloc>().add(
-                    LoadSchedule(refresh: true, page: 1, pageSize: 10),
-                  );
-                }
-              },
-            ),
-          ),
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
@@ -146,13 +208,19 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                         Expanded(
                           child: state.schedules.isEmpty
                               ? const Center(
-                                  child: Text('Ожидаемы платежи пусты'),
+                                  child: Text('Ожидаемые платежи пусты'),
                                 )
                               : Refresher(
                                   onRefresh: () async {
-                                    final bloc = context.read<ScheduleBloc>();
-                                    bloc.add(
-                                      LoadSchedule(refresh: true, page: 1),
+                                    context.read<ScheduleBloc>().add(
+                                      LoadSchedule(
+                                        refresh: true,
+                                        page: 1,
+                                        pageSize: 10,
+                                        search: _searchController.text.isEmpty
+                                            ? null
+                                            : _searchController.text,
+                                      ),
                                     );
                                   },
                                   content: ListView.builder(

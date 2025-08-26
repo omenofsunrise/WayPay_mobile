@@ -70,9 +70,7 @@ class _TodoScreenState extends State<TodoScreen> {
     taskBloc.add(
       LoadActiveTasks(
         onlyMine: onlyMyTasks,
-        priority: selectedPriority == TaskPriority.all
-            ? null
-            : selectedPriority,
+        priority: selectedPriority == TaskPriority.all ? null : selectedPriority,
         taskEmployeeId: selectedEmployee?.id,
         status: visibleStatus,
       ),
@@ -116,11 +114,59 @@ class _TodoScreenState extends State<TodoScreen> {
     }
   }
 
-  Widget _buildTaskSection(
-    String title,
-    TaskStatus sectionStatus,
-    List<TodoTask> tasks,
-  ) {
+  void _openFilterModal() {
+    showDialog(
+      context: context,
+      builder: (_) => AppModal(
+        title: 'Фильтры',
+        backgroundColor: const Color(AppColors.background),
+        contentPadding: const EdgeInsets.all(16),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            PriorityDropdown(
+              selectedPriority: selectedPriority ?? TaskPriority.all,
+              onChanged: (value) {
+                setState(() => selectedPriority = value);
+              },
+            ),
+            const SizedBox(height: 12),
+            EmployeeDropdown(
+              selectedEmployee: selectedEmployee,
+              showAllOption: true,
+              onChanged: (value) {
+                setState(() => selectedEmployee = value);
+              },
+            ),
+          ],
+        ),
+        actions: [
+          DefaultButton(
+            text: 'Сбросить',
+            onPressed: () {
+              setState(() {
+                selectedPriority = TaskPriority.all;
+                selectedEmployee = null;
+              });
+              _loadTasks();
+              Navigator.pop(context);
+            },
+          ),
+          const SizedBox(width: 12),
+          DefaultButton(
+            text: 'Применить',
+            isGreen: true,
+            onPressed: () {
+              _loadTasks();
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTaskSection(String title, TaskStatus sectionStatus, List<TodoTask> tasks) {
     bool isHovering = false;
 
     return StatefulBuilder(
@@ -141,12 +187,7 @@ class _TodoScreenState extends State<TodoScreen> {
                 _optimistic[data.task.id] = sectionStatus;
               });
               // и шлём событие в блок
-              context.read<TaskBloc>().add(
-                UpdateTaskStatus(
-                  taskId: data.task.id,
-                  newStatus: sectionStatus,
-                ),
-              );
+              context.read<TaskBloc>().add(UpdateTaskStatus(taskId: data.task.id, newStatus: sectionStatus));
             },
             builder: (context, candidate, rejected) {
               return Container(
@@ -156,51 +197,32 @@ class _TodoScreenState extends State<TodoScreen> {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     width: 1.5,
-                    color: isHovering
-                        ? Color(AppColors.primaryLight)
-                        : Color(AppColors.uncomfPayment),
+                    color: isHovering ? Color(AppColors.primaryLight) : Color(AppColors.uncomfPayment),
                   ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 8,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                       child: Row(
                         children: [
                           Text(
                             title,
-                            style: AppStyle.manrope(
-                              size: 16,
-                              weight: FontWeight.w600,
-                              color: Color(AppColors.black),
-                            ),
+                            style: AppStyle.manrope(size: 16, weight: FontWeight.w600, color: Color(AppColors.black)),
                           ),
                           const Spacer(),
                           Text(
                             tasks.length.toString(),
-                            style: AppStyle.manrope(
-                              size: 16,
-                              weight: FontWeight.w600,
-                              color: Color(AppColors.black),
-                            ),
+                            style: AppStyle.manrope(size: 16, weight: FontWeight.w600, color: Color(AppColors.black)),
                           ),
                         ],
                       ),
                     ),
                     if (tasks.isEmpty)
                       const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
-                        ),
-                        child: Text(
-                          'Задачи отсутствуют',
-                          style: TextStyle(color: Colors.grey),
-                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        child: Text('Задачи отсутствуют', style: TextStyle(color: Colors.grey)),
                       )
                     else
                       Padding(
@@ -212,40 +234,25 @@ class _TodoScreenState extends State<TodoScreen> {
                               child: LongPressDraggable<_TaskDragData>(
                                 data: _TaskDragData(task),
                                 dragAnchorStrategy: pointerDragAnchorStrategy,
-                                onDragStarted: () =>
-                                    setState(() => _isDragging = true),
-                                onDragEnd: (_) =>
-                                    setState(() => _isDragging = false),
-                                onDraggableCanceled: (_, __) =>
-                                    setState(() => _isDragging = false),
-                                onDragCompleted: () =>
-                                    setState(() => _isDragging = false),
+                                onDragStarted: () => setState(() => _isDragging = true),
+                                onDragEnd: (_) => setState(() => _isDragging = false),
+                                onDraggableCanceled: (_, __) => setState(() => _isDragging = false),
+                                onDragCompleted: () => setState(() => _isDragging = false),
                                 // 🔹 критично: обновляем автоскролл при движении
-                                onDragUpdate: (details) =>
-                                    _maybeAutoScroll(details.globalPosition),
+                                onDragUpdate: (details) => _maybeAutoScroll(details.globalPosition),
                                 feedback: Material(
                                   color: Colors.transparent,
                                   child: ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      maxWidth:
-                                          MediaQuery.of(context).size.width -
-                                          64,
-                                    ),
+                                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 64),
                                     child: Opacity(
                                       opacity: 0.9,
-                                      child: TodoCard(
-                                        task: task,
-                                        onChanged: _loadTasks,
-                                      ),
+                                      child: TodoCard(task: task, onChanged: _loadTasks),
                                     ),
                                   ),
                                 ),
                                 childWhenDragging: Opacity(
                                   opacity: 0.4,
-                                  child: TodoCard(
-                                    task: task,
-                                    onChanged: _loadTasks,
-                                  ),
+                                  child: TodoCard(task: task, onChanged: _loadTasks),
                                 ),
                                 child: TodoCard(
                                   task: task,
@@ -276,233 +283,133 @@ class _TodoScreenState extends State<TodoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const AppDrawer(),
-      backgroundColor: Color(AppColors.background),
+      backgroundColor: Color(AppColors.primary),
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
-        backgroundColor: Color(AppColors.background),
-        title: Text(
-          'To do',
-          style: AppStyle.manrope(size: 25, weight: FontWeight.w600),
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: const Color(AppColors.primary),
+        title: Text('To do', style: AppStyle.medium20.copyWith(color: const Color(AppColors.background))),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => showCreateTodoModal(context),
-          ),
+          IconButton(icon: const Icon(Icons.add), onPressed: () => showCreateTodoModal(context)),
+          IconButton(icon: const Icon(Icons.filter_alt), onPressed: _openFilterModal),
         ],
         elevation: 0,
         foregroundColor: Colors.black,
-        iconTheme: IconThemeData(color: Color(AppColors.grey)),
       ),
-      body: Column(
-        children: [
-          IgnorePointer(
-            ignoring: _isDragging,
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      AppRadioButton(
-                        isSelected: onlyMyTasks,
-                        label: 'Только свои',
-                        onTap: () {
-                          onlyMyTasks = !onlyMyTasks;
-                          _onFiltersChanged();
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: StatusDropdown(
-                          selectedStatus: visibleStatus,
-                          onChanged: (v) {
-                            setState(() => visibleStatus = v);
-                            _loadTasks();
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: PriorityDropdown(
-                          selectedPriority: selectedPriority!,
-                          onChanged: (value) {
-                            selectedPriority = value;
-                            _onFiltersChanged();
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: EmployeeDropdown(
-                          selectedEmployee: selectedEmployee,
-                          showAllOption: true,
-                          onChanged: (value) {
-                            selectedEmployee = value;
-                            _onFiltersChanged();
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // 🔹 слушаем успешные загрузки, чтобы очищать оптимистично изменённые элементы
-          BlocListener<TaskBloc, TaskState>(
-            listenWhen: (prev, curr) => curr is TaskLoaded,
-            listener: (context, state) {
-              if (state is TaskLoaded) {
-                setState(() {
-                  // чистим те overrides, которые уже совпали с сервером
-                  for (final t in state.tasks) {
-                    final o = _optimistic[t.id];
-                    if (o != null && o == t.taskStatus) {
-                      _optimistic.remove(t.id);
-                    }
-                  }
-                });
-              }
-            },
-            child: Expanded(
-              child: BlocBuilder<TaskBloc, TaskState>(
-                builder: (context, state) {
-                  if (state is TaskLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (state is TaskError) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.error_outline,
-                              size: 64,
-                              color: Colors.red,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              state.message,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.red),
-                            ),
-                            const SizedBox(height: 12),
-                            ElevatedButton(
-                              onPressed: () {
-                                if (state.message.contains('Сессия')) {
-                                  _logout();
-                                } else {
-                                  _loadTasks();
-                                }
-                              },
-                              child: const Text('Повторить'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-
-                  if (state is TaskLoaded) {
-                    final pending = <TodoTask>[];
-                    final inProgress = <TodoTask>[];
-                    final review = <TodoTask>[];
-                    final done = <TodoTask>[];
-
-                    // 🔹 применяем локальные оптимистичные статусы
-                    for (var task in state.tasks) {
-                      final effectiveStatus =
-                          _optimistic[task.id] ?? task.taskStatus;
-                      switch (effectiveStatus) {
-                        case TaskStatus.pending:
-                          pending.add(
-                            task.copyWith(taskStatus: effectiveStatus),
-                          );
-                          break;
-                        case TaskStatus.inProgress:
-                          inProgress.add(
-                            task.copyWith(taskStatus: effectiveStatus),
-                          );
-                          break;
-                        case TaskStatus.review:
-                          review.add(
-                            task.copyWith(taskStatus: effectiveStatus),
-                          );
-                          break;
-                        case TaskStatus.done:
-                          done.add(task.copyWith(taskStatus: effectiveStatus));
-                          break;
+      body: Container(
+        decoration: const BoxDecoration(
+          color: Color(AppColors.background),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            // 🔹 слушаем успешные загрузки, чтобы очищать оптимистично изменённые элементы
+            BlocListener<TaskBloc, TaskState>(
+              listenWhen: (prev, curr) => curr is TaskLoaded,
+              listener: (context, state) {
+                if (state is TaskLoaded) {
+                  setState(() {
+                    // чистим те overrides, которые уже совпали с сервером
+                    for (final t in state.tasks) {
+                      final o = _optimistic[t.id];
+                      if (o != null && o == t.taskStatus) {
+                        _optimistic.remove(t.id);
                       }
                     }
-
-                    final sections =
-                        <
-                          ({
-                            String title,
-                            TaskStatus status,
-                            List<TodoTask> data,
-                          })
-                        >[
-                          (
-                            title: 'К выполнению',
-                            status: TaskStatus.pending,
-                            data: pending,
+                  });
+                }
+              },
+              child: Expanded(
+                child: BlocBuilder<TaskBloc, TaskState>(
+                  builder: (context, state) {
+                    if (state is TaskLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (state is TaskError) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                              const SizedBox(height: 12),
+                              Text(
+                                state.message,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                              const SizedBox(height: 12),
+                              ElevatedButton(
+                                onPressed: () {
+                                  if (state.message.contains('Сессия')) {
+                                    _logout();
+                                  } else {
+                                    _loadTasks();
+                                  }
+                                },
+                                child: const Text('Повторить'),
+                              ),
+                            ],
                           ),
-                          (
-                            title: 'В работе',
-                            status: TaskStatus.inProgress,
-                            data: inProgress,
-                          ),
-                          (
-                            title: 'На проверке',
-                            status: TaskStatus.review,
-                            data: review,
-                          ),
-                          (
-                            title: 'Выполнено',
-                            status: TaskStatus.done,
-                            data: done,
-                          ),
-                        ];
-
-                    final visibleSections = visibleStatus == null
-                        ? sections
-                        : sections
-                              .where((s) => s.status == visibleStatus)
-                              .toList();
-
-                    return Refresher(
-                      onRefresh: () async => _loadTasks(),
-                      content: ListView(
-                        key: _listKey,
-                        controller: _scrollController,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
                         ),
-                        children: [
-                          for (final s in visibleSections)
-                            _buildTaskSection(s.title, s.status, s.data),
-                        ],
-                      ),
-                    );
-                  }
+                      );
+                    }
 
-                  return const SizedBox.shrink();
-                },
+                    if (state is TaskLoaded) {
+                      final pending = <TodoTask>[];
+                      final inProgress = <TodoTask>[];
+                      final review = <TodoTask>[];
+                      final done = <TodoTask>[];
+
+                      // 🔹 применяем локальные оптимистичные статусы
+                      for (var task in state.tasks) {
+                        final effectiveStatus = _optimistic[task.id] ?? task.taskStatus;
+                        switch (effectiveStatus) {
+                          case TaskStatus.pending:
+                            pending.add(task.copyWith(taskStatus: effectiveStatus));
+                            break;
+                          case TaskStatus.inProgress:
+                            inProgress.add(task.copyWith(taskStatus: effectiveStatus));
+                            break;
+                          case TaskStatus.review:
+                            review.add(task.copyWith(taskStatus: effectiveStatus));
+                            break;
+                          case TaskStatus.done:
+                            done.add(task.copyWith(taskStatus: effectiveStatus));
+                            break;
+                        }
+                      }
+
+                      final sections = <({String title, TaskStatus status, List<TodoTask> data})>[
+                        (title: 'К выполнению', status: TaskStatus.pending, data: pending),
+                        (title: 'В работе', status: TaskStatus.inProgress, data: inProgress),
+                        (title: 'На проверке', status: TaskStatus.review, data: review),
+                        (title: 'Выполнено', status: TaskStatus.done, data: done),
+                      ];
+
+                      final visibleSections = visibleStatus == null
+                          ? sections
+                          : sections.where((s) => s.status == visibleStatus).toList();
+
+                      return Refresher(
+                        onRefresh: () async => _loadTasks(),
+                        content: ListView(
+                          key: _listKey,
+                          controller: _scrollController,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          children: [for (final s in visibleSections) _buildTaskSection(s.title, s.status, s.data)],
+                        ),
+                      );
+                    }
+
+                    return const SizedBox.shrink();
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -522,10 +429,7 @@ void showCreateTodoModal(BuildContext externalContext) async {
 
   EmployeeName? selectedExecutor;
   if (employeeJson != null) {
-    selectedExecutor = EmployeeName(
-      id: employeeJson['id'] as int,
-      fullName: employeeJson['fullName'] as String,
-    );
+    selectedExecutor = EmployeeName(id: employeeJson['id'] as int, fullName: employeeJson['fullName'] as String);
   }
 
   EmployeeName? selectedResponsible;
@@ -577,6 +481,7 @@ void showCreateTodoModal(BuildContext externalContext) async {
       return StatefulBuilder(
         builder: (context, setState) {
           return AppModal(
+            backgroundColor: Color(AppColors.background),
             title: 'Создать задачу',
             content: SingleChildScrollView(
               child: Column(
@@ -603,10 +508,7 @@ void showCreateTodoModal(BuildContext externalContext) async {
                   const SizedBox(height: 4),
                   Text(
                     'Приоритет',
-                    style: AppStyle.medium16.copyWith(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: AppStyle.medium16.copyWith(color: Colors.black87, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 4),
                   PriorityDropdown(
@@ -621,10 +523,7 @@ void showCreateTodoModal(BuildContext externalContext) async {
                   const SizedBox(height: 16),
                   Text(
                     'Исполнитель',
-                    style: AppStyle.medium16.copyWith(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: AppStyle.medium16.copyWith(color: Colors.black87, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 4),
                   EmployeeDropdown(
@@ -639,10 +538,7 @@ void showCreateTodoModal(BuildContext externalContext) async {
                   const SizedBox(height: 16),
                   Text(
                     'Ответственный',
-                    style: AppStyle.medium16.copyWith(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: AppStyle.medium16.copyWith(color: Colors.black87, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 4),
                   EmployeeDropdown(
@@ -681,9 +577,7 @@ void showCreateTodoModal(BuildContext externalContext) async {
                               responsibleId: selectedResponsible?.id,
                             );
 
-                            externalContext.read<TaskBloc>().add(
-                              CreateTask(newTask),
-                            );
+                            externalContext.read<TaskBloc>().add(CreateTask(newTask));
                             Navigator.of(dialogContext).pop();
                           },
                           text: 'Создать',

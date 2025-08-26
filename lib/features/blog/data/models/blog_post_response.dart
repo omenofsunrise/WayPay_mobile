@@ -70,27 +70,34 @@ class BlogPostResponse {
   }
 
   BlogPostResponse copyWith({
+    int? id,
+    String? authorName,
+    String? authorAvatarPath,
+    int? authorId,
     String? content,
+    bool? isPublished,
+    DateTime? createdAt,
     List<String>? imageUrls,
     List<FileAttachmentResponse>? attachments,
     int? likesCount,
     int? commentsCount,
     bool? isLikedByCurrentUser,
+    bool? isAuthor,
   }) {
     return BlogPostResponse(
-      id: id,
-      authorName: authorName,
-      authorAvatarPath: authorAvatarPath,
-      authorId: authorId,
+      id: id ?? this.id,
+      authorName: authorName ?? this.authorName,
+      authorAvatarPath: authorAvatarPath ?? this.authorAvatarPath,
+      authorId: authorId ?? this.authorId,
       content: content ?? this.content,
-      isPublished: isPublished,
-      createdAt: createdAt,
+      isPublished: isPublished ?? this.isPublished,
+      createdAt: createdAt ?? this.createdAt,
       imageUrls: imageUrls ?? this.imageUrls,
       attachments: attachments ?? this.attachments,
       likesCount: likesCount ?? this.likesCount,
       commentsCount: commentsCount ?? this.commentsCount,
       isLikedByCurrentUser: isLikedByCurrentUser ?? this.isLikedByCurrentUser,
-      isAuthor: isAuthor,
+      isAuthor: isAuthor ?? this.isAuthor,
     );
   }
 }

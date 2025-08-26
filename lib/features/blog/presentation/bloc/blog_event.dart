@@ -14,12 +14,7 @@ class LoadBlogPosts extends BlogEvent {
   final String? search;
   final int? authorId;
 
-  const LoadBlogPosts({
-    required this.feedType,
-    required this.sortType,
-    this.search,
-    this.authorId,
-  });
+  const LoadBlogPosts({required this.feedType, required this.sortType, this.search, this.authorId});
 
   @override
   List<Object?> get props => [feedType, sortType, authorId];
@@ -30,6 +25,23 @@ class ToggleLikePost extends BlogEvent {
 
   const ToggleLikePost(this.postId);
 
+  @override
+  List<Object?> get props => [postId];
+}
+
+class ToggleLikeChatPost extends BlogEvent {
+  final int postId;
+
+  const ToggleLikeChatPost(this.postId);
+
+  @override
+  List<Object?> get props => [postId];
+}
+
+class LoadBlogPostById extends BlogEvent {
+  final int postId;
+
+  const LoadBlogPostById(this.postId);
   @override
   List<Object?> get props => [postId];
 }

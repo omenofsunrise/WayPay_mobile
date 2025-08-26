@@ -34,8 +34,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int _selectedIndex = 0;
 
   late List<ProfileTabItem> _tabItems;
-
   late final ProfileCubit _profileCubit;
+
   final Map<EmployeeRole, int> roleHierarchy = {
     EmployeeRole.employee: 0,
     EmployeeRole.accountant: 1,
@@ -51,15 +51,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Employee.fromJson(employeeJson);
   }
 
-  bool canEditEmployee({
-    required Employee currentUser,
-    required Employee targetEmployee,
-  }) {
+  bool canEditEmployee({required Employee currentUser, required Employee targetEmployee}) {
     final currentUserLevel = roleHierarchy[currentUser.role] ?? 0;
     final targetUserLevel = roleHierarchy[targetEmployee.role] ?? 0;
-
-    return (currentUserLevel > targetUserLevel) ||
-        (currentUser.id == targetEmployee.id);
+    return (currentUserLevel > targetUserLevel) || (currentUser.id == targetEmployee.id);
   }
 
   @override
@@ -87,44 +82,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
           title: 'Мой профиль',
           content: BlocProvider.value(
             value: _profileCubit,
-            child: MyProfileScreen(
-              employeeId: widget.employeeId,
-              refresh: loadTabs,
-            ),
+            child: MyProfileScreen(employeeId: widget.employeeId, refresh: loadTabs),
           ),
         ),
       ];
 
-      if (_userStorage.hasViewContent([
-        EmployeeRole.superAdmin,
-        EmployeeRole.director,
-        EmployeeRole.admin,
-      ])) {
-        _tabItems.add(
-          ProfileTabItem(
-            title: 'Активные сессии',
-            content: ActiveSessionsScreen(),
-          ),
-        );
+      if (_userStorage.hasViewContent([EmployeeRole.superAdmin, EmployeeRole.director, EmployeeRole.admin])) {
+        _tabItems.add(ProfileTabItem(title: 'Активные сессии', content: ActiveSessionsScreen()));
       }
 
-      if (_userStorage.hasViewContent([
-        EmployeeRole.superAdmin,
-        EmployeeRole.director,
-        EmployeeRole.admin,
-      ])) {
-        _tabItems.add(
-          ProfileTabItem(title: 'Все пользователи', content: EmployeesScreen()),
-        );
+      if (_userStorage.hasViewContent([EmployeeRole.superAdmin, EmployeeRole.director, EmployeeRole.admin])) {
+        _tabItems.add(ProfileTabItem(title: 'Все пользователи', content: EmployeesScreen()));
       }
 
-      if (_userStorage.hasViewContent([
-        EmployeeRole.superAdmin,
-        EmployeeRole.director,
-      ])) {
-        _tabItems.add(
-          ProfileTabItem(title: 'О компании', content: CompanyScreen()),
-        );
+      if (_userStorage.hasViewContent([EmployeeRole.superAdmin, EmployeeRole.director])) {
+        _tabItems.add(ProfileTabItem(title: 'О компании', content: CompanyScreen()));
       }
     });
   }
@@ -138,28 +110,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildTabItem(int index) {
     final bool isSelected = index == _selectedIndex;
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedIndex = index;
-        });
-      },
-      child: Opacity(
-        opacity: 1,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? Color(AppColors.tabSelected)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Center(
-            child: Text(
-              _tabItems[index].title,
-              style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
-            ),
-          ),
+      onTap: () => setState(() => _selectedIndex = index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? Color(AppColors.tabSelected) : Color(AppColors.greyLight),
+          borderRadius: BorderRadius.circular(10),
         ),
+        child: Text(_tabItems[index].title, style: AppStyle.manrope(size: 14, weight: FontWeight.w400)),
       ),
     );
   }
@@ -176,34 +134,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const AppDrawer(),
-      backgroundColor: Color(AppColors.background),
+      backgroundColor: Color(AppColors.primary),
       appBar: AppBar(
-        title: Text(
-          'Профиль',
-          style: AppStyle.manrope(size: 25, weight: FontWeight.w600),
-        ),
-        backgroundColor: Color(AppColors.background),
         surfaceTintColor: Colors.transparent,
-        iconTheme: IconThemeData(color: Color(AppColors.darkGrey)),
+        backgroundColor: Color(AppColors.primary),
+        elevation: 0,
+        title: Text('Профиль', style: AppStyle.medium20.copyWith(color: const Color(AppColors.background))),
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           if (_selectedIndex == 0)
             BlocBuilder<ProfileCubit, ProfileState>(
               bloc: _profileCubit,
               builder: (context, state) {
                 if (state is ProfileLoaded && currentUser != null) {
-                  final targetEmployee = state.employee;
-
-                  final editable = canEditEmployee(
-                    currentUser: currentUser!,
-                    targetEmployee: targetEmployee,
-                  );
-
+                  final editable = canEditEmployee(currentUser: currentUser!, targetEmployee: state.employee);
                   if (editable) {
                     return IconButton(
-                      icon: const Icon(
-                        Icons.edit,
-                        color: Color(AppColors.darkGrey),
-                      ),
+                      icon: const Icon(Icons.edit, color: Colors.white),
                       tooltip: 'Редактировать',
                       onPressed: () async {
                         await showDialog(
@@ -226,56 +173,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
             ),
           IconButton(
-            icon: const Icon(Icons.logout, color: Color(AppColors.darkGrey)),
+            icon: const Icon(Icons.logout, color: Colors.white),
             tooltip: 'Выйти',
             onPressed: _logout,
           ),
         ],
-        centerTitle: true,
       ),
-      body: Column(
-        children: [
-          BlocBuilder<ProfileCubit, ProfileState>(
-            bloc: _profileCubit,
-            builder: (context, state) {
-              if (state is ProfileLoaded) {
-                if (state.myProfile) {
+
+      body: Container(
+        decoration: const BoxDecoration(
+          color: Color(AppColors.background),
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            BlocBuilder<ProfileCubit, ProfileState>(
+              bloc: _profileCubit,
+              builder: (context, state) {
+                if (state is ProfileLoaded && state.myProfile) {
                   return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 20,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
-                      child: Container(
-                        color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Row(
-                            children: List.generate(
-                              _tabItems.length,
-                              (index) => Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                ),
-                                child: _buildTabItem(index),
-                              ),
-                            ),
-                          ),
+                      child: Row(
+                        children: List.generate(
+                          _tabItems.length,
+                          (index) =>
+                              Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: _buildTabItem(index)),
                         ),
                       ),
                     ),
                   );
-                } else {
-                  return SizedBox.shrink();
                 }
-              } else {
-                return SizedBox.shrink();
-              }
-            },
-          ),
-          Expanded(child: _buildTabContent(_selectedIndex)),
-        ],
+                return const SizedBox.shrink();
+              },
+            ),
+            Expanded(child: _buildTabContent(_selectedIndex)),
+          ],
+        ),
       ),
     );
   }
@@ -284,6 +219,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
 class ProfileTabItem {
   final String title;
   final Widget content;
-
   ProfileTabItem({required this.title, required this.content});
 }

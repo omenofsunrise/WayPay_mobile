@@ -59,43 +59,45 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Table(
-                  columnWidths: const {0: IntrinsicColumnWidth(), 1: FlexColumnWidth(1), 2: FlexColumnWidth(1)},
-                  border: TableBorder.all(color: Color(AppColors.borderColor), borderRadius: BorderRadius.circular(10)),
-                  children: [
-                    TableRow(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 17),
-                          child: Center(
-                            child: Text('Дата', style: AppStyle.manrope(size: 15, weight: FontWeight.w600)),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
-                            child: Text(
-                              'Сумма просрочки, руб',
-                              style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
-                            child: Text(
-                              'Сумма платежей, руб',
-                              style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ],
+                if (_isExpanded)
+                  Table(
+                    columnWidths: const {0: IntrinsicColumnWidth(), 1: FlexColumnWidth(1), 2: FlexColumnWidth(1)},
+                    border: TableBorder.all(
+                      color: Color(AppColors.borderColor),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    ...List.generate(
-                      _isExpanded ? rowCount : (rowCount > 0 ? 1 : 0), // в свернутом виде показываем 1 свежую строку
-                      (index) {
+                    children: [
+                      TableRow(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 17),
+                            child: Center(
+                              child: Text('Дата', style: AppStyle.manrope(size: 15, weight: FontWeight.w600)),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                              child: Text(
+                                'Сумма просрочки, руб',
+                                style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                              child: Text(
+                                'Сумма платежей, руб',
+                                style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      ...List.generate(rowCount, (index) {
                         final date = payment[index].periodName;
                         final overdueValue = overdue[index].value.toInt();
                         final paymentValue = payment[index].value.toInt();
@@ -142,10 +144,9 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
                             ),
                           ],
                         );
-                      },
-                    ),
-                  ],
-                ),
+                      }),
+                    ],
+                  ),
               ],
             ),
           );

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay/core/di/dependency_injection.dart';
+import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/widgets/form_modal/labeled_container.dart';
 import 'package:waypay/features/profile/data/models/employee.dart';
 
@@ -41,6 +42,7 @@ class BudgetCard extends StatelessWidget {
         showDialog(
           context: context,
           builder: (_) => AppModal(
+            backgroundColor: Color(AppColors.background),
             title: isIncome ? 'Детали прихода' : 'Детали расхода',
             menuItems: (userStorage.hasViewContent([EmployeeRole.superAdmin, EmployeeRole.director]))
                 ? [
@@ -52,6 +54,7 @@ class BudgetCard extends StatelessWidget {
                         final confirmed = await showDialog<bool>(
                           context: context,
                           builder: (_) => AlertDialog(
+                            backgroundColor: Color(AppColors.background),
                             title: const Text('Удаление'),
                             content: const Text('Удалить эту запись?'),
                             actions: [
@@ -93,6 +96,7 @@ class BudgetCard extends StatelessWidget {
                               showDialog(
                                 context: context,
                                 builder: (_) => AlertDialog(
+                                  backgroundColor: Color(AppColors.background),
                                   title: const Text('Ошибка'),
                                   content: Text('Не удалось удалить.\n$e'),
                                   actions: [

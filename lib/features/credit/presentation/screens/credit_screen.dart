@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:waypay/features/credit/presentation/widgets/credit_tab.dart';
+import 'package:waypay/features/credit/presentation/widgets/credit_tab_action.dart';
 import 'package:waypay/features/profile/data/models/employee.dart';
 import 'package:waypay/core/storage/user_storage.dart';
 import 'package:waypay/core/theme/app_colors.dart';
@@ -24,15 +26,10 @@ class CreditsScreen extends StatefulWidget {
   State<CreditsScreen> createState() => _CreditsScreenState();
 }
 
-enum CreditTab { all, favourite, debtors, archived }
-
 class _CreditsScreenState extends State<CreditsScreen> {
   final _searchController = TextEditingController();
   Timer? _debounce;
   CreditTab _selectedTab = CreditTab.all;
-
-  int? _exportProgress;
-  bool get _isExporting => _exportProgress != null;
 
   @override
   void initState() {
@@ -47,14 +44,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
       debt: _selectedTab == CreditTab.debtors ? true : null,
     );
 
-    context.read<CreditBloc>().add(
-      LoadCreditsEvent(refresh: true, query: query),
-    );
-  }
-
-  void _onTabSelected(CreditTab tab) {
-    setState(() => _selectedTab = tab);
-    _loadCredits();
+    context.read<CreditBloc>().add(LoadCreditsEvent(refresh: true, query: query));
   }
 
   @override
@@ -64,17 +54,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
     super.dispose();
   }
 
-  String _formatCurrency(num value) {
-    return NumberFormat.currency(
-      locale: 'ru_RU',
-      symbol: '₽',
-      decimalDigits: 0,
-    ).format(value);
-  }
-
-  String _formatDate(DateTime date) {
-    return DateFormat('dd-MM-yyyy').format(date);
-  }
+  String _formatDate(DateTime date) => DateFormat('dd-MM-yyyy').format(date);
 
   void _openFilterModal(BuildContext context) {
     showDialog(
@@ -82,20 +62,10 @@ class _CreditsScreenState extends State<CreditsScreen> {
       builder: (context) {
         return Dialog(
           backgroundColor: const Color(AppColors.background),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 16,
-              right: 16,
-              top: 24,
-            ),
-            child: const CreditFilters(
-              showIncomeFilters: false,
-              showClientInvestorFilters: true,
-            ),
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 16, right: 16, top: 24),
+            child: const CreditFilters(showIncomeFilters: false, showClientInvestorFilters: true),
           ),
         );
       },
@@ -111,13 +81,19 @@ class _CreditsScreenState extends State<CreditsScreen> {
         surfaceTintColor: Colors.transparent,
         backgroundColor: const Color(AppColors.primary),
         elevation: 0,
-        title: Text(
-          'Договоры',
-          style: AppStyle.medium20.copyWith(color: Colors.white),
-        ),
+        title: Text('Договоры', style: AppStyle.medium20.copyWith(color: const Color(AppColors.background))),
         actions: [
+          // маленькая кнопка выбора вкладки
+          CreditTabAppBarAction(
+            selectedTab: _selectedTab,
+            onSelected: (tab) {
+              setState(() => _selectedTab = tab);
+              _loadCredits();
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.filter_alt, color: Colors.white),
+            tooltip: 'Фильтры',
             onPressed: () => _openFilterModal(context),
           ),
         ],
@@ -126,32 +102,14 @@ class _CreditsScreenState extends State<CreditsScreen> {
         valueListenable: UserStorage().roleNotifier,
         builder: (context, role, _) {
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                color: const Color(AppColors.primary),
-                padding: const EdgeInsets.all(16),
-                child: BlocBuilder<CreditBloc, CreditState>(
-                  builder: (context, state) {
-                    final total = state is CreditLoaded ? state.totalCount : 0;
-                    return Text(
-                      'Всего договоров: $total',
-                      style: AppStyle.inter(
-                        size: 24,
-                        weight: FontWeight.w300,
-                        color: Colors.white,
-                      ),
-                    );
-                  },
-                ),
-              ),
-              _buildTabBar(),
+              // Dropdown из тела удалён — выбор вкладки в AppBar
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
                     color: Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(20),
-                    ),
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   ),
                   child: BlocBuilder<CreditBloc, CreditState>(
                     builder: (context, state) {
@@ -163,9 +121,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
                       }
                       if (state is CreditLoaded) {
                         if (state.credits.isEmpty) {
-                          return const Center(
-                            child: Text('Договоры не найдены'),
-                          );
+                          return const Center(child: Text('Договоры не найдены'));
                         }
                         return Column(
                           children: [
@@ -181,67 +137,43 @@ class _CreditsScreenState extends State<CreditsScreen> {
                                       onTap: () {
                                         showDialog(
                                           context: context,
-                                          builder: (_) => CreditModal(
-                                            credit: credit,
-                                            isControl: false,
-                                          ),
+                                          builder: (_) => CreditModal(credit: credit, isControl: false),
                                         );
                                       },
                                       child: Container(
-                                        margin: const EdgeInsets.only(
-                                          bottom: 12,
-                                        ),
+                                        margin: const EdgeInsets.only(bottom: 12),
                                         padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
                                           color: Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.grey.shade300,
-                                          ),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: Colors.grey.shade300),
                                         ),
                                         child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Row(
                                               children: [
                                                 Text(
                                                   '№${credit.id}',
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                                 ),
                                                 const Spacer(),
                                                 GestureDetector(
                                                   onTap: () {
-                                                    context
-                                                        .read<CreditBloc>()
-                                                        .add(
-                                                          ToggleFavouriteEvent(
-                                                            creditId: credit.id,
-                                                          ),
-                                                        );
+                                                    context.read<CreditBloc>().add(
+                                                      ToggleFavouriteEvent(creditId: credit.id),
+                                                    );
                                                   },
                                                   child: Icon(
-                                                    credit.isFavourite
-                                                        ? Icons.star
-                                                        : Icons.star_border,
-                                                    color: credit.isFavourite
-                                                        ? Colors.amber
-                                                        : Colors.grey,
+                                                    credit.isFavourite ? Icons.star : Icons.star_border,
+                                                    color: credit.isFavourite ? Colors.amber : Colors.grey,
                                                     size: 20,
                                                   ),
                                                 ),
                                                 const SizedBox(width: 4),
                                                 Text(
-                                                  _formatDate(
-                                                    credit.creditDate,
-                                                  ),
-                                                  style: const TextStyle(
-                                                    color: Colors.black54,
-                                                  ),
+                                                  _formatDate(credit.creditDate),
+                                                  style: const TextStyle(color: Colors.black54),
                                                 ),
                                               ],
                                             ),
@@ -250,17 +182,10 @@ class _CreditsScreenState extends State<CreditsScreen> {
                                                 Expanded(
                                                   child: Text(
                                                     credit.clientFullName,
-                                                    style: const TextStyle(
-                                                      fontSize: 14,
-                                                    ),
+                                                    style: const TextStyle(fontSize: 14),
                                                   ),
                                                 ),
-                                                Text(
-                                                  credit.clientPhone,
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                  ),
-                                                ),
+                                                Text(credit.clientPhone, style: const TextStyle(fontSize: 14)),
                                               ],
                                             ),
                                           ],
@@ -278,24 +203,13 @@ class _CreditsScreenState extends State<CreditsScreen> {
                                 totalPages: state.totalPages,
                                 onPageSelected: (page) {
                                   final query = GetCreditsQuery(
-                                    isFavourite:
-                                        _selectedTab == CreditTab.favourite
-                                        ? true
-                                        : null,
-                                    isActive: _selectedTab == CreditTab.archived
-                                        ? false
-                                        : null,
-                                    debt: _selectedTab == CreditTab.debtors
-                                        ? true
-                                        : null,
+                                    isFavourite: _selectedTab == CreditTab.favourite ? true : null,
+                                    isActive: _selectedTab == CreditTab.archived ? false : null,
+                                    debt: _selectedTab == CreditTab.debtors ? true : null,
                                     page: page,
                                   );
                                   context.read<CreditBloc>().add(
-                                    LoadCreditsEvent(
-                                      query: query,
-                                      page: page,
-                                      refresh: true,
-                                    ),
+                                    LoadCreditsEvent(query: query, page: page, refresh: true),
                                   );
                                 },
                               ),
@@ -311,76 +225,6 @@ class _CreditsScreenState extends State<CreditsScreen> {
             ],
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildMoney(String label, num value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-        const SizedBox(height: 2),
-        Text(
-          _formatCurrency(value),
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTabBar() {
-    return Container(
-      color: Color(AppColors.primary),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _buildTabItem('Все договоры', CreditTab.all, Icons.article),
-            _buildTabItem('Важные', CreditTab.favourite, Icons.star_border),
-            _buildTabItem(
-              'Должники',
-              CreditTab.debtors,
-              Icons.download_rounded,
-            ),
-            _buildTabItem(
-              'В архиве',
-              CreditTab.archived,
-              Icons.hourglass_empty,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabItem(String label, CreditTab tab, IconData icon) {
-    final isSelected = _selectedTab == tab;
-    final selectedColor = const Color(AppColors.primaryLight);
-    final textColor = isSelected ? Colors.white : Colors.black;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: GestureDetector(
-        onTap: () => _onTabSelected(tab),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected ? selectedColor : Colors.white,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, size: 16, color: textColor),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: TextStyle(fontWeight: FontWeight.w500, color: textColor),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:waypay/assets/resources.dart';
+import 'package:waypay/core/theme/app_colors.dart';
 
 class NetworkErrorScreen extends StatelessWidget {
   const NetworkErrorScreen({super.key});
@@ -7,7 +8,7 @@ class NetworkErrorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(AppColors.background),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -16,11 +17,7 @@ class NetworkErrorScreen extends StatelessWidget {
             const SizedBox(height: 24),
             const Text(
               'Ошибка подключения к сети',
-              style: TextStyle(
-                fontSize: 18,
-                color: Color(0xFF007D88),
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 18, color: Color(0xFF007D88), fontWeight: FontWeight.w500),
             ),
           ],
         ),

@@ -13,7 +13,7 @@ Future<bool> showConfirmDialog({
   final result = await showDialog<bool>(
     context: context,
     builder: (_) => AlertDialog(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(AppColors.background),
       title: Text(title),
       content: Text(content),
       actions: [

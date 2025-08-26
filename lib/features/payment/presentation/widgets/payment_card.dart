@@ -32,6 +32,7 @@ class _PaymentCardState extends State<PaymentCard> {
       builder: (_) {
         final UserStorage userStorage = UserStorage();
         return AppModal(
+          backgroundColor: Color(AppColors.background),
           menuItems: [
             if (userStorage.hasViewContent([EmployeeRole.accountant]) && !payment.accepted)
               PopupMenuItem(
@@ -42,6 +43,7 @@ class _PaymentCardState extends State<PaymentCard> {
                     final confirmed = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
+                        backgroundColor: Color(AppColors.background),
                         title: const Text('Подтверждение'),
                         content: const Text('Вы уверены, что хотите подтвердить этот платёж?'),
                         actions: [
@@ -69,6 +71,7 @@ class _PaymentCardState extends State<PaymentCard> {
                     final confirmed = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
+                        backgroundColor: Color(AppColors.background),
                         title: const Text('Подтверждение удаления'),
                         content: const Text('Вы действительно хотите удалить этот платёж? Это действие необратимо.'),
                         actions: [
