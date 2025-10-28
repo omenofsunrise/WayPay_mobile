@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:waypay/core/di/dependency_injection.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
@@ -14,7 +13,6 @@ import 'package:waypay/features/chat/data/service/chat_hub_service.dart';
 import 'package:waypay/features/chat/presentation/bloc/chat/chat_bloc.dart';
 import 'package:waypay/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
 import 'package:waypay/features/chat/presentation/screens/chat_screen.dart';
-import 'package:waypay/routes/routes.dart';
 
 class ProfileBlogCard extends StatefulWidget {
   final ProfileBlogModel user;
@@ -49,7 +47,10 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
   void _saveDescription() {
     final newDescription = _controller.text.trim();
     if (newDescription.isNotEmpty) {
-      context.read<ProfileBlogCubit>().updateProfile(description: newDescription, id: widget.user.id);
+      context.read<ProfileBlogCubit>().updateProfile(
+        description: newDescription,
+        id: widget.user.id,
+      );
     }
 
     setState(() {
@@ -80,8 +81,15 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                     width: 30,
                     height: 30,
                     child: DecoratedBox(
-                      decoration: BoxDecoration(color: Color(AppColors.comfPayment), shape: BoxShape.circle),
-                      child: Icon(Icons.arrow_back, size: 20, color: Color(AppColors.background)),
+                      decoration: BoxDecoration(
+                        color: Color(AppColors.comfPayment),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.arrow_back,
+                        size: 20,
+                        color: Color(AppColors.background),
+                      ),
                     ),
                   ),
                 ),
@@ -91,19 +99,33 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    buildAvatar(photoPath: widget.user.photoPath, fullName: widget.user.fullName, radius: 45),
+                    buildAvatar(
+                      photoPath: widget.user.photoPath,
+                      fullName: widget.user.fullName,
+                      radius: 45,
+                    ),
                     const SizedBox(width: 20),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(widget.user.fullName, style: AppStyle.manrope(size: 21, weight: FontWeight.w500)),
+                          Text(
+                            widget.user.fullName,
+                            style: AppStyle.manrope(
+                              size: 21,
+                              weight: FontWeight.w500,
+                            ),
+                          ),
                           if (widget.user.id == widget.userId)
                             GestureDetector(
                               onTap: _toggleEdit,
                               child: Row(
                                 children: [
-                                  Icon(Icons.edit, size: 16, color: Color(AppColors.darkGrey)),
+                                  Icon(
+                                    Icons.edit,
+                                    size: 16,
+                                    color: Color(AppColors.darkGrey),
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
                                     _isEditing ? 'Отменить' : 'Изменить статус',
@@ -145,9 +167,16 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                       Row(
                         children: [
                           Expanded(
-                            child: LabeledTextField(label: '', controller: _controller, hintText: 'Введите описание'),
+                            child: LabeledTextField(
+                              label: '',
+                              controller: _controller,
+                              hintText: 'Введите описание',
+                            ),
                           ),
-                          IconButton(icon: const Icon(Icons.send), onPressed: _saveDescription),
+                          IconButton(
+                            icon: const Icon(Icons.send),
+                            onPressed: _saveDescription,
+                          ),
                         ],
                       ),
                     ],
@@ -161,11 +190,18 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                     children: [
                       Text(
                         widget.user.postsCount.toString(),
-                        style: AppStyle.manrope(size: 16, weight: FontWeight.w500),
+                        style: AppStyle.manrope(
+                          size: 16,
+                          weight: FontWeight.w500,
+                        ),
                       ),
                       Text(
                         'Постов',
-                        style: AppStyle.manrope(size: 12, weight: FontWeight.w400, color: Color(AppColors.darkGrey)),
+                        style: AppStyle.manrope(
+                          size: 12,
+                          weight: FontWeight.w400,
+                          color: Color(AppColors.darkGrey),
+                        ),
                       ),
                     ],
                   ),
@@ -173,11 +209,18 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                     children: [
                       Text(
                         widget.user.commentsCount.toString(),
-                        style: AppStyle.manrope(size: 16, weight: FontWeight.w500),
+                        style: AppStyle.manrope(
+                          size: 16,
+                          weight: FontWeight.w500,
+                        ),
                       ),
                       Text(
                         'Коментариев',
-                        style: AppStyle.manrope(size: 12, weight: FontWeight.w400, color: Color(AppColors.darkGrey)),
+                        style: AppStyle.manrope(
+                          size: 12,
+                          weight: FontWeight.w400,
+                          color: Color(AppColors.darkGrey),
+                        ),
                       ),
                     ],
                   ),
@@ -185,11 +228,18 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                     children: [
                       Text(
                         widget.user.likesCount.toString(),
-                        style: AppStyle.manrope(size: 16, weight: FontWeight.w500),
+                        style: AppStyle.manrope(
+                          size: 16,
+                          weight: FontWeight.w500,
+                        ),
                       ),
                       Text(
                         'Реакций',
-                        style: AppStyle.manrope(size: 12, weight: FontWeight.w400, color: Color(AppColors.darkGrey)),
+                        style: AppStyle.manrope(
+                          size: 12,
+                          weight: FontWeight.w400,
+                          color: Color(AppColors.darkGrey),
+                        ),
                       ),
                     ],
                   ),
@@ -197,13 +247,18 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
               ),
               if (widget.user.id != widget.userId)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 25,
+                    vertical: 15,
+                  ),
                   child: GestureDetector(
                     onTap: () async {
                       final chatApi = getIt<ChatRemoteDataSource>();
 
                       try {
-                        final chat = await chatApi.getOrCreatePrivate(widget.user.id);
+                        final chat = await chatApi.getOrCreatePrivate(
+                          widget.user.id,
+                        );
                         if (!mounted) return;
                         Navigator.push(
                           context,
@@ -221,16 +276,20 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                                 chatName: chat.name,
                                 chatAvatarPath: chat.avatarPath,
                                 onChatUpdated: () {
-                                  context.read<ChatListBloc>().add(const ChatListRefreshed());
+                                  context.read<ChatListBloc>().add(
+                                    const ChatListRefreshed(),
+                                  );
                                 },
                               ),
                             ),
                           ),
                         );
                       } catch (e) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text('Ошибка при открытии чата: $e')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Ошибка при открытии чата: $e'),
+                          ),
+                        );
                       }
                     },
                     child: SizedBox(

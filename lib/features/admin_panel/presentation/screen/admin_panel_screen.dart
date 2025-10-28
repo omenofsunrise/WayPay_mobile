@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
@@ -43,7 +42,10 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     final nameDirController = TextEditingController();
     final nameCompanyController = TextEditingController();
 
-    final phoneFormatter = MaskTextInputFormatter(mask: ' (###) ###-##-##', filter: {"#": RegExp(r'\d')});
+    final phoneFormatter = MaskTextInputFormatter(
+      mask: ' (###) ###-##-##',
+      filter: {"#": RegExp(r'\d')},
+    );
 
     String? phoneError;
     String? dateError;
@@ -95,20 +97,28 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
         builder: (context, setState) {
           return Dialog(
             backgroundColor: Color(AppColors.background),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Добавить компанию', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Добавить компанию',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 12),
                   LabeledTextField(
                     controller: nameDirController,
                     label: 'ФИО директора',
                     format: LabeledTextFieldFormat.fullName,
                   ),
-                  LabeledTextField(controller: nameCompanyController, label: 'Название компании'),
+                  LabeledTextField(
+                    controller: nameCompanyController,
+                    label: 'Название компании',
+                  ),
                   LabeledTextField(
                     controller: phoneController,
                     keyboardType: TextInputType.phone,
@@ -132,12 +142,19 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                     children: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Отмена', style: TextStyle(color: Colors.black)),
+                        child: const Text(
+                          'Отмена',
+                          style: TextStyle(color: Colors.black),
+                        ),
                       ),
                       ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: const Color(AppColors.primary)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(AppColors.primary),
+                        ),
                         onPressed: () async {
-                          final isPhoneValid = validatePhone(phoneController.text);
+                          final isPhoneValid = validatePhone(
+                            phoneController.text,
+                          );
                           final isDateValid = validateDate();
 
                           if (!isPhoneValid || !isDateValid) {
@@ -154,11 +171,16 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                             companyName: nameCompanyController.text,
                           );
 
-                          await context.read<CompanyCubit>().createCompany(request);
+                          await context.read<CompanyCubit>().createCompany(
+                            request,
+                          );
                           if (!context.mounted) return;
                           Navigator.of(context).pop();
                         },
-                        child: const Text('Создать', style: TextStyle(color: Colors.white)),
+                        child: const Text(
+                          'Создать',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ],
                   ),
@@ -188,7 +210,10 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
             child: Container(
               decoration: const BoxDecoration(
                 color: Color(AppColors.background),
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
               ),
               child: BlocBuilder<CompanyCubit, CompanyState>(
                 builder: (context, state) {
@@ -202,7 +227,11 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                            const Icon(
+                              Icons.error_outline,
+                              size: 64,
+                              color: Colors.red,
+                            ),
                             const SizedBox(height: 16),
                             Text(
                               state.message,
@@ -240,7 +269,9 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                                     padding: const EdgeInsets.all(16),
                                     itemCount: state.companies.length,
                                     itemBuilder: (context, index) {
-                                      return CompanyCard(company: state.companies[index]);
+                                      return CompanyCard(
+                                        company: state.companies[index],
+                                      );
                                     },
                                   ),
                                 ),

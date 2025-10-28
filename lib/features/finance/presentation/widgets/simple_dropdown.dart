@@ -49,7 +49,10 @@ class _SimpleDropdownState<T> extends State<SimpleDropdown<T>> {
               value: item,
               child: Container(
                 color: Colors.transparent,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 child: Text(
                   widget.labelBuilder(item),
                   style: AppStyle.manrope(
@@ -74,7 +77,9 @@ class _SimpleDropdownState<T> extends State<SimpleDropdown<T>> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              selectedValue != null ? widget.labelBuilder(selectedValue!) : widget.hint,
+              selectedValue != null
+                  ? widget.labelBuilder(selectedValue as T)
+                  : widget.hint,
               style: AppStyle.manrope(size: 16, weight: FontWeight.w400),
             ),
             const Icon(Icons.arrow_drop_down),

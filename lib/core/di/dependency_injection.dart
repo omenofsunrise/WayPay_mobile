@@ -25,7 +25,6 @@ import 'package:waypay/features/chat/data/data_source/chat/chat_remote_data_sour
 import 'package:waypay/features/chat/data/data_source/message/message_remote_data_source.dart';
 import 'package:waypay/features/chat/data/data_source/message/message_remote_data_source_impl.dart';
 import 'package:waypay/features/chat/data/service/chat_hub_service.dart';
-import 'package:waypay/features/chat/presentation/bloc/chat/chat_bloc.dart';
 import 'package:waypay/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
 import 'package:waypay/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources.dart';
 import 'package:waypay/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources_impl.dart';

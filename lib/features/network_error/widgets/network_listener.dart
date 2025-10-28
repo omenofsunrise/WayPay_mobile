@@ -22,9 +22,7 @@ class _NetworkListenerState extends State<NetworkListener> {
     _checkInitialStatus();
 
     _subscription = Connectivity().onConnectivityChanged.listen((event) {
-      final results = event is List
-          ? event.cast<ConnectivityResult>()
-          : <ConnectivityResult>[event as ConnectivityResult];
+      final results = event.cast<ConnectivityResult>();
 
       final hasConnection = results.any((r) => r != ConnectivityResult.none);
 
@@ -38,9 +36,7 @@ class _NetworkListenerState extends State<NetworkListener> {
 
   Future<void> _checkInitialStatus() async {
     final event = await Connectivity().checkConnectivity();
-    final results = event is List
-        ? event.cast<ConnectivityResult>()
-        : <ConnectivityResult>[event as ConnectivityResult];
+    final results = event.cast<ConnectivityResult>();
 
     final hasConnection = results.any((r) => r != ConnectivityResult.none);
 

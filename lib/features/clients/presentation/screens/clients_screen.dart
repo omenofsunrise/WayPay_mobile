@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay/core/network/token_storage.dart';
@@ -35,7 +34,9 @@ class _ClientsScreenState extends State<ClientsScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<ClientsBloc>().add(LoadClients(refresh: true, page: 1, pageSize: 10));
+      context.read<ClientsBloc>().add(
+        LoadClients(refresh: true, page: 1, pageSize: 10),
+      );
     });
   }
 
@@ -71,7 +72,9 @@ class _ClientsScreenState extends State<ClientsScreen> {
               decoration: InputDecoration(
                 hintText: 'Поиск по имени...',
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12),
@@ -83,7 +86,9 @@ class _ClientsScreenState extends State<ClientsScreen> {
                   if (q.isNotEmpty) {
                     clientsBloc.add(SearchClients(q, pageSize: 10));
                   } else {
-                    clientsBloc.add(LoadClients(refresh: true, page: 1, pageSize: 10));
+                    clientsBloc.add(
+                      LoadClients(refresh: true, page: 1, pageSize: 10),
+                    );
                   }
                 });
               },
@@ -96,7 +101,9 @@ class _ClientsScreenState extends State<ClientsScreen> {
             onPressed: () {
               tempController.clear();
               setState(() => _searchController.clear());
-              clientsBloc.add(LoadClients(refresh: true, page: 1, pageSize: 10));
+              clientsBloc.add(
+                LoadClients(refresh: true, page: 1, pageSize: 10),
+              );
               Navigator.pop(context);
             },
           ),
@@ -110,7 +117,9 @@ class _ClientsScreenState extends State<ClientsScreen> {
               if (q.isNotEmpty) {
                 clientsBloc.add(SearchClients(q, pageSize: 10));
               } else {
-                clientsBloc.add(LoadClients(refresh: true, page: 1, pageSize: 10));
+                clientsBloc.add(
+                  LoadClients(refresh: true, page: 1, pageSize: 10),
+                );
               }
               Navigator.pop(context);
             },
@@ -150,7 +159,10 @@ class _ClientsScreenState extends State<ClientsScreen> {
             child: Container(
               decoration: const BoxDecoration(
                 color: Color(0xFFF5F5F5),
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
               ),
               child: BlocBuilder<ClientsBloc, ClientsState>(
                 builder: (context, state) {
@@ -165,7 +177,11 @@ class _ClientsScreenState extends State<ClientsScreen> {
                           spacing: 16,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                            const Icon(
+                              Icons.error_outline,
+                              size: 64,
+                              color: Colors.red,
+                            ),
                             Text(
                               state.message,
                               textAlign: TextAlign.center,
@@ -176,7 +192,13 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                 if (state.message.contains('Сессия')) {
                                   _logout();
                                 } else {
-                                  context.read<ClientsBloc>().add(LoadClients(refresh: true, page: 1, pageSize: 10));
+                                  context.read<ClientsBloc>().add(
+                                    LoadClients(
+                                      refresh: true,
+                                      page: 1,
+                                      pageSize: 10,
+                                    ),
+                                  );
                                 }
                               },
                               child: const Text('Повторить'),
@@ -200,7 +222,9 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                         refresh: true,
                                         page: 1,
                                         pageSize: 10,
-                                        search: _searchController.text.isEmpty ? null : _searchController.text,
+                                        search: _searchController.text.isEmpty
+                                            ? null
+                                            : _searchController.text,
                                       ),
                                     );
                                   },
@@ -216,7 +240,10 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                               refresh: true,
                                               page: 1,
                                               pageSize: 10,
-                                              search: _searchController.text.isEmpty ? null : _searchController.text,
+                                              search:
+                                                  _searchController.text.isEmpty
+                                                  ? null
+                                                  : _searchController.text,
                                             ),
                                           );
                                         },
@@ -235,7 +262,9 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                   refresh: true,
                                   page: page,
                                   pageSize: 10,
-                                  search: _searchController.text.isEmpty ? null : _searchController.text,
+                                  search: _searchController.text.isEmpty
+                                      ? null
+                                      : _searchController.text,
                                 ),
                               );
                             },
@@ -420,12 +449,19 @@ class _ClientsScreenState extends State<ClientsScreen> {
                       format: LabeledTextFieldFormat.birthdate,
                       onChanged: (_) => setState(() => validateInputs()),
                     ),
-                    LabeledTextField(label: 'Адрес регистрации (необязательно)', controller: addressController),
+                    LabeledTextField(
+                      label: 'Адрес регистрации (необязательно)',
+                      controller: addressController,
+                    ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
                         Expanded(
-                          child: DefaultButton(text: 'Отмена', isGreen: false, onPressed: () => context.pop()),
+                          child: DefaultButton(
+                            text: 'Отмена',
+                            isGreen: false,
+                            onPressed: () => context.pop(),
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -440,13 +476,21 @@ class _ClientsScreenState extends State<ClientsScreen> {
 
                               final request = CreateClientRequest(
                                 fullName: fullNameController.text.trim(),
-                                phone: '8${phoneController.text.replaceAll(RegExp(r'\D'), '')}',
+                                phone:
+                                    '8${phoneController.text.replaceAll(RegExp(r'\D'), '')}',
                                 doc: docController.text.trim(),
-                                birthdate: parsedBirthdate!.toUtc().toIso8601String(),
+                                birthdate: parsedBirthdate!
+                                    .toUtc()
+                                    .toIso8601String(),
                                 docIssueDate: parsedDocIssueDate != null
-                                    ? DateTime(parsedDocIssueDate!.year, 1, 1).toUtc().toIso8601String()
+                                    ? DateTime(
+                                        parsedDocIssueDate!.year,
+                                        1,
+                                        1,
+                                      ).toUtc().toIso8601String()
                                     : null,
-                                registrationAddress: addressController.text.trim().isEmpty
+                                registrationAddress:
+                                    addressController.text.trim().isEmpty
                                     ? null
                                     : addressController.text.trim(),
                               );

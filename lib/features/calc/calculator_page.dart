@@ -50,21 +50,28 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       final bytes = await _buildPdfBytes();
 
       final dir = await getTemporaryDirectory();
-      final filename = 'WayPay-raschet-${DateFormat('dd.MM.yyyy').format(DateTime.now())}.pdf';
+      final filename =
+          'WayPay-raschet-${DateFormat('dd.MM.yyyy').format(DateTime.now())}.pdf';
       final file = File('${dir.path}/$filename');
       await file.writeAsBytes(bytes, flush: true);
 
       await Share.shareXFiles([XFile(file.path)], subject: 'Расчёт рассрочки');
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Не удалось создать PDF: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Не удалось создать PDF: $e')));
     }
   }
 
   Future<Uint8List> _buildPdfBytes() async {
     // Шрифты с кириллицей
-    final fontRegular = pw.Font.ttf(await rootBundle.load('assets/fonts/Roboto-Regular.ttf'));
-    final fontBold = pw.Font.ttf(await rootBundle.load('assets/fonts/Roboto-Bold.ttf'));
+    final fontRegular = pw.Font.ttf(
+      await rootBundle.load('assets/fonts/Roboto-Regular.ttf'),
+    );
+    final fontBold = pw.Font.ttf(
+      await rootBundle.load('assets/fonts/Roboto-Bold.ttf'),
+    );
 
     final doc = pw.Document();
 
@@ -83,9 +90,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     String money(num v) => NumberFormat('#,##0', 'ru').format(v);
 
-    final amount = double.tryParse(_sumController.text.replaceAll(' ', '')) ?? 0;
+    final amount =
+        double.tryParse(_sumController.text.replaceAll(' ', '')) ?? 0;
     final months = int.tryParse(_monthsController.text) ?? 0;
-    final initial = double.tryParse(_initialController.text.replaceAll(' ', '')) ?? 0;
+    final initial =
+        double.tryParse(_initialController.text.replaceAll(' ', '')) ?? 0;
     final percent = double.tryParse(_percentController.text) ?? 0;
 
     final displayAmount = money(amount);
@@ -98,7 +107,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final displayDebt = money(debt);
     final displayOver = money(overpayment);
     final displayMonthly = money(monthlyPayment);
-    final displayLastMonth = DateFormat('LLLL yyyy', 'ru').format(lastPaymentDate);
+    final displayLastMonth = DateFormat(
+      'LLLL yyyy',
+      'ru',
+    ).format(lastPaymentDate);
 
     final sumForBar = (debt + overpayment);
     final debtPct = sumForBar > 0 ? (debt / sumForBar) : 0.5;
@@ -127,7 +139,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           pageFormat: PdfPageFormat.a4,
           margin: const pw.EdgeInsets.all(20),
           theme: theme,
-          buildBackground: (ctx) => pw.FullPage(ignoreMargins: true, child: pw.Container(color: white)),
+          buildBackground: (ctx) => pw.FullPage(
+            ignoreMargins: true,
+            child: pw.Container(color: white),
+          ),
         ),
         build: (context) => [
           // Header
@@ -143,11 +158,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       pw.Container(
                         padding: const pw.EdgeInsets.only(bottom: 10),
                         decoration: pw.BoxDecoration(
-                          border: pw.Border(bottom: pw.BorderSide(color: accent, width: 2)),
+                          border: pw.Border(
+                            bottom: pw.BorderSide(color: accent, width: 2),
+                          ),
                         ),
                         child: pw.Text(
                           'Расчёт рассрочки',
-                          style: pw.TextStyle(font: fontBold, fontSize: 24, color: primary),
+                          style: pw.TextStyle(
+                            font: fontBold,
+                            fontSize: 24,
+                            color: primary,
+                          ),
                         ),
                       ),
                       pw.Text(
@@ -169,10 +190,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 pw.Row(
                   crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.Container(width: 4, height: 20, color: accent, margin: const pw.EdgeInsets.only(right: 10)),
+                    pw.Container(
+                      width: 4,
+                      height: 20,
+                      color: accent,
+                      margin: const pw.EdgeInsets.only(right: 10),
+                    ),
                     pw.Text(
                       'Входные данные',
-                      style: pw.TextStyle(fontSize: 18, color: primary, font: fontBold),
+                      style: pw.TextStyle(
+                        fontSize: 18,
+                        color: primary,
+                        font: fontBold,
+                      ),
                     ),
                   ],
                 ),
@@ -191,11 +221,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 children: [
                                   pw.TextSpan(
                                     text: 'Сумма рассрочки: ',
-                                    style: pw.TextStyle(color: PdfColor.fromInt(0xFF374151)),
+                                    style: pw.TextStyle(
+                                      color: PdfColor.fromInt(0xFF374151),
+                                    ),
                                   ),
                                   pw.TextSpan(
                                     text: '$displayAmount ₽',
-                                    style: pw.TextStyle(font: fontBold, color: textDark),
+                                    style: pw.TextStyle(
+                                      font: fontBold,
+                                      color: textDark,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -208,11 +243,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 children: [
                                   pw.TextSpan(
                                     text: 'Надбавка: ',
-                                    style: pw.TextStyle(color: PdfColor.fromInt(0xFF374151)),
+                                    style: pw.TextStyle(
+                                      color: PdfColor.fromInt(0xFF374151),
+                                    ),
                                   ),
                                   pw.TextSpan(
                                     text: '$displayPercent%',
-                                    style: pw.TextStyle(font: fontBold, color: textDark),
+                                    style: pw.TextStyle(
+                                      font: fontBold,
+                                      color: textDark,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -233,11 +273,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 children: [
                                   pw.TextSpan(
                                     text: 'Количество месяцев: ',
-                                    style: pw.TextStyle(color: PdfColor.fromInt(0xFF374151)),
+                                    style: pw.TextStyle(
+                                      color: PdfColor.fromInt(0xFF374151),
+                                    ),
                                   ),
                                   pw.TextSpan(
                                     text: displayMonths,
-                                    style: pw.TextStyle(font: fontBold, color: textDark),
+                                    style: pw.TextStyle(
+                                      font: fontBold,
+                                      color: textDark,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -250,11 +295,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 children: [
                                   pw.TextSpan(
                                     text: 'Начало выплат: ',
-                                    style: pw.TextStyle(color: PdfColor.fromInt(0xFF374151)),
+                                    style: pw.TextStyle(
+                                      color: PdfColor.fromInt(0xFF374151),
+                                    ),
                                   ),
                                   pw.TextSpan(
                                     text: displayStart,
-                                    style: pw.TextStyle(font: fontBold, color: textDark),
+                                    style: pw.TextStyle(
+                                      font: fontBold,
+                                      color: textDark,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -277,33 +327,64 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 pw.Row(
                   crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.Container(width: 4, height: 20, color: accent, margin: const pw.EdgeInsets.only(right: 10)),
+                    pw.Container(
+                      width: 4,
+                      height: 20,
+                      color: accent,
+                      margin: const pw.EdgeInsets.only(right: 10),
+                    ),
                     pw.Text(
                       'Результаты расчёта',
-                      style: pw.TextStyle(fontSize: 18, color: primary, font: fontBold),
+                      style: pw.TextStyle(
+                        fontSize: 18,
+                        color: primary,
+                        font: fontBold,
+                      ),
                     ),
                   ],
                 ),
                 pw.SizedBox(height: 20),
                 // строки результатов
-                _pdfRow('Общая стоимость', '$displayTotal ₽', rowBorder, textDark),
+                _pdfRow(
+                  'Общая стоимость',
+                  '$displayTotal ₽',
+                  rowBorder,
+                  textDark,
+                ),
                 _pdfRow('Взнос', '$displayInitial ₽', rowBorder, textDark),
                 _pdfRow('Сумма долга', '$displayDebt ₽', rowBorder, textDark),
-                _pdfRow('Ежемесячный платёж', '$displayMonthly ₽', rowBorder, textDark),
-                _pdfRow('Последний месяц оплаты', displayLastMonth, null, textDark),
+                _pdfRow(
+                  'Ежемесячный платёж',
+                  '$displayMonthly ₽',
+                  rowBorder,
+                  textDark,
+                ),
+                _pdfRow(
+                  'Последний месяц оплаты',
+                  displayLastMonth,
+                  null,
+                  textDark,
+                ),
                 pw.SizedBox(height: 20),
                 // полоса доля долга/переплаты
                 pw.Container(
                   height: 10,
-                  decoration: pw.BoxDecoration(color: barOver, borderRadius: pw.BorderRadius.circular(5)),
+                  decoration: pw.BoxDecoration(
+                    color: barOver,
+                    borderRadius: pw.BorderRadius.circular(5),
+                  ),
                   child: pw.Align(
                     alignment: pw.Alignment.centerLeft,
                     child: pw.Container(
                       height: 10,
-                      width: pw.FractionColumnWidth(debtPct).value! * PdfPageFormat.a4.availableWidth,
+                      width:
+                          pw.FractionColumnWidth(debtPct).value *
+                          PdfPageFormat.a4.availableWidth,
                       decoration: pw.BoxDecoration(
                         color: barDebt,
-                        borderRadius: const pw.BorderRadius.horizontal(left: pw.Radius.circular(5)),
+                        borderRadius: const pw.BorderRadius.horizontal(
+                          left: pw.Radius.circular(5),
+                        ),
                       ),
                     ),
                   ),
@@ -329,7 +410,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   // Вспомогательная строка с разделителем
-  pw.Widget _pdfRow(String left, String right, PdfColor? underline, PdfColor rightColor) {
+  pw.Widget _pdfRow(
+    String left,
+    String right,
+    PdfColor? underline,
+    PdfColor rightColor,
+  ) {
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(vertical: 8),
       decoration: underline != null
@@ -340,11 +426,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(left, style: const pw.TextStyle(color: PdfColor.fromInt(0xFF374151))),
+          pw.Text(
+            left,
+            style: const pw.TextStyle(color: PdfColor.fromInt(0xFF374151)),
+          ),
           pw.Text(
             right,
 
-            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: rightColor),
+            style: pw.TextStyle(
+              fontWeight: pw.FontWeight.bold,
+              color: rightColor,
+            ),
           ),
         ],
       ),
@@ -357,11 +449,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   void _calculate() {
-    final amount = double.tryParse(_sumController.text.replaceAll(' ', '')) ?? 0;
+    final amount =
+        double.tryParse(_sumController.text.replaceAll(' ', '')) ?? 0;
     final months = int.tryParse(_monthsController.text) ?? 1;
-    final initial = double.tryParse(_initialController.text.replaceAll(' ', '')) ?? 0;
+    final initial =
+        double.tryParse(_initialController.text.replaceAll(' ', '')) ?? 0;
     final percent = double.tryParse(_percentController.text) ?? 0;
-    final round = double.tryParse(_roundController.text.replaceAll(' ', '')) ?? 0;
+    final round =
+        double.tryParse(_roundController.text.replaceAll(' ', '')) ?? 0;
 
     if (months < 1 || months > 360) return;
 
@@ -370,14 +465,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final overpaymentValue = roundedTotalAmount - amount;
     final roundedOverpayment = roundUp(overpaymentValue, round);
 
-    final validInitial = initial > roundedTotalAmount ? roundedTotalAmount : initial;
+    final validInitial = initial > roundedTotalAmount
+        ? roundedTotalAmount
+        : initial;
 
     final debtValue = roundedTotalAmount - validInitial;
     final roundedDebt = roundUp(debtValue, round);
     final monthlyRaw = roundedDebt / months;
     final roundedMonthly = roundUp(monthlyRaw, round);
 
-    final lastPayment = DateTime(_startDate.year, _startDate.month + months - 1, _startDate.day);
+    final lastPayment = DateTime(
+      _startDate.year,
+      _startDate.month + months - 1,
+      _startDate.day,
+    );
 
     setState(() {
       total = roundedTotalAmount;
@@ -397,7 +498,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         surfaceTintColor: Colors.transparent,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text('Калькулятор', style: AppStyle.medium20.copyWith(color: const Color(AppColors.background))),
+        title: Text(
+          'Калькулятор',
+          style: AppStyle.medium20.copyWith(
+            color: const Color(AppColors.background),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.ios_share, color: Colors.white),
@@ -430,11 +536,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             child: Container(
               decoration: const BoxDecoration(
                 color: Color(AppColors.background),
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
               ),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
-                child: Column(children: [_buildInputSection(), SizedBox(height: 20), _buildResultSection()]),
+                child: Column(
+                  children: [
+                    _buildInputSection(),
+                    SizedBox(height: 20),
+                    _buildResultSection(),
+                  ],
+                ),
               ),
             ),
           ),
@@ -452,7 +567,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           keyboardType: const TextInputType.numberWithOptions(),
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
-            CurrencyInputFormatter(thousandSeparator: ThousandSeparator.Space, mantissaLength: 0, trailingSymbol: ''),
+            CurrencyInputFormatter(
+              thousandSeparator: ThousandSeparator.Space,
+              mantissaLength: 0,
+              trailingSymbol: '',
+            ),
           ],
         ),
         _buildFloatingTextField(
@@ -461,7 +580,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           keyboardType: const TextInputType.numberWithOptions(),
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
-            CurrencyInputFormatter(thousandSeparator: ThousandSeparator.Space, mantissaLength: 0, trailingSymbol: ''),
+            CurrencyInputFormatter(
+              thousandSeparator: ThousandSeparator.Space,
+              mantissaLength: 0,
+              trailingSymbol: '',
+            ),
           ],
         ),
         _buildDatePickerField(),
@@ -522,14 +645,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           border: border,
           enabledBorder: border,
           focusedBorder: border,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
         ),
       ),
     );
   }
 
   Widget _buildDatePickerField() {
-    final controller = TextEditingController(text: DateFormat('dd.MM.yyyy').format(_startDate));
+    final controller = TextEditingController(
+      text: DateFormat('dd.MM.yyyy').format(_startDate),
+    );
 
     final border = OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
@@ -560,7 +688,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               border: border,
               enabledBorder: border,
               focusedBorder: border,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
               suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
             ),
           ),
@@ -577,14 +708,24 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           color: Color(AppColors.background),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: Color(AppColors.borderColor)),
-          boxShadow: [BoxShadow(color: Color(0x40000000), offset: Offset(5, 5), blurRadius: 25, spreadRadius: 2)],
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x40000000),
+              offset: Offset(5, 5),
+              blurRadius: 25,
+              spreadRadius: 2,
+            ),
+          ],
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Результаты расчёта', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text(
+                'Результаты расчёта',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 16),
               _buildResultItem('Ежемесячный платёж', monthlyPayment),
               Row(
@@ -620,7 +761,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 children: [
                   Text(
                     'Последний месяц\nоплаты',
-                    style: AppStyle.manrope(size: 15, weight: FontWeight.w400, color: Color(AppColors.darkGrey)),
+                    style: AppStyle.manrope(
+                      size: 15,
+                      weight: FontWeight.w400,
+                      color: Color(AppColors.darkGrey),
+                    ),
                     textAlign: TextAlign.start,
                   ),
                   Spacer(),
@@ -631,7 +776,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ],
               ),
               SizedBox(height: 10),
-              PaymentLineBar(debt: debt, overpayment: overpayment, total: total),
+              PaymentLineBar(
+                debt: debt,
+                overpayment: overpayment,
+                total: total,
+              ),
               SizedBox(height: 10),
             ],
           ),
@@ -648,7 +797,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         children: [
           Text(
             label,
-            style: AppStyle.manrope(size: 15, weight: FontWeight.w400, color: Color(AppColors.darkGrey)),
+            style: AppStyle.manrope(
+              size: 15,
+              weight: FontWeight.w400,
+              color: Color(AppColors.darkGrey),
+            ),
           ),
           Flexible(
             child: Text(
@@ -673,13 +826,20 @@ class PaymentLineBar extends StatelessWidget {
   final double overpayment;
   final double total;
 
-  const PaymentLineBar({super.key, required this.debt, required this.overpayment, required this.total});
+  const PaymentLineBar({
+    super.key,
+    required this.debt,
+    required this.overpayment,
+    required this.total,
+  });
 
   @override
   Widget build(BuildContext context) {
     final double sum = debt + overpayment;
     final double debtFraction = sum == 0 ? 0 : (debt / sum).clamp(0.0, 1.0);
-    final double overpaymentFraction = sum == 0 ? 0 : (overpayment / sum).clamp(0.0, 1.0);
+    final double overpaymentFraction = sum == 0
+        ? 0
+        : (overpayment / sum).clamp(0.0, 1.0);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
@@ -693,7 +853,11 @@ class PaymentLineBar extends StatelessWidget {
 
             return Stack(
               children: [
-                Container(width: overpaymentWidth + debtWidth, height: 10, color: const Color(AppColors.creditsCount)),
+                Container(
+                  width: overpaymentWidth + debtWidth,
+                  height: 10,
+                  color: const Color(AppColors.creditsCount),
+                ),
                 Positioned(
                   left: 0,
                   child: Container(
@@ -701,7 +865,10 @@ class PaymentLineBar extends StatelessWidget {
                     height: 10,
                     decoration: const BoxDecoration(
                       color: Color(AppColors.comfPayment),
-                      borderRadius: BorderRadius.only(topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(10),
+                        bottomRight: Radius.circular(10),
+                      ),
                     ),
                   ),
                 ),
