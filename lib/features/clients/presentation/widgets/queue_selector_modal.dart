@@ -12,34 +12,29 @@ import 'package:waypay/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay/features/clients/presentation/bloc/clients/clients_bloc.dart';
 
 class QueueSelectorModal extends StatelessWidget {
-  final void Function(ClientModel selectedClient, int amount, bool highPriority)
-  onSave;
+  final void Function(ClientModel selectedClient, int amount, bool highPriority) onSave;
 
   const QueueSelectorModal({super.key, required this.onSave});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) =>
-          ClientsBloc()..add(LoadClients(refresh: true, page: 1, pageSize: 10)),
+      create: (_) => ClientsBloc()..add(LoadClients(refresh: true, page: 1, pageSize: 10)),
       child: _QueueSelectorModalContent(onSave: onSave),
     );
   }
 }
 
 class _QueueSelectorModalContent extends StatefulWidget {
-  final void Function(ClientModel selectedClient, int amount, bool highPriority)
-  onSave;
+  final void Function(ClientModel selectedClient, int amount, bool highPriority) onSave;
 
   const _QueueSelectorModalContent({required this.onSave});
 
   @override
-  State<_QueueSelectorModalContent> createState() =>
-      _QueueSelectorModalContentState();
+  State<_QueueSelectorModalContent> createState() => _QueueSelectorModalContentState();
 }
 
-class _QueueSelectorModalContentState
-    extends State<_QueueSelectorModalContent> {
+class _QueueSelectorModalContentState extends State<_QueueSelectorModalContent> {
   final TextEditingController _amountController = TextEditingController();
   ClientModel? _selectedClient;
   bool _highPriority = false;
@@ -57,20 +52,14 @@ class _QueueSelectorModalContentState
     final raw = oldText.replaceAll(RegExp(r'\D'), '');
 
     if (raw.isEmpty) {
-      _amountController.value = TextEditingValue(
-        text: '',
-        selection: TextSelection.collapsed(offset: 0),
-      );
+      _amountController.value = TextEditingValue(text: '', selection: TextSelection.collapsed(offset: 0));
       return;
     }
 
     final parsed = int.tryParse(raw);
     if (parsed == null) return;
 
-    final formatted = NumberFormat(
-      "#,##0",
-      "ru_RU",
-    ).format(parsed).replaceAll(',', ' ');
+    final formatted = NumberFormat("#,##0", "ru_RU").format(parsed).replaceAll(',', ' ');
     final newText = '$formatted ₽';
     int cursorPositionInRaw = 0;
     int digitCount = 0;
@@ -83,8 +72,7 @@ class _QueueSelectorModalContentState
     cursorPositionInRaw = digitCount;
     int newCursorPosition = 0;
     int digitsPassed = 0;
-    while (digitsPassed < cursorPositionInRaw &&
-        newCursorPosition < newText.length) {
+    while (digitsPassed < cursorPositionInRaw && newCursorPosition < newText.length) {
       if (RegExp(r'\d').hasMatch(newText[newCursorPosition])) {
         digitsPassed++;
       }
@@ -114,10 +102,7 @@ class _QueueSelectorModalContentState
           const SizedBox(height: 12),
           Text(
             'Клиент',
-            style: AppStyle.medium16.copyWith(
-              color: Colors.black87,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppStyle.medium16.copyWith(color: Colors.black87, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 10),
           InkWell(
@@ -151,9 +136,7 @@ class _QueueSelectorModalContentState
                     child: Text(
                       _selectedClient?.fullName ?? 'Выбрать клиента',
                       style: TextStyle(
-                        color: _selectedClient != null
-                            ? Colors.black87
-                            : Colors.grey,
+                        color: _selectedClient != null ? Colors.black87 : Colors.grey,
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
                       ),
@@ -176,10 +159,7 @@ class _QueueSelectorModalContentState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Высокий приоритет',
-                style: TextStyle(color: Colors.black, fontSize: 16),
-              ),
+              const Text('Высокий приоритет', style: TextStyle(color: Colors.black, fontSize: 16)),
               Switch(
                 value: _highPriority,
                 onChanged: (value) {
@@ -187,7 +167,7 @@ class _QueueSelectorModalContentState
                     _highPriority = value;
                   });
                 },
-                activeThumbColor: const Color(AppColors.primary),
+                activeColor: const Color(AppColors.primary),
               ),
             ],
           ),
@@ -195,11 +175,7 @@ class _QueueSelectorModalContentState
           Row(
             children: [
               Expanded(
-                child: DefaultButton(
-                  text: 'Отмена',
-                  isGreen: false,
-                  onPressed: () => context.pop(),
-                ),
+                child: DefaultButton(text: 'Отмена', isGreen: false, onPressed: () => context.pop()),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -208,11 +184,7 @@ class _QueueSelectorModalContentState
                   color: const Color(AppColors.primary),
                   onPressed: (_selectedClient != null && _getRawAmount() > 0)
                       ? () {
-                          widget.onSave(
-                            _selectedClient!,
-                            _getRawAmount(),
-                            _highPriority,
-                          );
+                          widget.onSave(_selectedClient!, _getRawAmount(), _highPriority);
                           Navigator.of(context).pop();
                         }
                       : () {},
@@ -254,34 +226,24 @@ class _QueueSelectorModalContentState
                   prefixIcon: const Icon(Icons.search, color: Colors.black54),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(AppColors.primary),
-                    ),
+                    borderSide: const BorderSide(color: Color(AppColors.primary)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(AppColors.primary),
-                    ),
+                    borderSide: const BorderSide(color: Color(AppColors.primary)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(AppColors.primary),
-                    ),
+                    borderSide: const BorderSide(color: Color(AppColors.primary)),
                   ),
                   filled: true,
                   fillColor: Colors.white,
                 ),
                 onChanged: (value) {
                   if (value.trim().isNotEmpty) {
-                    context.read<ClientsBloc>().add(
-                      SearchClients(value.trim(), pageSize: 10),
-                    );
+                    context.read<ClientsBloc>().add(SearchClients(value.trim(), pageSize: 10));
                   } else {
-                    context.read<ClientsBloc>().add(
-                      LoadClients(refresh: true, page: 1, pageSize: 10),
-                    );
+                    context.read<ClientsBloc>().add(LoadClients(refresh: true, page: 1, pageSize: 10));
                   }
                 },
               ),
@@ -295,19 +257,13 @@ class _QueueSelectorModalContentState
                     }
                     if (state is ClientsError) {
                       return Center(
-                        child: Text(
-                          'Ошибка: ${state.message}',
-                          style: const TextStyle(color: Colors.black),
-                        ),
+                        child: Text('Ошибка: ${state.message}', style: const TextStyle(color: Colors.black)),
                       );
                     }
                     if (state is ClientsLoaded) {
                       if (state.clients.isEmpty) {
                         return const Center(
-                          child: Text(
-                            'Клиенты не найдены',
-                            style: TextStyle(color: Colors.black),
-                          ),
+                          child: Text('Клиенты не найдены', style: TextStyle(color: Colors.black)),
                         );
                       }
                       return Column(
@@ -326,27 +282,16 @@ class _QueueSelectorModalContentState
                                     onClientTap(client);
                                   },
                                   child: Container(
-                                    margin: const EdgeInsets.symmetric(
-                                      vertical: 4,
-                                    ),
+                                    margin: const EdgeInsets.symmetric(vertical: 4),
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? Colors.grey.shade200
-                                          : Colors.white,
+                                      color: isSelected ? Colors.grey.shade200 : Colors.white,
                                       border: Border.all(
-                                        color: isSelected
-                                            ? const Color(AppColors.primary)
-                                            : Colors.grey.shade300,
+                                        color: isSelected ? const Color(AppColors.primary) : Colors.grey.shade300,
                                       ),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: Text(
-                                      client.fullName,
-                                      style: const TextStyle(
-                                        color: Colors.black,
-                                      ),
-                                    ),
+                                    child: Text(client.fullName, style: const TextStyle(color: Colors.black)),
                                   ),
                                 );
                               },
@@ -363,9 +308,7 @@ class _QueueSelectorModalContentState
                                   refresh: true,
                                   page: page,
                                   pageSize: 10,
-                                  search: searchController.text.isEmpty
-                                      ? null
-                                      : searchController.text,
+                                  search: searchController.text.isEmpty ? null : searchController.text,
                                 ),
                               );
                             },

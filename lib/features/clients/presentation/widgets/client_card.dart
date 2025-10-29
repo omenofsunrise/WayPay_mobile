@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:waypay/core/di/dependency_injection.dart';
@@ -77,21 +78,14 @@ class _ClientCardState extends State<ClientCard> {
               LabeledContainer(label: 'ID', text: client.id.toString()),
               LabeledContainer(label: 'ФИО', text: client.fullName),
               LabeledContainer(label: 'Телефон', text: client.phone),
-              LabeledContainer(
-                label: 'Дата рождения',
-                text: _formatDate(client.birthdate),
-              ),
+              LabeledContainer(label: 'Дата рождения', text: _formatDate(client.birthdate)),
               LabeledContainer(
                 label: 'Номер договоров',
-                text: (client.creditIds.isNotEmpty)
-                    ? client.creditIds.join(', ')
-                    : '-',
+                text: (client.creditIds.isNotEmpty) ? client.creditIds.join(', ') : '-',
               ),
               LabeledContainer(
                 label: 'Остатки месяцев',
-                text: (client.creditRestTerms.isNotEmpty)
-                    ? client.creditRestTerms.join(', ')
-                    : '-',
+                text: (client.creditRestTerms.isNotEmpty) ? client.creditRestTerms.join(', ') : '-',
               ),
             ],
           ),
@@ -108,19 +102,11 @@ class _ClientCardState extends State<ClientCard> {
       phoneWithoutLeading8 = phoneWithoutLeading8.substring(1);
     }
     final phoneController = TextEditingController(text: phoneWithoutLeading8);
-    final phoneFormatter = MaskTextInputFormatter(
-      mask: ' (###) ###-##-##',
-      filter: {"#": RegExp(r'\d')},
-    );
+    final phoneFormatter = MaskTextInputFormatter(mask: ' (###) ###-##-##', filter: {"#": RegExp(r'\d')});
 
-    phoneFormatter.formatEditUpdate(
-      TextEditingValue.empty,
-      TextEditingValue(text: phoneController.text),
-    );
+    phoneFormatter.formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: phoneController.text));
 
-    final addressController = TextEditingController(
-      text: client.registrationAddress ?? '',
-    );
+    final addressController = TextEditingController(text: client.registrationAddress ?? '');
     final docController = TextEditingController(text: client.doc);
 
     String formatBirthdate(DateTime date) {
@@ -129,9 +115,7 @@ class _ClientCardState extends State<ClientCard> {
           '${date.year}';
     }
 
-    final birthdateController = TextEditingController(
-      text: formatBirthdate(client.birthdate),
-    );
+    final birthdateController = TextEditingController(text: formatBirthdate(client.birthdate));
 
     final docIssueDateController = TextEditingController(
       text: client.docIssueYear != null ? '01.01.${client.docIssueYear}' : '',
@@ -209,10 +193,7 @@ class _ClientCardState extends State<ClientCard> {
       return isValid;
     }
 
-    Future<void> onSavePressed(
-      BuildContext dialogContext,
-      void Function(void Function()) setState,
-    ) async {
+    Future<void> onSavePressed(BuildContext dialogContext, void Function(void Function()) setState) async {
       if (!validateInputs()) {
         setState(() {});
         return;
@@ -230,30 +211,20 @@ class _ClientCardState extends State<ClientCard> {
           birthdate: parsedBirthdate!.toUtc().toIso8601String(),
           registrationAddress: addressController.text,
         );
-        requests.add(
-          dataSource.updateClientBasic(client.id, updateBasicRequest),
-        );
+        requests.add(dataSource.updateClientBasic(client.id, updateBasicRequest));
       }
 
       if (docController.text != client.doc) {
-        final updateDocRequest = UpdateClientDocRequest(
-          doc: docController.text,
-        );
+        final updateDocRequest = UpdateClientDocRequest(doc: docController.text);
         requests.add(dataSource.updateClientDoc(client.id, updateDocRequest));
       }
 
-      if (parsedDocIssueYear != null &&
-          parsedDocIssueYear != (client.docIssueYear ?? -1)) {
+      if (parsedDocIssueYear != null && parsedDocIssueYear != (client.docIssueYear ?? -1)) {
         final dateForDocIssue = DateTime(parsedDocIssueYear!, 1, 1);
         final updateDocIssueDateRequest = UpdateClientDocIssueDateRequest(
           docIssueDate: dateForDocIssue.toUtc().toIso8601String(),
         );
-        requests.add(
-          dataSource.updateClientDocIssueDate(
-            client.id,
-            updateDocIssueDateRequest,
-          ),
-        );
+        requests.add(dataSource.updateClientDocIssueDate(client.id, updateDocIssueDateRequest));
       }
 
       try {
@@ -301,10 +272,7 @@ class _ClientCardState extends State<ClientCard> {
                     inputFormatters: [phoneFormatter],
                     onChanged: (_) => setState(() => validateInputs()),
                   ),
-                  LabeledTextField(
-                    label: 'Адрес регистрации',
-                    controller: addressController,
-                  ),
+                  LabeledTextField(label: 'Адрес регистрации', controller: addressController),
                   LabeledTextField(
                     label: 'Документ',
                     format: LabeledTextFieldFormat.passport,
@@ -327,11 +295,7 @@ class _ClientCardState extends State<ClientCard> {
                     onChanged: (_) => setState(() => validateInputs()),
                   ),
                   const SizedBox(height: 12),
-                  DefaultButton(
-                    text: 'Сохранить',
-                    isGreen: true,
-                    onPressed: () => onSavePressed(context, setState),
-                  ),
+                  DefaultButton(text: 'Сохранить', isGreen: true, onPressed: () => onSavePressed(context, setState)),
                 ],
               ),
             ),
@@ -384,27 +348,15 @@ class _ClientCardState extends State<ClientCard> {
               ? const Color(AppColors.pinkTint)
               : const Color(AppColors.greenTint),
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              widget.client.fullName,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
+            Text(widget.client.fullName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             Text(widget.client.phone, style: const TextStyle(fontSize: 14)),
             const SizedBox(height: 4),
-            Text(
-              'Дата рождения: ${_formatDate(widget.client.birthdate)}',
-              style: const TextStyle(fontSize: 14),
-            ),
+            Text('Дата рождения: ${_formatDate(widget.client.birthdate)}', style: const TextStyle(fontSize: 14)),
           ],
         ),
       ),

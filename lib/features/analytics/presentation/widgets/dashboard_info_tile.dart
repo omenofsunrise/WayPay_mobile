@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
@@ -24,11 +26,7 @@ class DashboardInfoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final NumberFormat currencyFormatter = NumberFormat.currency(
-      locale: 'ru_RU',
-      symbol: '',
-      decimalDigits: 0,
-    );
+    final NumberFormat currencyFormatter = NumberFormat.currency(locale: 'ru_RU', symbol: '', decimalDigits: 0);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,13 +35,8 @@ class DashboardInfoTile extends StatelessWidget {
           height: 60,
           width: 60,
           child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: circleColor,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: SvgPicture.asset(iconAsset, width: 24, height: 24),
-            ),
+            decoration: BoxDecoration(color: circleColor, shape: BoxShape.circle),
+            child: Center(child: SvgPicture.asset(iconAsset, width: 24, height: 24)),
           ),
         ),
         const SizedBox(width: 15),
@@ -51,10 +44,7 @@ class DashboardInfoTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 2),
-            Text(
-              title,
-              style: AppStyle.manrope(size: 15, weight: FontWeight.w500),
-            ),
+            Text(title, style: AppStyle.manrope(size: 15, weight: FontWeight.w500)),
             Text(
               currencyFormatter.format(int.tryParse(value) ?? 0),
               style: AppStyle.manrope(size: 29, weight: FontWeight.w600),
@@ -68,9 +58,7 @@ class DashboardInfoTile extends StatelessWidget {
                   Icon(
                     isGrowth! ? Icons.arrow_drop_up : Icons.arrow_drop_down,
                     size: 36,
-                    color: isGrowth!
-                        ? Color(AppColors.radioColor)
-                        : Color(AppColors.red),
+                    color: isGrowth! ? Color(AppColors.radioColor) : Color(AppColors.red),
                   ),
                 if (isGrowth != null)
                   SizedBox(
@@ -81,9 +69,7 @@ class DashboardInfoTile extends StatelessWidget {
                         size: 12,
                         weight: FontWeight.w400,
                         color: isGrowth != null
-                            ? (isGrowth!
-                                  ? Color(AppColors.radioColor)
-                                  : Color(AppColors.red))
+                            ? (isGrowth! ? Color(AppColors.radioColor) : Color(AppColors.red))
                             : Colors.black,
                       ),
                     ),
@@ -93,11 +79,7 @@ class DashboardInfoTile extends StatelessWidget {
                     width: 140,
                     child: Text(
                       'Отсутвует активность',
-                      style: AppStyle.manrope(
-                        size: 12,
-                        weight: FontWeight.w400,
-                        color: Color(AppColors.greyLight),
-                      ),
+                      style: AppStyle.manrope(size: 12, weight: FontWeight.w400, color: Color(AppColors.greyLight)),
                     ),
                   ),
               ],

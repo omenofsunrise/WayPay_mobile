@@ -14,11 +14,7 @@ import 'package:waypay/features/clients/data/models/queue/queue_model.dart';
 import 'package:waypay/features/clients/data/models/queue/queue_request_model.dart';
 
 /// --- форматирование денег ---
-final _moneyRu = NumberFormat.currency(
-  locale: 'ru_RU',
-  symbol: '₽',
-  decimalDigits: 0,
-);
+final _moneyRu = NumberFormat.currency(locale: 'ru_RU', symbol: '₽', decimalDigits: 0);
 
 String formatMoney(num? v) {
   if (v == null) return '';
@@ -30,12 +26,7 @@ class QueueCard extends StatefulWidget {
   final QueueItemModel queue;
   final VoidCallback? onQueueChanged;
 
-  const QueueCard({
-    super.key,
-    required this.client,
-    required this.queue,
-    this.onQueueChanged,
-  });
+  const QueueCard({super.key, required this.client, required this.queue, this.onQueueChanged});
 
   @override
   State<QueueCard> createState() => _QueueCardState();
@@ -95,20 +86,14 @@ class _QueueCardState extends State<QueueCard> {
       final raw = oldText.replaceAll(RegExp(r'\D'), '');
 
       if (raw.isEmpty) {
-        amountController.value = const TextEditingValue(
-          text: '',
-          selection: TextSelection.collapsed(offset: 0),
-        );
+        amountController.value = const TextEditingValue(text: '', selection: TextSelection.collapsed(offset: 0));
         return;
       }
 
       final parsed = int.tryParse(raw);
       if (parsed == null) return;
 
-      final formatted = NumberFormat(
-        "#,##0",
-        "ru_RU",
-      ).format(parsed).replaceAll(',', ' ');
+      final formatted = NumberFormat("#,##0", "ru_RU").format(parsed).replaceAll(',', ' ');
       final newText = '$formatted ₽';
 
       int cursorPositionInRaw = 0;
@@ -123,8 +108,7 @@ class _QueueCardState extends State<QueueCard> {
 
       int newCursorPosition = 0;
       int digitsPassed = 0;
-      while (digitsPassed < cursorPositionInRaw &&
-          newCursorPosition < newText.length) {
+      while (digitsPassed < cursorPositionInRaw && newCursorPosition < newText.length) {
         if (RegExp(r'\d').hasMatch(newText[newCursorPosition])) {
           digitsPassed++;
         }
@@ -140,8 +124,7 @@ class _QueueCardState extends State<QueueCard> {
       );
     }
 
-    amountController.text =
-        '${NumberFormat("#,##0", "ru_RU").format(queue.sum).replaceAll(',', ' ')} ₽';
+    amountController.text = '${NumberFormat("#,##0", "ru_RU").format(queue.sum).replaceAll(',', ' ')} ₽';
 
     double getRawAmount() {
       final raw = amountController.text.replaceAll(RegExp(r'\D'), '');
@@ -178,16 +161,13 @@ class _QueueCardState extends State<QueueCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Высокий приоритет',
-                    style: TextStyle(color: Colors.black, fontSize: 16),
-                  ),
+                  const Text('Высокий приоритет', style: TextStyle(color: Colors.black, fontSize: 16)),
                   Switch(
                     value: highPriority,
                     onChanged: (value) => setState(() {
                       highPriority = value;
                     }),
-                    activeThumbColor: const Color(AppColors.primary),
+                    activeColor: const Color(AppColors.primary),
                   ),
                 ],
               ),
@@ -239,10 +219,7 @@ class _QueueCardState extends State<QueueCard> {
               clientId: widget.client.id,
               priority: highPriority ? 1 : 0,
             );
-            await _queueDataSource.updateQueueById(
-              widget.queue.id,
-              updateRequest,
-            );
+            await _queueDataSource.updateQueueById(widget.queue.id, updateRequest);
             widget.onQueueChanged?.call();
             if (context.mounted) {
               Navigator.of(context).pop();
@@ -260,19 +237,14 @@ class _QueueCardState extends State<QueueCard> {
 
   Future<void> _loadClientAndShowModal(BuildContext context) async {
     try {
-      final fullClient = await _clientDataSource.getClientById(
-        widget.client.id,
-      );
+      final fullClient = await _clientDataSource.getClientById(widget.client.id);
       if (!context.mounted) return;
       showDialog(
         context: context,
         builder: (_) => AppModal(
           backgroundColor: Color(AppColors.background),
           menuItems: [
-            PopupMenuItem(
-              child: const Text('Удалить'),
-              onTap: () => _handleDeleteQueue(context),
-            ),
+            PopupMenuItem(child: const Text('Удалить'), onTap: () => _handleDeleteQueue(context)),
             PopupMenuItem(
               child: const Text('Редактировать'),
               onTap: () {
@@ -289,15 +261,10 @@ class _QueueCardState extends State<QueueCard> {
               children: [
                 LabeledContainer(label: 'ФИО', text: fullClient.fullName),
                 LabeledContainer(label: 'Телефон', text: fullClient.phone),
-                LabeledContainer(
-                  label: 'Сумма',
-                  text: formatMoney(widget.queue.sum),
-                ),
+                LabeledContainer(label: 'Сумма', text: formatMoney(widget.queue.sum)),
                 LabeledContainer(
                   label: 'Приоритет',
-                  text: widget.queue.priority == 0
-                      ? 'Обычный приоритет'
-                      : 'Высокий приоритет',
+                  text: widget.queue.priority == 0 ? 'Обычный приоритет' : 'Высокий приоритет',
                 ),
                 const SizedBox(height: 22),
                 DefaultButton(
@@ -326,41 +293,23 @@ class _QueueCardState extends State<QueueCard> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: widget.queue.priority == 1
-              ? const Color(AppColors.greenTint)
-              : Colors.white,
+          color: widget.queue.priority == 1 ? const Color(AppColors.greenTint) : Colors.white,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
         ),
         child: Row(
           children: [
-            Text(
-              widget.queue.positionInQueue.toString(),
-              style: const TextStyle(fontSize: 16, color: Colors.black),
-            ),
+            Text(widget.queue.positionInQueue.toString(), style: const TextStyle(fontSize: 16, color: Colors.black)),
             const SizedBox(width: 24),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   widget.client.fullName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  widget.client.phone,
-                  style: const TextStyle(fontSize: 14, color: Colors.black),
-                ),
+                Text(widget.client.phone, style: const TextStyle(fontSize: 14, color: Colors.black)),
               ],
             ),
           ],

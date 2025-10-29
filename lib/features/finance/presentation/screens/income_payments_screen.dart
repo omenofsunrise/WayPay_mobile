@@ -132,7 +132,7 @@ class _IncomePaymentsScreenState extends State<IncomePaymentsScreen> {
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<int>(
-                          initialValue: tempMonth,
+                          value: tempMonth,
                           dropdownColor: Colors.white,
                           decoration: InputDecoration(
                             filled: true,
@@ -162,7 +162,7 @@ class _IncomePaymentsScreenState extends State<IncomePaymentsScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: DropdownButtonFormField<int>(
-                          initialValue: tempYear,
+                          value: tempYear,
                           dropdownColor: Colors.white,
                           decoration: InputDecoration(
                             filled: true,
