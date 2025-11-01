@@ -1,0 +1,5 @@
+import 'package:waypay/features/notifications/data/models/notification_page.dart';
+
+abstract class NotificationsDataSource {
+  Future<NotificationPage> fetchNotifications({int page = 1, int pageSize = 8});
+}

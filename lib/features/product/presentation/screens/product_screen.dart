@@ -6,11 +6,12 @@ import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
 import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
 import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/core/widgets/pagination_widget.dart';
 import 'package:waypay/core/widgets/refresh.dart';
 import 'package:waypay/core/storage/user_storage.dart';
-import 'package:waypay/features/profile/data/models/employee.dart' show EmployeeRole, admin, director, superAdmin;
+import 'package:waypay/features/profile/data/models/employee.dart'
+    show EmployeeRole, admin, director, superAdmin;
 import 'package:waypay/features/product/presentation/bloc/products_bloc.dart';
 import 'package:waypay/features/product/presentation/widgets/product_card.dart';
 import 'package:waypay/features/product/data/data_sources/products_remote_data_source.dart';
@@ -61,7 +62,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   decoration: InputDecoration(
                     hintText: 'Поиск продуктов...',
                     prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12),
@@ -141,8 +144,13 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     decoration: InputDecoration(
                       labelText: 'Название продукта',
                       errorText: error,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                     style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
                   ),
@@ -178,20 +186,29 @@ class _ProductsScreenState extends State<ProductsScreen> {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (_) => const Center(child: CircularProgressIndicator()),
+                            builder: (_) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
                           );
 
                           try {
-                            await getIt<ProductsRemoteDataSource>().createProduct(name: nameController.text.trim());
+                            await getIt<ProductsRemoteDataSource>()
+                                .createProduct(
+                                  name: nameController.text.trim(),
+                                );
 
                             if (!context.mounted) return;
                             Navigator.pop(context);
 
-                            context.read<ProductsBloc>().add(LoadProductsEvent(refresh: true, page: 1));
+                            context.read<ProductsBloc>().add(
+                              LoadProductsEvent(refresh: true, page: 1),
+                            );
 
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(const SnackBar(content: Text('Продукт успешно создан')));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Продукт успешно создан'),
+                              ),
+                            );
                           } catch (e) {
                             if (!context.mounted) return;
                             Navigator.pop(context);
@@ -200,8 +217,15 @@ class _ProductsScreenState extends State<ProductsScreen> {
                               context: context,
                               builder: (_) => AlertDialog(
                                 title: const Text('Ошибка'),
-                                content: Text('Не удалось создать продукт.\n$e'),
-                                actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Ок'))],
+                                content: Text(
+                                  'Не удалось создать продукт.\n$e',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('Ок'),
+                                  ),
+                                ],
                               ),
                             );
                           }
@@ -237,7 +261,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
             surfaceTintColor: Colors.transparent,
             backgroundColor: const Color(AppColors.primary),
             elevation: 0,
-            title: Text('Продукты', style: AppStyle.medium20.copyWith(color: const Color(AppColors.background))),
+            title: Text(
+              'Продукты',
+              style: AppStyle.medium20.copyWith(
+                color: const Color(AppColors.background),
+              ),
+            ),
             actions: [
               if (canAddProduct)
                 IconButton(
@@ -257,7 +286,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 child: Container(
                   decoration: const BoxDecoration(
                     color: Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
                   ),
                   child: BlocBuilder<ProductsBloc, ProductsState>(
                     builder: (context, state) {
@@ -272,17 +304,26 @@ class _ProductsScreenState extends State<ProductsScreen> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.error_outline, size: 64, color: Color(AppColors.red)),
+                                const Icon(
+                                  Icons.error_outline,
+                                  size: 64,
+                                  color: Color(AppColors.red),
+                                ),
                                 const SizedBox(height: 16),
                                 Text(
                                   'Ошибка загрузки\n${state.message}',
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 16, color: Color(AppColors.red)),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Color(AppColors.red),
+                                  ),
                                 ),
                                 const SizedBox(height: 16),
                                 ElevatedButton(
                                   onPressed: () {
-                                    context.read<ProductsBloc>().add(LoadProductsEvent());
+                                    context.read<ProductsBloc>().add(
+                                      LoadProductsEvent(),
+                                    );
                                   },
                                   child: const Text('Повторить'),
                                 ),
@@ -294,32 +335,43 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
                       if (state is ProductsLoaded) {
                         if (state.products.isEmpty) {
-                          return const Center(child: Text('Продукты не найдены'));
+                          return const Center(
+                            child: Text('Продукты не найдены'),
+                          );
                         }
                         return Column(
                           children: [
                             Expanded(
                               child: Refresher(
                                 onRefresh: () async {
-                                  context.read<ProductsBloc>().add(LoadProductsEvent(page: state.currentPage));
+                                  context.read<ProductsBloc>().add(
+                                    LoadProductsEvent(page: state.currentPage),
+                                  );
                                 },
                                 content: ListView.builder(
                                   padding: const EdgeInsets.all(16),
                                   itemCount: state.products.length,
                                   itemBuilder: (context, index) {
-                                    return ProductCard(product: state.products[index]);
+                                    return ProductCard(
+                                      product: state.products[index],
+                                    );
                                   },
                                 ),
                               ),
                             ),
 
                             Padding(
-                              padding: const EdgeInsets.only(top: 8, bottom: 16),
+                              padding: const EdgeInsets.only(
+                                top: 8,
+                                bottom: 16,
+                              ),
                               child: PaginationWidget(
                                 currentPage: state.currentPage,
                                 totalPages: state.totalPages,
                                 onPageSelected: (page) {
-                                  context.read<ProductsBloc>().add(LoadProductsEvent(page: page));
+                                  context.read<ProductsBloc>().add(
+                                    LoadProductsEvent(page: page),
+                                  );
                                 },
                               ),
                             ),

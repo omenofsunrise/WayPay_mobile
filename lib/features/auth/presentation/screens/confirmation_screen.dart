@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/routes/routes.dart';
 
 class ConfirmationScreen extends StatefulWidget {
@@ -28,7 +28,11 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
             const Spacer(),
             Text(
               'Подтверждение авторизации',
-              style: AppStyle.inter(size: 24, weight: FontWeight.w600, color: const Color(AppColors.black)),
+              style: AppStyle.inter(
+                size: 24,
+                weight: FontWeight.w600,
+                color: const Color(AppColors.black),
+              ),
             ),
             const SizedBox(height: 12),
             Text(widget.phone, style: AppStyle.manrope16),
@@ -40,7 +44,11 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'Авторизация успешно подтверждена!',
-                    style: AppStyle.inter(size: 18, weight: FontWeight.w600, color: const Color(AppColors.black)),
+                    style: AppStyle.inter(
+                      size: 18,
+                      weight: FontWeight.w600,
+                      color: const Color(AppColors.black),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),

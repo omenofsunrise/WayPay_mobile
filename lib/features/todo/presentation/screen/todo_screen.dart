@@ -7,7 +7,7 @@ import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
 import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
 import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/core/widgets/form_modal/label_text_field.dart';
 import 'package:waypay/core/widgets/refresh.dart';
 import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
@@ -70,7 +70,9 @@ class _TodoScreenState extends State<TodoScreen> {
     taskBloc.add(
       LoadActiveTasks(
         onlyMine: onlyMyTasks,
-        priority: selectedPriority == TaskPriority.all ? null : selectedPriority,
+        priority: selectedPriority == TaskPriority.all
+            ? null
+            : selectedPriority,
         taskEmployeeId: selectedEmployee?.id,
         status: visibleStatus,
       ),
@@ -166,7 +168,11 @@ class _TodoScreenState extends State<TodoScreen> {
     );
   }
 
-  Widget _buildTaskSection(String title, TaskStatus sectionStatus, List<TodoTask> tasks) {
+  Widget _buildTaskSection(
+    String title,
+    TaskStatus sectionStatus,
+    List<TodoTask> tasks,
+  ) {
     bool isHovering = false;
 
     return StatefulBuilder(
@@ -187,7 +193,12 @@ class _TodoScreenState extends State<TodoScreen> {
                 _optimistic[data.task.id] = sectionStatus;
               });
               // и шлём событие в блок
-              context.read<TaskBloc>().add(UpdateTaskStatus(taskId: data.task.id, newStatus: sectionStatus));
+              context.read<TaskBloc>().add(
+                UpdateTaskStatus(
+                  taskId: data.task.id,
+                  newStatus: sectionStatus,
+                ),
+              );
             },
             builder: (context, candidate, rejected) {
               return Container(
@@ -197,32 +208,51 @@ class _TodoScreenState extends State<TodoScreen> {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     width: 1.5,
-                    color: isHovering ? Color(AppColors.primaryLight) : Color(AppColors.uncomfPayment),
+                    color: isHovering
+                        ? Color(AppColors.primaryLight)
+                        : Color(AppColors.uncomfPayment),
                   ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
                       child: Row(
                         children: [
                           Text(
                             title,
-                            style: AppStyle.manrope(size: 16, weight: FontWeight.w600, color: Color(AppColors.black)),
+                            style: AppStyle.manrope(
+                              size: 16,
+                              weight: FontWeight.w600,
+                              color: Color(AppColors.black),
+                            ),
                           ),
                           const Spacer(),
                           Text(
                             tasks.length.toString(),
-                            style: AppStyle.manrope(size: 16, weight: FontWeight.w600, color: Color(AppColors.black)),
+                            style: AppStyle.manrope(
+                              size: 16,
+                              weight: FontWeight.w600,
+                              color: Color(AppColors.black),
+                            ),
                           ),
                         ],
                       ),
                     ),
                     if (tasks.isEmpty)
                       const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        child: Text('Задачи отсутствуют', style: TextStyle(color: Colors.grey)),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        child: Text(
+                          'Задачи отсутствуют',
+                          style: TextStyle(color: Colors.grey),
+                        ),
                       )
                     else
                       Padding(
@@ -234,25 +264,40 @@ class _TodoScreenState extends State<TodoScreen> {
                               child: LongPressDraggable<_TaskDragData>(
                                 data: _TaskDragData(task),
                                 dragAnchorStrategy: pointerDragAnchorStrategy,
-                                onDragStarted: () => setState(() => _isDragging = true),
-                                onDragEnd: (_) => setState(() => _isDragging = false),
-                                onDraggableCanceled: (_, __) => setState(() => _isDragging = false),
-                                onDragCompleted: () => setState(() => _isDragging = false),
+                                onDragStarted: () =>
+                                    setState(() => _isDragging = true),
+                                onDragEnd: (_) =>
+                                    setState(() => _isDragging = false),
+                                onDraggableCanceled: (_, __) =>
+                                    setState(() => _isDragging = false),
+                                onDragCompleted: () =>
+                                    setState(() => _isDragging = false),
                                 // 🔹 критично: обновляем автоскролл при движении
-                                onDragUpdate: (details) => _maybeAutoScroll(details.globalPosition),
+                                onDragUpdate: (details) =>
+                                    _maybeAutoScroll(details.globalPosition),
                                 feedback: Material(
                                   color: Colors.transparent,
                                   child: ConstrainedBox(
-                                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 64),
+                                    constraints: BoxConstraints(
+                                      maxWidth:
+                                          MediaQuery.of(context).size.width -
+                                          64,
+                                    ),
                                     child: Opacity(
                                       opacity: 0.9,
-                                      child: TodoCard(task: task, onChanged: _loadTasks),
+                                      child: TodoCard(
+                                        task: task,
+                                        onChanged: _loadTasks,
+                                      ),
                                     ),
                                   ),
                                 ),
                                 childWhenDragging: Opacity(
                                   opacity: 0.4,
-                                  child: TodoCard(task: task, onChanged: _loadTasks),
+                                  child: TodoCard(
+                                    task: task,
+                                    onChanged: _loadTasks,
+                                  ),
                                 ),
                                 child: TodoCard(
                                   task: task,
@@ -288,10 +333,21 @@ class _TodoScreenState extends State<TodoScreen> {
         surfaceTintColor: Colors.transparent,
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: const Color(AppColors.primary),
-        title: Text('To do', style: AppStyle.medium20.copyWith(color: const Color(AppColors.background))),
+        title: Text(
+          'To do',
+          style: AppStyle.medium20.copyWith(
+            color: const Color(AppColors.background),
+          ),
+        ),
         actions: [
-          IconButton(icon: const Icon(Icons.add), onPressed: () => showCreateTodoModal(context)),
-          IconButton(icon: const Icon(Icons.filter_alt), onPressed: _openFilterModal),
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => showCreateTodoModal(context),
+          ),
+          IconButton(
+            icon: const Icon(Icons.filter_alt),
+            onPressed: _openFilterModal,
+          ),
         ],
         elevation: 0,
         foregroundColor: Colors.black,
@@ -332,7 +388,11 @@ class _TodoScreenState extends State<TodoScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                              const Icon(
+                                Icons.error_outline,
+                                size: 64,
+                                color: Colors.red,
+                              ),
                               const SizedBox(height: 12),
                               Text(
                                 state.message,
@@ -364,41 +424,81 @@ class _TodoScreenState extends State<TodoScreen> {
 
                       // 🔹 применяем локальные оптимистичные статусы
                       for (var task in state.tasks) {
-                        final effectiveStatus = _optimistic[task.id] ?? task.taskStatus;
+                        final effectiveStatus =
+                            _optimistic[task.id] ?? task.taskStatus;
                         switch (effectiveStatus) {
                           case TaskStatus.pending:
-                            pending.add(task.copyWith(taskStatus: effectiveStatus));
+                            pending.add(
+                              task.copyWith(taskStatus: effectiveStatus),
+                            );
                             break;
                           case TaskStatus.inProgress:
-                            inProgress.add(task.copyWith(taskStatus: effectiveStatus));
+                            inProgress.add(
+                              task.copyWith(taskStatus: effectiveStatus),
+                            );
                             break;
                           case TaskStatus.review:
-                            review.add(task.copyWith(taskStatus: effectiveStatus));
+                            review.add(
+                              task.copyWith(taskStatus: effectiveStatus),
+                            );
                             break;
                           case TaskStatus.done:
-                            done.add(task.copyWith(taskStatus: effectiveStatus));
+                            done.add(
+                              task.copyWith(taskStatus: effectiveStatus),
+                            );
                             break;
                         }
                       }
 
-                      final sections = <({String title, TaskStatus status, List<TodoTask> data})>[
-                        (title: 'К выполнению', status: TaskStatus.pending, data: pending),
-                        (title: 'В работе', status: TaskStatus.inProgress, data: inProgress),
-                        (title: 'На проверке', status: TaskStatus.review, data: review),
-                        (title: 'Выполнено', status: TaskStatus.done, data: done),
-                      ];
+                      final sections =
+                          <
+                            ({
+                              String title,
+                              TaskStatus status,
+                              List<TodoTask> data,
+                            })
+                          >[
+                            (
+                              title: 'К выполнению',
+                              status: TaskStatus.pending,
+                              data: pending,
+                            ),
+                            (
+                              title: 'В работе',
+                              status: TaskStatus.inProgress,
+                              data: inProgress,
+                            ),
+                            (
+                              title: 'На проверке',
+                              status: TaskStatus.review,
+                              data: review,
+                            ),
+                            (
+                              title: 'Выполнено',
+                              status: TaskStatus.done,
+                              data: done,
+                            ),
+                          ];
 
                       final visibleSections = visibleStatus == null
                           ? sections
-                          : sections.where((s) => s.status == visibleStatus).toList();
+                          : sections
+                                .where((s) => s.status == visibleStatus)
+                                .toList();
 
                       return Refresher(
                         onRefresh: () async => _loadTasks(),
                         content: ListView(
                           key: _listKey,
                           controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          children: [for (final s in visibleSections) _buildTaskSection(s.title, s.status, s.data)],
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          children: [
+                            for (final s in visibleSections)
+                              _buildTaskSection(s.title, s.status, s.data),
+                          ],
                         ),
                       );
                     }
@@ -429,7 +529,10 @@ void showCreateTodoModal(BuildContext externalContext) async {
 
   EmployeeName? selectedExecutor;
   if (employeeJson != null) {
-    selectedExecutor = EmployeeName(id: employeeJson['id'] as int, fullName: employeeJson['fullName'] as String);
+    selectedExecutor = EmployeeName(
+      id: employeeJson['id'] as int,
+      fullName: employeeJson['fullName'] as String,
+    );
   }
 
   EmployeeName? selectedResponsible;
@@ -508,7 +611,10 @@ void showCreateTodoModal(BuildContext externalContext) async {
                   const SizedBox(height: 4),
                   Text(
                     'Приоритет',
-                    style: AppStyle.medium16.copyWith(color: Colors.black87, fontWeight: FontWeight.w500),
+                    style: AppStyle.medium16.copyWith(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   PriorityDropdown(
@@ -523,7 +629,10 @@ void showCreateTodoModal(BuildContext externalContext) async {
                   const SizedBox(height: 16),
                   Text(
                     'Исполнитель',
-                    style: AppStyle.medium16.copyWith(color: Colors.black87, fontWeight: FontWeight.w500),
+                    style: AppStyle.medium16.copyWith(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   EmployeeDropdown(
@@ -538,7 +647,10 @@ void showCreateTodoModal(BuildContext externalContext) async {
                   const SizedBox(height: 16),
                   Text(
                     'Ответственный',
-                    style: AppStyle.medium16.copyWith(color: Colors.black87, fontWeight: FontWeight.w500),
+                    style: AppStyle.medium16.copyWith(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   EmployeeDropdown(
@@ -577,7 +689,9 @@ void showCreateTodoModal(BuildContext externalContext) async {
                               responsibleId: selectedResponsible?.id,
                             );
 
-                            externalContext.read<TaskBloc>().add(CreateTask(newTask));
+                            externalContext.read<TaskBloc>().add(
+                              CreateTask(newTask),
+                            );
                             Navigator.of(dialogContext).pop();
                           },
                           text: 'Создать',

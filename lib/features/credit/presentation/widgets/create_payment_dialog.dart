@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay/core/di/dependency_injection.dart';
 import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/core/widgets/form_modal/label_text_field.dart';
 import 'package:waypay/features/credit/data/models/credit_model.dart';
 import 'package:waypay/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';

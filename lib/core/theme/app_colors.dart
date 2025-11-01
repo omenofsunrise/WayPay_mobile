@@ -1,7 +1,9 @@
 class AppColors {
-  static const primary = 0xFF008376;
+  static const primary = 0xFF007D88;
   static const primaryLight = 0xFF25CBA1;
+  static const white = 0xFFFFFFFF;
   static const background = 0xFFF9FAFA;
+  static const uiBorder = 0xFF50555C;
   static const grey = 0x8A000000;
   static const greyLight = 0xFFD3D3D3;
   static const black = 0xFF111111;

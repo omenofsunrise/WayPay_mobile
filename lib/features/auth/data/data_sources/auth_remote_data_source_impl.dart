@@ -14,10 +14,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl(this.dio);
 
   @override
-  Future<StartAuthResponseModel> startAuth(StartAuthRequestModel request) async {
+  Future<StartAuthResponseModel> startAuth(
+    StartAuthRequestModel request,
+  ) async {
     try {
       print('➡️ Старт авторизации: ${request.toJson()}');
-      final response = await dio.post('/api/Auth/start', data: request.toJson());
+      final response = await dio.post(
+        '/api/Auth/start',
+        data: request.toJson(),
+      );
       print('✅ Успешный ответ startAuth: ${response.data}');
       return StartAuthResponseModel.fromJson(response.data);
     } on DioException catch (e) {
@@ -30,14 +35,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> confirmCall(CallConfirmRequestModel request) async {
     try {
       print('➡️ Подтверждение звонка: ${request.toJson()}');
-      final response = await dio.post('/api/Auth/confirm', data: request.toJson());
+      final response = await dio.post(
+        '/api/Auth/confirm',
+        data: request.toJson(),
+      );
 
       print('✅ Ответ confirmCall: ${response.data}');
 
       if (response.data is Map<String, dynamic>) {
         final data = response.data as Map<String, dynamic>;
 
-        if (data.containsKey('accessToken') && data.containsKey('refreshToken')) {
+        if (data.containsKey('accessToken') &&
+            data.containsKey('refreshToken')) {
           final tokenStorage = TokenStorage();
           await tokenStorage.saveTokens(
             accessToken: data['accessToken'] as String,
@@ -57,12 +66,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<RefreshTokenResponseModel> refreshToken(RefreshTokenRequestModel request) async {
+  Future<RefreshTokenResponseModel> refreshToken(
+    RefreshTokenRequestModel request,
+  ) async {
     try {
       final tokenStorage = TokenStorage();
       final savedPin = await tokenStorage.getPinCode();
 
-      final body = {'accessToken': request.accessToken, 'refreshToken': request.refreshToken};
+      final body = {
+        'accessToken': request.accessToken,
+        'refreshToken': request.refreshToken,
+      };
 
       if (savedPin != null) {
         body['pinCode'] = savedPin;
@@ -73,16 +87,24 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final response = await dio.post(
         '/api/Auth/refresh',
         data: body,
-        options: Options(headers: {'Authorization': 'Bearer ${request.accessToken}'}),
+        options: Options(
+          headers: {'Authorization': 'Bearer ${request.accessToken}'},
+        ),
       );
 
       final data = response.data as Map<String, dynamic>;
       final newAccessToken = data['accessToken'] as String;
-      final newRefreshToken = data['refreshToken'] as String? ?? request.refreshToken;
+      final newRefreshToken =
+          data['refreshToken'] as String? ?? request.refreshToken;
 
-      await tokenStorage.saveTokens(accessToken: newAccessToken, refreshToken: newRefreshToken);
+      await tokenStorage.saveTokens(
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      );
 
-      print('✅ Токены обновлены: accessToken=${newAccessToken.substring(0, 10)}...');
+      print(
+        '✅ Токены обновлены: accessToken=${newAccessToken.substring(0, 10)}...',
+      );
 
       return RefreshTokenResponseModel.fromJson(data);
     } on DioException catch (e) {
@@ -100,7 +122,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
       print('❌ Ошибка getAuthInfo: ${e.response?.data}');
-      throw Exception('Ошибка получения информации о пользователе: ${e.message}');
+      throw Exception(
+        'Ошибка получения информации о пользователе: ${e.message}',
+      );
     }
   }
 
@@ -116,7 +140,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final response = await dio.post(
         '/api/Auth/setup-pin',
         data: {'pinCode': pinCode},
-        options: Options(headers: {'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json'}),
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
       );
 
       print('✅ Ответ setup-pin: ${response.data}');
@@ -125,7 +154,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         if (response.data is Map<String, dynamic>) {
           final data = response.data as Map<String, dynamic>;
 
-          if (data.containsKey('accessToken') && data.containsKey('refreshToken')) {
+          if (data.containsKey('accessToken') &&
+              data.containsKey('refreshToken')) {
             await tokenStorage.saveTokens(
               accessToken: data['accessToken'] as String,
               refreshToken: data['refreshToken'] as String,
@@ -164,17 +194,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           if (status == 400) {
             if (error.contains('PIN code is temporarily locked')) {
               final minutesLeft = data['MinutesLeft'];
-              throw Exception('🚫 PIN временно заблокирован. Осталось минут: $minutesLeft');
+              throw Exception(
+                '🚫 PIN временно заблокирован. Осталось минут: $minutesLeft',
+              );
             }
             if (data['ErrorCode'] == 'PIN_REQUIRED') {
               throw Exception('📌 PIN обязателен.');
             }
             if (data['PinInvalid'] == true) {
               final attemptsLeft = data['AttemptsLeft'];
-              throw Exception('❌ Неверный PIN. Осталось попыток: $attemptsLeft');
+              throw Exception(
+                '❌ Неверный PIN. Осталось попыток: $attemptsLeft',
+              );
             }
             if (error.contains('Refresh token does not belong to this user')) {
-              throw Exception('🚫 Refresh токен не принадлежит этому пользователю.');
+              throw Exception(
+                '🚫 Refresh токен не принадлежит этому пользователю.',
+              );
             }
           }
         }
@@ -193,12 +229,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       final response = await dio.get(
         '/api/Auth/sessions',
-        options: access != null ? Options(headers: {'Authorization': 'Bearer $access'}) : null,
+        options: access != null
+            ? Options(headers: {'Authorization': 'Bearer $access'})
+            : null,
       );
 
       final data = response.data;
       if (data is List) {
-        final result = data.map((e) => SessionModel.fromJson(Map<String, dynamic>.from(e as Map))).toList();
+        final result = data
+            .map(
+              (e) => SessionModel.fromJson(Map<String, dynamic>.from(e as Map)),
+            )
+            .toList();
         print('✅ Сессий: ${result.length}');
         return result;
       }
@@ -258,7 +300,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw Exception('Сессия не найдена (id=$tokenId).');
       }
 
-      throw Exception('Ошибка при отзыве сессии: code=$code, body=${e.response?.data}');
+      throw Exception(
+        'Ошибка при отзыве сессии: code=$code, body=${e.response?.data}',
+      );
     }
   }
 }

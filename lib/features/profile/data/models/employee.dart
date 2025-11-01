@@ -85,7 +85,7 @@ extension EmployeeRoleMapper on EmployeeRole {
   }
 }
 
-enum Permission { createCredits, deleteCredits }
+enum Permission { createCredits, deleteCredits, viewAnalytic, viewAllCredits }
 
 extension PermissionMapper on Permission {
   static Permission fromApi(String apiValue) {
@@ -94,6 +94,10 @@ extension PermissionMapper on Permission {
         return Permission.createCredits;
       case 'DELETE_CREDITS':
         return Permission.deleteCredits;
+      case 'VIEW_ANALYTIC':
+        return Permission.viewAnalytic;
+      case 'VIEW_ALL_CREDITS':
+        return Permission.viewAllCredits;
       default:
         throw Exception('Неизвестное разрешение: $apiValue');
     }
@@ -105,6 +109,10 @@ extension PermissionMapper on Permission {
         return 'Создание договоров';
       case Permission.deleteCredits:
         return 'Удаление договоров';
+      case Permission.viewAnalytic:
+        return 'Просмотр аналитики';
+      case Permission.viewAllCredits:
+        return 'Просмотр чужих договоро';
     }
   }
 }

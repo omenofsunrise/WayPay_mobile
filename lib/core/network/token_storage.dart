@@ -78,7 +78,7 @@ class TokenStorage {
 
     try {
       final response = await http.post(
-        Uri.parse('http://test.waypay.one:5000/api/Auth/refresh'),
+        Uri.parse('https://web.waypay.one:5001/api/Auth/refresh'),
         headers: {'Content-Type': 'application/json', 'X-Environment': 'dev'},
         body: jsonEncode(body),
       );

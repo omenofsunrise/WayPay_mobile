@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/core/widgets/form_modal/label_text_field.dart';
 import 'package:waypay/features/admin_panel/presentation/cubit/company_cubit.dart';
 import 'package:waypay/features/admin_panel/data/models/company_model.dart';
@@ -112,13 +112,21 @@ class _CompanyScreenState extends State<CompanyScreen> {
             child: Text(
               'Сведения о компании',
               textAlign: TextAlign.center,
-              style: AppStyle.manrope(size: 20, weight: FontWeight.w500, color: Color(AppColors.radioColor)),
+              style: AppStyle.manrope(
+                size: 20,
+                weight: FontWeight.w500,
+                color: Color(AppColors.radioColor),
+              ),
             ),
           ),
           const SizedBox(height: 25),
           Text(
             'Логотип',
-            style: AppStyle.manrope(size: 14, weight: FontWeight.w400, color: Color(AppColors.grey)),
+            style: AppStyle.manrope(
+              size: 14,
+              weight: FontWeight.w400,
+              color: Color(AppColors.grey),
+            ),
           ),
           const SizedBox(height: 10),
           GestureDetector(
@@ -132,8 +140,16 @@ class _CompanyScreenState extends State<CompanyScreen> {
                   color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(8),
                   image: _newImageFile != null
-                      ? DecorationImage(image: FileImage(_newImageFile!), fit: BoxFit.cover)
-                      : (photoUrl != null ? DecorationImage(image: NetworkImage(photoUrl), fit: BoxFit.cover) : null),
+                      ? DecorationImage(
+                          image: FileImage(_newImageFile!),
+                          fit: BoxFit.cover,
+                        )
+                      : (photoUrl != null
+                            ? DecorationImage(
+                                image: NetworkImage(photoUrl),
+                                fit: BoxFit.cover,
+                              )
+                            : null),
                 ),
                 child: photoUrl == null && _newImageFile == null
                     ? const Icon(Icons.apartment, size: 32, color: Colors.white)
@@ -142,15 +158,25 @@ class _CompanyScreenState extends State<CompanyScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          LabeledTextField(label: 'Название компании', controller: nameController),
+          LabeledTextField(
+            label: 'Название компании',
+            controller: nameController,
+          ),
           const SizedBox(height: 20),
           LabeledTextField(label: 'Учредитель', controller: chiefController),
           const SizedBox(height: 20),
-          LabeledTextField(label: 'Населённый пункт', controller: cityController),
+          LabeledTextField(
+            label: 'Населённый пункт',
+            controller: cityController,
+          ),
           const SizedBox(height: 20),
           LabeledTextField(label: 'Адрес офиса', controller: addressController),
           const SizedBox(height: 20),
-          LabeledTextField(label: 'ИНН', controller: innController, keyboardType: TextInputType.number),
+          LabeledTextField(
+            label: 'ИНН',
+            controller: innController,
+            keyboardType: TextInputType.number,
+          ),
           const SizedBox(height: 20),
           LabeledTextField(label: 'Email', controller: emailController),
           const SizedBox(height: 20),
@@ -163,7 +189,10 @@ class _CompanyScreenState extends State<CompanyScreen> {
             prefix: const Text('8 '),
           ),
           const SizedBox(height: 20),
-          LabeledTextField(label: 'Рассчётный счёт', controller: bankController),
+          LabeledTextField(
+            label: 'Рассчётный счёт',
+            controller: bankController,
+          ),
           const SizedBox(height: 20),
           Text(
             '*Все данные компании используются только для автоматического оформления договора займа и не передаются третьим лицам.',
@@ -173,7 +202,11 @@ class _CompanyScreenState extends State<CompanyScreen> {
           Row(
             children: [
               Expanded(
-                child: DefaultButton(text: 'Сбросить', onPressed: _resetEmptyFields, isGreen: false),
+                child: DefaultButton(
+                  text: 'Сбросить',
+                  onPressed: _resetEmptyFields,
+                  isGreen: false,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -183,7 +216,8 @@ class _CompanyScreenState extends State<CompanyScreen> {
                     final updatedCompany = _initialCompany.copyWith(
                       name: nameController.text.trim(),
                       chief: chiefController.text.trim(),
-                      phone: '8${phoneController.text.trim()}', // добавляем 8 перед отправкой
+                      phone:
+                          '8${phoneController.text.trim()}', // добавляем 8 перед отправкой
                       city: cityController.text.trim(),
                       officeAddress: addressController.text.trim(),
                       bank: bankController.text.trim(),
@@ -192,14 +226,20 @@ class _CompanyScreenState extends State<CompanyScreen> {
                     );
 
                     try {
-                      await context.read<CompanyCubit>().updateCompany(updatedCompany);
+                      await context.read<CompanyCubit>().updateCompany(
+                        updatedCompany,
+                      );
                       if (!mounted) return;
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(const SnackBar(content: Text('Данные компании обновлены')));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Данные компании обновлены'),
+                        ),
+                      );
                     } catch (e) {
                       if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ошибка при обновлении: $e')));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Ошибка при обновлении: $e')),
+                      );
                     }
                   },
                   color: Color(AppColors.primary),

@@ -7,7 +7,7 @@ import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
 import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
 import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 
 import 'package:waypay/features/chat/data/data_source/chat/chat_remote_data_source.dart';
 import 'package:waypay/features/chat/data/data_source/message/message_remote_data_source.dart';

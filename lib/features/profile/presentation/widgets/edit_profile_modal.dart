@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/core/widgets/form_modal/label_text_field.dart';
 import 'package:waypay/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:waypay/features/profile/data/models/employee.dart';
@@ -76,7 +76,8 @@ class _EditProfileModalState extends State<EditProfileModal> {
     try {
       if (_isMyProfile) {
         final nameChanged = _nameController.text.trim() != _employee!.fullName;
-        final addressChanged = _addressController.text.trim() != _employee!.address;
+        final addressChanged =
+            _addressController.text.trim() != _employee!.address;
         final photoChanged = _newImageFile != null;
 
         if (nameChanged || addressChanged) {
@@ -88,26 +89,42 @@ class _EditProfileModalState extends State<EditProfileModal> {
         }
 
         if (photoChanged && _newImageFile != null) {
-          await cubit.uploadEmployeePhoto(id: _employee!.id, filePath: _newImageFile!.path);
+          await cubit.uploadEmployeePhoto(
+            id: _employee!.id,
+            filePath: _newImageFile!.path,
+          );
         }
       } else {
         final roleChanged = _roleController.text.trim() != _employee!.roleLabel;
         final phoneChanged = _phoneController.text.trim() != _employee!.phone;
-        final minSurchargeChanged = double.tryParse(_minSurchargeController.text.trim()) != _employee!.minSurcharge;
+        final minSurchargeChanged =
+            double.tryParse(_minSurchargeController.text.trim()) !=
+            _employee!.minSurcharge;
 
-        final String? role = roleChanged ? EmployeeRoleMapper.fromLabel(_roleController.text.trim()).toApi() : null;
-        final String? phone = phoneChanged ? _phoneController.text.trim() : null;
+        final String? role = roleChanged
+            ? EmployeeRoleMapper.fromLabel(_roleController.text.trim()).toApi()
+            : null;
+        final String? phone = phoneChanged
+            ? _phoneController.text.trim()
+            : null;
         final int? minSurcharge = minSurchargeChanged
             ? (double.tryParse(_minSurchargeController.text.trim())?.toInt())
             : null;
 
         if (role != null || phone != null || minSurcharge != null) {
-          await cubit.updateEmployeeById(id: _employee!.id, role: role, phone: phone, minSurcharge: minSurcharge);
+          await cubit.updateEmployeeById(
+            id: _employee!.id,
+            role: role,
+            phone: phone,
+            minSurcharge: minSurcharge,
+          );
         }
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ошибка при сохранении: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ошибка при сохранении: $e')));
     }
   }
 
@@ -118,7 +135,8 @@ class _EditProfileModalState extends State<EditProfileModal> {
     final currentLevel = _roleHierarchy[currentUserRole] ?? 0;
     final editingLevel = _roleHierarchy[editingUserRole] ?? 0;
 
-    if (currentUserRole == EmployeeRole.employee || currentUserRole == EmployeeRole.accountant) {
+    if (currentUserRole == EmployeeRole.employee ||
+        currentUserRole == EmployeeRole.accountant) {
       return false;
     }
 
@@ -126,7 +144,8 @@ class _EditProfileModalState extends State<EditProfileModal> {
   }
 
   Future<void> _showPhotoMenu(String? currentPhotoUrl) async {
-    final RenderBox box = _avatarKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox box =
+        _avatarKey.currentContext!.findRenderObject() as RenderBox;
     final Offset position = box.localToGlobal(Offset.zero);
     final Size size = box.size;
 
@@ -173,8 +192,14 @@ class _EditProfileModalState extends State<EditProfileModal> {
           title: const Text('Удалить фото?'),
           content: const Text('Вы уверены, что хотите удалить фото?'),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Отмена')),
-            TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Удалить')),
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Отмена'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Удалить'),
+            ),
           ],
         ),
       );
@@ -192,7 +217,10 @@ class _EditProfileModalState extends State<EditProfileModal> {
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         if (state is ProfileLoading) {
-          return const SizedBox(height: 200, child: Center(child: CircularProgressIndicator()));
+          return const SizedBox(
+            height: 200,
+            child: Center(child: CircularProgressIndicator()),
+          );
         } else if (state is ProfileLoaded) {
           final employee = state.employee;
           if (_nameController.text.isEmpty) {
@@ -206,7 +234,8 @@ class _EditProfileModalState extends State<EditProfileModal> {
           final filteredRoles = EmployeeRole.values.where((role) {
             final currentLevel = _roleHierarchy[currentUserRole] ?? 0;
             final roleLevel = _roleHierarchy[role] ?? 0;
-            if (currentUserRole == EmployeeRole.director && role == EmployeeRole.director) {
+            if (currentUserRole == EmployeeRole.director &&
+                role == EmployeeRole.director) {
               return false;
             }
             return currentLevel >= roleLevel;
@@ -219,7 +248,9 @@ class _EditProfileModalState extends State<EditProfileModal> {
 
           return Dialog(
             backgroundColor: Color(AppColors.lightBackground),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             insetPadding: const EdgeInsets.all(20),
             child: Padding(
               padding: EdgeInsets.only(
@@ -237,10 +268,16 @@ class _EditProfileModalState extends State<EditProfileModal> {
                         Expanded(
                           child: Text(
                             'Редактировать профиль',
-                            style: AppStyle.manrope(size: 18, weight: FontWeight.w600),
+                            style: AppStyle.manrope(
+                              size: 18,
+                              weight: FontWeight.w600,
+                            ),
                           ),
                         ),
-                        IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -259,9 +296,12 @@ class _EditProfileModalState extends State<EditProfileModal> {
                             radius: 70,
                             backgroundImage: _newImageFile != null
                                 ? FileImage(_newImageFile!)
-                                : (currentPhotoUrl != null ? NetworkImage(currentPhotoUrl) : null)
+                                : (currentPhotoUrl != null
+                                          ? NetworkImage(currentPhotoUrl)
+                                          : null)
                                       as ImageProvider<Object>?,
-                            child: _newImageFile == null && currentPhotoUrl == null
+                            child:
+                                _newImageFile == null && currentPhotoUrl == null
                                 ? const Icon(Icons.person, size: 40)
                                 : null,
                           ),
@@ -276,9 +316,16 @@ class _EditProfileModalState extends State<EditProfileModal> {
                                   decoration: BoxDecoration(
                                     color: Color(AppColors.primary),
                                     shape: BoxShape.circle,
-                                    border: Border.all(width: 2, color: Colors.white),
+                                    border: Border.all(
+                                      width: 2,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                  child: Icon(Icons.photo_camera, size: 16, color: Color(AppColors.background)),
+                                  child: Icon(
+                                    Icons.photo_camera,
+                                    size: 16,
+                                    color: Color(AppColors.background),
+                                  ),
                                 ),
                               ),
                             ),
@@ -287,9 +334,17 @@ class _EditProfileModalState extends State<EditProfileModal> {
                     ),
 
                     const SizedBox(height: 12),
-                    LabeledTextField(label: 'Имя', controller: _nameController, enabled: _isMyProfile),
+                    LabeledTextField(
+                      label: 'Имя',
+                      controller: _nameController,
+                      enabled: _isMyProfile,
+                    ),
                     const SizedBox(height: 12),
-                    LabeledTextField(label: 'Адрес', controller: _addressController, enabled: _isMyProfile),
+                    LabeledTextField(
+                      label: 'Адрес',
+                      controller: _addressController,
+                      enabled: _isMyProfile,
+                    ),
                     const SizedBox(height: 12),
                     IgnorePointer(
                       ignoring: _isMyProfile,
@@ -298,13 +353,18 @@ class _EditProfileModalState extends State<EditProfileModal> {
                         children: [
                           Text(
                             'Роль',
-                            style: AppStyle.medium16.copyWith(color: Colors.black87, fontWeight: FontWeight.w500),
+                            style: AppStyle.medium16.copyWith(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              border: Border.all(color: Color(AppColors.primary)),
+                              border: Border.all(
+                                color: Color(AppColors.primary),
+                              ),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -312,19 +372,29 @@ class _EditProfileModalState extends State<EditProfileModal> {
                               child: DropdownButton<EmployeeRole>(
                                 dropdownColor: Color(AppColors.background),
                                 isExpanded: true,
-                                icon: _isMyProfile ? const SizedBox.shrink() : Icon(Icons.keyboard_arrow_down_rounded),
+                                icon: _isMyProfile
+                                    ? const SizedBox.shrink()
+                                    : Icon(Icons.keyboard_arrow_down_rounded),
                                 borderRadius: BorderRadius.circular(12),
-                                style: AppStyle.manrope(size: 14, weight: FontWeight.w500, color: Colors.black),
+                                style: AppStyle.manrope(
+                                  size: 14,
+                                  weight: FontWeight.w500,
+                                  color: Colors.black,
+                                ),
                                 value: selectedRole,
                                 items: filteredRoles.map((role) {
                                   return DropdownMenuItem<EmployeeRole>(
                                     value: role,
-                                    child: Text(role.toLabel(), style: AppStyle.regular14),
+                                    child: Text(
+                                      role.toLabel(),
+                                      style: AppStyle.regular14,
+                                    ),
                                   );
                                 }).toList(),
                                 onChanged: (newRole) {
                                   setState(() {
-                                    _roleController.text = newRole?.toLabel() ?? '';
+                                    _roleController.text =
+                                        newRole?.toLabel() ?? '';
                                   });
                                 },
                               ),
@@ -374,9 +444,15 @@ class _EditProfileModalState extends State<EditProfileModal> {
             ),
           );
         } else if (state is ProfileError) {
-          return const SizedBox(height: 200, child: Center(child: Text('Ошибка загрузки профиля')));
+          return const SizedBox(
+            height: 200,
+            child: Center(child: Text('Ошибка загрузки профиля')),
+          );
         } else {
-          return const SizedBox(height: 200, child: Center(child: Text('Нет данных профиля')));
+          return const SizedBox(
+            height: 200,
+            child: Center(child: Text('Нет данных профиля')),
+          );
         }
       },
     );

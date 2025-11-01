@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:waypay/core/network/token_storage.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/core/widgets/pagination_widget.dart';
 import 'package:waypay/core/widgets/refresh.dart';
 import 'package:waypay/core/widgets/app_modal.dart';

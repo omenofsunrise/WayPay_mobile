@@ -19,7 +19,7 @@ class CreditTabAppBarAction extends StatelessWidget {
       tooltip: 'Выбрать вкладку',
       icon: const Icon(
         Icons.segment,
-        color: Colors.white,
+        color: Color(AppColors.uiBorder),
       ), // маленькая кнопка в AppBar
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

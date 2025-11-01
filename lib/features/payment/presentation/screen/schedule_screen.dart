@@ -9,7 +9,7 @@ import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
 import 'package:waypay/core/widgets/pagination_widget.dart';
 import 'package:waypay/core/widgets/refresh.dart';
 import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/features/payment/presentation/bloc/schedule/schedule_bloc.dart';
 import 'package:waypay/features/payment/presentation/widgets/schedule_card.dart';
 import 'package:waypay/routes/routes.dart';

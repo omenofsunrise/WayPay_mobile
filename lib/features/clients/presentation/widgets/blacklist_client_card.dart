@@ -4,7 +4,7 @@ import 'package:waypay/core/di/dependency_injection.dart';
 import 'package:waypay/core/storage/user_storage.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/core/widgets/form_modal/labeled_container.dart';
 import 'package:waypay/core/widgets/helpers.dart';
 import 'package:waypay/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources.dart';
@@ -30,7 +30,9 @@ class _BlacklistClientCardState extends State<BlacklistClientCard> {
       if (!context.mounted) return;
       _showClientModal(context, fullClient);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ошибка загрузки клиента: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ошибка загрузки клиента: $e')));
     }
   }
 
@@ -64,8 +66,14 @@ class _BlacklistClientCardState extends State<BlacklistClientCard> {
             children: [
               LabeledContainer(label: 'ID', text: client.id.toString()),
               LabeledContainer(label: 'ФИО', text: client.fullName),
-              LabeledContainer(label: 'Дата рождения', text: _formatDate(client.birthdate)),
-              LabeledContainer(label: 'Адрес регистрации', text: client.registrationAddress ?? '----'),
+              LabeledContainer(
+                label: 'Дата рождения',
+                text: _formatDate(client.birthdate),
+              ),
+              LabeledContainer(
+                label: 'Адрес регистрации',
+                text: client.registrationAddress ?? '----',
+              ),
               LabeledContainer(label: 'Документ', text: client.doc),
               LabeledContainer(label: 'Телефон', text: client.phone),
               SizedBox(height: 16),
@@ -100,13 +108,17 @@ class _BlacklistClientCardState extends State<BlacklistClientCard> {
       await dataSource.fromBlackList(widget.client.id);
       if (!context.mounted) return;
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Клиент успешно удалён')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Клиент успешно удалён')));
       if (widget.onDeleted != null) {
         widget.onDeleted!();
       }
     } catch (e) {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ошибка удаления клиента: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ошибка удаления клиента: $e')));
     }
   }
 
@@ -121,17 +133,30 @@ class _BlacklistClientCardState extends State<BlacklistClientCard> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               widget.client.fullName,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
             const SizedBox(height: 4),
-            Text(widget.client.phone, style: const TextStyle(fontSize: 14, color: Colors.black)),
+            Text(
+              widget.client.phone,
+              style: const TextStyle(fontSize: 14, color: Colors.black),
+            ),
           ],
         ),
       ),

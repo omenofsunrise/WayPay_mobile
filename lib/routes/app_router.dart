@@ -14,6 +14,7 @@ import 'package:waypay/features/investors/presentation/bloc/investors_bloc.dart'
 import 'package:waypay/features/investors/presentation/screens/investors_screen.dart';
 import 'package:waypay/features/product/presentation/screens/product_screen.dart';
 import 'package:waypay/features/profile/presentation/screens/profile_screen.dart';
+import 'package:waypay/features/home/presentation/screens/home_screen.dart';
 
 import 'package:waypay/routes/routes.dart';
 
@@ -125,6 +126,11 @@ class AppRouter {
         path: Routes.creditsScreen.toPath,
         name: Routes.creditsScreen.toName,
         builder: (context, state) => const CreditsScreen(),
+      ),
+      GoRoute(
+        path: Routes.homeScreen.toPath,
+        name: Routes.homeScreen.toName,
+        builder: (context, state) => const HomeScreen(),
       ),
     ],
   );

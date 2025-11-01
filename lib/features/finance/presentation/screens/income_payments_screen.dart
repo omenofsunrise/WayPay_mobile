@@ -6,7 +6,7 @@ import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
 import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
 import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/core/widgets/pagination_widget.dart';
 import 'package:waypay/core/widgets/refresh.dart';
 import 'package:waypay/features/finance/presentation/widgets/payment_card.dart';

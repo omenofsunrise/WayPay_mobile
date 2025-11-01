@@ -8,6 +8,7 @@ enum Routes {
   productScreen,
   budgetScreen,
   creditsScreen,
+  homeScreen,
 }
 
 extension RoutesExtension on Routes {
@@ -31,6 +32,8 @@ extension RoutesExtension on Routes {
         return '/budget_screen';
       case Routes.creditsScreen:
         return '/credits_screen';
+      case Routes.homeScreen:
+        return '/home_screen';
     }
   }
 
@@ -54,6 +57,8 @@ extension RoutesExtension on Routes {
         return 'BUDGET_SCREEN';
       case Routes.creditsScreen:
         return 'CREDITS_SCREEN';
+      case Routes.homeScreen:
+        return 'HOME_SCREEN';
     }
   }
 }

@@ -8,7 +8,7 @@ import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
 import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
 import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/core/widgets/pagination_widget.dart';
 import 'package:waypay/core/widgets/refresh.dart';
 import 'package:waypay/features/finance/data/data_source/budget_remote_data_source.dart';
@@ -26,7 +26,8 @@ class BudgetScreen extends StatefulWidget {
   State<BudgetScreen> createState() => _BudgetScreenState();
 }
 
-class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderStateMixin {
+class _BudgetScreenState extends State<BudgetScreen>
+    with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   final userStorage = UserStorage();
 
@@ -39,20 +40,32 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
     _tabController = TabController(length: 2, vsync: this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BudgetIncomeBloc>().add(LoadBudgetIncomeEvent(month: selectedMonth, year: selectedYear));
-      context.read<BudgetExpenseBloc>().add(LoadBudgetExpenseEvent(month: selectedMonth, year: selectedYear));
+      context.read<BudgetIncomeBloc>().add(
+        LoadBudgetIncomeEvent(month: selectedMonth, year: selectedYear),
+      );
+      context.read<BudgetExpenseBloc>().add(
+        LoadBudgetExpenseEvent(month: selectedMonth, year: selectedYear),
+      );
     });
   }
 
   String formatAmount(num amount) {
-    return NumberFormat.currency(locale: 'ru_RU', symbol: '₽', decimalDigits: 0).format(amount);
+    return NumberFormat.currency(
+      locale: 'ru_RU',
+      symbol: '₽',
+      decimalDigits: 0,
+    ).format(amount);
   }
 
   void _loadData(bool isIncome, int month, int year) {
     if (isIncome) {
-      context.read<BudgetIncomeBloc>().add(LoadBudgetIncomeEvent(month: month, year: year));
+      context.read<BudgetIncomeBloc>().add(
+        LoadBudgetIncomeEvent(month: month, year: year),
+      );
     } else {
-      context.read<BudgetExpenseBloc>().add(LoadBudgetExpenseEvent(month: month, year: year));
+      context.read<BudgetExpenseBloc>().add(
+        LoadBudgetExpenseEvent(month: month, year: year),
+      );
     }
   }
 
@@ -81,7 +94,12 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Период', style: AppStyle.manrope16.copyWith(color: const Color(AppColors.black))),
+                Text(
+                  'Период',
+                  style: AppStyle.manrope16.copyWith(
+                    color: const Color(AppColors.black),
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -92,8 +110,12 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.white,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                         icon: const Icon(Icons.arrow_drop_down),
                         items: List.generate(12, (i) => i + 1)
@@ -101,7 +123,11 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                               (m) => DropdownMenuItem(
                                 value: m,
                                 child: Text(
-                                  toBeginningOfSentenceCase(DateFormat.MMMM('ru_RU').format(DateTime(0, m)))!,
+                                  toBeginningOfSentenceCase(
+                                    DateFormat.MMMM(
+                                      'ru_RU',
+                                    ).format(DateTime(0, m)),
+                                  )!,
                                 ),
                               ),
                             )
@@ -120,14 +146,23 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.white,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                         icon: const Icon(Icons.arrow_drop_down),
-                        items: List.generate(
-                          5,
-                          (i) => DateTime.now().year - 2 + i,
-                        ).map((y) => DropdownMenuItem(value: y, child: Text(y.toString()))).toList(),
+                        items:
+                            List.generate(5, (i) => DateTime.now().year - 2 + i)
+                                .map(
+                                  (y) => DropdownMenuItem(
+                                    value: y,
+                                    child: Text(y.toString()),
+                                  ),
+                                )
+                                .toList(),
                         onChanged: (v) {
                           if (v == null) return;
                           setModalState(() => tempYear = v);
@@ -153,8 +188,12 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                 selectedYear = tempYear;
               });
 
-              incomeBloc.add(LoadBudgetIncomeEvent(month: tempMonth, year: tempYear));
-              expenseBloc.add(LoadBudgetExpenseEvent(month: tempMonth, year: tempYear));
+              incomeBloc.add(
+                LoadBudgetIncomeEvent(month: tempMonth, year: tempYear),
+              );
+              expenseBloc.add(
+                LoadBudgetExpenseEvent(month: tempMonth, year: tempYear),
+              );
 
               Navigator.pop(context);
             },
@@ -169,8 +208,12 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                 selectedYear = tempYear;
               });
 
-              incomeBloc.add(LoadBudgetIncomeEvent(month: tempMonth, year: tempYear));
-              expenseBloc.add(LoadBudgetExpenseEvent(month: tempMonth, year: tempYear));
+              incomeBloc.add(
+                LoadBudgetIncomeEvent(month: tempMonth, year: tempYear),
+              );
+              expenseBloc.add(
+                LoadBudgetExpenseEvent(month: tempMonth, year: tempYear),
+              );
 
               Navigator.pop(context);
             },
@@ -202,7 +245,9 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                   labelText: 'Сумма',
                   hintText: '0.0',
                   errorText: error,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
             ),
@@ -211,14 +256,20 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
               controller: commentController,
               decoration: InputDecoration(
                 labelText: 'Комментарий (необязательно)',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
             const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
-                  child: DefaultButton(text: 'Отмена', isGreen: false, onPressed: () => Navigator.pop(dialogContext)),
+                  child: DefaultButton(
+                    text: 'Отмена',
+                    isGreen: false,
+                    onPressed: () => Navigator.pop(dialogContext),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -229,7 +280,9 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                       amountError.value = null;
                       final amountText = amountController.text.trim();
 
-                      if (amountText.isEmpty || double.tryParse(amountText) == null || double.parse(amountText) <= 0) {
+                      if (amountText.isEmpty ||
+                          double.tryParse(amountText) == null ||
+                          double.parse(amountText) <= 0) {
                         amountError.value = 'Введите корректную сумму';
                         return;
                       }
@@ -239,27 +292,36 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                       showDialog(
                         context: context,
                         barrierDismissible: false,
-                        builder: (_) => const Center(child: CircularProgressIndicator()),
+                        builder: (_) =>
+                            const Center(child: CircularProgressIndicator()),
                       );
 
                       try {
-                        await getIt<BudgetRemoteDataSource>().createBudgetOutcome(
-                          CreateBudgetOutcomeDto(
-                            amount: double.parse(amountText),
-                            comment: commentController.text.trim().isEmpty ? null : commentController.text.trim(),
-                          ),
-                        );
+                        await getIt<BudgetRemoteDataSource>()
+                            .createBudgetOutcome(
+                              CreateBudgetOutcomeDto(
+                                amount: double.parse(amountText),
+                                comment: commentController.text.trim().isEmpty
+                                    ? null
+                                    : commentController.text.trim(),
+                              ),
+                            );
 
                         if (!context.mounted) return;
                         Navigator.pop(context);
 
                         context.read<BudgetExpenseBloc>().add(
-                          LoadBudgetExpenseEvent(month: selectedMonth, year: selectedYear),
+                          LoadBudgetExpenseEvent(
+                            month: selectedMonth,
+                            year: selectedYear,
+                          ),
                         );
 
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(const SnackBar(content: Text('Расход успешно добавлен')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Расход успешно добавлен'),
+                          ),
+                        );
                       } catch (e) {
                         if (!context.mounted) return;
                         Navigator.pop(context);
@@ -269,7 +331,12 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                             backgroundColor: Color(AppColors.background),
                             title: const Text('Ошибка'),
                             content: Text('Не удалось добавить расход.\n$e'),
-                            actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Ок'))],
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Ок'),
+                              ),
+                            ],
                           ),
                         );
                       }
@@ -297,14 +364,22 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
 
           try {
             await getIt<BudgetRemoteDataSource>().createBudgetIncome(
-              CreateBudgetIncomeDto(amount: amount, comment: comment, investorId: investor.id),
+              CreateBudgetIncomeDto(
+                amount: amount,
+                comment: comment,
+                investorId: investor.id,
+              ),
             );
 
             if (!mounted) return;
             Navigator.pop(context);
-            context.read<BudgetIncomeBloc>().add(LoadBudgetIncomeEvent(month: selectedMonth, year: selectedYear));
+            context.read<BudgetIncomeBloc>().add(
+              LoadBudgetIncomeEvent(month: selectedMonth, year: selectedYear),
+            );
 
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Приход успешно добавлен')));
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Приход успешно добавлен')),
+            );
           } catch (e) {
             if (!mounted) return;
             Navigator.pop(context);
@@ -314,7 +389,12 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                 backgroundColor: Color(AppColors.background),
                 title: const Text('Ошибка'),
                 content: Text('Не удалось добавить приход.\n$e'),
-                actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Ок'))],
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Ок'),
+                  ),
+                ],
               ),
             );
           }
@@ -332,7 +412,12 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
         surfaceTintColor: Colors.transparent,
         backgroundColor: const Color(AppColors.primary),
         elevation: 0,
-        title: Text('Бюджет', style: AppStyle.medium20.copyWith(color: const Color(AppColors.background))),
+        title: Text(
+          'Бюджет',
+          style: AppStyle.medium20.copyWith(
+            color: const Color(AppColors.background),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_alt, color: Colors.white),
@@ -348,11 +433,17 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
               return BlocBuilder<BudgetExpenseBloc, BudgetExpenseState>(
                 builder: (context, expenseState) {
                   final incomeTotal = incomeState is BudgetIncomeLoaded
-                      ? incomeState.incomes.fold<double>(0, (sum, item) => sum + item.amount)
+                      ? incomeState.incomes.fold<double>(
+                          0,
+                          (sum, item) => sum + item.amount,
+                        )
                       : 0.0;
 
                   final expenseTotal = expenseState is BudgetExpenseLoaded
-                      ? expenseState.expenses.fold<double>(0, (sum, item) => sum + item.amount)
+                      ? expenseState.expenses.fold<double>(
+                          0,
+                          (sum, item) => sum + item.amount,
+                        )
                       : 0.0;
 
                   return TabBar(
@@ -402,13 +493,21 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                           totalPages: state.totalPages,
                           onPageSelected: (page) {
                             context.read<BudgetIncomeBloc>().add(
-                              LoadBudgetIncomeEvent(page: page, month: selectedMonth, year: selectedYear),
+                              LoadBudgetIncomeEvent(
+                                page: page,
+                                month: selectedMonth,
+                                year: selectedYear,
+                              ),
                             );
                           },
                           onAddPressed: _showAddBudgetIncomeModal,
                           onRefresh: () async {
                             context.read<BudgetIncomeBloc>().add(
-                              LoadBudgetIncomeEvent(page: state.currentPage, month: selectedMonth, year: selectedYear),
+                              LoadBudgetIncomeEvent(
+                                page: state.currentPage,
+                                month: selectedMonth,
+                                year: selectedYear,
+                              ),
                             );
                           },
                         );
@@ -419,46 +518,57 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
                 ),
                 _buildBudgetTab(
                   isIncome: false,
-                  blocBuilder: BlocBuilder<BudgetExpenseBloc, BudgetExpenseState>(
-                    builder: (context, state) {
-                      if (state is BudgetExpenseLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (state is BudgetExpenseError) {
-                        return Center(child: Text(state.message));
-                      }
-                      if (state is BudgetExpenseLoaded) {
-                        return _buildBudgetContent(
-                          totalCount: state.totalCount,
-                          items: state.expenses
-                              .map(
-                                (e) => BudgetCard(
-                                  amount: e.amount,
-                                  comment: e.comment,
-                                  createdAt: e.createdAt,
-                                  isIncome: false,
-                                  id: e.id,
-                                ),
-                              )
-                              .toList(),
-                          currentPage: state.currentPage,
-                          totalPages: state.totalPages,
-                          onPageSelected: (page) {
-                            context.read<BudgetExpenseBloc>().add(
-                              LoadBudgetExpenseEvent(page: page, month: selectedMonth, year: selectedYear),
+                  blocBuilder:
+                      BlocBuilder<BudgetExpenseBloc, BudgetExpenseState>(
+                        builder: (context, state) {
+                          if (state is BudgetExpenseLoading) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
                             );
-                          },
-                          onAddPressed: _showAddBudgetOutcomeModal,
-                          onRefresh: () async {
-                            context.read<BudgetExpenseBloc>().add(
-                              LoadBudgetExpenseEvent(page: state.currentPage, month: selectedMonth, year: selectedYear),
+                          }
+                          if (state is BudgetExpenseError) {
+                            return Center(child: Text(state.message));
+                          }
+                          if (state is BudgetExpenseLoaded) {
+                            return _buildBudgetContent(
+                              totalCount: state.totalCount,
+                              items: state.expenses
+                                  .map(
+                                    (e) => BudgetCard(
+                                      amount: e.amount,
+                                      comment: e.comment,
+                                      createdAt: e.createdAt,
+                                      isIncome: false,
+                                      id: e.id,
+                                    ),
+                                  )
+                                  .toList(),
+                              currentPage: state.currentPage,
+                              totalPages: state.totalPages,
+                              onPageSelected: (page) {
+                                context.read<BudgetExpenseBloc>().add(
+                                  LoadBudgetExpenseEvent(
+                                    page: page,
+                                    month: selectedMonth,
+                                    year: selectedYear,
+                                  ),
+                                );
+                              },
+                              onAddPressed: _showAddBudgetOutcomeModal,
+                              onRefresh: () async {
+                                context.read<BudgetExpenseBloc>().add(
+                                  LoadBudgetExpenseEvent(
+                                    page: state.currentPage,
+                                    month: selectedMonth,
+                                    year: selectedYear,
+                                  ),
+                                );
+                              },
                             );
-                          },
-                        );
-                      }
-                      return const SizedBox();
-                    },
-                  ),
+                          }
+                          return const SizedBox();
+                        },
+                      ),
                 ),
               ],
             ),
@@ -468,11 +578,17 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildBudgetTab({required bool isIncome, required Widget blocBuilder}) {
+  Widget _buildBudgetTab({
+    required bool isIncome,
+    required Widget blocBuilder,
+  }) {
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
       ),
       child: blocBuilder,
     );
@@ -497,7 +613,10 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
             content: hasData
                 ? ListView(padding: const EdgeInsets.all(16), children: items)
                 : const Center(
-                    child: Text('Нет данных', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                    child: Text(
+                      'Нет данных',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
                   ),
           ),
         ),
@@ -505,7 +624,11 @@ class _BudgetScreenState extends State<BudgetScreen> with SingleTickerProviderSt
         if (hasData)
           Padding(
             padding: const EdgeInsets.only(top: 8, bottom: 16),
-            child: PaginationWidget(currentPage: currentPage, totalPages: totalPages, onPageSelected: onPageSelected),
+            child: PaginationWidget(
+              currentPage: currentPage,
+              totalPages: totalPages,
+              onPageSelected: onPageSelected,
+            ),
           ),
       ],
     );

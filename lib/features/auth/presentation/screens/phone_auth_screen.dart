@@ -6,7 +6,7 @@ import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
 import 'package:waypay/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:waypay/features/auth/presentation/widgets/call_confirmation_dialog.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/routes/routes.dart';
 
 class PhoneAuthScreen extends StatefulWidget {
@@ -21,7 +21,10 @@ class PhoneAuthScreen extends StatefulWidget {
 class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
-  final _phoneFormatter = MaskTextInputFormatter(mask: ' (###) ###-##-##', filter: {"#": RegExp(r'\d')});
+  final _phoneFormatter = MaskTextInputFormatter(
+    mask: ' (###) ###-##-##',
+    filter: {"#": RegExp(r'\d')},
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +43,10 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                 checkId: state.checkId,
                 phone: formattedPhone,
                 onTryConfirm: () async {
-                  await context.read<AuthCubit>().confirmCall(state.checkId, formattedPhone);
+                  await context.read<AuthCubit>().confirmCall(
+                    state.checkId,
+                    formattedPhone,
+                  );
                 },
               ),
             );
@@ -51,11 +57,14 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
 
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
-            }
+            } else {}
 
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
-                context.pushReplacementNamed(Routes.confirmationScreen.toName, extra: formattedPhone);
+                context.pushReplacementNamed(
+                  Routes.confirmationScreen.toName,
+                  extra: formattedPhone,
+                );
               }
             });
           }
@@ -91,16 +100,26 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                           inputFormatters: [_phoneFormatter],
                           decoration: InputDecoration(
                             labelText: 'Номер телефона',
-                            labelStyle: AppStyle.regular14.copyWith(color: const Color(AppColors.black)),
+                            labelStyle: AppStyle.regular14.copyWith(
+                              color: const Color(AppColors.black),
+                            ),
                             prefix: const Text('8'),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 14,
+                            ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Color(AppColors.primary)),
+                              borderSide: BorderSide(
+                                color: Color(AppColors.primary),
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Color(AppColors.primary), width: 2),
+                              borderSide: BorderSide(
+                                color: Color(AppColors.primary),
+                                width: 2,
+                              ),
                             ),
                             errorBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
@@ -108,7 +127,10 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                             ),
                             focusedErrorBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Colors.red, width: 2),
+                              borderSide: const BorderSide(
+                                color: Colors.red,
+                                width: 2,
+                              ),
                             ),
                           ),
                           validator: (value) {
@@ -121,14 +143,6 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                           },
                         ),
 
-                        if (state is AuthError)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              state.message,
-                              style: AppStyle.regular14.copyWith(color: const Color(AppColors.red)),
-                            ),
-                          ),
                         const SizedBox(height: 18),
                         isLoading
                             ? const Center(child: CircularProgressIndicator())
@@ -137,8 +151,12 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                                 isGreen: true,
                                 onPressed: () {
                                   if (_formKey.currentState!.validate()) {
-                                    final formattedPhone = '8${_phoneFormatter.getUnmaskedText()}';
-                                    context.read<AuthCubit>().startAuth(formattedPhone, widget.userType);
+                                    final formattedPhone =
+                                        '8${_phoneFormatter.getUnmaskedText()}';
+                                    context.read<AuthCubit>().startAuth(
+                                      formattedPhone,
+                                      widget.userType,
+                                    );
                                   }
                                 },
                               ),

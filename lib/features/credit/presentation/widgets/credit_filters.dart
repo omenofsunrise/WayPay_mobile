@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/features/credit/presentation/bloc/credit_bloc.dart';
 import 'package:waypay/features/credit/presentation/bloc/credit_event.dart';
 import 'package:waypay/features/credit/data/models/get_query_credits.dart';
@@ -12,7 +12,11 @@ class CreditFilters extends StatefulWidget {
   final bool showIncomeFilters;
   final bool showClientInvestorFilters;
 
-  const CreditFilters({super.key, this.showIncomeFilters = true, this.showClientInvestorFilters = true});
+  const CreditFilters({
+    super.key,
+    this.showIncomeFilters = true,
+    this.showClientInvestorFilters = true,
+  });
 
   @override
   State<CreditFilters> createState() => _CreditFiltersState();
@@ -35,19 +39,26 @@ class _CreditFiltersState extends State<CreditFilters> {
       LoadCreditsEvent(
         refresh: true,
         query: GetCreditsQuery(
-          creditId: _creditIdController.text.isNotEmpty ? int.tryParse(_creditIdController.text) : null,
+          creditId: _creditIdController.text.isNotEmpty
+              ? int.tryParse(_creditIdController.text)
+              : null,
           dateFrom: _dateFrom,
           dateTo: _dateTo,
-          investorNickname: widget.showClientInvestorFilters && _investorController.text.isNotEmpty
+          investorNickname:
+              widget.showClientInvestorFilters &&
+                  _investorController.text.isNotEmpty
               ? _investorController.text
               : null,
-          clientFullname: widget.showClientInvestorFilters && _fioController.text.isNotEmpty
+          clientFullname:
+              widget.showClientInvestorFilters && _fioController.text.isNotEmpty
               ? _fioController.text
               : null,
           rublesIncomeFrom: _incomeRubFromController.text.isNotEmpty
               ? double.tryParse(_incomeRubFromController.text)
               : null,
-          rublesIncomeTo: _incomeRubToController.text.isNotEmpty ? double.tryParse(_incomeRubToController.text) : null,
+          rublesIncomeTo: _incomeRubToController.text.isNotEmpty
+              ? double.tryParse(_incomeRubToController.text)
+              : null,
           percentsIncomeFrom: _incomePercFromController.text.isNotEmpty
               ? double.tryParse(_incomePercFromController.text)
               : null,
@@ -138,18 +149,33 @@ class _CreditFiltersState extends State<CreditFilters> {
           _buildStyledDatePicker('До: Дата', _dateTo, false),
 
           if (widget.showClientInvestorFilters) ...[
-            _buildStyledTextField(controller: _investorController, label: 'Инвестор'),
+            _buildStyledTextField(
+              controller: _investorController,
+              label: 'Инвестор',
+            ),
             _buildStyledTextField(controller: _fioController, label: 'ФИО'),
           ],
           if (widget.showIncomeFilters) ...[
-            _buildRangeGroupStyled(label: 'Доход, ₽', from: _incomeRubFromController, to: _incomeRubToController),
-            _buildRangeGroupStyled(label: 'Доход, %', from: _incomePercFromController, to: _incomePercToController),
+            _buildRangeGroupStyled(
+              label: 'Доход, ₽',
+              from: _incomeRubFromController,
+              to: _incomeRubToController,
+            ),
+            _buildRangeGroupStyled(
+              label: 'Доход, %',
+              from: _incomePercFromController,
+              to: _incomePercToController,
+            ),
           ],
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
-                child: DefaultButton(text: 'Очистить', isGreen: false, onPressed: _clearFilters),
+                child: DefaultButton(
+                  text: 'Очистить',
+                  isGreen: false,
+                  onPressed: _clearFilters,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -180,20 +206,29 @@ class _CreditFiltersState extends State<CreditFilters> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: AppStyle.manrope(size: 14, weight: FontWeight.w400)),
+          Text(
+            label,
+            style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
+          ),
           const SizedBox(height: 10),
           TextField(
             controller: controller,
             keyboardType: keyboardType,
             decoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 14,
+              ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: Color(AppColors.primary)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Color(AppColors.primary), width: 2),
+                borderSide: BorderSide(
+                  color: Color(AppColors.primary),
+                  width: 2,
+                ),
               ),
             ),
             style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
@@ -209,20 +244,29 @@ class _CreditFiltersState extends State<CreditFilters> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: AppStyle.manrope(size: 14, weight: FontWeight.w400)),
+          Text(
+            label,
+            style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
+          ),
           const SizedBox(height: 10),
           InkWell(
             onTap: () => _pickDate(isFrom: isFrom),
             child: InputDecorator(
               decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 14,
+                ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: Color(AppColors.primary)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Color(AppColors.primary), width: 2),
+                  borderSide: BorderSide(
+                    color: Color(AppColors.primary),
+                    width: 2,
+                  ),
                 ),
               ),
               child: Row(
@@ -252,7 +296,10 @@ class _CreditFiltersState extends State<CreditFilters> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: AppStyle.manrope(size: 14, weight: FontWeight.w400)),
+          Text(
+            label,
+            style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
+          ),
           const SizedBox(height: 10),
           Row(
             children: [

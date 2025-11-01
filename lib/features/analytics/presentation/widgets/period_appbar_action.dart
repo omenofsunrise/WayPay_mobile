@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/features/analytics/presentation/widgets/dropdown.dart';
 
 class PeriodAppBarAction extends StatelessWidget {

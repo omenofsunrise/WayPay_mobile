@@ -9,7 +9,7 @@ import 'package:waypay/features/profile/data/models/employee.dart';
 import 'package:waypay/core/storage/user_storage.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
 import 'package:waypay/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay/features/credit/data/models/credit_model.dart';
@@ -45,7 +45,10 @@ class _CreditModalState extends State<CreditModal> {
   }
 
   Widget _buildMenu(BuildContext context) {
-    final canDelete = userStorage.hasViewContent([EmployeeRole.superAdmin, EmployeeRole.director]);
+    final canDelete = userStorage.hasViewContent([
+      EmployeeRole.superAdmin,
+      EmployeeRole.director,
+    ]);
 
     if (!canDelete) return const SizedBox.shrink();
 
@@ -65,7 +68,10 @@ class _CreditModalState extends State<CreditModal> {
                 context: context,
                 builder: (ctx) => AlertDialog(
                   backgroundColor: Color(AppColors.background),
-                  title: const Text('Удалить договор?', style: TextStyle(color: Colors.black)),
+                  title: const Text(
+                    'Удалить договор?',
+                    style: TextStyle(color: Colors.black),
+                  ),
                   content: const Text(
                     'Вы уверены, что хотите удалить этот договор? Это действие необратимо.',
                     style: TextStyle(color: Colors.black87),
@@ -96,8 +102,12 @@ class _CreditModalState extends State<CreditModal> {
 
               if (confirmed == true) {
                 if (!context.mounted) return;
-                debugPrint('🟡 Подтверждено удаление договора ID: ${widget.credit.id}');
-                context.read<CreditBloc>().add(DeleteCreditEvent(widget.credit.id));
+                debugPrint(
+                  '🟡 Подтверждено удаление договора ID: ${widget.credit.id}',
+                );
+                context.read<CreditBloc>().add(
+                  DeleteCreditEvent(widget.credit.id),
+                );
                 Navigator.of(context).pop();
               }
             },
@@ -107,7 +117,10 @@ class _CreditModalState extends State<CreditModal> {
                 children: [
                   Icon(Icons.delete, size: 18, color: Colors.redAccent),
                   SizedBox(width: 4),
-                  Text('Удалить договор', style: TextStyle(color: Colors.redAccent)),
+                  Text(
+                    'Удалить договор',
+                    style: TextStyle(color: Colors.redAccent),
+                  ),
                 ],
               ),
             ),
@@ -125,7 +138,9 @@ class _CreditModalState extends State<CreditModal> {
       menu: _buildMenu(context),
       title: 'Договор №${widget.credit.id}',
       content: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.75),
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.75,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -134,7 +149,10 @@ class _CreditModalState extends State<CreditModal> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    LabeledContainer(label: 'Дата', text: _formatDate(widget.credit.creditDate)),
+                    LabeledContainer(
+                      label: 'Дата',
+                      text: _formatDate(widget.credit.creditDate),
+                    ),
                     // Row(
                     //   crossAxisAlignment: CrossAxisAlignment.center,
                     //   children: [
@@ -157,7 +175,10 @@ class _CreditModalState extends State<CreditModal> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
-                          child: LabeledContainer(label: 'Покупатель', text: widget.credit.clientFullName),
+                          child: LabeledContainer(
+                            label: 'Покупатель',
+                            text: widget.credit.clientFullName,
+                          ),
                         ),
                         const SizedBox(width: 10),
                         Column(
@@ -165,7 +186,10 @@ class _CreditModalState extends State<CreditModal> {
                             const SizedBox(height: 40),
                             InkWell(
                               child: Icon(Icons.remove_red_eye),
-                              onTap: () => _loadClientAndShowModal(context, widget.credit.clientId),
+                              onTap: () => _loadClientAndShowModal(
+                                context,
+                                widget.credit.clientId,
+                              ),
                             ),
                           ],
                         ),
@@ -176,11 +200,23 @@ class _CreditModalState extends State<CreditModal> {
                       text: _formatCurrency(widget.credit.firstPayment),
                     ),
 
-                    LabeledContainer(label: 'Срок, месяцев', text: widget.credit.termMonths.toString()),
+                    LabeledContainer(
+                      label: 'Срок, месяцев',
+                      text: widget.credit.termMonths.toString(),
+                    ),
                     if (widget.isControl) ...[
-                      LabeledContainer(label: 'Начислено', text: _formatCurrency(widget.credit.accured)),
-                      LabeledContainer(label: 'Доход %', text: '${widget.credit.incomePercents.toString()} %'),
-                      LabeledContainer(label: 'Доход ₽', text: _formatCurrency(widget.credit.incomeRubles)),
+                      LabeledContainer(
+                        label: 'Начислено',
+                        text: _formatCurrency(widget.credit.accured),
+                      ),
+                      LabeledContainer(
+                        label: 'Доход %',
+                        text: '${widget.credit.incomePercents.toString()} %',
+                      ),
+                      LabeledContainer(
+                        label: 'Доход ₽',
+                        text: _formatCurrency(widget.credit.incomeRubles),
+                      ),
                     ],
 
                     //InfoRow(label: 'Поручитель', value: widget.credit.guarantorId != null ? 'Есть' : 'Нет'),
@@ -188,7 +224,13 @@ class _CreditModalState extends State<CreditModal> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Заметки', style: AppStyle.manrope(size: 16, weight: FontWeight.w400)),
+                        Text(
+                          'Заметки',
+                          style: AppStyle.manrope(
+                            size: 16,
+                            weight: FontWeight.w400,
+                          ),
+                        ),
                         GestureDetector(
                           onTap: () {
                             showAddNoteDialog(context, widget.credit.id);
@@ -200,7 +242,9 @@ class _CreditModalState extends State<CreditModal> {
                               decoration: BoxDecoration(
                                 color: Color(AppColors.background),
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Color(AppColors.comfPayment)),
+                                border: Border.all(
+                                  color: Color(AppColors.comfPayment),
+                                ),
                               ),
                               child: Center(
                                 child: Text(
@@ -223,7 +267,10 @@ class _CreditModalState extends State<CreditModal> {
                         : _notes.isEmpty
                         ? Padding(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Text('Заметок нет', style: const TextStyle(color: Colors.black87)),
+                            child: Text(
+                              'Заметок нет',
+                              style: const TextStyle(color: Colors.black87),
+                            ),
                           )
                         : ListView.builder(
                             itemCount: _notes.length,
@@ -291,7 +338,9 @@ class _CreditModalState extends State<CreditModal> {
             maxLines: 5,
             decoration: const InputDecoration(
               hintText: 'Введите текст заметки',
-              border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+              ),
             ),
           ),
           actions: [
@@ -299,28 +348,41 @@ class _CreditModalState extends State<CreditModal> {
               onPressed: () {
                 Navigator.of(ctx).pop();
               },
-              child: const Text('Отмена', style: TextStyle(color: Colors.black)),
+              child: const Text(
+                'Отмена',
+                style: TextStyle(color: Colors.black),
+              ),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(AppColors.primary)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(AppColors.primary),
+              ),
               onPressed: () async {
                 Navigator.of(ctx).pop();
                 final dataSource = getIt<NoteRemoteDataSource>();
 
-                final note = NoteCreateRequest(creditId: creditId, content: controller.text);
+                final note = NoteCreateRequest(
+                  creditId: creditId,
+                  content: controller.text,
+                );
 
                 try {
                   await dataSource.createNote(note);
                   _loadNotes();
                 } catch (e) {
                   if (mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Ошибка при добавлении заметки: $e')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Ошибка при добавлении заметки: $e'),
+                      ),
+                    );
                   }
                 }
               },
-              child: const Text('Сохранить', style: TextStyle(color: Colors.white)),
+              child: const Text(
+                'Сохранить',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );
@@ -329,7 +391,11 @@ class _CreditModalState extends State<CreditModal> {
   }
 
   String _formatCurrency(num amount) {
-    final formatter = NumberFormat.currency(locale: 'ru_RU', symbol: '₽', decimalDigits: 0);
+    final formatter = NumberFormat.currency(
+      locale: 'ru_RU',
+      symbol: '₽',
+      decimalDigits: 0,
+    );
     return formatter.format(amount);
   }
 
@@ -346,7 +412,9 @@ class _CreditModalState extends State<CreditModal> {
       final data = await noteDataSource.fetchNotesByCreditId(creditId);
 
       for (var note in data) {
-        debugPrint('📌 Note: id=${note.id}, date=${note.createdAt}, content="${note.content}"');
+        debugPrint(
+          '📌 Note: id=${note.id}, date=${note.createdAt}, content="${note.content}"',
+        );
       }
 
       setState(() {
@@ -360,30 +428,42 @@ class _CreditModalState extends State<CreditModal> {
       setState(() => _isLoadingNotes = false);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ошибка загрузки заметок: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Ошибка загрузки заметок: $e')));
       }
     }
   }
 
-  Future<void> _loadClientAndShowModal(BuildContext context, int clientId) async {
+  Future<void> _loadClientAndShowModal(
+    BuildContext context,
+    int clientId,
+  ) async {
     final dataSource = getIt<ClientRemoteDataSource>();
     try {
       final client = await dataSource.getClientById(clientId);
       if (!context.mounted) return;
       _showClientModal(context, client);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ошибка загрузки клиента: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ошибка загрузки клиента: $e')));
     }
   }
 
-  Future<void> _loadInvestorAndShowModal(BuildContext context, int investorId) async {
+  Future<void> _loadInvestorAndShowModal(
+    BuildContext context,
+    int investorId,
+  ) async {
     final dataSource = getIt<InvestorsRemoteDataSource>();
     try {
       final investor = await dataSource.getInvestorById(investorId);
       if (!context.mounted) return;
       _showInvestorModal(context, investor);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ошибка загрузки инвестора: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ошибка загрузки инвестора: $e')));
     }
   }
 
@@ -400,14 +480,27 @@ class _CreditModalState extends State<CreditModal> {
               LabeledContainer(label: 'ID', text: client.id.toString()),
               LabeledContainer(label: 'ФИО', text: client.fullName),
               LabeledContainer(label: 'Телефон', text: client.phone),
-              LabeledContainer(label: 'Дата рождения', text: _formatDate(client.birthdate)),
+              LabeledContainer(
+                label: 'Дата рождения',
+                text: _formatDate(client.birthdate),
+              ),
               if (client.registrationAddress != null)
-                LabeledContainer(label: 'Адрес', text: client.registrationAddress!),
+                LabeledContainer(
+                  label: 'Адрес',
+                  text: client.registrationAddress!,
+                ),
               LabeledContainer(label: 'Паспорт', text: client.doc),
               if (client.docIssueYear != null)
-                LabeledContainer(label: 'Дата выдачи', text: '01.01.${client.docIssueYear}'),
+                LabeledContainer(
+                  label: 'Дата выдачи',
+                  text: '01.01.${client.docIssueYear}',
+                ),
               const SizedBox(height: 16),
-              DefaultButton(text: 'Закрыть', isGreen: true, onPressed: () => Navigator.pop(context)),
+              DefaultButton(
+                text: 'Закрыть',
+                isGreen: true,
+                onPressed: () => Navigator.pop(context),
+              ),
             ],
           ),
         ),
@@ -415,7 +508,10 @@ class _CreditModalState extends State<CreditModal> {
     );
   }
 
-  void _showInvestorModal(BuildContext context, InvestorsModel detailedInvestor) {
+  void _showInvestorModal(
+    BuildContext context,
+    InvestorsModel detailedInvestor,
+  ) {
     showDialog(
       context: context,
       builder: (_) {
@@ -433,11 +529,17 @@ class _CreditModalState extends State<CreditModal> {
                     children: [
                       TextSpan(
                         text: 'Никнейм: ',
-                        style: const TextStyle(fontSize: 14, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
                       ),
                       TextSpan(
                         text: detailedInvestor.nickname,
-                        style: const TextStyle(fontSize: 14, color: Colors.black),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
                       ),
                     ],
                   ),
@@ -449,11 +551,17 @@ class _CreditModalState extends State<CreditModal> {
                       children: [
                         TextSpan(
                           text: 'ФИО: ',
-                          style: const TextStyle(fontSize: 14, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
                         ),
                         TextSpan(
                           text: detailedInvestor.fullName,
-                          style: const TextStyle(fontSize: 14, color: Colors.black),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                          ),
                         ),
                       ],
                     ),
@@ -465,11 +573,17 @@ class _CreditModalState extends State<CreditModal> {
                     children: [
                       TextSpan(
                         text: 'Телефон: ',
-                        style: const TextStyle(fontSize: 14, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
                       ),
                       TextSpan(
                         text: detailedInvestor.phoneNumber ?? "не указан",
-                        style: const TextStyle(fontSize: 14, color: Colors.black),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
                       ),
                     ],
                   ),
@@ -480,11 +594,17 @@ class _CreditModalState extends State<CreditModal> {
                     children: [
                       TextSpan(
                         text: 'Доля инвестора: ',
-                        style: const TextStyle(fontSize: 14, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
                       ),
                       TextSpan(
                         text: '${detailedInvestor.investorPie}%',
-                        style: const TextStyle(fontSize: 14, color: Colors.black),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
                       ),
                     ],
                   ),
@@ -495,11 +615,19 @@ class _CreditModalState extends State<CreditModal> {
                     children: [
                       TextSpan(
                         text: 'Инвестиция: ',
-                        style: const TextStyle(fontSize: 14, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
                       ),
                       TextSpan(
-                        text: _formatCurrency(detailedInvestor.investmentAmount),
-                        style: const TextStyle(fontSize: 14, color: Colors.black),
+                        text: _formatCurrency(
+                          detailedInvestor.investmentAmount,
+                        ),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
                       ),
                     ],
                   ),
@@ -510,17 +638,27 @@ class _CreditModalState extends State<CreditModal> {
                     children: [
                       TextSpan(
                         text: 'Касса: ',
-                        style: const TextStyle(fontSize: 14, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
                       ),
                       TextSpan(
                         text: _formatCurrency(detailedInvestor.balance),
-                        style: const TextStyle(fontSize: 14, color: Colors.black),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
-                DefaultButton(text: 'Закрыть', isGreen: true, onPressed: () => Navigator.pop(context)),
+                DefaultButton(
+                  text: 'Закрыть',
+                  isGreen: true,
+                  onPressed: () => Navigator.pop(context),
+                ),
               ],
             ),
           ),

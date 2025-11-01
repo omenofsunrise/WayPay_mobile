@@ -24,7 +24,9 @@ Future<bool> showConfirmDialog({
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(true),
-          style: TextButton.styleFrom(backgroundColor: const Color(AppColors.primary)),
+          style: TextButton.styleFrom(
+            backgroundColor: const Color(AppColors.primary),
+          ),
           child: Text(confirmText, style: const TextStyle(color: Colors.white)),
         ),
       ],
@@ -53,7 +55,7 @@ final _avatarColors = [
 String? _resolvePhotoUrl(String? path) {
   if (path == null || path.isEmpty) return null;
   if (path.startsWith('http')) return path;
-  return 'http://test.waypay.one:5000$path';
+  return 'https://web.waypay.one:5001$path';
 }
 
 Color _getColorFromName(String name) {
@@ -113,7 +115,10 @@ Widget _buildAvatarWidget(String fullName, String? photoPath, double radius) {
   final resolvedUrl = _resolvePhotoUrl(photoPath);
 
   if (resolvedUrl != null) {
-    return CircleAvatar(radius: radius, backgroundImage: NetworkImage(resolvedUrl));
+    return CircleAvatar(
+      radius: radius,
+      backgroundImage: NetworkImage(resolvedUrl),
+    );
   }
 
   final initials = _getInitials(fullName);
@@ -123,7 +128,11 @@ Widget _buildAvatarWidget(String fullName, String? photoPath, double radius) {
     backgroundColor: _getColorFromName(fullName),
     child: Text(
       initials,
-      style: TextStyle(fontSize: radius * 0.75, fontWeight: FontWeight.w400, color: Colors.white),
+      style: TextStyle(
+        fontSize: radius * 0.75,
+        fontWeight: FontWeight.w400,
+        color: Colors.white,
+      ),
     ),
   );
 }

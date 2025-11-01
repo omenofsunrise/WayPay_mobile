@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 
 class CallConfirmationDialog extends StatefulWidget {
   final String callPhone;
@@ -68,11 +68,17 @@ class _CallConfirmationDialogState extends State<CallConfirmationDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Подтверждение авторизации', style: AppStyle.semiBold20, textAlign: TextAlign.center),
+            Text(
+              'Подтверждение авторизации',
+              style: AppStyle.semiBold20,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 16),
             Text(
               'Для завершения авторизации позвоните на номер:',
-              style: AppStyle.medium16.copyWith(color: const Color(AppColors.grey)),
+              style: AppStyle.medium16.copyWith(
+                color: const Color(AppColors.grey),
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -91,13 +97,10 @@ class _CallConfirmationDialogState extends State<CallConfirmationDialog> {
             const SizedBox(height: 16),
             Text(
               'После звонка проверка будет происходить автоматически.',
-              style: AppStyle.medium16.copyWith(color: const Color(AppColors.grey)),
+              style: AppStyle.medium16.copyWith(
+                color: const Color(AppColors.grey),
+              ),
               textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: DefaultButton(onPressed: () => context.pop(), text: 'Отмена', isGreen: true),
             ),
           ],
         ),

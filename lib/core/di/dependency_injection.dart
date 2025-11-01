@@ -45,6 +45,8 @@ import 'package:waypay/features/investors/data/data_sources/investors_remote_dat
 import 'package:waypay/features/investors/presentation/bloc/investors_bloc.dart';
 import 'package:waypay/features/note/data/data_sources/note_remote_data_source.dart';
 import 'package:waypay/features/note/data/data_sources/note_remote_data_source_impl.dart';
+import 'package:waypay/features/notifications/data/data_sources/notifications_data_source.dart';
+import 'package:waypay/features/notifications/data/data_sources/notifications_data_source_impl.dart';
 import 'package:waypay/features/product/data/data_sources/products_remote_data_source.dart';
 import 'package:waypay/features/product/data/data_sources/products_remote_data_source_impl.dart';
 import 'package:waypay/features/product/presentation/bloc/products_bloc.dart';
@@ -66,6 +68,7 @@ import 'package:waypay/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:waypay/features/todo/data/data_soucres/task_remote_data_source.dart';
 import 'package:waypay/features/todo/data/data_soucres/task_remote_data_source_impl.dart';
 import 'package:waypay/features/todo/presentation/bloc/task_bloc.dart';
+import '../../features/notifications/presentation/cubit/notifications_cubit.dart';
 import '../network/dio_client.dart';
 import '../network/token_storage.dart';
 
@@ -74,7 +77,7 @@ final getIt = GetIt.instance;
 Future<void> initDependencies() async {
   getIt.registerLazySingleton(() => createDio());
   getIt.registerLazySingleton<Dio>(
-    () => createDio(baseUrl: 'http://test.waypay.one:5003'),
+    () => createDio(baseUrl: 'https://web.waypay.one:5002'),
     instanceName: 'second',
   );
   getIt.registerLazySingleton(() => TokenStorage());
@@ -140,7 +143,7 @@ Future<void> initDependencies() async {
   );
   getIt.registerLazySingleton<ChatHubService>(
     () => ChatHubService(
-      baseUrl: 'http://test.waypay.one:5003',
+      baseUrl: 'https://web.waypay.one:5002',
       tokenProvider: () async => await getIt<TokenStorage>().getAccessToken(),
     ),
   );

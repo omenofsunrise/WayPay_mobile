@@ -33,6 +33,7 @@ class AppStyle {
   static final TextStyle medium16 = inter(size: 16, weight: FontWeight.w500);
   static final TextStyle regular14 = inter(size: 14, weight: FontWeight.w400);
   static final TextStyle semiBold20 = inter(size: 20, weight: FontWeight.w600);
+  static final TextStyle semiBold23 = inter(size: 23, weight: FontWeight.w500);
   static final TextStyle semiBold14 = inter(size: 14, weight: FontWeight.w600);
   static final TextStyle bold12 = inter(size: 12, weight: FontWeight.w700);
 }

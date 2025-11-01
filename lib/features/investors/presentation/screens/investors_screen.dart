@@ -19,7 +19,7 @@ import 'package:waypay/features/investors/presentation/widgets/investor_card.dar
 import 'package:waypay/features/profile/data/models/employee.dart';
 import 'package:waypay/routes/routes.dart';
 import 'package:waypay/core/storage/user_storage.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import '../bloc/investors_bloc.dart';
 
 class InvestorsScreen extends StatefulWidget {
@@ -75,7 +75,9 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
               decoration: InputDecoration(
                 hintText: 'Поиск инвесторов...',
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12),
@@ -131,7 +133,10 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
     final pieController = TextEditingController();
     final investmentController = TextEditingController();
 
-    final phoneFormatter = MaskTextInputFormatter(mask: '8 (###) ###-##-##', filter: {"#": RegExp(r'\d')});
+    final phoneFormatter = MaskTextInputFormatter(
+      mask: '8 (###) ###-##-##',
+      filter: {"#": RegExp(r'\d')},
+    );
 
     final ValueNotifier<String?> nicknameError = ValueNotifier(null);
     final ValueNotifier<String?> fullNameError = ValueNotifier(null);
@@ -175,7 +180,9 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
         investmentError.value = 'Введите сумму';
         isValid = false;
       } else {
-        final investmentValue = double.tryParse(investmentController.text.trim());
+        final investmentValue = double.tryParse(
+          investmentController.text.trim(),
+        );
         if (investmentValue == null || investmentValue < 0) {
           investmentError.value = 'Введите корректное число';
           isValid = false;
@@ -196,8 +203,11 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
               children: [
                 ValueListenableBuilder<String?>(
                   valueListenable: nicknameError,
-                  builder: (_, error, __) =>
-                      LabeledTextField(label: 'Никнейм', controller: nicknameController, errorText: error),
+                  builder: (_, error, __) => LabeledTextField(
+                    label: 'Никнейм',
+                    controller: nicknameController,
+                    errorText: error,
+                  ),
                 ),
                 ValueListenableBuilder<String?>(
                   valueListenable: fullNameError,
@@ -210,8 +220,11 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                 ),
                 ValueListenableBuilder<String?>(
                   valueListenable: phoneError,
-                  builder: (_, error, __) =>
-                      _buildPhoneField(controller: phoneController, formatter: phoneFormatter, errorText: error),
+                  builder: (_, error, __) => _buildPhoneField(
+                    controller: phoneController,
+                    formatter: phoneFormatter,
+                    errorText: error,
+                  ),
                 ),
                 ValueListenableBuilder<String?>(
                   valueListenable: pieError,
@@ -230,7 +243,9 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                     controller: investmentController,
                     keyboardType: TextInputType.number,
                     errorText: error,
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -264,30 +279,44 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (_) => const Center(child: CircularProgressIndicator()),
+                            builder: (_) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
                           );
 
                           try {
-                            await getIt<InvestorsRemoteDataSource>().createInvestor(
-                              nickname: nicknameController.text.trim(),
-                              fullName: fullNameController.text.trim(),
-                              phoneNumber: phoneController.text.trim().isEmpty
-                                  ? null
-                                  : phoneFormatter.getUnmaskedText(),
-                              investorPie: int.tryParse(pieController.text.trim()) ?? 0,
-                              investmentAmount: double.tryParse(investmentController.text.trim()) ?? 0.0,
-                            );
+                            await getIt<InvestorsRemoteDataSource>()
+                                .createInvestor(
+                                  nickname: nicknameController.text.trim(),
+                                  fullName: fullNameController.text.trim(),
+                                  phoneNumber:
+                                      phoneController.text.trim().isEmpty
+                                      ? null
+                                      : phoneFormatter.getUnmaskedText(),
+                                  investorPie:
+                                      int.tryParse(pieController.text.trim()) ??
+                                      0,
+                                  investmentAmount:
+                                      double.tryParse(
+                                        investmentController.text.trim(),
+                                      ) ??
+                                      0.0,
+                                );
 
                             if (!context.mounted) return;
                             Navigator.pop(context);
 
                             if (!context.mounted) return;
-                            context.read<InvestorsBloc>().add(LoadInvestorsEvent(refresh: true, page: 1));
+                            context.read<InvestorsBloc>().add(
+                              LoadInvestorsEvent(refresh: true, page: 1),
+                            );
 
                             if (!context.mounted) return;
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(const SnackBar(content: Text('Инвестор успешно создан')));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Инвестор успешно создан'),
+                              ),
+                            );
                           } catch (e) {
                             if (!context.mounted) return;
                             Navigator.pop(context);
@@ -297,7 +326,9 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                               context: context,
                               builder: (_) => AlertDialog(
                                 title: const Text('Ошибка'),
-                                content: Text('Не удалось создать инвестора.\n$e'),
+                                content: Text(
+                                  'Не удалось создать инвестора.\n$e',
+                                ),
                                 actions: [
                                   TextButton(
                                     onPressed: () {
@@ -332,7 +363,12 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
         surfaceTintColor: Colors.transparent,
         backgroundColor: const Color(AppColors.primary),
         elevation: 0,
-        title: Text('Инвесторы', style: AppStyle.medium20.copyWith(color: const Color(AppColors.background))),
+        title: Text(
+          'Инвесторы',
+          style: AppStyle.medium20.copyWith(
+            color: const Color(AppColors.background),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_alt, color: Colors.white),
@@ -349,7 +385,10 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                 child: Container(
                   decoration: const BoxDecoration(
                     color: Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
                   ),
                   child: BlocBuilder<InvestorsBloc, InvestorsState>(
                     builder: (context, state) {
@@ -364,17 +403,26 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.error_outline, size: 64, color: Color(AppColors.red)),
+                                const Icon(
+                                  Icons.error_outline,
+                                  size: 64,
+                                  color: Color(AppColors.red),
+                                ),
                                 const SizedBox(height: 16),
                                 const Text(
                                   'Ошибка загрузки',
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   state.message,
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(color: Color(AppColors.red)),
+                                  style: const TextStyle(
+                                    color: Color(AppColors.red),
+                                  ),
                                 ),
                                 const SizedBox(height: 16),
                                 if (state.message.contains('Сессия истекла') ||
@@ -382,7 +430,9 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                                   ElevatedButton(
                                     onPressed: _logout,
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(AppColors.red),
+                                      backgroundColor: const Color(
+                                        AppColors.red,
+                                      ),
                                       foregroundColor: Colors.white,
                                     ),
                                     child: const Text('Войти заново'),
@@ -392,7 +442,9 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                                 ElevatedButton(
                                   onPressed: () {
                                     if (!context.mounted) return;
-                                    context.read<InvestorsBloc>().add(LoadInvestorsEvent(refresh: true));
+                                    context.read<InvestorsBloc>().add(
+                                      LoadInvestorsEvent(refresh: true),
+                                    );
                                   },
                                   child: const Text('Повторить'),
                                 ),
@@ -418,13 +470,20 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                                   if (currentState is InvestorsLoaded) {
                                     currentPage = currentState.currentPage;
                                   }
-                                  bloc.add(LoadInvestorsEvent(refresh: true, page: currentPage));
+                                  bloc.add(
+                                    LoadInvestorsEvent(
+                                      refresh: true,
+                                      page: currentPage,
+                                    ),
+                                  );
                                 },
                                 content: ListView.builder(
                                   padding: const EdgeInsets.all(16),
                                   itemCount: state.investors.length,
                                   itemBuilder: (context, index) {
-                                    return InvestorCard(investor: state.investors[index]);
+                                    return InvestorCard(
+                                      investor: state.investors[index],
+                                    );
                                   },
                                 ),
                               ),
@@ -439,13 +498,21 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                             //   ),
                             // ),
                             Padding(
-                              padding: const EdgeInsets.only(top: 8, bottom: 16),
+                              padding: const EdgeInsets.only(
+                                top: 8,
+                                bottom: 16,
+                              ),
                               child: PaginationWidget(
                                 currentPage: state.currentPage,
                                 totalPages: state.totalPages,
                                 onPageSelected: (page) {
                                   if (!context.mounted) return;
-                                  context.read<InvestorsBloc>().add(LoadInvestorsEvent(refresh: true, page: page));
+                                  context.read<InvestorsBloc>().add(
+                                    LoadInvestorsEvent(
+                                      refresh: true,
+                                      page: page,
+                                    ),
+                                  );
                                 },
                               ),
                             ),
@@ -477,7 +544,10 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
         children: [
           Text(
             'Телефон',
-            style: AppStyle.medium16.copyWith(color: Colors.black87, fontWeight: FontWeight.w500),
+            style: AppStyle.medium16.copyWith(
+              color: Colors.black87,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 10),
           TextField(
@@ -487,14 +557,20 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
             decoration: InputDecoration(
               hintText: 'Телефон',
               errorText: errorText,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 14,
+              ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: Color(AppColors.primary)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Color(AppColors.primary), width: 2),
+                borderSide: BorderSide(
+                  color: Color(AppColors.primary),
+                  width: 2,
+                ),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),

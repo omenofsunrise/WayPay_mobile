@@ -9,7 +9,7 @@ import 'package:waypay/core/di/dependency_injection.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
 import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/core/widgets/form_modal/label_text_field.dart';
 import 'package:waypay/core/widgets/pagination_widget.dart';
 import 'package:waypay/features/profile/data/data_sources/employee_remote_data_source.dart';
@@ -62,14 +62,21 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
         title: const Text('Удаление'),
         content: Text('Удалить сотрудника "${employee.fullName}"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Отмена')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Отмена'),
+          ),
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
               try {
-                await getIt<EmployeeRemoteDataSource>().deleteEmployee(employee.id);
+                await getIt<EmployeeRemoteDataSource>().deleteEmployee(
+                  employee.id,
+                );
                 context.read<EmployeesBloc>().add(LoadEmployeesEvent());
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Сотрудник удалён')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Сотрудник удалён')),
+                );
               } catch (e) {
                 showDialog(
                   context: context,
@@ -77,7 +84,12 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                     backgroundColor: Color(AppColors.background),
                     title: const Text('Ошибка'),
                     content: Text('Не удалось удалить сотрудника.\n$e'),
-                    actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Ок'))],
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Ок'),
+                      ),
+                    ],
                   ),
                 );
               }
@@ -95,7 +107,10 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     final addressController = TextEditingController();
     final surchargeController = TextEditingController();
 
-    final phoneFormatter = MaskTextInputFormatter(mask: '8 (###) ###-##-##', filter: {"#": RegExp(r'\d')});
+    final phoneFormatter = MaskTextInputFormatter(
+      mask: '8 (###) ###-##-##',
+      filter: {"#": RegExp(r'\d')},
+    );
     EmployeeRole? selectedRole;
 
     final ValueNotifier<String?> fullNameError = ValueNotifier(null);
@@ -154,18 +169,27 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
               children: [
                 ValueListenableBuilder<String?>(
                   valueListenable: fullNameError,
-                  builder: (_, error, __) =>
-                      LabeledTextField(label: 'ФИО', controller: fullNameController, errorText: error),
+                  builder: (_, error, __) => LabeledTextField(
+                    label: 'ФИО',
+                    controller: fullNameController,
+                    errorText: error,
+                  ),
                 ),
                 ValueListenableBuilder<String?>(
                   valueListenable: phoneError,
-                  builder: (_, error, __) =>
-                      _buildPhoneField(controller: phoneController, formatter: phoneFormatter, errorText: error),
+                  builder: (_, error, __) => _buildPhoneField(
+                    controller: phoneController,
+                    formatter: phoneFormatter,
+                    errorText: error,
+                  ),
                 ),
                 ValueListenableBuilder<String?>(
                   valueListenable: addressError,
-                  builder: (_, error, __) =>
-                      LabeledTextField(label: 'Адрес', controller: addressController, errorText: error),
+                  builder: (_, error, __) => LabeledTextField(
+                    label: 'Адрес',
+                    controller: addressController,
+                    errorText: error,
+                  ),
                 ),
                 ValueListenableBuilder<String?>(
                   valueListenable: surchargeError,
@@ -173,7 +197,9 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                     label: 'Надбавка (%)',
                     controller: surchargeController,
                     keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                    ],
                     errorText: error,
                   ),
                 ),
@@ -189,8 +215,14 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                             value: EmployeeRole.accountant,
                             child: Text(EmployeeRole.accountant.toLabel()),
                           ),
-                          DropdownMenuItem(value: EmployeeRole.employee, child: Text(EmployeeRole.employee.toLabel())),
-                          DropdownMenuItem(value: EmployeeRole.admin, child: Text(EmployeeRole.admin.toLabel())),
+                          DropdownMenuItem(
+                            value: EmployeeRole.employee,
+                            child: Text(EmployeeRole.employee.toLabel()),
+                          ),
+                          DropdownMenuItem(
+                            value: EmployeeRole.admin,
+                            child: Text(EmployeeRole.admin.toLabel()),
+                          ),
                         ],
                         onChanged: (val) {
                           setState(() => selectedRole = val);
@@ -198,7 +230,9 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                         decoration: InputDecoration(
                           labelText: 'Роль',
                           errorText: error,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                       ),
                     ],
@@ -230,32 +264,45 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (_) => const Center(child: CircularProgressIndicator()),
+                            builder: (_) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
                           );
 
                           try {
-                            final minSurcharge = int.tryParse(surchargeController.text.trim());
+                            final minSurcharge = int.tryParse(
+                              surchargeController.text.trim(),
+                            );
                             if (minSurcharge == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Введите корректное целое число для Мин. надбавки')),
+                                SnackBar(
+                                  content: Text(
+                                    'Введите корректное целое число для Мин. надбавки',
+                                  ),
+                                ),
                               );
                               return;
                             }
-                            await getIt<EmployeeRemoteDataSource>().createEmployee(
-                              fullName: fullNameController.text.trim(),
-                              phone: phoneFormatter.getUnmaskedText(),
-                              address: addressController.text.trim(),
-                              minSurcharge: minSurcharge,
-                              role: selectedRole!.toApi(),
-                            );
+                            await getIt<EmployeeRemoteDataSource>()
+                                .createEmployee(
+                                  fullName: fullNameController.text.trim(),
+                                  phone: phoneFormatter.getUnmaskedText(),
+                                  address: addressController.text.trim(),
+                                  minSurcharge: minSurcharge,
+                                  role: selectedRole!.toApi(),
+                                );
 
                             if (!context.mounted) return;
                             Navigator.pop(context);
-                            context.read<EmployeesBloc>().add(LoadEmployeesEvent(page: 1));
+                            context.read<EmployeesBloc>().add(
+                              LoadEmployeesEvent(page: 1),
+                            );
 
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(const SnackBar(content: Text('Сотрудник успешно создан')));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Сотрудник успешно создан'),
+                              ),
+                            );
                           } catch (e) {
                             if (!context.mounted) return;
                             Navigator.pop(context);
@@ -264,8 +311,15 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                               builder: (_) => AlertDialog(
                                 backgroundColor: Color(AppColors.background),
                                 title: const Text('Ошибка'),
-                                content: Text('Не удалось создать сотрудника.\n$e'),
-                                actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Ок'))],
+                                content: Text(
+                                  'Не удалось создать сотрудника.\n$e',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('Ок'),
+                                  ),
+                                ],
                               ),
                             );
                           }
@@ -294,7 +348,10 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
         children: [
           Text(
             'Телефон',
-            style: AppStyle.medium16.copyWith(color: Colors.black87, fontWeight: FontWeight.w500),
+            style: AppStyle.medium16.copyWith(
+              color: Colors.black87,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 6),
           TextField(
@@ -304,8 +361,13 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
             decoration: InputDecoration(
               hintText: 'Телефон',
               errorText: errorText,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
         ],
@@ -323,7 +385,10 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
           children: [
             TextField(
               controller: _searchController,
-              decoration: const InputDecoration(hintText: 'Поиск по ФИО', border: OutlineInputBorder()),
+              decoration: const InputDecoration(
+                hintText: 'Поиск по ФИО',
+                border: OutlineInputBorder(),
+              ),
               onChanged: _onSearchChanged,
             ),
             const SizedBox(height: 12),
@@ -332,7 +397,12 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
               children: [
                 Flexible(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 300, minWidth: 140, minHeight: 44, maxHeight: 60),
+                    constraints: const BoxConstraints(
+                      maxWidth: 300,
+                      minWidth: 140,
+                      minHeight: 44,
+                      maxHeight: 60,
+                    ),
                     child: DefaultButton(
                       text: '+ Создать пользователя',
                       isGreen: true,
@@ -365,13 +435,20 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                     return Column(
                       children: [
                         Expanded(
-                          child: ListView(children: [_buildTableHeader(), ...state.employees.map(_buildEmployeeRow)]),
+                          child: ListView(
+                            children: [
+                              _buildTableHeader(),
+                              ...state.employees.map(_buildEmployeeRow),
+                            ],
+                          ),
                         ),
                         PaginationWidget(
                           currentPage: state.currentPage,
                           totalPages: state.totalPages,
                           onPageSelected: (page) {
-                            context.read<EmployeesBloc>().add(LoadEmployeesEvent(page: page));
+                            context.read<EmployeesBloc>().add(
+                              LoadEmployeesEvent(page: page),
+                            );
                           },
                         ),
                       ],
@@ -379,7 +456,9 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                   } else if (state is EmployeesError) {
                     return Center(child: Text(state.message));
                   } else {
-                    return const Center(child: Text('Не удалось загрузить сотрудников'));
+                    return const Center(
+                      child: Text('Не удалось загрузить сотрудников'),
+                    );
                   }
                 },
               ),
@@ -392,7 +471,9 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
 
   Widget _buildTableHeader() {
     return Container(
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300)),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+      ),
       child: Row(
         children: [
           _buildCell('№', flex: 1, isHeader: true),
@@ -406,7 +487,9 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
 
   Widget _buildEmployeeRow(Employee employee) {
     return Container(
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300)),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+      ),
       child: GestureDetector(
         onTap: () {
           context.pushNamed(Routes.profileScreen.toName, extra: employee.id);
@@ -416,7 +499,10 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
             _buildCell('${employee.id}', flex: 1),
             _buildCell(employee.fullName, flex: 4),
             _buildCell(employee.roleLabel, flex: 3),
-            _buildCellIcon(icon: Icons.delete, onPressed: () => _confirmDelete(employee)),
+            _buildCellIcon(
+              icon: Icons.delete,
+              onPressed: () => _confirmDelete(employee),
+            ),
           ],
         ),
       ),
@@ -431,12 +517,18 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
         decoration: BoxDecoration(
           border: Border(right: BorderSide(color: Colors.grey.shade300)),
         ),
-        child: Text(text, style: isHeader ? AppStyle.medium16 : AppStyle.regular14),
+        child: Text(
+          text,
+          style: isHeader ? AppStyle.medium16 : AppStyle.regular14,
+        ),
       ),
     );
   }
 
-  Widget _buildCellIcon({required IconData icon, required VoidCallback onPressed}) {
+  Widget _buildCellIcon({
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
     return Expanded(
       flex: 1,
       child: Container(

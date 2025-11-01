@@ -79,7 +79,9 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
       await userStorage.saveRole(role);
 
       final permissionsList = (employee['permissions'] as List?) ?? [];
-      final permissions = permissionsList.map((p) => PermissionMapper.fromApi(p.toString())).toList();
+      final permissions = permissionsList
+          .map((p) => PermissionMapper.fromApi(p.toString()))
+          .toList();
       await userStorage.savePermissions(permissions);
 
       debugPrint('✅ Роль обновлена: $role, права: $permissions');
@@ -102,7 +104,7 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
       if (_savedPin == pin) {
         await _updateUserRole();
         if (!mounted) return;
-        context.pushReplacementNamed(Routes.creditsScreen.toName);
+        context.go(Routes.homeScreen.toPath);
       } else {
         setState(() {
           _errorMessage = 'Неверный пин-код';
@@ -119,7 +121,7 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
         });
       } else {
         if (_firstPin == pin) {
-          final dio = createDio(baseUrl: 'http://test.waypay.one:5000');
+          final dio = createDio(baseUrl: 'https://web.waypay.one:5001');
           final authDataSource = AuthRemoteDataSourceImpl(dio);
 
           try {
@@ -128,7 +130,7 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
             await _tokenStorage.setAuthenticated(true);
             await _updateUserRole();
             if (mounted) {
-              context.pushReplacementNamed(Routes.creditsScreen.toName);
+              context.go(Routes.homeScreen.toPath);
             }
           } catch (e) {
             setState(() {
@@ -179,12 +181,22 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              border: value != 'back' ? Border.all(color: const Color(AppColors.primary)) : null,
+              border: value != 'back'
+                  ? Border.all(color: const Color(AppColors.primary))
+                  : null,
               borderRadius: BorderRadius.circular(12),
             ),
             child: value == 'back'
-                ? const Icon(Icons.backspace_outlined, color: Color(AppColors.primary))
-                : Text(value, style: AppStyle.medium20.copyWith(color: const Color(AppColors.primary))),
+                ? const Icon(
+                    Icons.backspace_outlined,
+                    color: Color(AppColors.primary),
+                  )
+                : Text(
+                    value,
+                    style: AppStyle.medium20.copyWith(
+                      color: const Color(AppColors.primary),
+                    ),
+                  ),
           ),
         ),
       ),
@@ -215,7 +227,13 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
         child: Column(
           children: [
             const SizedBox(height: 32),
-            Center(child: Image.asset(Images.backgroundLogo, height: 107, width: 107)),
+            Center(
+              child: Image.asset(
+                Images.backgroundLogo,
+                height: 107,
+                width: 107,
+              ),
+            ),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -225,7 +243,12 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
                   _buildPinDots(),
                   if (_errorMessage != null) ...[
                     const SizedBox(height: 12),
-                    Text(_errorMessage!, style: AppStyle.regular14.copyWith(color: const Color(AppColors.red))),
+                    Text(
+                      _errorMessage!,
+                      style: AppStyle.regular14.copyWith(
+                        color: const Color(AppColors.red),
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -238,7 +261,10 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: row.map((key) {
                       if (key == 'empty') {
-                        return Padding(padding: const EdgeInsets.all(8), child: const SizedBox(width: 60, height: 60));
+                        return Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: const SizedBox(width: 60, height: 60),
+                        );
                       }
                       return _buildKey(key);
                     }).toList(),

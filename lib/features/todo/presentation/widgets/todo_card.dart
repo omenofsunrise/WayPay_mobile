@@ -3,7 +3,7 @@ import 'package:waypay/core/di/dependency_injection.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
 import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/core/widgets/form_modal/label_text_field.dart';
 import 'package:waypay/core/widgets/helpers.dart';
 import 'package:waypay/features/profile/data/data_sources/employee_remote_data_source.dart';
@@ -23,7 +23,12 @@ class TodoCard extends StatefulWidget {
   /// 🔹 новый колбэк — для мгновенного обновления UI
   final ValueChanged<TaskStatus>? onLocalStatusChange;
 
-  const TodoCard({super.key, required this.task, this.onChanged, this.onLocalStatusChange});
+  const TodoCard({
+    super.key,
+    required this.task,
+    this.onChanged,
+    this.onLocalStatusChange,
+  });
 
   @override
   State<TodoCard> createState() => _TodoCardState();
@@ -34,16 +39,22 @@ class _TodoCardState extends State<TodoCard> {
 
   @override
   Widget build(BuildContext context) {
-    final isOverdue = widget.task.deadline != null && widget.task.deadline!.isBefore(DateTime.now());
+    final isOverdue =
+        widget.task.deadline != null &&
+        widget.task.deadline!.isBefore(DateTime.now());
 
     return SizedBox(
       width: double.infinity,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: Color(AppColors.background),
-          border: isOverdue ? Border(left: BorderSide(color: Color(AppColors.red), width: 4)) : null,
+          border: isOverdue
+              ? Border(left: BorderSide(color: Color(AppColors.red), width: 4))
+              : null,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: [BoxShadow(color: Colors.grey, blurRadius: 7, offset: Offset(0, 4))],
+          boxShadow: [
+            BoxShadow(color: Colors.grey, blurRadius: 7, offset: Offset(0, 4)),
+          ],
         ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -54,16 +65,26 @@ class _TodoCardState extends State<TodoCard> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.bookmark, size: 22, color: getPriorityColor(widget.task.priority)),
+                  Icon(
+                    Icons.bookmark,
+                    size: 22,
+                    color: getPriorityColor(widget.task.priority),
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.7,
+                      ),
                       child: Text(
                         widget.task.title,
                         softWrap: true,
                         overflow: TextOverflow.visible,
-                        style: AppStyle.manrope(size: 14, weight: FontWeight.w500, color: Color(AppColors.black)),
+                        style: AppStyle.manrope(
+                          size: 14,
+                          weight: FontWeight.w500,
+                          color: Color(AppColors.black),
+                        ),
                       ),
                     ),
                   ),
@@ -79,16 +100,24 @@ class _TodoCardState extends State<TodoCard> {
                       try {
                         switch (status) {
                           case TaskStatus.pending:
-                            await _taskDataSource.patchPendingTasks(widget.task.id);
+                            await _taskDataSource.patchPendingTasks(
+                              widget.task.id,
+                            );
                             break;
                           case TaskStatus.inProgress:
-                            await _taskDataSource.patchInProgressTasks(widget.task.id);
+                            await _taskDataSource.patchInProgressTasks(
+                              widget.task.id,
+                            );
                             break;
                           case TaskStatus.review:
-                            await _taskDataSource.patchReviewTasks(widget.task.id);
+                            await _taskDataSource.patchReviewTasks(
+                              widget.task.id,
+                            );
                             break;
                           case TaskStatus.done:
-                            await _taskDataSource.patchDoneTasks(widget.task.id);
+                            await _taskDataSource.patchDoneTasks(
+                              widget.task.id,
+                            );
                             break;
                         }
                         if (context.mounted && widget.onChanged != null) {
@@ -120,11 +149,19 @@ class _TodoCardState extends State<TodoCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Icon(Icons.calendar_month, size: 22, color: Color(AppColors.grey)),
+                  Icon(
+                    Icons.calendar_month,
+                    size: 22,
+                    color: Color(AppColors.grey),
+                  ),
                   const SizedBox(width: 2),
                   Text(
                     formatDate(widget.task.deadline),
-                    style: AppStyle.manrope(size: 12, weight: FontWeight.w400, color: Color(AppColors.black)),
+                    style: AppStyle.manrope(
+                      size: 12,
+                      weight: FontWeight.w400,
+                      color: Color(AppColors.black),
+                    ),
                   ),
                   const SizedBox(width: 10),
                   if (isOverdue)
@@ -132,7 +169,10 @@ class _TodoCardState extends State<TodoCard> {
                       height: 20,
                       width: 100,
                       child: DecoratedBox(
-                        decoration: BoxDecoration(color: Color(AppColors.red), borderRadius: BorderRadius.circular(16)),
+                        decoration: BoxDecoration(
+                          color: Color(AppColors.red),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                         child: Center(
                           child: Text(
                             'Просрочено',
@@ -149,11 +189,19 @@ class _TodoCardState extends State<TodoCard> {
               ),
               Row(
                 children: [
-                  buildAvatar(photoPath: widget.task.employeePhotoPath, fullName: widget.task.employeeName, radius: 15),
+                  buildAvatar(
+                    photoPath: widget.task.employeePhotoPath,
+                    fullName: widget.task.employeeName,
+                    radius: 15,
+                  ),
                   SizedBox(width: 4),
                   Text(
                     widget.task.employeeName ?? 'Нет исполнителя',
-                    style: AppStyle.manrope(size: 12, weight: FontWeight.w400, color: Color(AppColors.black)),
+                    style: AppStyle.manrope(
+                      size: 12,
+                      weight: FontWeight.w400,
+                      color: Color(AppColors.black),
+                    ),
                   ),
                 ],
               ),
@@ -241,7 +289,8 @@ class _TodoCardState extends State<TodoCard> {
           : '',
     );
 
-    final EmployeeRemoteDataSource empDataSource = getIt<EmployeeRemoteDataSource>();
+    final EmployeeRemoteDataSource empDataSource =
+        getIt<EmployeeRemoteDataSource>();
 
     String? titleError;
     String? deadlineError;
@@ -253,12 +302,18 @@ class _TodoCardState extends State<TodoCard> {
 
     if (task.employeeId != null) {
       final empJson1 = await empDataSource.getEmployeeById(task.employeeId!);
-      selectedExecutor = EmployeeName(id: empJson1['id'] as int, fullName: empJson1['fullName'] as String);
+      selectedExecutor = EmployeeName(
+        id: empJson1['id'] as int,
+        fullName: empJson1['fullName'] as String,
+      );
     }
 
     if (task.responsibleId != null) {
       final empJson2 = await empDataSource.getEmployeeById(task.responsibleId!);
-      selectedResponsible = EmployeeName(id: empJson2['id'] as int, fullName: empJson2['fullName'] as String);
+      selectedResponsible = EmployeeName(
+        id: empJson2['id'] as int,
+        fullName: empJson2['fullName'] as String,
+      );
     }
 
     DateTime? parsedDeadline;
@@ -332,7 +387,10 @@ class _TodoCardState extends State<TodoCard> {
                     const SizedBox(height: 4),
                     Text(
                       'Приоритет',
-                      style: AppStyle.medium16.copyWith(color: Colors.black87, fontWeight: FontWeight.w500),
+                      style: AppStyle.medium16.copyWith(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     PriorityDropdown(
@@ -347,7 +405,10 @@ class _TodoCardState extends State<TodoCard> {
                     const SizedBox(height: 16),
                     Text(
                       'Исполнитель',
-                      style: AppStyle.medium16.copyWith(color: Colors.black87, fontWeight: FontWeight.w500),
+                      style: AppStyle.medium16.copyWith(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     EmployeeDropdown(
@@ -362,7 +423,10 @@ class _TodoCardState extends State<TodoCard> {
                     const SizedBox(height: 16),
                     Text(
                       'Ответственный',
-                      style: AppStyle.medium16.copyWith(color: Colors.black87, fontWeight: FontWeight.w500),
+                      style: AppStyle.medium16.copyWith(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     EmployeeDropdown(

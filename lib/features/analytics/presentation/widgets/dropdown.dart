@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/default_button.dart';
+import 'package:waypay/core/widgets/buttons/default_button.dart';
 
 enum PeriodOption {
   last7Days('За последние 7 дней'),
@@ -34,7 +34,10 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
 
   @override
   Widget build(BuildContext context) {
-    final reorderedOptions = [PeriodOption.thisMonth, ...PeriodOption.values.where((e) => e != PeriodOption.thisMonth)];
+    final reorderedOptions = [
+      PeriodOption.thisMonth,
+      ...PeriodOption.values.where((e) => e != PeriodOption.thisMonth),
+    ];
     return PopupMenuButton<String>(
       color: Colors.white,
       onSelected: (value) {
@@ -42,7 +45,9 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
           _showCustomPeriodModal(context);
         } else {
           setState(() {
-            selectedOption = PeriodOption.values.firstWhere((e) => e.name == value);
+            selectedOption = PeriodOption.values.firstWhere(
+              (e) => e.name == value,
+            );
           });
           if (widget.onChanged != null) {
             widget.onChanged!(selectedOption, null);
@@ -56,7 +61,9 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
             padding: EdgeInsets.zero,
             child: Container(
               width: double.infinity,
-              color: selectedOption == option ? Color(AppColors.redTint) : Colors.transparent,
+              color: selectedOption == option
+                  ? Color(AppColors.redTint)
+                  : Colors.transparent,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Row(
                 children: [
@@ -68,7 +75,9 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
                       style: AppStyle.manrope(
                         size: 14,
                         weight: FontWeight.w400,
-                        color: selectedOption == option ? Colors.black : Colors.black,
+                        color: selectedOption == option
+                            ? Colors.black
+                            : Colors.black,
                       ),
                     ),
                   ),
@@ -83,7 +92,11 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
           child: Center(
             child: Text(
               'Другой период',
-              style: AppStyle.manrope(size: 14, weight: FontWeight.w400, color: Color(AppColors.radioColor)),
+              style: AppStyle.manrope(
+                size: 14,
+                weight: FontWeight.w400,
+                color: Color(AppColors.radioColor),
+              ),
             ),
           ),
         ),
@@ -98,7 +111,10 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(selectedOption?.label ?? 'Выбрать период', style: const TextStyle(fontSize: 14)),
+            Text(
+              selectedOption?.label ?? 'Выбрать период',
+              style: const TextStyle(fontSize: 14),
+            ),
             const Icon(Icons.arrow_drop_down),
           ],
         ),
@@ -142,7 +158,10 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
             child: Container(
               width: 10,
               height: 10,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: Color(AppColors.radioColor)),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(AppColors.radioColor),
+              ),
             ),
           ),
         ),
@@ -182,7 +201,9 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
       final lastDate = DateTime(2100);
       final picked = await showDatePicker(
         context: context,
-        initialDate: isStart ? (selectedStartDate ?? initialDate) : (selectedEndDate ?? initialDate),
+        initialDate: isStart
+            ? (selectedStartDate ?? initialDate)
+            : (selectedEndDate ?? initialDate),
         firstDate: firstDate,
         lastDate: lastDate,
       );
@@ -201,7 +222,9 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
         return StatefulBuilder(
           builder: (context, setState) {
             return Dialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               backgroundColor: Color(AppColors.background),
               child: SizedBox(
                 height: 320,
@@ -219,13 +242,20 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
                                 SizedBox(height: 15),
                                 Text(
                                   'Выбор периода',
-                                  style: AppStyle.manrope(size: 20, weight: FontWeight.w600, color: Colors.black),
+                                  style: AppStyle.manrope(
+                                    size: 20,
+                                    weight: FontWeight.w600,
+                                    color: Colors.black,
+                                  ),
                                 ),
                               ],
                             ),
                           ),
                           const Spacer(),
-                          IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+                          IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.close),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -240,7 +270,10 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
                             height: 48,
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
-                              border: Border.all(color: const Color(0xFFD1D5DB), width: 1),
+                              border: Border.all(
+                                color: const Color(0xFFD1D5DB),
+                                width: 1,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                               color: Colors.white,
                             ),
@@ -261,11 +294,16 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
                                     style: AppStyle.manrope(
                                       size: 14,
                                       weight: FontWeight.w400,
-                                      color: selectedStartDate == null ? Color(AppColors.grey) : Colors.black,
+                                      color: selectedStartDate == null
+                                          ? Color(AppColors.grey)
+                                          : Colors.black,
                                     ),
                                   ),
                                 ),
-                                const Icon(Icons.calendar_month, color: Color(AppColors.grey)),
+                                const Icon(
+                                  Icons.calendar_month,
+                                  color: Color(AppColors.grey),
+                                ),
                               ],
                             ),
                           ),
@@ -283,7 +321,10 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
                             height: 48,
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
-                              border: Border.all(color: const Color(0xFFD1D5DB), width: 1),
+                              border: Border.all(
+                                color: const Color(0xFFD1D5DB),
+                                width: 1,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                               color: Colors.white,
                             ),
@@ -304,11 +345,16 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
                                     style: AppStyle.manrope(
                                       size: 14,
                                       weight: FontWeight.w400,
-                                      color: selectedEndDate == null ? Color(AppColors.grey) : Colors.black,
+                                      color: selectedEndDate == null
+                                          ? Color(AppColors.grey)
+                                          : Colors.black,
                                     ),
                                   ),
                                 ),
-                                const Icon(Icons.calendar_month, color: Color(AppColors.grey)),
+                                const Icon(
+                                  Icons.calendar_month,
+                                  color: Color(AppColors.grey),
+                                ),
                               ],
                             ),
                           ),
@@ -330,7 +376,9 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
                             Expanded(
                               child: DefaultButton(
                                 text: 'Выбрать',
-                                onPressed: selectedStartDate != null && selectedEndDate != null
+                                onPressed:
+                                    selectedStartDate != null &&
+                                        selectedEndDate != null
                                     ? () {
                                         Navigator.pop(context);
                                         if (widget.onChanged != null &&
@@ -338,7 +386,10 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
                                             selectedEndDate != null) {
                                           widget.onChanged!(
                                             null,
-                                            DateTimeRange(start: selectedStartDate!, end: selectedEndDate!),
+                                            DateTimeRange(
+                                              start: selectedStartDate!,
+                                              end: selectedEndDate!,
+                                            ),
                                           );
                                         }
                                       }

@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'token_storage.dart';
 
-Dio createDio({String baseUrl = 'http://test.waypay.one:5000'}) {
+Dio createDio({String baseUrl = 'https://web.waypay.one:5001'}) {
   final dio = Dio(
     BaseOptions(
       baseUrl: baseUrl,

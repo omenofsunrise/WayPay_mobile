@@ -3,6 +3,8 @@ part of 'resources.dart';
 class SvgIcons {
   SvgIcons._();
 
+  static const String bell = 'assets/icons/bell.svg';
+  static const String search = 'assets/icons/search.svg';
   static const String book = 'assets/icons/book.svg';
   static const String coolicon = 'assets/icons/coolicon.svg';
   static const String currencyDollar = 'assets/icons/currency-dollar.svg';
