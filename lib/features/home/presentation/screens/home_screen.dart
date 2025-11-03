@@ -15,8 +15,29 @@ class HomeScreen extends StatelessWidget {
   String get _mockFullName => 'Иван Петров';
   String? get _mockPhotoPath => null;
 
+  bool _canSeeInvestorsSection() {
+    final userRole = UserStorage().getRoleSync();
+    return userRole == EmployeeRole.superAdmin ||
+        userRole == EmployeeRole.admin ||
+        userRole == EmployeeRole.director;
+  }
+
+  bool _canSeeAnalyticsSection() {
+    final userRole = UserStorage().getRoleSync();
+    final userPermissions = UserStorage().getPermissionsSync();
+
+    return userRole == EmployeeRole.superAdmin ||
+        userRole == EmployeeRole.director ||
+        userPermissions.any(
+          (permission) => permission == Permission.viewAnalytic,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userRole = UserStorage().getRoleSync();
+    final isAccountant = userRole == EmployeeRole.accountant;
+
     return Scaffold(
       backgroundColor: const Color(AppColors.background),
       body: SafeArea(
@@ -53,43 +74,11 @@ class HomeScreen extends StatelessWidget {
               _buildCompaniesSection(),
               const SliverToBoxAdapter(child: SizedBox(height: 13)),
 
-              SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        SectionTitle(text: 'Финансы'),
-                        Spacer(),
-                        MoreDetailsButton(
-                          onPressed: () {
-                            print('asd');
-                          },
-                        ),
-                      ],
-                    ),
-                    DashboardCard(title: 'Бюджет', value: '15 000'),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: DashboardCard(
-                            title: 'Текущий доход',
-                            value: '125 000',
-                          ),
-                        ),
-                        const SizedBox(width: 13),
-                        Expanded(
-                          child: DashboardCard(
-                            title: 'Ожидаемый доход',
-                            value: '125 000',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 13)),
+              if (_canSeeAnalyticsSection()) _buildAnalyticsSection(),
+
+              if (isAccountant) _buildFinanceSection(),
+              if (isAccountant)
+                const SliverToBoxAdapter(child: SizedBox(height: 13)),
 
               SliverToBoxAdapter(
                 child: Column(
@@ -213,27 +202,9 @@ class HomeScreen extends StatelessWidget {
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 13)),
 
-              SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        SectionTitle(text: 'Инвесторы'),
-                        Spacer(),
-                        MoreDetailsButton(
-                          onPressed: () {
-                            print('asd');
-                          },
-                        ),
-                      ],
-                    ),
-                    DashboardCard(title: 'Касса', value: '2463'),
-                    DashboardCard(title: 'Сумма инвестиций', value: '500'),
-                  ],
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              if (_canSeeInvestorsSection()) _buildInvestorsSection(),
+              if (_canSeeInvestorsSection())
+                const SliverToBoxAdapter(child: SizedBox(height: 20)),
             ],
           ),
         ),
@@ -274,6 +245,88 @@ class HomeScreen extends StatelessWidget {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFinanceSection() {
+    return SliverToBoxAdapter(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              SectionTitle(text: 'Финансы'),
+              Spacer(),
+              MoreDetailsButton(
+                onPressed: () {
+                  print('asd');
+                },
+              ),
+            ],
+          ),
+          DashboardCard(title: 'Бюджет', value: '15 000'),
+          Row(
+            children: [
+              Expanded(
+                child: DashboardCard(title: 'Текущий доход', value: '125 000'),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: DashboardCard(
+                  title: 'Ожидаемый доход',
+                  value: '125 000',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInvestorsSection() {
+    return SliverToBoxAdapter(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              SectionTitle(text: 'Инвесторы'),
+              Spacer(),
+              MoreDetailsButton(
+                onPressed: () {
+                  print('asd');
+                },
+              ),
+            ],
+          ),
+          DashboardCard(title: 'Касса', value: '2463'),
+          DashboardCard(title: 'Сумма инвестиций', value: '500'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnalyticsSection() {
+    return SliverToBoxAdapter(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              SectionTitle(text: 'Аналитика'),
+              Spacer(),
+              MoreDetailsButton(
+                onPressed: () {
+                  print('asd');
+                },
+              ),
+            ],
+          ),
+          DashboardCard(title: 'Текущий доход', value: '2 4633'),
+          DashboardCard(title: 'Активные договоры', value: '500'),
         ],
       ),
     );

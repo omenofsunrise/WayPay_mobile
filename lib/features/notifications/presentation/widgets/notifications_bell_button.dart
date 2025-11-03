@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:waypay/assets/resources.dart';
 import 'package:waypay/features/notifications/presentation/widgets/notifications_sheet.dart';
 
 class NotificationsBellButton extends StatelessWidget {
@@ -29,7 +30,7 @@ class NotificationsBellButton extends StatelessWidget {
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
             child: Center(
               child: SvgPicture.asset(
-                'assets/icons/bell.svg',
+                SvgIcons.bell,
                 width: iconSize,
                 height: iconSize,
               ),

@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum Routes {
   userTypeSelectionScreen,
   phoneAuthScreen,
@@ -9,6 +11,10 @@ enum Routes {
   budgetScreen,
   creditsScreen,
   homeScreen,
+  todoScreen,
+  chatScreen,
+  blogCreen,
+  calculatorScreen,
 }
 
 extension RoutesExtension on Routes {
@@ -34,6 +40,14 @@ extension RoutesExtension on Routes {
         return '/credits_screen';
       case Routes.homeScreen:
         return '/home_screen';
+      case Routes.todoScreen:
+        return '/todo_screen';
+      case Routes.chatScreen:
+        return '/chat_screen';
+      case Routes.blogCreen:
+        return '/blog_creen';
+      case Routes.calculatorScreen:
+        return '/calculator_screen';
     }
   }
 
@@ -59,6 +73,14 @@ extension RoutesExtension on Routes {
         return 'CREDITS_SCREEN';
       case Routes.homeScreen:
         return 'HOME_SCREEN';
+      case Routes.todoScreen:
+        return 'TODO_SCREEN';
+      case Routes.chatScreen:
+        return 'CHAT_SCREEN';
+      case Routes.blogCreen:
+        return 'BLOG_SCREEN';
+      case Routes.calculatorScreen:
+        return 'CALCULATOR_SCREEN';
     }
   }
 }

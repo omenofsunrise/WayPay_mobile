@@ -17,7 +17,6 @@ import 'package:waypay/features/credit/presentation/bloc/credit_bloc.dart';
 import 'package:waypay/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
 import 'package:waypay/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
 import 'package:waypay/features/investors/presentation/bloc/investors_bloc.dart';
-import 'package:waypay/features/notifications/presentation/cubit/notifications_cubit.dart';
 import 'package:waypay/features/product/presentation/bloc/products_bloc.dart';
 import 'package:waypay/features/profile/presentation/bloc/employees_bloc.dart';
 import 'package:waypay/features/profile/presentation/cubit/credit_stats_cubit.dart';

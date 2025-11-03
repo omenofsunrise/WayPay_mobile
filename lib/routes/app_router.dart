@@ -1,21 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:waypay/core/network/token_storage.dart';
-
 import 'package:waypay/features/auth/presentation/screens/confirmation_screen.dart';
 import 'package:waypay/features/auth/presentation/screens/phone_auth_screen.dart';
 import 'package:waypay/features/auth/presentation/screens/pin_code_screen.dart';
-
+import 'package:waypay/features/bottom_navigation_bar/main_layout.dart';
+import 'package:waypay/features/calc/calculator_page.dart';
+import 'package:waypay/features/chat/presentation/screens/all_chat_screen.dart';
 import 'package:waypay/features/credit/presentation/screens/credit_screen.dart';
-import 'package:waypay/features/finance/presentation/screens/budget_screen.dart';
-import 'package:waypay/features/investors/presentation/bloc/investors_bloc.dart';
-import 'package:waypay/features/investors/presentation/screens/investors_screen.dart';
-import 'package:waypay/features/product/presentation/screens/product_screen.dart';
-import 'package:waypay/features/profile/presentation/screens/profile_screen.dart';
 import 'package:waypay/features/home/presentation/screens/home_screen.dart';
-
+import 'package:waypay/features/blog/presentation/screens/blog_screen.dart';
+import 'package:waypay/features/todo/presentation/screen/todo_screen.dart';
 import 'package:waypay/routes/routes.dart';
 
 class AppRouter {
@@ -41,11 +35,23 @@ class AppRouter {
         }
         return null;
       }
+
       if (hasPinCode) {
         if (here == '/' ||
             here == Routes.phoneAuthScreen.toPath ||
             here == Routes.confirmationScreen.toPath) {
           return Routes.pinCodeScreen.toPath;
+        }
+        final mainScreens = {
+          Routes.homeScreen.toPath,
+          Routes.todoScreen.toPath,
+          Routes.chatScreen.toPath,
+          Routes.creditsScreen.toPath,
+          Routes.blogCreen.toPath,
+          Routes.calculatorScreen.toPath,
+        };
+        if (mainScreens.contains(here)) {
+          return null;
         }
         return null;
       }
@@ -87,50 +93,71 @@ class AppRouter {
         builder: (context, state) => const PinCodeScreen(),
       ),
 
-      GoRoute(
-        path: Routes.investorsScreen.toPath,
-        name: Routes.investorsScreen.toName,
-        pageBuilder: (context, state) {
-          return MaterialPage(
-            child: BlocProvider(
-              create: (_) =>
-                  InvestorsBloc()..add(LoadInvestorsEvent(refresh: true)),
-              child: const InvestorsScreen(),
-            ),
-          );
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainLayout(navigationShell: navigationShell);
         },
-      ),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.homeScreen.toPath,
+                name: Routes.homeScreen.toName,
+                builder: (context, state) => const HomeScreen(),
+              ),
+            ],
+          ),
 
-      GoRoute(
-        path: Routes.profileScreen.toPath,
-        name: Routes.profileScreen.toName,
-        builder: (context, state) {
-          final employeeId = state.extra as int?;
-          return ProfileScreen(employeeId: employeeId);
-        },
-      ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.todoScreen.toPath,
+                name: Routes.todoScreen.toName,
+                builder: (context, state) => const TodoScreen(),
+              ),
+            ],
+          ),
 
-      GoRoute(
-        path: Routes.productScreen.toPath,
-        name: Routes.productScreen.toName,
-        builder: (context, state) => const ProductsScreen(),
-      ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.chatScreen.toPath,
+                name: Routes.chatScreen.toName,
+                builder: (context, state) => const AllChatScreen(),
+              ),
+            ],
+          ),
 
-      GoRoute(
-        path: Routes.budgetScreen.toPath,
-        name: Routes.budgetScreen.toName,
-        builder: (context, state) => const BudgetScreen(),
-      ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.creditsScreen.toPath,
+                name: Routes.creditsScreen.toName,
+                builder: (context, state) => const CreditsScreen(),
+              ),
+            ],
+          ),
 
-      GoRoute(
-        path: Routes.creditsScreen.toPath,
-        name: Routes.creditsScreen.toName,
-        builder: (context, state) => const CreditsScreen(),
-      ),
-      GoRoute(
-        path: Routes.homeScreen.toPath,
-        name: Routes.homeScreen.toName,
-        builder: (context, state) => const HomeScreen(),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.blogCreen.toPath,
+                name: Routes.blogCreen.toName,
+                builder: (context, state) => const BlogScreen(),
+              ),
+            ],
+          ),
+
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.calculatorScreen.toPath,
+                name: Routes.calculatorScreen.toName,
+                builder: (context, state) => const CalculatorScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );

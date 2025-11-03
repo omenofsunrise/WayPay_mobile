@@ -4,6 +4,14 @@ class SvgIcons {
   SvgIcons._();
 
   static const String bell = 'assets/icons/bell.svg';
+
+  static const String blog = 'assets/icons/blog.svg';
+  static const String menuCalculator = 'assets/icons/menuCalculator.svg';
+  static const String chat = 'assets/icons/chat.svg';
+  static const String home = 'assets/icons/home.svg';
+  static const String newCredit = 'assets/icons/newCredit.svg';
+  static const String todo = 'assets/icons/todo.svg';
+
   static const String search = 'assets/icons/search.svg';
   static const String book = 'assets/icons/book.svg';
   static const String coolicon = 'assets/icons/coolicon.svg';
@@ -35,4 +43,31 @@ class SvgIcons {
   static const String investorIcon = 'assets/icons/investor_icon.svg';
   static const String investorPercent = 'assets/icons/investor_percent.svg';
   static const String shield_person = 'assets/icons/shield_person.svg';
+}
+
+class SvgIcon extends StatelessWidget {
+  final String assetPath;
+  final double? width;
+  final double? height;
+  final Color? color;
+
+  const SvgIcon({
+    super.key,
+    required this.assetPath,
+    this.width,
+    this.height,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SvgPicture.asset(
+      assetPath,
+      width: width ?? 24,
+      height: height ?? 24,
+      colorFilter: color != null
+          ? ColorFilter.mode(color!, BlendMode.srcIn)
+          : null,
+    );
+  }
 }
