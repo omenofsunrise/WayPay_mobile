@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay/core/widgets/buttons/add_button.dart';
 import 'package:waypay/core/widgets/cards/credit_card.dart';
+import 'package:waypay/core/widgets/search_field.dart';
 import 'package:waypay/features/credit/presentation/widgets/credit_tab.dart';
 import 'package:waypay/features/credit/presentation/widgets/credit_tab_action.dart';
 import 'package:waypay/core/storage/user_storage.dart';
@@ -142,24 +143,11 @@ class _CreditsScreenState extends State<CreditsScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: _onSearchChanged,
-                        decoration: InputDecoration(
-                          hintText: 'Поиск...',
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            color: Colors.grey,
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 0,
-                          ),
+                      child: Expanded(
+                        child: SearchField(
+                          hintText: 'Поиск',
+                          onChanged: (value) {},
+                          onSubmitted: (value) {},
                         ),
                       ),
                     ),
