@@ -25,7 +25,6 @@ class Header extends StatelessWidget {
       padding: const EdgeInsets.only(top: 0.0, bottom: 5.0),
       child: Row(
         children: [
-          // Аватар или кнопка назад
           if (showBackButton)
             GestureDetector(
               onTap: onBackPressed ?? () => context.pop(),

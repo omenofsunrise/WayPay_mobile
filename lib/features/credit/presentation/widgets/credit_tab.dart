@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:waypay/assets/resources.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
 
 enum CreditTab {
-  all('Все договоры', Icons.article),
-  favourite('Важные', Icons.star_border),
-  debtors('Должники', Icons.download_rounded),
-  archived('В архиве', Icons.hourglass_empty);
+  all('Все договоры', SvgIcons.allCredits),
+  favourite('Важные', SvgIcons.importantCredits),
+  debtors('Должники', SvgIcons.debtCredits),
+  archived('В архиве', SvgIcons.inactiveCredits);
 
   final String label;
-  final IconData icon;
-  const CreditTab(this.label, this.icon);
+  final String iconPath;
+
+  const CreditTab(this.label, this.iconPath);
 }
 
 class CreditTabDropdown extends StatelessWidget {
   final CreditTab selectedTab;
   final void Function(CreditTab tab) onTabSelected;
 
-  const CreditTabDropdown({super.key, required this.selectedTab, required this.onTabSelected});
+  const CreditTabDropdown({
+    super.key,
+    required this.selectedTab,
+    required this.onTabSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +43,21 @@ class CreditTabDropdown extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Иконка выбранного раздела - используем SvgIcon
+                SvgIcon(
+                  assetPath: selectedTab.iconPath,
+                  width: 20,
+                  height: 20,
+                  color: Colors.black,
+                ),
+                const SizedBox(width: 6),
                 Text(
-                  _getLabel(selectedTab),
-                  style: AppStyle.manrope(size: 14, weight: FontWeight.w400, color: Colors.black),
+                  selectedTab.label, // Используем свойство label напрямую
+                  style: AppStyle.manrope(
+                    size: 14,
+                    weight: FontWeight.w400,
+                    color: Colors.black,
+                  ),
                 ),
                 const SizedBox(width: 4),
                 const Icon(Icons.arrow_drop_down, color: Colors.black),
@@ -49,15 +67,16 @@ class CreditTabDropdown extends StatelessWidget {
         ),
       ),
       itemBuilder: (context) => [
-        _buildTabItem(context, CreditTab.all, 'Все договоры'),
-        _buildTabItem(context, CreditTab.favourite, 'Важные'),
-        _buildTabItem(context, CreditTab.debtors, 'Должники'),
-        _buildTabItem(context, CreditTab.archived, 'В архиве'),
+        _buildTabItem(context, CreditTab.all),
+        _buildTabItem(context, CreditTab.favourite),
+        _buildTabItem(context, CreditTab.debtors),
+        _buildTabItem(context, CreditTab.archived),
       ],
+      onSelected: onTabSelected,
     );
   }
 
-  PopupMenuItem<CreditTab> _buildTabItem(BuildContext context, CreditTab tab, String label) {
+  PopupMenuItem<CreditTab> _buildTabItem(BuildContext context, CreditTab tab) {
     final isSelected = tab == selectedTab;
     return PopupMenuItem<CreditTab>(
       value: tab,
@@ -72,32 +91,33 @@ class CreditTabDropdown extends StatelessWidget {
           child: Row(
             children: [
               Icon(
-                isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                isSelected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_off,
                 color: isSelected ? Colors.teal : Colors.grey,
                 size: 20,
               ),
               const SizedBox(width: 8),
+              // Иконка вкладки - используем SvgIcon
+              SvgIcon(
+                assetPath: tab.iconPath,
+                width: 20,
+                height: 20,
+                color: Colors.black,
+              ),
+              const SizedBox(width: 8),
               Text(
-                label,
-                style: AppStyle.manrope(size: 14, weight: FontWeight.w400, color: Colors.black),
+                tab.label,
+                style: AppStyle.manrope(
+                  size: 14,
+                  weight: FontWeight.w400,
+                  color: Colors.black,
+                ),
               ),
             ],
           ),
         ),
       ),
     );
-  }
-
-  String _getLabel(CreditTab tab) {
-    switch (tab) {
-      case CreditTab.all:
-        return 'Все договоры';
-      case CreditTab.favourite:
-        return 'Важные';
-      case CreditTab.debtors:
-        return 'Должники';
-      case CreditTab.archived:
-        return 'В архиве';
-    }
   }
 }

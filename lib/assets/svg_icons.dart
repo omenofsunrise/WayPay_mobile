@@ -12,6 +12,11 @@ class SvgIcons {
   static const String newCredit = 'assets/icons/newCredit.svg';
   static const String todo = 'assets/icons/todo.svg';
 
+  static const String allCredits = 'assets/icons/all_credits.svg';
+  static const String importantCredits = 'assets/icons/important_credits.svg';
+  static const String debtCredits = 'assets/icons/debt_credits.svg';
+  static const String inactiveCredits = 'assets/icons/inactive_credits.svg';
+
   static const String search = 'assets/icons/search.svg';
   static const String book = 'assets/icons/book.svg';
   static const String coolicon = 'assets/icons/coolicon.svg';
