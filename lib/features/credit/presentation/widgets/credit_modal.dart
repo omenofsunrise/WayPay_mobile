@@ -8,7 +8,6 @@ import 'package:waypay/features/profile/data/models/employee.dart';
 
 import 'package:waypay/core/storage/user_storage.dart';
 import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/app_modal.dart';
 import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
 import 'package:waypay/features/clients/data/models/clients/client_model.dart';
@@ -23,17 +22,21 @@ import 'package:waypay/features/note/data/data_sources/note_remote_data_source.d
 import 'package:waypay/features/note/data/models/note_create_request.dart';
 import 'package:waypay/features/note/data/models/note_model.dart';
 
-class CreditModal extends StatefulWidget {
+class CreditFullScreen extends StatefulWidget {
   final CreditModel credit;
   final bool isControl;
 
-  const CreditModal({super.key, required this.credit, required this.isControl});
+  const CreditFullScreen({
+    super.key,
+    required this.credit,
+    required this.isControl,
+  });
 
   @override
-  State<CreditModal> createState() => _CreditModalState();
+  State<CreditFullScreen> createState() => _CreditFullScreenState();
 }
 
-class _CreditModalState extends State<CreditModal> {
+class _CreditFullScreenState extends State<CreditFullScreen> {
   List<NoteModel> _notes = [];
   bool _isLoadingNotes = true;
   UserStorage userStorage = UserStorage();
@@ -42,6 +45,26 @@ class _CreditModalState extends State<CreditModal> {
   void initState() {
     super.initState();
     _loadNotes();
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: Color(AppColors.background),
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      title: Text(
+        'Договор №${widget.credit.id}',
+        style: AppStyle.manrope(
+          size: 18,
+          weight: FontWeight.w600,
+          color: Colors.black,
+        ),
+      ),
+      actions: [_buildMenu(context), const SizedBox(width: 8)],
+    );
   }
 
   Widget _buildMenu(BuildContext context) {
@@ -53,7 +76,7 @@ class _CreditModalState extends State<CreditModal> {
     if (!canDelete) return const SizedBox.shrink();
 
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_horiz, size: 18),
+      icon: const Icon(Icons.more_vert, color: Colors.black, size: 24),
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       itemBuilder: (context) => [
@@ -115,8 +138,8 @@ class _CreditModalState extends State<CreditModal> {
               padding: EdgeInsets.symmetric(vertical: 8),
               child: Row(
                 children: [
-                  Icon(Icons.delete, size: 18, color: Colors.redAccent),
-                  SizedBox(width: 4),
+                  Icon(Icons.delete, size: 20, color: Colors.redAccent),
+                  SizedBox(width: 8),
                   Text(
                     'Удалить договор',
                     style: TextStyle(color: Colors.redAccent),
@@ -133,183 +156,353 @@ class _CreditModalState extends State<CreditModal> {
   @override
   Widget build(BuildContext context) {
     final userStorage = UserStorage();
-    return AppModal(
+    return Scaffold(
       backgroundColor: Color(AppColors.background),
-      menu: _buildMenu(context),
-      title: 'Договор №${widget.credit.id}',
-      content: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.75,
-        ),
+      appBar: _buildAppBar(context),
+      body: SafeArea(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Flexible(
+            Expanded(
               child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    LabeledContainer(
-                      label: 'Дата',
-                      text: _formatDate(widget.credit.creditDate),
-                    ),
-                    // Row(
-                    //   crossAxisAlignment: CrossAxisAlignment.center,
-                    //   children: [
-                    //     Expanded(
-                    //       child: InfoRow(
-                    //         label: 'Инвестор',
-                    //         value: widget.credit.investorNickname,
-                    //       ),
-                    //     ),
-                    //     InkWell(
-                    //       child: Icon(Icons.remove_red_eye),
-                    //       onTap: () => _loadInvestorAndShowModal(
-                    //         context,
-                    //         widget.credit.investorId,
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: LabeledContainer(
-                            label: 'Покупатель',
-                            text: widget.credit.clientFullName,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Column(
-                          children: [
-                            const SizedBox(height: 40),
-                            InkWell(
-                              child: Icon(Icons.remove_red_eye),
-                              onTap: () => _loadClientAndShowModal(
-                                context,
-                                widget.credit.clientId,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    LabeledContainer(
-                      label: 'Первоначальный взнос, руб',
-                      text: _formatCurrency(widget.credit.firstPayment),
-                    ),
+                    // Основная информация о договоре
+                    _buildCreditInfoSection(),
 
-                    LabeledContainer(
-                      label: 'Срок, месяцев',
-                      text: widget.credit.termMonths.toString(),
-                    ),
-                    if (widget.isControl) ...[
-                      LabeledContainer(
-                        label: 'Начислено',
-                        text: _formatCurrency(widget.credit.accured),
-                      ),
-                      LabeledContainer(
-                        label: 'Доход %',
-                        text: '${widget.credit.incomePercents.toString()} %',
-                      ),
-                      LabeledContainer(
-                        label: 'Доход ₽',
-                        text: _formatCurrency(widget.credit.incomeRubles),
-                      ),
-                    ],
+                    const SizedBox(height: 24),
 
-                    //InfoRow(label: 'Поручитель', value: widget.credit.guarantorId != null ? 'Есть' : 'Нет'),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Заметки',
-                          style: AppStyle.manrope(
-                            size: 16,
-                            weight: FontWeight.w400,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            showAddNoteDialog(context, widget.credit.id);
-                          },
-                          child: SizedBox(
-                            height: 22,
-                            width: 100,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: Color(AppColors.background),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: Color(AppColors.comfPayment),
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '+ Добавить',
-                                  style: AppStyle.manrope(
-                                    size: 14,
-                                    weight: FontWeight.w500,
-                                    color: Color(AppColors.comfPayment),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    _isLoadingNotes
-                        ? const Center(child: CircularProgressIndicator())
-                        : _notes.isEmpty
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Text(
-                              'Заметок нет',
-                              style: const TextStyle(color: Colors.black87),
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: _notes.length,
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemBuilder: (context, index) {
-                              final note = _notes[index];
-                              return Note(
-                                note: note,
-                                onDelete: () {
-                                  _notes.removeAt(index);
-                                  setState(() {});
-                                },
-                              );
-                            },
-                          ),
+                    // Финансовая информация (если доступно)
+                    if (widget.isControl) _buildFinancialInfoSection(),
+
+                    const SizedBox(height: 24),
+
+                    // Секция заметок
+                    _buildNotesSection(),
+
+                    const SizedBox(height: 80), // Отступ для кнопки внизу
                   ],
                 ),
               ),
             ),
+
+            // Кнопка добавления платежа
             if (userStorage.hasViewContent([
               EmployeeRole.admin,
               EmployeeRole.director,
               EmployeeRole.employee,
               EmployeeRole.superAdmin,
             ]))
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: DefaultButton(
-                  text: 'Добавить платёж',
-                  onPressed: () {
-                    Future.delayed(Duration.zero, () {
-                      _showCreatePaymentModal(context, widget.credit);
-                    });
-                  },
-                  isGreen: true,
+              _buildBottomButton(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCreditInfoSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Основная информация',
+          style: AppStyle.manrope(size: 18, weight: FontWeight.w600),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              _buildInfoRow(
+                'Дата договора',
+                _formatDate(widget.credit.creditDate),
+              ),
+              const SizedBox(height: 12),
+              _buildClientRow(),
+              const SizedBox(height: 12),
+              _buildInfoRow(
+                'Первоначальный взнос',
+                _formatCurrency(widget.credit.firstPayment),
+              ),
+              const SizedBox(height: 12),
+              _buildInfoRow(
+                'Срок договора',
+                '${widget.credit.termMonths} месяцев',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFinancialInfoSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Финансовая информация',
+          style: AppStyle.manrope(size: 18, weight: FontWeight.w600),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              _buildInfoRow(
+                'Начислено',
+                _formatCurrency(widget.credit.accured),
+              ),
+              const SizedBox(height: 12),
+              _buildInfoRow(
+                'Доход в %',
+                '${widget.credit.incomePercents.toString()} %',
+              ),
+              const SizedBox(height: 12),
+              _buildInfoRow(
+                'Доход в рублях',
+                _formatCurrency(widget.credit.incomeRubles),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNotesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Заметки',
+              style: AppStyle.manrope(size: 18, weight: FontWeight.w600),
+            ),
+            GestureDetector(
+              onTap: () {
+                showAddNoteDialog(context, widget.credit.id);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Color(AppColors.primary).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Color(AppColors.primary)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add, size: 16, color: Color(AppColors.primary)),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Добавить',
+                      style: AppStyle.manrope(
+                        size: 14,
+                        weight: FontWeight.w500,
+                        color: Color(AppColors.primary),
+                      ),
+                    ),
+                  ],
                 ),
               ),
+            ),
           ],
+        ),
+        const SizedBox(height: 16),
+        _isLoadingNotes
+            ? const Center(child: CircularProgressIndicator())
+            : _notes.isEmpty
+            ? Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Icon(Icons.note_add, size: 48, color: Colors.grey[400]),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Заметок пока нет',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Добавьте первую заметку',
+                      style: TextStyle(color: Colors.grey[500], fontSize: 14),
+                    ),
+                  ],
+                ),
+              )
+            : ListView.separated(
+                itemCount: _notes.length,
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final note = _notes[index];
+                  return Note(
+                    note: note,
+                    onDelete: () {
+                      _notes.removeAt(index);
+                      setState(() {});
+                    },
+                  );
+                },
+              ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(
+            label,
+            style: AppStyle.manrope(
+              size: 14,
+              weight: FontWeight.w400,
+              color: Colors.grey[600],
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Text(
+            value,
+            style: AppStyle.manrope(
+              size: 14,
+              weight: FontWeight.w500,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildClientRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(
+            'Покупатель',
+            style: AppStyle.manrope(
+              size: 14,
+              weight: FontWeight.w400,
+              color: Colors.grey[600],
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Text(
+                  widget.credit.clientFullName,
+                  style: AppStyle.manrope(
+                    size: 14,
+                    weight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.right,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              InkWell(
+                onTap: () =>
+                    _loadClientAndShowModal(context, widget.credit.clientId),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(
+                    Icons.remove_red_eye,
+                    size: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBottomButton(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: DefaultButton(
+          text: 'Добавить платёж',
+          onPressed: () {
+            _showCreatePaymentModal(context, widget.credit);
+          },
+          isGreen: true,
         ),
       ),
     );
@@ -470,40 +663,92 @@ class _CreditModalState extends State<CreditModal> {
   void _showClientModal(BuildContext context, ClientModel client) {
     showDialog(
       context: context,
-      builder: (_) => AppModal(
+      builder: (_) => Dialog(
         backgroundColor: Color(AppColors.background),
-        title: 'Информация о клиенте',
-        content: SingleChildScrollView(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              LabeledContainer(label: 'ID', text: client.id.toString()),
-              LabeledContainer(label: 'ФИО', text: client.fullName),
-              LabeledContainer(label: 'Телефон', text: client.phone),
-              LabeledContainer(
-                label: 'Дата рождения',
-                text: _formatDate(client.birthdate),
+              Text(
+                'Информация о клиенте',
+                style: AppStyle.manrope(size: 18, weight: FontWeight.w600),
               ),
-              if (client.registrationAddress != null)
-                LabeledContainer(
-                  label: 'Адрес',
-                  text: client.registrationAddress!,
+              const SizedBox(height: 20),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildClientInfoRow('ID', client.id.toString()),
+                      _buildClientInfoRow('ФИО', client.fullName),
+                      _buildClientInfoRow('Телефон', client.phone),
+                      _buildClientInfoRow(
+                        'Дата рождения',
+                        _formatDate(client.birthdate),
+                      ),
+                      if (client.registrationAddress != null)
+                        _buildClientInfoRow(
+                          'Адрес',
+                          client.registrationAddress!,
+                        ),
+                      _buildClientInfoRow('Паспорт', client.doc),
+                      if (client.docIssueYear != null)
+                        _buildClientInfoRow(
+                          'Дата выдачи',
+                          '01.01.${client.docIssueYear}',
+                        ),
+                    ],
+                  ),
                 ),
-              LabeledContainer(label: 'Паспорт', text: client.doc),
-              if (client.docIssueYear != null)
-                LabeledContainer(
-                  label: 'Дата выдачи',
-                  text: '01.01.${client.docIssueYear}',
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: DefaultButton(
+                  text: 'Закрыть',
+                  isGreen: true,
+                  onPressed: () => Navigator.pop(context),
                 ),
-              const SizedBox(height: 16),
-              DefaultButton(
-                text: 'Закрыть',
-                isGreen: true,
-                onPressed: () => Navigator.pop(context),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildClientInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              '$label:',
+              style: AppStyle.manrope(
+                size: 14,
+                weight: FontWeight.w500,
+                color: Colors.grey[600],
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: AppStyle.manrope(
+                size: 14,
+                weight: FontWeight.w400,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -517,153 +762,88 @@ class _CreditModalState extends State<CreditModal> {
       builder: (_) {
         final userStorage = getIt<UserStorage>();
         final canSeeNames = userStorage.canViewAdminContent();
-        return AppModal(
+        return Dialog(
           backgroundColor: Color(AppColors.background),
-          title: 'Информация о инвесторе',
-          content: SingleChildScrollView(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Никнейм: ',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      TextSpan(
-                        text: detailedInvestor.nickname,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
+                Text(
+                  'Информация о инвесторе',
+                  style: AppStyle.manrope(size: 18, weight: FontWeight.w600),
                 ),
-                const SizedBox(height: 8),
-                if (canSeeNames) ...[
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'ФИО: ',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        TextSpan(
-                          text: detailedInvestor.fullName,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Телефон: ',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      TextSpan(
-                        text: detailedInvestor.phoneNumber ?? "не указан",
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
+                const SizedBox(height: 20),
+                _buildInvestorInfoRow('Никнейм', detailedInvestor.nickname),
+                if (canSeeNames)
+                  _buildInvestorInfoRow('ФИО', detailedInvestor.fullName),
+                _buildInvestorInfoRow(
+                  'Телефон',
+                  detailedInvestor.phoneNumber ?? "не указан",
                 ),
-                const SizedBox(height: 8),
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Доля инвестора: ',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      TextSpan(
-                        text: '${detailedInvestor.investorPie}%',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
+                _buildInvestorInfoRow(
+                  'Доля инвестора',
+                  '${detailedInvestor.investorPie}%',
                 ),
-                const SizedBox(height: 8),
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Инвестиция: ',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      TextSpan(
-                        text: _formatCurrency(
-                          detailedInvestor.investmentAmount,
-                        ),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
+                _buildInvestorInfoRow(
+                  'Инвестиция',
+                  _formatCurrency(detailedInvestor.investmentAmount),
                 ),
-                const SizedBox(height: 8),
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Касса: ',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      TextSpan(
-                        text: _formatCurrency(detailedInvestor.balance),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
+                _buildInvestorInfoRow(
+                  'Касса',
+                  _formatCurrency(detailedInvestor.balance),
                 ),
-                const SizedBox(height: 16),
-                DefaultButton(
-                  text: 'Закрыть',
-                  isGreen: true,
-                  onPressed: () => Navigator.pop(context),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: DefaultButton(
+                    text: 'Закрыть',
+                    isGreen: true,
+                    onPressed: () => Navigator.pop(context),
+                  ),
                 ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildInvestorInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              '$label:',
+              style: AppStyle.manrope(
+                size: 14,
+                weight: FontWeight.w500,
+                color: Colors.grey[600],
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: AppStyle.manrope(
+                size: 14,
+                weight: FontWeight.w400,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

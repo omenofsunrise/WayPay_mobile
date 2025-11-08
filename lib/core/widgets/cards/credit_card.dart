@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay/core/theme/app_colors.dart';
+import 'package:waypay/core/utilits/price_formatter.dart';
 import 'package:waypay/features/credit/data/models/credit_model.dart';
 import 'package:waypay/features/credit/presentation/widgets/credit_modal.dart';
 
@@ -24,7 +25,8 @@ class CreditCardWidget extends StatelessWidget {
       onTap: () {
         showDialog(
           context: context,
-          builder: (_) => CreditModal(credit: credit, isControl: isControl),
+          builder: (_) =>
+              CreditFullScreen(credit: credit, isControl: isControl),
         );
       },
       child: Container(
@@ -80,14 +82,53 @@ class CreditCardWidget extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                Text(
-                  'Уплачено: ${credit.payed}',
-                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Уплачено',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Color(AppColors.grey),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        PriceFormatter.formatPrice(credit.payed),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(AppColors.primary),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const Spacer(),
-                Text(
-                  'Остаток: ${credit.rest}',
-                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Остаток',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Color(AppColors.grey),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        PriceFormatter.formatPrice(credit.rest),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(AppColors.red),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

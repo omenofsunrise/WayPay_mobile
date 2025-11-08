@@ -202,7 +202,7 @@ class _ControlCreditsScreenState extends State<ControlCreditsScreen> {
                                       onTap: () {
                                         showDialog(
                                           context: context,
-                                          builder: (_) => CreditModal(
+                                          builder: (_) => CreditFullScreen(
                                             credit: credit,
                                             isControl: true,
                                           ),

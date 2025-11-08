@@ -138,7 +138,6 @@ class _CreditsScreenState extends State<CreditsScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // Обертка для кнопки категории
                     Container(
                       height: 48, // Такая же высота как у SearchField
                       decoration: BoxDecoration(
