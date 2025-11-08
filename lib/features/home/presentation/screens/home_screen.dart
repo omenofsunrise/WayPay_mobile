@@ -7,7 +7,7 @@ import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/widgets/buttons/add_button.dart';
 import 'package:waypay/core/widgets/buttons/more_info_button.dart';
 import 'package:waypay/core/widgets/header.dart';
-import 'package:waypay/core/widgets/search_field.dart';
+import 'package:waypay/core/widgets/inputs/search_field.dart';
 import 'package:waypay/features/home/presentation/widgets/dashboard_card.dart';
 import 'package:waypay/features/home/presentation/widgets/section_title.dart';
 import 'package:waypay/features/home/data/models/employee_model.dart';

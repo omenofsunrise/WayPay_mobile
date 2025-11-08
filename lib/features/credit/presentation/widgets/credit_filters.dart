@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/theme/app_style.dart';
 import 'package:waypay/core/widgets/buttons/default_button.dart';
 import 'package:waypay/features/credit/presentation/bloc/credit_bloc.dart';
 import 'package:waypay/features/credit/presentation/bloc/credit_event.dart';
 import 'package:waypay/features/credit/data/models/get_query_credits.dart';
+import 'package:waypay/core/widgets/inputs/custom_input.dart';
+import 'package:waypay/core/widgets/inputs/date_input.dart';
 
 class CreditFilters extends StatefulWidget {
   final bool showIncomeFilters;
   final bool showClientInvestorFilters;
+  final GetCreditsQuery? initialFilters;
 
   const CreditFilters({
     super.key,
     this.showIncomeFilters = true,
     this.showClientInvestorFilters = true,
+    this.initialFilters,
   });
 
   @override
@@ -30,10 +33,62 @@ class _CreditFiltersState extends State<CreditFilters> {
   final _incomeRubToController = TextEditingController();
   final _incomePercFromController = TextEditingController();
   final _incomePercToController = TextEditingController();
+
   DateTime? _dateFrom;
   DateTime? _dateTo;
+  final _dateFromController = TextEditingController();
+  final _dateToController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeFromExistingFilters();
+  }
+
+  void _initializeFromExistingFilters() {
+    final initial = widget.initialFilters;
+    if (initial != null) {
+      if (initial.creditId != null) {
+        _creditIdController.text = initial.creditId.toString();
+      }
+      if (initial.investorNickname != null) {
+        _investorController.text = initial.investorNickname!;
+      }
+      if (initial.clientFullname != null) {
+        _fioController.text = initial.clientFullname!;
+      }
+      if (initial.rublesIncomeFrom != null) {
+        _incomeRubFromController.text = initial.rublesIncomeFrom.toString();
+      }
+      if (initial.rublesIncomeTo != null) {
+        _incomeRubToController.text = initial.rublesIncomeTo.toString();
+      }
+      if (initial.percentsIncomeFrom != null) {
+        _incomePercFromController.text = initial.percentsIncomeFrom.toString();
+      }
+      if (initial.percentsIncomeTo != null) {
+        _incomePercToController.text = initial.percentsIncomeTo.toString();
+      }
+
+      _dateFrom = initial.dateFrom;
+      _dateTo = initial.dateTo;
+      if (_dateFrom != null) {
+        _dateFromController.text = DateFormat('dd.MM.yyyy').format(_dateFrom!);
+      }
+      if (_dateTo != null) {
+        _dateToController.text = DateFormat('dd.MM.yyyy').format(_dateTo!);
+      }
+    }
+  }
 
   void _applyFilters() {
+    if (_dateFrom != null && _dateTo != null && _dateFrom!.isAfter(_dateTo!)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Дата "От" не может быть больше даты "До"')),
+      );
+      return;
+    }
+
     final bloc = context.read<CreditBloc>();
     bloc.add(
       LoadCreditsEvent(
@@ -68,6 +123,8 @@ class _CreditFiltersState extends State<CreditFilters> {
         ),
       ),
     );
+
+    Navigator.of(context).pop();
   }
 
   void _clearFilters() {
@@ -81,25 +138,9 @@ class _CreditFiltersState extends State<CreditFilters> {
       _incomePercToController.clear();
       _dateFrom = null;
       _dateTo = null;
+      _dateFromController.clear();
+      _dateToController.clear();
     });
-  }
-
-  Future<void> _pickDate({required bool isFrom}) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null) {
-      setState(() {
-        if (isFrom) {
-          _dateFrom = picked;
-        } else {
-          _dateTo = picked;
-        }
-      });
-    }
   }
 
   @override
@@ -111,182 +152,163 @@ class _CreditFiltersState extends State<CreditFilters> {
     _incomeRubToController.dispose();
     _incomePercFromController.dispose();
     _incomePercToController.dispose();
+    _dateFromController.dispose();
+    _dateToController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return Container(
+      margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 8),
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Фильтры',
+                      textAlign: TextAlign.left,
+                      style: AppStyle.manrope(
+                        size: 20,
+                        weight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.black87),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              CustomInput(
+                controller: _creditIdController,
+                label: '№ Договора',
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 8),
+
+              _buildDateRangeRow(),
+
+              if (widget.showClientInvestorFilters) ...[
+                const SizedBox(height: 8),
+                CustomInput(controller: _investorController, label: 'Инвестор'),
+                const SizedBox(height: 8),
+                CustomInput(
+                  controller: _fioController,
+                  label: 'ФИО',
+                  inputType: InputType.fullname,
+                ),
+              ],
+              if (widget.showIncomeFilters) ...[
+                const SizedBox(height: 8),
+                _buildRangeGroup(
+                  label: 'Доход, ₽',
+                  from: _incomeRubFromController,
+                  to: _incomeRubToController,
+                ),
+                const SizedBox(height: 8),
+                _buildRangeGroup(
+                  label: 'Доход, %',
+                  from: _incomePercFromController,
+                  to: _incomePercToController,
+                ),
+              ],
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: DefaultButton(
+                      text: 'Очистить',
+                      isGreen: false,
+                      onPressed: _clearFilters,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: DefaultButton(
+                      text: 'Применить',
+                      isGreen: true,
+                      onPressed: _applyFilters,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateRangeRow() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 0),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const SizedBox(width: 48),
-              Expanded(
-                child: Text(
-                  'Фильтры',
-                  textAlign: TextAlign.center,
-                  style: AppStyle.manrope(size: 20, weight: FontWeight.w500),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close, color: Colors.black87),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-          _buildStyledTextField(
-            controller: _creditIdController,
-            label: 'Номер Договора',
-            keyboardType: TextInputType.number,
-          ),
-          _buildStyledDatePicker('От: Дата', _dateFrom, true),
-          _buildStyledDatePicker('До: Дата', _dateTo, false),
-
-          if (widget.showClientInvestorFilters) ...[
-            _buildStyledTextField(
-              controller: _investorController,
-              label: 'Инвестор',
-            ),
-            _buildStyledTextField(controller: _fioController, label: 'ФИО'),
-          ],
-          if (widget.showIncomeFilters) ...[
-            _buildRangeGroupStyled(
-              label: 'Доход, ₽',
-              from: _incomeRubFromController,
-              to: _incomeRubToController,
-            ),
-            _buildRangeGroupStyled(
-              label: 'Доход, %',
-              from: _incomePercFromController,
-              to: _incomePercToController,
-            ),
-          ],
-          const SizedBox(height: 16),
-          Row(
             children: [
               Expanded(
-                child: DefaultButton(
-                  text: 'Очистить',
-                  isGreen: false,
-                  onPressed: _clearFilters,
+                child: DateInput(
+                  controller: _dateFromController,
+                  label: 'От',
+                  initialDate: _dateFrom,
+                  onDateSelected: (date) {
+                    setState(() {
+                      _dateFrom = date;
+                    });
+                  },
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               Expanded(
-                child: DefaultButton(
-                  text: 'Применить',
-                  isGreen: true,
-                  onPressed: () {
-                    _applyFilters();
-                    Navigator.of(context).pop();
+                child: DateInput(
+                  controller: _dateToController,
+                  label: 'До',
+                  initialDate: _dateTo,
+                  onDateSelected: (date) {
+                    setState(() {
+                      _dateTo = date;
+                    });
                   },
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
         ],
       ),
     );
   }
 
-  Widget _buildStyledTextField({
-    required TextEditingController controller,
-    required String label,
-    TextInputType? keyboardType,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: controller,
-            keyboardType: keyboardType,
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 14,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Color(AppColors.primary)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: Color(AppColors.primary),
-                  width: 2,
-                ),
-              ),
-            ),
-            style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStyledDatePicker(String label, DateTime? date, bool isFrom) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
-          ),
-          const SizedBox(height: 10),
-          InkWell(
-            onTap: () => _pickDate(isFrom: isFrom),
-            child: InputDecorator(
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 14,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Color(AppColors.primary)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: Color(AppColors.primary),
-                    width: 2,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    date != null ? DateFormat('dd.MM.yyyy').format(date) : '',
-                    style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
-                  ),
-                  Icon(Icons.calendar_month, color: Color(AppColors.grey)),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRangeGroupStyled({
+  Widget _buildRangeGroup({
     required String label,
     required TextEditingController from,
     required TextEditingController to,
@@ -300,15 +322,23 @@ class _CreditFiltersState extends State<CreditFilters> {
             label,
             style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
-                child: _buildStyledTextField(controller: from, label: 'От'),
+                child: CustomInput(
+                  controller: from,
+                  label: 'От',
+                  keyboardType: TextInputType.number,
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _buildStyledTextField(controller: to, label: 'До'),
+                child: CustomInput(
+                  controller: to,
+                  label: 'До',
+                  keyboardType: TextInputType.number,
+                ),
               ),
             ],
           ),

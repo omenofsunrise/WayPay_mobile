@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay/core/widgets/buttons/add_button.dart';
 import 'package:waypay/core/widgets/cards/credit_card.dart';
-import 'package:waypay/core/widgets/search_field.dart';
+import 'package:waypay/core/widgets/inputs/search_field.dart';
 import 'package:waypay/features/credit/presentation/widgets/credit_tab.dart';
 import 'package:waypay/features/credit/presentation/widgets/credit_tab_action.dart';
 import 'package:waypay/core/storage/user_storage.dart';
@@ -58,26 +58,14 @@ class _CreditsScreenState extends State<CreditsScreen> {
   }
 
   void _openFilterModal(BuildContext context) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return Dialog(
-          backgroundColor: const Color(AppColors.background),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 16,
-              right: 16,
-              top: 24,
-            ),
-            child: const CreditFilters(
-              showIncomeFilters: false,
-              showClientInvestorFilters: true,
-            ),
-          ),
+        return const CreditFilters(
+          showIncomeFilters: false,
+          showClientInvestorFilters: true,
         );
       },
     );
@@ -143,36 +131,43 @@ class _CreditsScreenState extends State<CreditsScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Expanded(
-                        child: SearchField(
-                          hintText: 'Поиск',
-                          onChanged: (value) {},
-                          onSubmitted: (value) {},
-                        ),
+                      child: SearchField(
+                        hintText: 'Поиск',
+                        onChanged: (value) {},
+                        onSubmitted: (value) {},
                       ),
                     ),
                     const SizedBox(width: 12),
-                    CreditTabAppBarAction(
-                      selectedTab: _selectedTab,
-                      onSelected: (tab) {
-                        setState(() => _selectedTab = tab);
-                        _loadCredits();
-                      },
+                    // Обертка для кнопки категории
+                    Container(
+                      height: 48, // Такая же высота как у SearchField
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: CreditTabAppBarAction(
+                        selectedTab: _selectedTab,
+                        onSelected: (tab) {
+                          setState(() => _selectedTab = tab);
+                          _loadCredits();
+                        },
+                      ),
                     ),
                     const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.filter_alt,
-                        color: Color(AppColors.uiBorder),
-                        size: 24,
+                    Container(
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      tooltip: 'Фильтры',
-                      onPressed: () => _openFilterModal(context),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.filter_alt,
+                          color: Color(AppColors.uiBorder),
+                          size: 24,
                         ),
+                        tooltip: 'Фильтры',
+                        onPressed: () => _openFilterModal(context),
                       ),
                     ),
                   ],

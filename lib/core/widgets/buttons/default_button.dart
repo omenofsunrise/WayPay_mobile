@@ -43,9 +43,9 @@ class _DefaultButtonState extends State<DefaultButton> {
       child: Container(
         decoration: BoxDecoration(
           color: bg,
-          borderRadius: BorderRadius.circular(50),
+          borderRadius: BorderRadius.circular(8),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
         child: Center(
           child: Row(
             mainAxisSize: MainAxisSize.min,
