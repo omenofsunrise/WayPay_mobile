@@ -3,11 +3,17 @@ import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay/core/theme/app_style.dart';
 import 'package:waypay/core/widgets/buttons/default_button.dart';
+import 'package:waypay/features/credit/data/objectType/models/get_object_types_query.dart';
+import 'package:waypay/features/credit/data/objectType/models/object_type_model.dart';
 import 'package:waypay/features/credit/presentation/bloc/credit_bloc.dart';
 import 'package:waypay/features/credit/presentation/bloc/credit_event.dart';
 import 'package:waypay/features/credit/data/models/get_query_credits.dart';
 import 'package:waypay/core/widgets/inputs/custom_input.dart';
 import 'package:waypay/core/widgets/inputs/date_input.dart';
+import 'package:waypay/core/widgets/inputs/custom_select.dart';
+import 'package:waypay/features/credit/presentation/bloc/object_type_bloc.dart';
+import 'package:waypay/features/credit/presentation/bloc/object_type_event.dart';
+import 'package:waypay/features/credit/presentation/bloc/object_type_state.dart';
 
 class CreditFilters extends StatefulWidget {
   final bool showIncomeFilters;
@@ -39,10 +45,16 @@ class _CreditFiltersState extends State<CreditFilters> {
   final _dateFromController = TextEditingController();
   final _dateToController = TextEditingController();
 
+  ObjectTypeModel? _selectedObjectType;
+  bool _isObjectTypesLoading = false;
+
   @override
   void initState() {
     super.initState();
     _initializeFromExistingFilters();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadObjectTypes();
+    });
   }
 
   void _initializeFromExistingFilters() {
@@ -81,10 +93,32 @@ class _CreditFiltersState extends State<CreditFilters> {
     }
   }
 
+  void _loadObjectTypes() {
+    if (_isObjectTypesLoading) return;
+
+    setState(() {
+      _isObjectTypesLoading = true;
+    });
+
+    final objectTypeBloc = context.read<ObjectTypeBloc>();
+    objectTypeBloc.add(
+      LoadObjectTypesEvent(
+        refresh: true,
+        query: GetObjectTypesQuery(
+          page: 1,
+          pageSize: 100,
+          entityType: 'Credit',
+        ),
+      ),
+    );
+  }
+
   void _applyFilters() {
     if (_dateFrom != null && _dateTo != null && _dateFrom!.isAfter(_dateTo!)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Дата "От" не может быть больше даты "До"')),
+        const SnackBar(
+          content: Text('Дата "От" не может быть больше даты "До"'),
+        ),
       );
       return;
     }
@@ -120,6 +154,7 @@ class _CreditFiltersState extends State<CreditFilters> {
           percentsIncomeTo: _incomePercToController.text.isNotEmpty
               ? double.tryParse(_incomePercToController.text)
               : null,
+          creditTypeId: _selectedObjectType?.id,
         ),
       ),
     );
@@ -140,6 +175,7 @@ class _CreditFiltersState extends State<CreditFilters> {
       _dateTo = null;
       _dateFromController.clear();
       _dateToController.clear();
+      _selectedObjectType = null;
     });
   }
 
@@ -161,110 +197,179 @@ class _CreditFiltersState extends State<CreditFilters> {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 8),
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Фильтры',
-                      textAlign: TextAlign.left,
-                      style: AppStyle.manrope(
-                        size: 20,
-                        weight: FontWeight.w500,
-                      ),
-                    ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Фильтры',
+                    textAlign: TextAlign.left,
+                    style: AppStyle.manrope(size: 20, weight: FontWeight.w500),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.black87),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.black87),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _buildObjectTypeSection(),
+            const SizedBox(height: 8),
+            CustomInput(
+              controller: _creditIdController,
+              label: '№ Договора',
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 8),
+            _buildDateRangeRow(),
+            if (widget.showClientInvestorFilters) ...[
+              const SizedBox(height: 8),
+              CustomInput(controller: _investorController, label: 'Инвестор'),
               const SizedBox(height: 8),
               CustomInput(
-                controller: _creditIdController,
-                label: '№ Договора',
-                keyboardType: TextInputType.number,
+                controller: _fioController,
+                label: 'ФИО',
+                inputType: InputType.fullname,
+              ),
+            ],
+            if (widget.showIncomeFilters) ...[
+              const SizedBox(height: 8),
+              _buildRangeGroup(
+                label: 'Доход, ₽',
+                from: _incomeRubFromController,
+                to: _incomeRubToController,
               ),
               const SizedBox(height: 8),
-
-              _buildDateRangeRow(),
-
-              if (widget.showClientInvestorFilters) ...[
-                const SizedBox(height: 8),
-                CustomInput(controller: _investorController, label: 'Инвестор'),
-                const SizedBox(height: 8),
-                CustomInput(
-                  controller: _fioController,
-                  label: 'ФИО',
-                  inputType: InputType.fullname,
-                ),
-              ],
-              if (widget.showIncomeFilters) ...[
-                const SizedBox(height: 8),
-                _buildRangeGroup(
-                  label: 'Доход, ₽',
-                  from: _incomeRubFromController,
-                  to: _incomeRubToController,
-                ),
-                const SizedBox(height: 8),
-                _buildRangeGroup(
-                  label: 'Доход, %',
-                  from: _incomePercFromController,
-                  to: _incomePercToController,
-                ),
-              ],
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: DefaultButton(
-                      text: 'Очистить',
-                      isGreen: false,
-                      onPressed: _clearFilters,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: DefaultButton(
-                      text: 'Применить',
-                      isGreen: true,
-                      onPressed: _applyFilters,
-                    ),
-                  ),
-                ],
+              _buildRangeGroup(
+                label: 'Доход, %',
+                from: _incomePercFromController,
+                to: _incomePercToController,
               ),
-              const SizedBox(height: 24),
             ],
-          ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: DefaultButton(
+                    text: 'Очистить',
+                    isGreen: false,
+                    onPressed: _clearFilters,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DefaultButton(
+                    text: 'Применить',
+                    isGreen: true,
+                    onPressed: _applyFilters,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildObjectTypeSection() {
+    return BlocConsumer<ObjectTypeBloc, ObjectTypeState>(
+      listener: (context, state) {
+        if (state is ObjectTypeLoaded || state is ObjectTypeError) {
+          setState(() {
+            _isObjectTypesLoading = false;
+          });
+        }
+      },
+      builder: (context, state) {
+        List<ObjectTypeModel> objectTypes = [];
+
+        if (state is ObjectTypeLoaded) {
+          objectTypes = state.objectTypes;
+        } else if (state is ObjectTypeError) {
+          // Можно показать сообщение об ошибке
+          print('Ошибка загрузки типов объектов: ${state.message}');
+        }
+
+        final options = objectTypes
+            .map(
+              (type) => CustomSelectOption<ObjectTypeModel?>(
+                value: type,
+                label: type.name,
+              ),
+            )
+            .toList();
+
+        options.insert(
+          0,
+          CustomSelectOption<ObjectTypeModel?>(value: null, label: 'Все'),
+        );
+
+        if (_isObjectTypesLoading || state is ObjectTypeLoading) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Каталог',
+                style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                height: 48,
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFD1D5DB)),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: const Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+
+        return CustomSelect<ObjectTypeModel?>(
+          placeholder: 'Выберите каталог',
+          options: options,
+          value: _selectedObjectType,
+          onChange: (ObjectTypeModel? value) {
+            setState(() {
+              _selectedObjectType = value;
+            });
+          },
+        );
+      },
     );
   }
 

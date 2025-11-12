@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay/assets/resources.dart';
 import 'package:waypay/core/theme/app_colors.dart';
+import 'package:waypay/features/credit/presentation/bloc/object_type_bloc.dart';
 
 class MainLayout extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
@@ -86,19 +88,24 @@ class MainLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: navigationShell.currentIndex,
-        onTap: (index) => _onItemTapped(index, context),
-        items: _bottomNavItemsCustom,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(AppColors.white),
-        unselectedItemColor: const Color(AppColors.darkGrey),
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        backgroundColor: const Color(AppColors.white),
-        elevation: 8.0,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ObjectTypeBloc>(create: (context) => ObjectTypeBloc()),
+      ],
+      child: Scaffold(
+        body: navigationShell,
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: navigationShell.currentIndex,
+          onTap: (index) => _onItemTapped(index, context),
+          items: _bottomNavItemsCustom,
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: const Color(AppColors.white),
+          unselectedItemColor: const Color(AppColors.darkGrey),
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          backgroundColor: const Color(AppColors.white),
+          elevation: 8.0,
+        ),
       ),
     );
   }

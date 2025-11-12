@@ -3,6 +3,7 @@ class GetCreditsQuery {
   final int? pageSize;
   final String? sortBy;
   final String? sortDirection;
+  final String? search;
   final int? creditId;
   final int? investorId;
   final DateTime? dateFrom;
@@ -16,12 +17,14 @@ class GetCreditsQuery {
   final double? rublesIncomeTo;
   final double? percentsIncomeFrom;
   final double? percentsIncomeTo;
+  final int? creditTypeId;
 
   GetCreditsQuery({
     this.page,
     this.pageSize,
     this.sortBy,
     this.sortDirection,
+    this.search,
     this.creditId,
     this.investorId,
     this.dateFrom,
@@ -35,6 +38,7 @@ class GetCreditsQuery {
     this.rublesIncomeTo,
     this.percentsIncomeFrom,
     this.percentsIncomeTo,
+    this.creditTypeId,
   });
 
   Map<String, dynamic> toQueryParams() {
@@ -43,6 +47,7 @@ class GetCreditsQuery {
       if (pageSize != null) 'pageSize': pageSize,
       if (sortBy != null) 'sortBy': sortBy,
       if (sortDirection != null) 'sortDirection': sortDirection,
+      if (search != null) 'search': search,
       if (creditId != null) 'creditId': creditId,
       if (investorId != null) 'investorId': investorId,
       if (dateFrom != null) 'dateFrom': dateFrom!.toIso8601String(),
@@ -56,6 +61,7 @@ class GetCreditsQuery {
       if (rublesIncomeTo != null) 'rublesIncomeTo': rublesIncomeTo,
       if (percentsIncomeFrom != null) 'percentsIncomeFrom': percentsIncomeFrom,
       if (percentsIncomeTo != null) 'percentsIncomeTo': percentsIncomeTo,
+      if (creditTypeId != null) 'creditTypeId': creditTypeId,
     };
   }
 
@@ -64,6 +70,7 @@ class GetCreditsQuery {
     int? pageSize,
     String? sortBy,
     String? sortDirection,
+    String? search,
     int? creditId,
     int? investorId,
     DateTime? dateFrom,
@@ -77,12 +84,14 @@ class GetCreditsQuery {
     double? rublesIncomeTo,
     double? percentsIncomeFrom,
     double? percentsIncomeTo,
+    int? creditTypeId,
   }) {
     return GetCreditsQuery(
       page: page ?? this.page,
       pageSize: pageSize ?? this.pageSize,
       sortBy: sortBy ?? this.sortBy,
       sortDirection: sortDirection ?? this.sortDirection,
+      search: search ?? this.search,
       creditId: creditId ?? this.creditId,
       investorId: investorId ?? this.investorId,
       dateFrom: dateFrom ?? this.dateFrom,
@@ -96,6 +105,7 @@ class GetCreditsQuery {
       rublesIncomeTo: rublesIncomeTo ?? this.rublesIncomeTo,
       percentsIncomeFrom: percentsIncomeFrom ?? this.percentsIncomeFrom,
       percentsIncomeTo: percentsIncomeTo ?? this.percentsIncomeTo,
+      creditTypeId: creditTypeId ?? this.creditTypeId,
     );
   }
 }

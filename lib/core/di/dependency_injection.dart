@@ -35,7 +35,9 @@ import 'package:waypay/features/clients/data/data_sources/clients/clients_remote
 import 'package:waypay/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay/features/credit/data/data_source/credit_remote_data_source_impl.dart';
+import 'package:waypay/features/credit/data/objectType/data_source/object_type_remote_data_source.dart';
 import 'package:waypay/features/credit/presentation/bloc/credit_bloc.dart';
+import 'package:waypay/features/credit/presentation/bloc/object_type_bloc.dart';
 import 'package:waypay/features/finance/data/data_source/budget_remote_data_source.dart';
 import 'package:waypay/features/finance/data/data_source/budget_remote_data_source_impl.dart';
 import 'package:waypay/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
@@ -46,7 +48,6 @@ import 'package:waypay/features/investors/presentation/bloc/investors_bloc.dart'
 import 'package:waypay/features/note/data/data_sources/note_remote_data_source.dart';
 import 'package:waypay/features/note/data/data_sources/note_remote_data_source_impl.dart';
 import 'package:waypay/features/notifications/data/data_sources/notifications_data_source.dart';
-import 'package:waypay/features/notifications/data/data_sources/notifications_data_source_impl.dart';
 import 'package:waypay/features/product/data/data_sources/products_remote_data_source.dart';
 import 'package:waypay/features/product/data/data_sources/products_remote_data_source_impl.dart';
 import 'package:waypay/features/product/presentation/bloc/products_bloc.dart';
@@ -141,6 +142,10 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton<MessageRemoteDataSource>(
     () => MessageRemoteDataSourceImpl(getIt<Dio>(instanceName: 'second')),
   );
+  getIt.registerLazySingleton<ObjectTypeRemoteDataSource>(
+    () => ObjectTypeRemoteDataSourceImpl(getIt<Dio>()),
+  );
+
   getIt.registerLazySingleton<ChatHubService>(
     () => ChatHubService(
       baseUrl: 'https://web.waypay.one:5002',
@@ -172,6 +177,7 @@ Future<void> initDependencies() async {
   getIt.registerFactory(() => BlogBloc());
   getIt.registerFactory(() => CommentBloc());
   getIt.registerFactory(() => ProfileBlogCubit());
+  getIt.registerFactory<ObjectTypeBloc>(() => ObjectTypeBloc());
   getIt.registerFactory(
     () => ChatListBloc(
       api: getIt<ChatRemoteDataSource>(),

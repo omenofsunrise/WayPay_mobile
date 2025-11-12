@@ -73,7 +73,6 @@ class CreditDocsModel {
 
   final List<PaymentScheduleItem> paymentSchedule;
 
-  /// Доп. поля, которых нет в модели, но могут прийти
   final Map<String, dynamic> extras;
 
   CreditDocsModel({
@@ -117,7 +116,6 @@ class CreditDocsModel {
         .map(PaymentScheduleItem.fromJson)
         .toList();
 
-    // известные ключи
     const known = {
       'contractNumber',
       'contractDate',

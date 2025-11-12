@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay/core/widgets/buttons/add_button.dart';
 import 'package:waypay/core/widgets/cards/credit_card.dart';
 import 'package:waypay/core/widgets/inputs/search_field.dart';
+import 'package:waypay/features/credit/presentation/bloc/object_type_bloc.dart';
 import 'package:waypay/features/credit/presentation/widgets/credit_tab.dart';
 import 'package:waypay/features/credit/presentation/widgets/credit_tab_action.dart';
 import 'package:waypay/core/storage/user_storage.dart';
@@ -58,14 +59,22 @@ class _CreditsScreenState extends State<CreditsScreen> {
   }
 
   void _openFilterModal(BuildContext context) {
+    final objectTypeBloc = BlocProvider.of<ObjectTypeBloc>(
+      context,
+      listen: false,
+    );
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return const CreditFilters(
-          showIncomeFilters: false,
-          showClientInvestorFilters: true,
+        return BlocProvider.value(
+          value: objectTypeBloc,
+          child: const CreditFilters(
+            showIncomeFilters: false,
+            showClientInvestorFilters: true,
+          ),
         );
       },
     );
@@ -75,11 +84,14 @@ class _CreditsScreenState extends State<CreditsScreen> {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
       final query = GetCreditsQuery(
+        search: value.isNotEmpty ? value : null,
         isFavourite: _selectedTab == CreditTab.favourite ? true : null,
         isActive: _selectedTab == CreditTab.archived ? false : null,
         debt: _selectedTab == CreditTab.debtors ? true : null,
       );
-      context.read<CreditBloc>().add(LoadCreditsEvent(query: query));
+      context.read<CreditBloc>().add(
+        LoadCreditsEvent(query: query, refresh: true),
+      );
     });
   }
 
@@ -133,13 +145,15 @@ class _CreditsScreenState extends State<CreditsScreen> {
                     Expanded(
                       child: SearchField(
                         hintText: 'Поиск',
-                        onChanged: (value) {},
-                        onSubmitted: (value) {},
+                        onChanged: _onSearchChanged,
+                        onSubmitted: (value) {
+                          _onSearchChanged(value);
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
                     Container(
-                      height: 48, // Такая же высота как у SearchField
+                      height: 48,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),

@@ -14,6 +14,7 @@ import 'package:waypay/features/blog/presentation/bloc/comment_bloc.dart';
 import 'package:waypay/features/blog/presentation/cubit/profile_blog_cubit.dart';
 import 'package:waypay/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
 import 'package:waypay/features/credit/presentation/bloc/credit_bloc.dart';
+import 'package:waypay/features/credit/presentation/bloc/object_type_bloc.dart';
 import 'package:waypay/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
 import 'package:waypay/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
 import 'package:waypay/features/investors/presentation/bloc/investors_bloc.dart';
@@ -115,6 +116,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (_) => getIt<CommentBloc>()),
         BlocProvider(create: (_) => getIt<ProfileBlogCubit>()),
         BlocProvider(create: (_) => getIt<ChatListBloc>()),
+        BlocProvider(create: (context) => ObjectTypeBloc()),
       ],
       child: app,
     );

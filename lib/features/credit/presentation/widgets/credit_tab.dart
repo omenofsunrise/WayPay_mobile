@@ -43,7 +43,6 @@ class CreditTabDropdown extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Иконка выбранного раздела - используем SvgIcon
                 SvgIcon(
                   assetPath: selectedTab.iconPath,
                   width: 20,
@@ -52,7 +51,7 @@ class CreditTabDropdown extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  selectedTab.label, // Используем свойство label напрямую
+                  selectedTab.label,
                   style: AppStyle.manrope(
                     size: 14,
                     weight: FontWeight.w400,
@@ -98,7 +97,6 @@ class CreditTabDropdown extends StatelessWidget {
                 size: 20,
               ),
               const SizedBox(width: 8),
-              // Иконка вкладки - используем SvgIcon
               SvgIcon(
                 assetPath: tab.iconPath,
                 width: 20,
