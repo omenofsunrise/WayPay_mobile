@@ -133,7 +133,7 @@ class Note extends StatelessWidget {
         return false;
       }
     } catch (e) {
-      debugPrint('Ошибка при анализе base64 данных: $e');
+      debugPrint('Ошибка при анализе base64 данных');
     }
 
     return false;
@@ -219,7 +219,6 @@ class Note extends StatelessWidget {
             );
           },
           errorBuilder: (context, error, stackTrace) {
-            debugPrint('Ошибка загрузки изображения с data URI: $error');
             return _buildErrorWidget('Ошибка загрузки изображения');
           },
         );
@@ -240,26 +239,25 @@ class Note extends StatelessWidget {
             );
           },
           errorBuilder: (context, error, stackTrace) {
-            debugPrint('Ошибка загрузки base64 изображения: $error');
             try {
               final bytes = base64.decode(imageData);
               return Image.memory(
                 bytes,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  debugPrint('Ошибка загрузки memory image: $error');
+                  debugPrint('Ошибка загрузки memory image');
                   return _buildErrorWidget('Неверный формат изображения');
                 },
               );
             } catch (e) {
-              debugPrint('Ошибка декодирования base64: $e');
+              debugPrint('Ошибка декодирования base64');
               return _buildErrorWidget('Ошибка декодирования');
             }
           },
         );
       }
     } catch (e) {
-      debugPrint('Общая ошибка при создании виджета изображения: $e');
+      debugPrint('Общая ошибка при создании виджета изображения');
       return _buildErrorWidget('Ошибка отображения');
     }
   }
@@ -521,14 +519,14 @@ class Note extends StatelessWidget {
         }
       });
     } on PlatformException catch (e) {
-      debugPrint('Ошибка платформы при открытии файла: $e');
+      debugPrint('Ошибка платформы при открытии файла');
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Ошибка открытия: ${e.message}')));
     } catch (e) {
-      debugPrint('Ошибка при открытии файла: $e');
+      debugPrint('Ошибка при открытии файла');
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(

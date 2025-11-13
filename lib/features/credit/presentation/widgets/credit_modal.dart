@@ -3,25 +3,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay/core/di/dependency_injection.dart';
 import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/inputs/custom_input.dart';
 import 'package:waypay/features/credit/presentation/widgets/add_note_dialog.dart';
 import 'package:waypay/features/profile/data/models/employee.dart';
 
 import 'package:waypay/core/storage/user_storage.dart';
 import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/core/widgets/buttons/default_button.dart';
-import 'package:waypay/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
-import 'package:waypay/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay/features/credit/data/models/credit_model.dart';
 import 'package:waypay/features/credit/presentation/bloc/credit_bloc.dart';
 import 'package:waypay/features/credit/presentation/bloc/credit_event.dart';
 import 'package:waypay/features/credit/presentation/widgets/create_payment_dialog.dart';
 import 'package:waypay/features/credit/presentation/widgets/note.dart';
-import 'package:waypay/features/investors/data/data_sources/investors_remote_data_source.dart';
-import 'package:waypay/features/investors/data/models/investors_model.dart';
 import 'package:waypay/features/note/data/data_sources/note_remote_data_source.dart';
-import 'package:waypay/features/note/data/models/note_create_request.dart';
 import 'package:waypay/features/note/data/models/note_model.dart';
+import 'package:waypay/features/sold_products/data/data_sources/sold_product_remote_data_source.dart';
+import 'package:waypay/features/sold_products/data/models/sold_product_model.dart';
 
 class CreditFullScreen extends StatefulWidget {
   final CreditModel credit;
@@ -39,13 +35,16 @@ class CreditFullScreen extends StatefulWidget {
 
 class _CreditFullScreenState extends State<CreditFullScreen> {
   List<NoteModel> _notes = [];
+  List<SoldProductModel> _soldProducts = [];
   bool _isLoadingNotes = true;
+  bool _isLoadingProducts = true;
   UserStorage userStorage = UserStorage();
 
   @override
   void initState() {
     super.initState();
     _loadNotes();
+    _loadSoldProducts();
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
@@ -173,6 +172,11 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
 
                     const SizedBox(height: 24),
 
+                    // Секция проданных товаров
+                    _buildSoldProductsSection(),
+
+                    const SizedBox(height: 24),
+
                     if (widget.isControl) _buildFinancialInfoSection(),
 
                     const SizedBox(height: 24),
@@ -197,6 +201,232 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildSoldProductsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Проданные товары',
+          style: AppStyle.manrope(size: 18, weight: FontWeight.w600),
+        ),
+        const SizedBox(height: 16),
+        _isLoadingProducts
+            ? const Center(child: CircularProgressIndicator())
+            : _soldProducts.isEmpty
+            ? _buildEmptyProductsState()
+            : _buildProductsList(),
+      ],
+    );
+  }
+
+  Widget _buildEmptyProductsState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.shopping_bag, size: 48, color: Colors.grey[400]),
+          const SizedBox(height: 8),
+          Text(
+            'Товары не найдены',
+            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'По данному договору нет проданных товаров',
+            style: TextStyle(color: Colors.grey[500], fontSize: 14),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductsList() {
+    return _buildVerticalProductsList();
+  }
+
+  Widget _buildVerticalProductsList() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: _soldProducts.map((product) {
+          final hasSurcharge =
+              product.surcharge != null || product.surchargeAmount != null;
+
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: product != _soldProducts.last
+                  ? Border(bottom: BorderSide(color: Colors.grey[200]!))
+                  : null,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  product.name,
+                  style: AppStyle.manrope(size: 14, weight: FontWeight.w600),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Стоимость: ${_formatCurrency(product.price)}',
+                      style: AppStyle.manrope(
+                        size: 14,
+                        weight: FontWeight.w400,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    Text(
+                      'Цена: ${_formatCurrency(product.totalAmount)}',
+                      style: AppStyle.manrope(
+                        size: 14,
+                        weight: FontWeight.w600,
+                        color: Color(AppColors.primary),
+                      ),
+                    ),
+                  ],
+                ),
+
+                if (hasSurcharge) ...[
+                  const SizedBox(height: 4),
+                  _buildVerticalSurchargeInfo(product),
+                ],
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildVerticalSurchargeInfo(SoldProductModel product) {
+    final hasSurchargePercent =
+        product.surcharge != null && product.surcharge! > 0;
+    final hasSurchargeAmount =
+        product.surchargeAmount != null && product.surchargeAmount! > 0;
+
+    if (!hasSurchargePercent && !hasSurchargeAmount) {
+      return const SizedBox.shrink();
+    }
+
+    String surchargeText = '';
+    if (hasSurchargePercent && hasSurchargeAmount) {
+      surchargeText =
+          'Наценка: ${product.surcharge!.toStringAsFixed(1)}% (${_formatCurrency(product.surchargeAmount!)})';
+    } else if (hasSurchargePercent) {
+      surchargeText = 'Наценка: ${product.surcharge!.toStringAsFixed(1)}%';
+    } else {
+      surchargeText = 'Наценка: ${_formatCurrency(product.surchargeAmount!)}';
+    }
+
+    return Text(
+      surchargeText,
+      style: AppStyle.manrope(
+        size: 14,
+        weight: FontWeight.w500,
+        color: Colors.green,
+      ),
+    );
+  }
+
+  Widget _buildHorizontalProductsList(SoldProductModel product) {
+    final hasSurchargePercent =
+        product.surcharge != null && product.surcharge! > 0;
+    final hasSurchargeAmount =
+        product.surchargeAmount != null && product.surchargeAmount! > 0;
+
+    if (!hasSurchargePercent && !hasSurchargeAmount) {
+      return Text(
+        '—',
+        style: AppStyle.manrope(
+          size: 14,
+          weight: FontWeight.w400,
+          color: Colors.grey[500],
+        ),
+        textAlign: TextAlign.right,
+      );
+    }
+
+    if (hasSurchargePercent && hasSurchargeAmount) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            '${product.surcharge!.toStringAsFixed(1)}%',
+            style: AppStyle.manrope(
+              size: 12,
+              weight: FontWeight.w400,
+              color: Colors.green,
+            ),
+          ),
+          Text(
+            _formatCurrency(product.surchargeAmount!),
+            style: AppStyle.manrope(
+              size: 14,
+              weight: FontWeight.w500,
+              color: Colors.green,
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (hasSurchargePercent) {
+      return Text(
+        '${product.surcharge!.toStringAsFixed(1)}%',
+        style: AppStyle.manrope(
+          size: 14,
+          weight: FontWeight.w500,
+          color: Colors.green,
+        ),
+        textAlign: TextAlign.right,
+      );
+    }
+
+    // hasSurchargeAmount
+    return Text(
+      _formatCurrency(product.surchargeAmount!),
+      style: AppStyle.manrope(
+        size: 14,
+        weight: FontWeight.w500,
+        color: Colors.green,
+      ),
+      textAlign: TextAlign.right,
+    );
+  }
+
+  double _calculateTotalAmount() {
+    return _soldProducts.fold(0.0, (sum, product) => sum + product.totalAmount);
   }
 
   Widget _buildCreditInfoSection() {
@@ -378,7 +608,6 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
                   return Note(
                     note: note,
                     onDelete: () {
-                      // Удаляем заметку из списка и обновляем UI
                       setState(() {
                         _notes.removeAt(index);
                       });
@@ -411,42 +640,6 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
               size: 14,
               weight: FontWeight.w500,
               color: Colors.black,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildClientRow() {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'ФИО клиента',
-              style: AppStyle.manrope(
-                size: 14,
-                weight: FontWeight.w400,
-                color: Colors.grey[600],
-              ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              widget.credit.clientFullName,
-              style: AppStyle.manrope(
-                size: 14,
-                weight: FontWeight.w500,
-                color: Colors.black,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -526,12 +719,6 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
       final noteDataSource = getIt<NoteRemoteDataSource>();
       final data = await noteDataSource.fetchNotesByCreditId(creditId);
 
-      for (var note in data) {
-        debugPrint(
-          '📌 Note: id=${note.id}, date=${note.createdAt}, content="${note.content}"',
-        );
-      }
-
       setState(() {
         _notes = data;
         _isLoadingNotes = false;
@@ -550,222 +737,31 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
     }
   }
 
-  Future<void> _loadClientAndShowModal(
-    BuildContext context,
-    int clientId,
-  ) async {
-    final dataSource = getIt<ClientRemoteDataSource>();
+  Future<void> _loadSoldProducts() async {
     try {
-      final client = await dataSource.getClientById(clientId);
-      if (!context.mounted) return;
-      _showClientModal(context, client);
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка загрузки клиента: $e')));
+      final creditId = widget.credit.id;
+      debugPrint('🛍️ Загружаем проданные товары для creditId = $creditId');
+
+      final productDataSource = getIt<SoldProductRemoteDataSource>();
+      final data = await productDataSource.fetchSoldProductsByCreditId(
+        creditId,
+      );
+
+      setState(() {
+        _soldProducts = data;
+        _isLoadingProducts = false;
+      });
+    } catch (e, stack) {
+      debugPrint('❌ Ошибка при загрузке проданных товаров: $e');
+      debugPrintStack(stackTrace: stack);
+
+      setState(() => _isLoadingProducts = false);
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Ошибка загрузки товаров: $e')));
+      }
     }
-  }
-
-  Future<void> _loadInvestorAndShowModal(
-    BuildContext context,
-    int investorId,
-  ) async {
-    final dataSource = getIt<InvestorsRemoteDataSource>();
-    try {
-      final investor = await dataSource.getInvestorById(investorId);
-      if (!context.mounted) return;
-      _showInvestorModal(context, investor);
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка загрузки инвестора: $e')));
-    }
-  }
-
-  void _showClientModal(BuildContext context, ClientModel client) {
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        backgroundColor: Color(AppColors.background),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Информация о клиенте',
-                style: AppStyle.manrope(size: 18, weight: FontWeight.w600),
-              ),
-              const SizedBox(height: 20),
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildClientInfoRow('ID', client.id.toString()),
-                      _buildClientInfoRow('ФИО', client.fullName),
-                      _buildClientInfoRow('Телефон', client.phone),
-                      _buildClientInfoRow(
-                        'Дата рождения',
-                        _formatDate(client.birthdate),
-                      ),
-                      if (client.registrationAddress != null)
-                        _buildClientInfoRow(
-                          'Адрес',
-                          client.registrationAddress!,
-                        ),
-                      _buildClientInfoRow('Паспорт', client.doc),
-                      if (client.docIssueYear != null)
-                        _buildClientInfoRow(
-                          'Дата выдачи',
-                          '01.01.${client.docIssueYear}',
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: DefaultButton(
-                  text: 'Закрыть',
-                  isGreen: true,
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildClientInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              '$label:',
-              style: AppStyle.manrope(
-                size: 14,
-                weight: FontWeight.w500,
-                color: Colors.grey[600],
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(
-              value,
-              style: AppStyle.manrope(
-                size: 14,
-                weight: FontWeight.w400,
-                color: Colors.black,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showInvestorModal(
-    BuildContext context,
-    InvestorsModel detailedInvestor,
-  ) {
-    showDialog(
-      context: context,
-      builder: (_) {
-        final userStorage = getIt<UserStorage>();
-        final canSeeNames = userStorage.canViewAdminContent();
-        return Dialog(
-          backgroundColor: Color(AppColors.background),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Информация о инвесторе',
-                  style: AppStyle.manrope(size: 18, weight: FontWeight.w600),
-                ),
-                const SizedBox(height: 20),
-                _buildInvestorInfoRow('Никнейм', detailedInvestor.nickname),
-                if (canSeeNames)
-                  _buildInvestorInfoRow('ФИО', detailedInvestor.fullName),
-                _buildInvestorInfoRow(
-                  'Телефон',
-                  detailedInvestor.phoneNumber ?? "не указан",
-                ),
-                _buildInvestorInfoRow(
-                  'Доля инвестора',
-                  '${detailedInvestor.investorPie}%',
-                ),
-                _buildInvestorInfoRow(
-                  'Инвестиция',
-                  _formatCurrency(detailedInvestor.investmentAmount),
-                ),
-                _buildInvestorInfoRow(
-                  'Касса',
-                  _formatCurrency(detailedInvestor.balance),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: DefaultButton(
-                    text: 'Закрыть',
-                    isGreen: true,
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildInvestorInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              '$label:',
-              style: AppStyle.manrope(
-                size: 14,
-                weight: FontWeight.w500,
-                color: Colors.grey[600],
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(
-              value,
-              style: AppStyle.manrope(
-                size: 14,
-                weight: FontWeight.w400,
-                color: Colors.black,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

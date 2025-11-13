@@ -66,6 +66,8 @@ import 'package:waypay/features/profile/presentation/bloc/employees_bloc.dart';
 import 'package:waypay/features/profile/presentation/cubit/credit_stats_cubit.dart';
 import 'package:waypay/features/profile/presentation/cubit/payment_stats_cubit.dart';
 import 'package:waypay/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:waypay/features/sold_products/data/data_sources/sold_product_remote_data_source.dart';
+import 'package:waypay/features/sold_products/data/data_sources/sold_product_remote_data_source_impl.dart';
 import 'package:waypay/features/todo/data/data_soucres/task_remote_data_source.dart';
 import 'package:waypay/features/todo/data/data_soucres/task_remote_data_source_impl.dart';
 import 'package:waypay/features/todo/presentation/bloc/task_bloc.dart';
@@ -144,6 +146,9 @@ Future<void> initDependencies() async {
   );
   getIt.registerLazySingleton<ObjectTypeRemoteDataSource>(
     () => ObjectTypeRemoteDataSourceImpl(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<SoldProductRemoteDataSource>(
+    () => SoldProductRemoteDataSourceImpl(getIt<Dio>()),
   );
 
   getIt.registerLazySingleton<ChatHubService>(
