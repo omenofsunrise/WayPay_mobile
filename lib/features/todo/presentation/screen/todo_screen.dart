@@ -327,16 +327,14 @@ class _TodoScreenState extends State<TodoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const AppDrawer(),
-      backgroundColor: Color(AppColors.primary),
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: const Color(AppColors.primary),
+        iconTheme: const IconThemeData(color: Color(AppColors.grey)),
+        backgroundColor: const Color(AppColors.background),
         title: Text(
           'To do',
           style: AppStyle.medium20.copyWith(
-            color: const Color(AppColors.background),
+            color: const Color(AppColors.black),
           ),
         ),
         actions: [

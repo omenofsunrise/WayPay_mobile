@@ -33,7 +33,6 @@ class _AllChatScreenState extends State<AllChatScreen> {
   @override
   void initState() {
     super.initState();
-    // Живой поиск по вводу в контроллер (если изменяем текст программно — тоже сработает)
     _searchController.addListener(() {
       final text = _searchController.text.trim();
       context.read<ChatListBloc>().add(ChatListSearchChanged(text));
@@ -71,7 +70,6 @@ class _AllChatScreenState extends State<AllChatScreen> {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12),
               ),
               onChanged: (value) {
-                // Дебаунс для лайв-поиска
                 if (_debounce?.isActive ?? false) _debounce!.cancel();
                 _debounce = Timer(const Duration(milliseconds: 400), () {
                   context.read<ChatListBloc>().add(
@@ -114,17 +112,12 @@ class _AllChatScreenState extends State<AllChatScreen> {
     return BlocProvider(
       create: (_) => getIt<ChatListBloc>()..add(const ChatListStarted()),
       child: Scaffold(
-        drawer: const AppDrawer(),
-
-        // зелёная шапка
-        backgroundColor: const Color(AppColors.primary),
-
         appBar: AppBar(
           surfaceTintColor: Colors.transparent,
-          backgroundColor: const Color(AppColors.primary),
+          backgroundColor: const Color(AppColors.background),
           elevation: 0,
           iconTheme: const IconThemeData(color: Colors.white),
-          centerTitle: false, // прижимаем заголовок влево
+          centerTitle: false,
           title: BlocBuilder<ChatListBloc, ChatListState>(
             builder: (context, state) {
               final badge = state.totalUnread;
@@ -135,7 +128,7 @@ class _AllChatScreenState extends State<AllChatScreen> {
                     style: AppStyle.manrope(
                       size: 25,
                       weight: FontWeight.w600,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                   ),
                   if (badge > 0)
@@ -169,19 +162,18 @@ class _AllChatScreenState extends State<AllChatScreen> {
           actions: [
             IconButton(
               tooltip: 'Поиск',
-              icon: const Icon(Icons.search, color: Colors.white),
+              icon: const Icon(Icons.search, color: Color(AppColors.grey)),
               onPressed: _openSearchModal,
             ),
             IconButton(
               tooltip: 'Обновить',
-              icon: const Icon(Icons.refresh, color: Colors.white),
+              icon: const Icon(Icons.refresh, color: Color(AppColors.grey)),
               onPressed: () =>
                   context.read<ChatListBloc>().add(const ChatListRefreshed()),
             ),
           ],
         ),
 
-        // Белый контент с закруглением сверху
         body: Container(
           decoration: const BoxDecoration(
             color: Color(AppColors.background),
