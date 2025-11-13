@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay/core/di/dependency_injection.dart';
 import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/form_modal/labeled_container.dart';
+import 'package:waypay/core/widgets/inputs/custom_input.dart';
+import 'package:waypay/features/credit/presentation/widgets/add_note_dialog.dart';
 import 'package:waypay/features/profile/data/models/employee.dart';
 
 import 'package:waypay/core/storage/user_storage.dart';
@@ -168,12 +169,10 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Основная информация о договоре
                     _buildCreditInfoSection(),
 
                     const SizedBox(height: 24),
 
-                    // Финансовая информация (если доступно)
                     if (widget.isControl) _buildFinancialInfoSection(),
 
                     const SizedBox(height: 24),
@@ -181,13 +180,12 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
                     // Секция заметок
                     _buildNotesSection(),
 
-                    const SizedBox(height: 80), // Отступ для кнопки внизу
+                    const SizedBox(height: 80),
                   ],
                 ),
               ),
             ),
 
-            // Кнопка добавления платежа
             if (userStorage.hasViewContent([
               EmployeeRole.admin,
               EmployeeRole.director,
@@ -205,10 +203,6 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Основная информация',
-          style: AppStyle.manrope(size: 18, weight: FontWeight.w600),
-        ),
         const SizedBox(height: 16),
         Container(
           width: double.infinity,
@@ -227,11 +221,13 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
           child: Column(
             children: [
               _buildInfoRow(
-                'Дата договора',
+                'Дата подписания',
                 _formatDate(widget.credit.creditDate),
               ),
               const SizedBox(height: 12),
-              _buildClientRow(),
+              _buildInfoRow('ФИО клиента', '${widget.credit.clientFullName}'),
+              const SizedBox(height: 12),
+              _buildInfoRow('Номер', '${widget.credit.clientPhone}'),
               const SizedBox(height: 12),
               _buildInfoRow(
                 'Первоначальный взнос',
@@ -307,9 +303,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
               style: AppStyle.manrope(size: 18, weight: FontWeight.w600),
             ),
             GestureDetector(
-              onTap: () {
-                showAddNoteDialog(context, widget.credit.id);
-              },
+              onTap: () => showAddNoteDialog(context, widget.credit.id),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -384,8 +378,10 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
                   return Note(
                     note: note,
                     onDelete: () {
-                      _notes.removeAt(index);
-                      setState(() {});
+                      // Удаляем заметку из списка и обновляем UI
+                      setState(() {
+                        _notes.removeAt(index);
+                      });
                     },
                   );
                 },
@@ -395,12 +391,12 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
   }
 
   Widget _buildInfoRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          flex: 2,
-          child: Text(
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
             label,
             style: AppStyle.manrope(
               size: 14,
@@ -408,77 +404,53 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
               color: Colors.grey[600],
             ),
           ),
-        ),
-        Expanded(
-          flex: 3,
-          child: Text(
+          const SizedBox(height: 4),
+          Text(
             value,
             style: AppStyle.manrope(
               size: 14,
               weight: FontWeight.w500,
               color: Colors.black,
             ),
-            textAlign: TextAlign.right,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildClientRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          flex: 2,
-          child: Text(
-            'Покупатель',
-            style: AppStyle.manrope(
-              size: 14,
-              weight: FontWeight.w400,
-              color: Colors.grey[600],
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'ФИО клиента',
+              style: AppStyle.manrope(
+                size: 14,
+                weight: FontWeight.w400,
+                color: Colors.grey[600],
+              ),
             ),
           ),
-        ),
-        Expanded(
-          flex: 3,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Text(
-                  widget.credit.clientFullName,
-                  style: AppStyle.manrope(
-                    size: 14,
-                    weight: FontWeight.w500,
-                    color: Colors.black,
-                  ),
-                  textAlign: TextAlign.right,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              widget.credit.clientFullName,
+              style: AppStyle.manrope(
+                size: 14,
+                weight: FontWeight.w500,
+                color: Colors.black,
               ),
-              const SizedBox(width: 8),
-              InkWell(
-                onTap: () =>
-                    _loadClientAndShowModal(context, widget.credit.clientId),
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Icon(
-                    Icons.remove_red_eye,
-                    size: 16,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ),
-            ],
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -518,66 +490,16 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
   }
 
   void showAddNoteDialog(BuildContext context, int creditId) {
-    final controller = TextEditingController();
-
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (ctx) {
-        return AlertDialog(
-          backgroundColor: Color(AppColors.background),
-          title: const Text('Новая заметка'),
-          content: TextField(
-            controller: controller,
-            maxLines: 5,
-            decoration: const InputDecoration(
-              hintText: 'Введите текст заметки',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(ctx).pop();
-              },
-              child: const Text(
-                'Отмена',
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(AppColors.primary),
-              ),
-              onPressed: () async {
-                Navigator.of(ctx).pop();
-                final dataSource = getIt<NoteRemoteDataSource>();
-
-                final note = NoteCreateRequest(
-                  creditId: creditId,
-                  content: controller.text,
-                );
-
-                try {
-                  await dataSource.createNote(note);
-                  _loadNotes();
-                } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Ошибка при добавлении заметки: $e'),
-                      ),
-                    );
-                  }
-                }
-              },
-              child: const Text(
-                'Сохранить',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
+        return AddNoteDialog(
+          creditId: creditId,
+          onNoteAdded: () {
+            _loadNotes();
+          },
         );
       },
     );

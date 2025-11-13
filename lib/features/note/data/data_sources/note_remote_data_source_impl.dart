@@ -10,7 +10,10 @@ class NoteRemoteDataSourceImpl implements NoteRemoteDataSource {
 
   @override
   Future<List<NoteModel>> fetchNotesByCreditId(int creditId) async {
-    final response = await dio.get('/api/Note/$creditId');
+    final response = await dio.get(
+      '/api/Note/by-type/credit/$creditId',
+      queryParameters: {'includeFiles': true},
+    );
 
     if (response.statusCode == 200) {
       final data = response.data as List;
@@ -30,7 +33,17 @@ class NoteRemoteDataSourceImpl implements NoteRemoteDataSource {
 
   @override
   Future<void> createNote(NoteCreateRequest note) async {
-    final response = await dio.post('/api/Note', data: note.toJson());
+    final formData = FormData.fromMap({
+      'NoteableType': note.noteableType,
+      'NoteableId': note.noteableId,
+      'Content': note.content,
+      if (note.remindDate != null)
+        'RemindDate': note.remindDate!.toIso8601String(),
+      if (note.file != null) 'File': await MultipartFile.fromFile(note.file!),
+    });
+
+    final response = await dio.post('/api/Note', data: formData);
+
     if (response.statusCode != 200) {
       throw Exception('Не удалось создать заметку');
     }
