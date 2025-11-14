@@ -1,77 +1,78 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import 'package:waypay/core/storage/user_storage.dart';
-import 'package:waypay/features/admin_panel/data/data_sources/company_remote_data_source.dart';
-import 'package:waypay/features/admin_panel/data/data_sources/company_remote_data_source_impl.dart';
-import 'package:waypay/features/admin_panel/presentation/cubit/company_cubit.dart';
-import 'package:waypay/features/analytics/data/data_sources/analytic_remote_data_source.dart';
-import 'package:waypay/features/analytics/data/data_sources/analytic_remote_data_source_impl.dart';
-import 'package:waypay/features/analytics/presentation/cubit/analytic_items_cubit.dart';
-import 'package:waypay/features/analytics/presentation/cubit/debt_dynamic_cubit.dart';
-import 'package:waypay/features/analytics/presentation/cubit/investment_dynamic_cubit.dart';
-import 'package:waypay/features/analytics/presentation/cubit/sell_info_cubit.dart';
-import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source_impl.dart';
-import 'package:waypay/features/auth/presentation/bloc/auth_cubit.dart';
-import 'package:waypay/features/blog/data/data_sources/blog_remote_data_sources.dart';
-import 'package:waypay/features/blog/data/data_sources/blog_remote_data_sources_impl.dart';
-import 'package:waypay/features/blog/data/data_sources/profile_blog_remote_data_sources.dart';
-import 'package:waypay/features/blog/data/data_sources/profile_blog_remote_data_sources_impl.dart';
-import 'package:waypay/features/blog/presentation/bloc/blog_bloc.dart';
-import 'package:waypay/features/blog/presentation/bloc/comment_bloc.dart';
-import 'package:waypay/features/blog/presentation/cubit/profile_blog_cubit.dart';
-import 'package:waypay/features/chat/data/data_source/chat/chat_remote_data_source.dart';
-import 'package:waypay/features/chat/data/data_source/chat/chat_remote_data_source_impl.dart';
-import 'package:waypay/features/chat/data/data_source/message/message_remote_data_source.dart';
-import 'package:waypay/features/chat/data/data_source/message/message_remote_data_source_impl.dart';
-import 'package:waypay/features/chat/data/service/chat_hub_service.dart';
-import 'package:waypay/features/chat/presentation/bloc/chat/chat_bloc.dart';
-import 'package:waypay/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
-import 'package:waypay/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources.dart';
-import 'package:waypay/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources_impl.dart';
-import 'package:waypay/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
-import 'package:waypay/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
-import 'package:waypay/features/clients/data/data_sources/clients/clients_remote_data_source_impl.dart';
-import 'package:waypay/features/clients/presentation/bloc/clients/clients_bloc.dart';
-import 'package:waypay/features/credit/data/data_source/credit_remote_data_source.dart';
-import 'package:waypay/features/credit/data/data_source/credit_remote_data_source_impl.dart';
-import 'package:waypay/features/credit/data/objectType/data_source/object_type_remote_data_source.dart';
-import 'package:waypay/features/credit/presentation/bloc/credit_bloc.dart';
-import 'package:waypay/features/credit/presentation/bloc/object_type_bloc.dart';
-import 'package:waypay/features/finance/data/data_source/budget_remote_data_source.dart';
-import 'package:waypay/features/finance/data/data_source/budget_remote_data_source_impl.dart';
-import 'package:waypay/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
-import 'package:waypay/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
-import 'package:waypay/features/investors/data/data_sources/investors_remote_data_source.dart';
-import 'package:waypay/features/investors/data/data_sources/investors_remote_data_source_impl.dart';
-import 'package:waypay/features/investors/presentation/bloc/investors_bloc.dart';
-import 'package:waypay/features/note/data/data_sources/note_remote_data_source.dart';
-import 'package:waypay/features/note/data/data_sources/note_remote_data_source_impl.dart';
-import 'package:waypay/features/notifications/data/data_sources/notifications_data_source.dart';
-import 'package:waypay/features/product/data/data_sources/products_remote_data_source.dart';
-import 'package:waypay/features/product/data/data_sources/products_remote_data_source_impl.dart';
-import 'package:waypay/features/product/presentation/bloc/products_bloc.dart';
-import 'package:waypay/features/clients/data/data_sources/queue/queue_remote_data_source.dart';
-import 'package:waypay/features/clients/data/data_sources/queue/queue_remote_data_source_impl.dart';
-import 'package:waypay/features/clients/presentation/bloc/queue/queue_bloc.dart';
-import 'package:waypay/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
-import 'package:waypay/features/payment/data/data_sources/schedule/schedule_remote_data_sources_impl.dart';
-import 'package:waypay/features/payment/presentation/bloc/schedule/schedule_bloc.dart';
-import 'package:waypay/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
-import 'package:waypay/features/payment/data/data_sources/expected/payment_remote_data_sources_impl.dart';
-import 'package:waypay/features/payment/presentation/bloc/expected/payment_bloc.dart';
-import 'package:waypay/features/profile/data/data_sources/employee_remote_data_source.dart';
-import 'package:waypay/features/profile/data/data_sources/employee_remote_data_source_impl.dart';
-import 'package:waypay/features/profile/presentation/bloc/employees_bloc.dart';
-import 'package:waypay/features/profile/presentation/cubit/credit_stats_cubit.dart';
-import 'package:waypay/features/profile/presentation/cubit/payment_stats_cubit.dart';
-import 'package:waypay/features/profile/presentation/cubit/profile_cubit.dart';
-import 'package:waypay/features/sold_products/data/data_sources/sold_product_remote_data_source.dart';
-import 'package:waypay/features/sold_products/data/data_sources/sold_product_remote_data_source_impl.dart';
-import 'package:waypay/features/todo/data/data_soucres/task_remote_data_source.dart';
-import 'package:waypay/features/todo/data/data_soucres/task_remote_data_source_impl.dart';
-import 'package:waypay/features/todo/presentation/bloc/task_bloc.dart';
-import '../../features/notifications/presentation/cubit/notifications_cubit.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
+import 'package:waypay_mobile/features/admin_panel/data/data_sources/company_remote_data_source.dart';
+import 'package:waypay_mobile/features/admin_panel/data/data_sources/company_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/admin_panel/presentation/cubit/company_cubit.dart';
+import 'package:waypay_mobile/features/analytics/data/data_sources/analytic_remote_data_source.dart';
+import 'package:waypay_mobile/features/analytics/data/data_sources/analytic_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/analytic_items_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/debt_dynamic_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/investment_dynamic_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/sell_info_cubit.dart';
+import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/auth/presentation/bloc/auth_cubit.dart';
+import 'package:waypay_mobile/features/blog/data/data_sources/blog_remote_data_sources.dart';
+import 'package:waypay_mobile/features/blog/data/data_sources/blog_remote_data_sources_impl.dart';
+import 'package:waypay_mobile/features/blog/data/data_sources/profile_blog_remote_data_sources.dart';
+import 'package:waypay_mobile/features/blog/data/data_sources/profile_blog_remote_data_sources_impl.dart';
+import 'package:waypay_mobile/features/blog/presentation/bloc/blog_bloc.dart';
+import 'package:waypay_mobile/features/blog/presentation/bloc/comment_bloc.dart';
+import 'package:waypay_mobile/features/blog/presentation/cubit/profile_blog_cubit.dart';
+import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source.dart';
+import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source.dart';
+import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/chat/data/service/chat_hub_service.dart';
+import 'package:waypay_mobile/features/chat/presentation/bloc/chat/chat_bloc.dart';
+import 'package:waypay_mobile/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources_impl.dart';
+import 'package:waypay_mobile/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
+import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
+import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/credit/data/objectType/data_source/object_type_remote_data_source.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/object_type_bloc.dart';
+import 'package:waypay_mobile/features/finance/data/data_source/budget_remote_data_source.dart';
+import 'package:waypay_mobile/features/finance/data/data_source/budget_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
+import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
+import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
+import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
+import 'package:waypay_mobile/features/note/data/data_sources/note_remote_data_source.dart';
+import 'package:waypay_mobile/features/note/data/data_sources/note_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/notifications/data/data_source/notifications_data_source.dart';
+import 'package:waypay_mobile/features/notifications/data/data_source/notifications_data_source_impl.dart';
+import 'package:waypay_mobile/features/notifications/presentation/cubit/notifications_cubit.dart';
+import 'package:waypay_mobile/features/product/data/data_sources/products_remote_data_source.dart';
+import 'package:waypay_mobile/features/product/data/data_sources/products_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/product/presentation/bloc/products_bloc.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/queue/queue_remote_data_source.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/queue/queue_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/clients/presentation/bloc/queue/queue_bloc.dart';
+import 'package:waypay_mobile/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
+import 'package:waypay_mobile/features/payment/data/data_sources/schedule/schedule_remote_data_sources_impl.dart';
+import 'package:waypay_mobile/features/payment/presentation/bloc/schedule/schedule_bloc.dart';
+import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
+import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources_impl.dart';
+import 'package:waypay_mobile/features/payment/presentation/bloc/expected/payment_bloc.dart';
+import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
+import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/profile/presentation/bloc/employees_bloc.dart';
+import 'package:waypay_mobile/features/profile/presentation/cubit/credit_stats_cubit.dart';
+import 'package:waypay_mobile/features/profile/presentation/cubit/payment_stats_cubit.dart';
+import 'package:waypay_mobile/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:waypay_mobile/features/sold_products/data/data_sources/sold_product_remote_data_source.dart';
+import 'package:waypay_mobile/features/sold_products/data/data_sources/sold_product_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/todo/data/data_soucres/task_remote_data_source.dart';
+import 'package:waypay_mobile/features/todo/data/data_soucres/task_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/todo/presentation/bloc/task_bloc.dart';
 import '../network/dio_client.dart';
 import '../network/token_storage.dart';
 
@@ -80,7 +81,7 @@ final getIt = GetIt.instance;
 Future<void> initDependencies() async {
   getIt.registerLazySingleton(() => createDio());
   getIt.registerLazySingleton<Dio>(
-    () => createDio(baseUrl: 'https://web.waypay.one:5002'),
+    () => createDio(baseUrl: 'https://web.waypay_mobile.one:5002'),
     instanceName: 'second',
   );
   getIt.registerLazySingleton(() => TokenStorage());
@@ -120,6 +121,9 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton<NoteRemoteDataSource>(
     () => NoteRemoteDataSourceImpl(getIt<Dio>()),
   );
+  getIt.registerLazySingleton<NotificationsDataSource>(
+    () => NotificationsDataSourceImpl(getIt<Dio>()),
+  );
   getIt.registerLazySingleton<EmployeeRemoteDataSource>(
     () => EmployeeRemoteDataSourceImpl(getIt<Dio>()),
   );
@@ -150,10 +154,9 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton<SoldProductRemoteDataSource>(
     () => SoldProductRemoteDataSourceImpl(getIt<Dio>()),
   );
-
   getIt.registerLazySingleton<ChatHubService>(
     () => ChatHubService(
-      baseUrl: 'https://web.waypay.one:5002',
+      baseUrl: 'https://web.waypay_mobile.one:5002',
       tokenProvider: () async => await getIt<TokenStorage>().getAccessToken(),
     ),
   );
@@ -183,6 +186,9 @@ Future<void> initDependencies() async {
   getIt.registerFactory(() => CommentBloc());
   getIt.registerFactory(() => ProfileBlogCubit());
   getIt.registerFactory<ObjectTypeBloc>(() => ObjectTypeBloc());
+  getIt.registerFactory(
+    () => NotificationsCubit(getIt<NotificationsDataSource>()),
+  );
   getIt.registerFactory(
     () => ChatListBloc(
       api: getIt<ChatRemoteDataSource>(),

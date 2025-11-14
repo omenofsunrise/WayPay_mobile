@@ -1,5 +1,5 @@
-import 'package:waypay/features/product/data/models/product_model.dart';
-import 'package:waypay/features/product/data/models/products_response_model.dart';
+import 'package:waypay_mobile/features/product/data/models/product_model.dart';
+import 'package:waypay_mobile/features/product/data/models/products_response_model.dart';
 
 abstract class ProductsRemoteDataSource {
   Future<ProductsResponseModel> getProducts({

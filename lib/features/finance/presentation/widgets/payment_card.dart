@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/form_modal/labeled_container.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
-import 'package:waypay/core/storage/user_storage.dart';
-import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
-import 'package:waypay/core/widgets/helpers.dart';
-import 'package:waypay/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
-import 'package:waypay/features/payment/data/models/expected/payment_item_model.dart';
-import 'package:waypay/features/payment/presentation/bloc/expected/payment_bloc.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/form_modal/labeled_container.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
+import 'package:waypay_mobile/core/widgets/app_modal.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/core/widgets/helpers.dart';
+import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
+import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
+import 'package:waypay_mobile/features/payment/presentation/bloc/expected/payment_bloc.dart';
 
 class PaymentCard extends StatefulWidget {
   final PaymentItemModel payment;

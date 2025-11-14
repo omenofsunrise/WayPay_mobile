@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
 
 Future<bool> showConfirmDialog({
   required BuildContext context,
@@ -55,7 +55,7 @@ final _avatarColors = [
 String? _resolvePhotoUrl(String? path) {
   if (path == null || path.isEmpty) return null;
   if (path.startsWith('http')) return path;
-  return 'https://file.waypay.one$path';
+  return 'https://file.waypay_mobile.one${path.startsWith('/') ? '' : '/'}$path';
 }
 
 Color _getColorFromName(String name) {

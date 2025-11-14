@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:waypay/features/network_error/screens/network_error_screen.dart';
+import 'package:waypay_mobile/features/network_error/screens/network_error_screen.dart';
 
 class NetworkListener extends StatefulWidget {
   final Widget child;

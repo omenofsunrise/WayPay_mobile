@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/helpers.dart';
-import 'package:waypay/features/blog/data/data_sources/blog_remote_data_sources.dart';
-import 'package:waypay/features/blog/presentation/screens/blog_profile_screen.dart';
-import 'package:waypay/features/blog/presentation/widgets/image_modal_viewer.dart';
-import 'package:waypay/features/chat/data/data_source/chat/chat_remote_data_source.dart';
-import 'package:waypay/features/chat/data/data_source/message/message_remote_data_source.dart';
-import 'package:waypay/features/chat/data/models/chat/chat_response.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/helpers.dart';
+import 'package:waypay_mobile/features/blog/data/data_sources/blog_remote_data_sources.dart';
+import 'package:waypay_mobile/features/blog/presentation/screens/blog_profile_screen.dart';
+import 'package:waypay_mobile/features/blog/presentation/widgets/image_modal_viewer.dart';
+import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source.dart';
+import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source.dart';
+import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
 
 class PostCard extends StatefulWidget {
   final int id;
@@ -73,7 +73,9 @@ class _PostCardState extends State<PostCard> {
   String _resolveUrl(String? url, {bool isAvatar = false}) {
     if (url == null || url.isEmpty) return '';
     if (url.startsWith('/')) {
-      return isAvatar ? 'http://test.waypay.one:5000$url' : 'http://test.waypay.one:5003$url';
+      return isAvatar
+          ? 'https://web.waypay_mobile.one:5001$url'
+          : 'https://web.waypay_mobile.one:5002$url';
     }
     return url;
   }
@@ -134,7 +136,10 @@ class _PostCardState extends State<PostCard> {
         ? [widget.imageUrl!]
         : const [];
 
-    final List<String> resolvedUrls = rawUrls.map((u) => _resolveUrl(u)).where((u) => u.isNotEmpty).toList();
+    final List<String> resolvedUrls = rawUrls
+        .map((u) => _resolveUrl(u))
+        .where((u) => u.isNotEmpty)
+        .toList();
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -156,7 +161,10 @@ class _PostCardState extends State<PostCard> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ProfileBlogScreen(id: widget.authorId)),
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ProfileBlogScreen(id: widget.authorId),
+                      ),
                     );
                   },
                   child: buildAvatar(
@@ -174,22 +182,32 @@ class _PostCardState extends State<PostCard> {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => ProfileBlogScreen(id: widget.authorId)),
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ProfileBlogScreen(id: widget.authorId),
+                            ),
                           );
                         },
                         child: Text(
                           widget.author,
-                          style: AppStyle.manrope(size: widget.isChat == null ? 14 : 11, weight: FontWeight.w600),
+                          style: AppStyle.manrope(
+                            size: widget.isChat == null ? 14 : 11,
+                            weight: FontWeight.w600,
+                          ),
                         ),
                       ),
                       Text(
                         widget.timeAgo,
-                        style: AppStyle.manrope(size: widget.isChat == null ? 14 : 11, weight: FontWeight.w400),
+                        style: AppStyle.manrope(
+                          size: widget.isChat == null ? 14 : 11,
+                          weight: FontWeight.w400,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                if (widget.isAuthor == true && widget.isChat == null) _buildMenu(context),
+                if (widget.isAuthor == true && widget.isChat == null)
+                  _buildMenu(context),
               ],
             ),
             const SizedBox(height: 8),
@@ -198,13 +216,19 @@ class _PostCardState extends State<PostCard> {
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
                   widget.text,
-                  style: AppStyle.manrope(size: widget.isChat == null ? 14 : 11, weight: FontWeight.w400),
+                  style: AppStyle.manrope(
+                    size: widget.isChat == null ? 14 : 11,
+                    weight: FontWeight.w400,
+                  ),
                 ),
               ),
             if (resolvedUrls.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: _ImagesBlockCached(urls: resolvedUrls, onTapImage: (url) => ImageModalViewer.show(context, url)),
+                child: _ImagesBlockCached(
+                  urls: resolvedUrls,
+                  onTapImage: (url) => ImageModalViewer.show(context, url),
+                ),
               ),
 
             if (widget.fileName != null && widget.fileThumbnail != null)
@@ -214,7 +238,12 @@ class _PostCardState extends State<PostCard> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(_resolveUrl(widget.fileThumbnail), width: 50, height: 50, fit: BoxFit.cover),
+                      child: Image.network(
+                        _resolveUrl(widget.fileThumbnail),
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -239,7 +268,9 @@ class _PostCardState extends State<PostCard> {
                       Icon(
                         widget.isLiked ? Icons.favorite : Icons.favorite_border,
                         size: 20,
-                        color: widget.isLiked ? const Color(AppColors.red) : const Color(AppColors.darkGrey),
+                        color: widget.isLiked
+                            ? const Color(AppColors.red)
+                            : const Color(AppColors.darkGrey),
                       ),
                       const SizedBox(width: 5),
                       Text(
@@ -257,7 +288,11 @@ class _PostCardState extends State<PostCard> {
                   onTap: widget.onCommentsPressed,
                   child: Row(
                     children: [
-                      const Icon(Icons.chat_bubble_outline, size: 20, color: Color(AppColors.darkGrey)),
+                      const Icon(
+                        Icons.chat_bubble_outline,
+                        size: 20,
+                        color: Color(AppColors.darkGrey),
+                      ),
                       const SizedBox(width: 5),
                       Text(
                         '${widget.comments}',
@@ -273,12 +308,21 @@ class _PostCardState extends State<PostCard> {
                 if (widget.isChat == null)
                   GestureDetector(
                     onTap: () async {
-                      final ok = await showSharePostDialog(context, postId: widget.id);
+                      final ok = await showSharePostDialog(
+                        context,
+                        postId: widget.id,
+                      );
                       if (ok == true && context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Пост отправлен')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Пост отправлен')),
+                        );
                       }
                     },
-                    child: const Icon(Icons.share, size: 20, color: Color(AppColors.darkGrey)),
+                    child: const Icon(
+                      Icons.share,
+                      size: 20,
+                      color: Color(AppColors.darkGrey),
+                    ),
                   ),
               ],
             ),
@@ -310,7 +354,13 @@ class _ImagesBlockCachedState extends State<_ImagesBlockCached> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      _mediaCache = CacheManager(Config('postMediaCache', stalePeriod: Duration(days: 14), maxNrOfCacheObjects: 300));
+      _mediaCache = CacheManager(
+        Config(
+          'postMediaCache',
+          stalePeriod: Duration(days: 14),
+          maxNrOfCacheObjects: 300,
+        ),
+      );
 
       _prefetch(_index);
       _prefetch(_index + 1);
@@ -320,7 +370,11 @@ class _ImagesBlockCachedState extends State<_ImagesBlockCached> {
 
   void _prefetch(int i) {
     if (i < 0 || i >= widget.urls.length) return;
-    final provider = CachedNetworkImageProvider(widget.urls[i], cacheKey: widget.urls[i], cacheManager: _mediaCache);
+    final provider = CachedNetworkImageProvider(
+      widget.urls[i],
+      cacheKey: widget.urls[i],
+      cacheManager: _mediaCache,
+    );
     precacheImage(provider, context);
   }
 
@@ -339,7 +393,8 @@ class _ImagesBlockCachedState extends State<_ImagesBlockCached> {
       fadeInDuration: const Duration(milliseconds: 120),
       fadeOutDuration: const Duration(milliseconds: 80),
       placeholder: (_, __) => Container(color: Colors.black12),
-      errorWidget: (_, __, ___) => const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
+      errorWidget: (_, __, ___) =>
+          const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
       useOldImageOnUrlChange: true,
     );
   }
@@ -458,7 +513,9 @@ class _SharePostDialogState extends State<_SharePostDialog> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Не удалось загрузить чаты: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Не удалось загрузить чаты: $e')));
     }
   }
 
@@ -478,14 +535,21 @@ class _SharePostDialogState extends State<_SharePostDialog> {
     try {
       final msg = _msgCtrl.text.trim().isEmpty ? null : _msgCtrl.text.trim();
       for (final chatId in _selected) {
-        await _msgApi.sendMessage(chatId, text: msg, postId: widget.postId, attachments: const []);
+        await _msgApi.sendMessage(
+          chatId,
+          text: msg,
+          postId: widget.postId,
+          attachments: const [],
+        );
       }
       if (!mounted) return;
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       setState(() => _sending = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ошибка отправки: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ошибка отправки: $e')));
     }
   }
 
@@ -516,10 +580,16 @@ class _SharePostDialogState extends State<_SharePostDialog> {
                   }
                 });
               },
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
             ),
             const SizedBox(width: 8),
-            buildAvatar(fullName: c.name ?? 'Чат', radius: 18, photoPath: c.avatarPath),
+            buildAvatar(
+              fullName: c.name ?? 'Чат',
+              radius: 18,
+              photoPath: c.avatarPath,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -537,7 +607,11 @@ class _SharePostDialogState extends State<_SharePostDialog> {
                               ? '${c.lastMessage!.text!.substring(0, 40)}…'
                               : c.lastMessage!.text!)
                         : 'Нет сообщений',
-                    style: AppStyle.manrope(size: 13, weight: FontWeight.w400, color: const Color(AppColors.darkGrey)),
+                    style: AppStyle.manrope(
+                      size: 13,
+                      weight: FontWeight.w400,
+                      color: const Color(AppColors.darkGrey),
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -559,16 +633,25 @@ class _SharePostDialogState extends State<_SharePostDialog> {
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8, minWidth: 340),
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+          minWidth: 340,
+        ),
         child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 8, 8),
               child: Row(
                 children: [
-                  Text('Поделиться постом', style: AppStyle.manrope(size: 18, weight: FontWeight.w700)),
+                  Text(
+                    'Поделиться постом',
+                    style: AppStyle.manrope(size: 18, weight: FontWeight.w700),
+                  ),
                   const Spacer(),
-                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context, false)),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context, false),
+                  ),
                 ],
               ),
             ),
@@ -582,7 +665,9 @@ class _SharePostDialogState extends State<_SharePostDialog> {
                       maxLines: 3,
                       decoration: InputDecoration(
                         hintText: 'Добавьте сообщение к посту (необязательно)',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         filled: true,
                         fillColor: Colors.white,
                         contentPadding: const EdgeInsets.all(12),
@@ -595,10 +680,14 @@ class _SharePostDialogState extends State<_SharePostDialog> {
                       decoration: InputDecoration(
                         hintText: 'Поиск чатов...',
                         prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         filled: true,
                         fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -610,7 +699,10 @@ class _SharePostDialogState extends State<_SharePostDialog> {
                           ? const Center(child: Text('Чатов не найдено'))
                           : ListView.separated(
                               itemCount: _filtered.length,
-                              separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade200),
+                              separatorBuilder: (_, __) => Divider(
+                                height: 1,
+                                color: Colors.grey.shade200,
+                              ),
                               itemBuilder: (_, i) => _chatTile(_filtered[i]),
                             ),
                     ),
@@ -623,14 +715,18 @@ class _SharePostDialogState extends State<_SharePostDialog> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: const Color(0xFFF7F7F7),
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(16),
+                ),
                 border: Border(top: BorderSide(color: Colors.grey.shade200)),
               ),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
-                      _selected.isEmpty ? 'Выберите чаты для отправки' : 'Выбрано чатов: ${_selected.length}',
+                      _selected.isEmpty
+                          ? 'Выберите чаты для отправки'
+                          : 'Выбрано чатов: ${_selected.length}',
                       style: AppStyle.manrope(
                         size: 14,
                         weight: FontWeight.w400,
@@ -644,14 +740,22 @@ class _SharePostDialogState extends State<_SharePostDialog> {
                       backgroundColor: const Color(AppColors.comfPayment),
                       disabledBackgroundColor: Colors.grey.shade300,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                     child: _sending
                         ? const SizedBox(
                             width: 18,
                             height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
                           )
                         : const Text('Отправить'),
                   ),

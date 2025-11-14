@@ -1,4 +1,4 @@
-import 'package:waypay/features/credit/data/models/credit_model.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 
 abstract class CreditState {}
 

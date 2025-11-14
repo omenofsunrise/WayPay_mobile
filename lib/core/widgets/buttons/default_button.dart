@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
 
 class DefaultButton extends StatefulWidget {
   final String text;
 
   final Color? color;
+  final Color? textColor;
   final VoidCallback onPressed;
   final bool showIcon;
   final IconData? icon;
+  final Widget? iconWidget;
 
   final bool isGreen;
 
@@ -17,8 +19,10 @@ class DefaultButton extends StatefulWidget {
     required this.text,
     required this.onPressed,
     this.color,
+    this.textColor,
     this.showIcon = false,
     this.icon,
+    this.iconWidget,
     this.isGreen = false,
   });
 
@@ -36,7 +40,15 @@ class _DefaultButtonState extends State<DefaultButton> {
             : const Color(AppColors.greyLight));
 
     final bool isGrey = bg == const Color(AppColors.greyLight);
-    final Color fg = isGrey ? Colors.black : const Color(AppColors.background);
+    final Color fg =
+        widget.textColor ??
+        (isGrey ? Colors.black : const Color(AppColors.background));
+
+    final Widget? iconWidget =
+        widget.iconWidget ??
+        (widget.icon != null
+            ? Icon(widget.icon, color: fg, size: 20)
+            : Icon(Icons.info, color: fg, size: 20));
 
     return GestureDetector(
       onTap: widget.onPressed,
@@ -51,11 +63,8 @@ class _DefaultButtonState extends State<DefaultButton> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              if (widget.showIcon) ...[iconWidget!, const SizedBox(width: 8)],
               Text(widget.text, style: AppStyle.manrope16.copyWith(color: fg)),
-              if (widget.showIcon) ...[
-                const SizedBox(width: 8),
-                Icon(widget.icon ?? Icons.info, color: fg, size: 20),
-              ],
             ],
           ),
         ),

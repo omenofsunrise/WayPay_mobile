@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:waypay/features/blog/data/models/blog_post_response.dart';
-import 'package:waypay/features/blog/data/models/blog_post_response_paged_result.dart';
-import 'package:waypay/features/blog/data/models/comment_response.dart';
+import 'package:waypay_mobile/features/blog/data/models/blog_post_response.dart';
+import 'package:waypay_mobile/features/blog/data/models/blog_post_response_paged_result.dart';
+import 'package:waypay_mobile/features/blog/data/models/comment_response.dart';
 
 abstract class BlogRemoteDataSources {
   Future<BlogPostResponsePagedResult> getBlogPosts({
@@ -12,7 +12,11 @@ abstract class BlogRemoteDataSources {
     int page = 1,
     int pageSize = 20,
   });
-  Future<void> createBlogPost({required String content, List<MultipartFile>? images, List<MultipartFile>? files});
+  Future<void> createBlogPost({
+    required String content,
+    List<MultipartFile>? images,
+    List<MultipartFile>? files,
+  });
   Future<BlogPostResponse> getBlogPostById(int id);
   Future<void> publishPost(int id);
   Future<void> deleteAttachment(int postId, int attachmentId);
@@ -27,8 +31,17 @@ abstract class BlogRemoteDataSources {
   });
   Future<List<CommentResponse>> getCommentsByPostId(int postId);
   Future<void> likeComment(int commentId);
-  Future<void> updateCommentText({required int commentId, required String newText});
+  Future<void> updateCommentText({
+    required int commentId,
+    required String newText,
+  });
   Future<void> deleteComment(int commentId);
-  Future<void> deleteCommentAttachment({required int commentId, required int attachmentId});
-  Future<CommentResponse> uploadCommentAttachment({required int commentId, required MultipartFile file});
+  Future<void> deleteCommentAttachment({
+    required int commentId,
+    required int attachmentId,
+  });
+  Future<CommentResponse> uploadCommentAttachment({
+    required int commentId,
+    required MultipartFile file,
+  });
 }

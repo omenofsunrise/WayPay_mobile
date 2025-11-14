@@ -1,6 +1,6 @@
-import 'package:waypay/features/chat/data/models/chat/chat_link_response.dart';
-import 'package:waypay/features/chat/data/models/chat/chat_member_response.dart';
-import 'package:waypay/features/chat/data/models/chat/chat_response.dart';
+import 'package:waypay_mobile/features/chat/data/models/chat/chat_link_response.dart';
+import 'package:waypay_mobile/features/chat/data/models/chat/chat_member_response.dart';
+import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
 
 abstract class ChatRemoteDataSource {
   Future<int> getUnreadCount();

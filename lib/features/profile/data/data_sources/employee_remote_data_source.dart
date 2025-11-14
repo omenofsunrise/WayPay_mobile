@@ -1,6 +1,6 @@
-import 'package:waypay/features/profile/data/models/credit_stat.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
-import 'package:waypay/features/profile/data/models/payment_stat.dart';
+import 'package:waypay_mobile/features/profile/data/models/credit_stat.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/features/profile/data/models/payment_stat.dart';
 
 abstract class EmployeeRemoteDataSource {
   Future<void> uploadEmployeePhoto({required int id, required String filePath});

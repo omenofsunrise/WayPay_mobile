@@ -1,4 +1,4 @@
-import 'package:waypay/features/blog/data/models/blog_post_response.dart';
+import 'package:waypay_mobile/features/blog/data/models/blog_post_response.dart';
 
 class BlogPostResponsePagedResult {
   final int page;
@@ -21,7 +21,11 @@ class BlogPostResponsePagedResult {
       pageSize: json['pageSize'] as int,
       totalCount: json['totalCount'] as int,
       totalPages: json['totalPages'] as int,
-      items: json['items'] != null ? (json['items'] as List).map((e) => BlogPostResponse.fromJson(e)).toList() : null,
+      items: json['items'] != null
+          ? (json['items'] as List)
+                .map((e) => BlogPostResponse.fromJson(e))
+                .toList()
+          : null,
     );
   }
 

@@ -1,4 +1,4 @@
-import 'package:waypay/features/finance/data/models/payment_model.dart';
+import 'package:waypay_mobile/features/finance/data/models/payment_model.dart';
 
 class PaymentResponseModel {
   final int page;

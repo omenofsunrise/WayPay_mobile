@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
-import 'package:waypay/routes/routes.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/routes/routes.dart';
 
 class ConfirmationScreen extends StatefulWidget {
   final String phone;

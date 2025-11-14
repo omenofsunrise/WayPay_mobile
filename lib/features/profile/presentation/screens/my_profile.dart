@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/helpers.dart';
-import 'package:waypay/core/widgets/refresh.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
-import 'package:waypay/features/profile/presentation/cubit/profile_cubit.dart';
-import 'package:waypay/features/profile/presentation/widgets/credit_count.dart';
-import 'package:waypay/features/profile/presentation/widgets/payment_stats_table.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/helpers.dart';
+import 'package:waypay_mobile/core/widgets/refresh.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:waypay_mobile/features/profile/presentation/widgets/credit_count.dart';
+import 'package:waypay_mobile/features/profile/presentation/widgets/payment_stats_table.dart';
 
 class MyProfileScreen extends StatefulWidget {
   final int? employeeId;
@@ -42,7 +42,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 widget.refresh();
               },
               content: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 25),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 25,
+                ),
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,33 +54,57 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                         child: Text(
                           'Личные данные и статистика',
                           textAlign: TextAlign.center,
-                          style: AppStyle.manrope(size: 20, weight: FontWeight.w500, color: Color(0xff007D88)),
+                          style: AppStyle.manrope(
+                            size: 20,
+                            weight: FontWeight.w500,
+                            color: Color(0xff007D88),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 25),
                       Center(
-                        child: buildAvatar(photoPath: employee.photoPath, fullName: employee.fullName),
+                        child: buildAvatar(
+                          photoPath: employee.photoPath,
+                          fullName: employee.fullName,
+                        ),
                       ),
                       const SizedBox(height: 21),
                       Center(
                         child: Text(
                           employee.fullName,
-                          style: AppStyle.inter(size: 20, weight: FontWeight.w500),
+                          style: AppStyle.inter(
+                            size: 20,
+                            weight: FontWeight.w500,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ),
                       const SizedBox(height: 15),
                       Center(
-                        child: Text(employee.roleLabel, style: AppStyle.inter(size: 16, weight: FontWeight.w400)),
+                        child: Text(
+                          employee.roleLabel,
+                          style: AppStyle.inter(
+                            size: 16,
+                            weight: FontWeight.w400,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 30),
                       Row(
                         spacing: 5,
                         children: [
-                          Icon(Icons.phone, color: Color(AppColors.darkGrey), size: 24),
+                          Icon(
+                            Icons.phone,
+                            color: Color(AppColors.darkGrey),
+                            size: 24,
+                          ),
                           Text(
                             employee.phone,
-                            style: AppStyle.manrope(weight: FontWeight.w400, size: 16, color: Colors.black),
+                            style: AppStyle.manrope(
+                              weight: FontWeight.w400,
+                              size: 16,
+                              color: Colors.black,
+                            ),
                           ),
                         ],
                       ),
@@ -85,10 +112,18 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       Row(
                         spacing: 5,
                         children: [
-                          Icon(Icons.location_on, color: Color(AppColors.darkGrey), size: 24),
+                          Icon(
+                            Icons.location_on,
+                            color: Color(AppColors.darkGrey),
+                            size: 24,
+                          ),
                           Text(
                             employee.address,
-                            style: AppStyle.manrope(weight: FontWeight.w400, size: 16, color: Colors.black),
+                            style: AppStyle.manrope(
+                              weight: FontWeight.w400,
+                              size: 16,
+                              color: Colors.black,
+                            ),
                           ),
                         ],
                       ),
@@ -96,18 +131,28 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       Row(
                         spacing: 5,
                         children: [
-                          Icon(Icons.trending_up, color: Color(AppColors.darkGrey), size: 24),
+                          Icon(
+                            Icons.trending_up,
+                            color: Color(AppColors.darkGrey),
+                            size: 24,
+                          ),
                           Text(
                             'Мин. надбавка ${employee.minSurcharge} %',
-                            style: AppStyle.manrope(weight: FontWeight.w400, size: 16, color: Colors.black),
+                            style: AppStyle.manrope(
+                              weight: FontWeight.w400,
+                              size: 16,
+                              color: Colors.black,
+                            ),
                           ),
                         ],
                       ),
-                      if (employee.role.toLabel() != EmployeeRole.accountant.toLabel()) ...[
+                      if (employee.role.toLabel() !=
+                          EmployeeRole.accountant.toLabel()) ...[
                         const SizedBox(height: 30),
                         PaymentStatsProfileTable(employeeId: widget.employeeId),
                       ],
-                      if (employee.role.toLabel() != EmployeeRole.accountant.toLabel()) ...[
+                      if (employee.role.toLabel() !=
+                          EmployeeRole.accountant.toLabel()) ...[
                         const SizedBox(height: 20),
                         CreditCount(employeeId: widget.employeeId),
                       ],
@@ -119,7 +164,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                           child: Text(
                             'Права пользователя',
                             textAlign: TextAlign.center,
-                            style: AppStyle.manrope(size: 20, weight: FontWeight.w500, color: Color(0xff007D88)),
+                            style: AppStyle.manrope(
+                              size: 20,
+                              weight: FontWeight.w500,
+                              color: Color(0xff007D88),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 23),
@@ -129,7 +178,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 6),
                               child: buildPermissionIndicator(
-                                isGranted: employee.permissions.contains(permission),
+                                isGranted: employee.permissions.contains(
+                                  permission,
+                                ),
                                 label: permission.toLabel(),
                               ),
                             );
@@ -149,7 +200,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     );
   }
 
-  Widget buildPermissionIndicator({required bool isGranted, required String label}) {
+  Widget buildPermissionIndicator({
+    required bool isGranted,
+    required String label,
+  }) {
     return Row(
       spacing: 8,
       children: [
@@ -160,7 +214,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             color: isGranted ? Color(AppColors.radioColor) : Colors.transparent,
             border: Border.all(color: Color(AppColors.borderColor), width: 1),
           ),
-          child: isGranted ? const Icon(Icons.check, size: 12, color: Colors.white) : null,
+          child: isGranted
+              ? const Icon(Icons.check, size: 12, color: Colors.white)
+              : null,
         ),
         Text(label, style: AppStyle.manrope(size: 20, weight: FontWeight.w400)),
       ],

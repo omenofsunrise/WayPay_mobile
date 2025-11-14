@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:waypay/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
-import 'package:waypay/features/payment/data/models/schedule/get_schedule_query.dart';
-import 'package:waypay/features/payment/data/models/schedule/schedule_model.dart';
+import 'package:waypay_mobile/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
+import 'package:waypay_mobile/features/payment/data/models/schedule/get_schedule_query.dart';
+import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
 
 class ScheduleRemoteDataSourcesImpl implements ScheduleRemoteDataSources {
   final Dio dio;
@@ -11,7 +11,10 @@ class ScheduleRemoteDataSourcesImpl implements ScheduleRemoteDataSources {
   @override
   Future<ScheduleResponseModel> getSchedule(GetScheduleQuery query) async {
     try {
-      final response = await dio.get('/api/Schedule', queryParameters: query.toQueryParams());
+      final response = await dio.get(
+        '/api/Schedule',
+        queryParameters: query.toQueryParams(),
+      );
       final data = response.data;
 
       if (data is Map<String, dynamic>) {

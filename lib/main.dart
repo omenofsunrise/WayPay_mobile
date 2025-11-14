@@ -2,32 +2,32 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/features/admin_panel/presentation/cubit/company_cubit.dart';
-import 'package:waypay/features/analytics/presentation/cubit/analytic_items_cubit.dart';
-import 'package:waypay/features/analytics/presentation/cubit/debt_dynamic_cubit.dart';
-import 'package:waypay/features/analytics/presentation/cubit/investment_dynamic_cubit.dart';
-import 'package:waypay/features/analytics/presentation/cubit/sell_info_cubit.dart';
-import 'package:waypay/features/auth/presentation/bloc/auth_cubit.dart';
-import 'package:waypay/features/blog/presentation/bloc/blog_bloc.dart';
-import 'package:waypay/features/blog/presentation/bloc/comment_bloc.dart';
-import 'package:waypay/features/blog/presentation/cubit/profile_blog_cubit.dart';
-import 'package:waypay/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
-import 'package:waypay/features/credit/presentation/bloc/credit_bloc.dart';
-import 'package:waypay/features/credit/presentation/bloc/object_type_bloc.dart';
-import 'package:waypay/features/credit/presentation/cubit/credit_creation_provider.dart';
-import 'package:waypay/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
-import 'package:waypay/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
-import 'package:waypay/features/investors/presentation/bloc/investors_bloc.dart';
-import 'package:waypay/features/product/presentation/bloc/products_bloc.dart';
-import 'package:waypay/features/profile/presentation/bloc/employees_bloc.dart';
-import 'package:waypay/features/profile/presentation/cubit/credit_stats_cubit.dart';
-import 'package:waypay/features/profile/presentation/cubit/payment_stats_cubit.dart';
-import 'package:waypay/features/profile/presentation/cubit/profile_cubit.dart';
-import 'package:waypay/features/todo/presentation/bloc/task_bloc.dart';
-import 'package:waypay/features/network_error/screens/network_error_screen.dart';
-import 'package:waypay/routes/app_router.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/features/admin_panel/presentation/cubit/company_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/analytic_items_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/debt_dynamic_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/investment_dynamic_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/sell_info_cubit.dart';
+import 'package:waypay_mobile/features/auth/presentation/bloc/auth_cubit.dart';
+import 'package:waypay_mobile/features/blog/presentation/bloc/blog_bloc.dart';
+import 'package:waypay_mobile/features/blog/presentation/bloc/comment_bloc.dart';
+import 'package:waypay_mobile/features/blog/presentation/cubit/profile_blog_cubit.dart';
+import 'package:waypay_mobile/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/object_type_bloc.dart';
+import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
+import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
+import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
+import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
+import 'package:waypay_mobile/features/product/presentation/bloc/products_bloc.dart';
+import 'package:waypay_mobile/features/profile/presentation/bloc/employees_bloc.dart';
+import 'package:waypay_mobile/features/profile/presentation/cubit/credit_stats_cubit.dart';
+import 'package:waypay_mobile/features/profile/presentation/cubit/payment_stats_cubit.dart';
+import 'package:waypay_mobile/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:waypay_mobile/features/todo/presentation/bloc/task_bloc.dart';
+import 'package:waypay_mobile/features/network_error/screens/network_error_screen.dart';
+import 'package:waypay_mobile/routes/app_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
@@ -85,7 +85,7 @@ class _MyAppState extends State<MyApp> {
     final app = isOffline!
         ? const MaterialApp(home: NetworkErrorScreen())
         : MaterialApp.router(
-            title: 'WayPay',
+            title: 'waypay_mobile',
             routerConfig: AppRouter.router,
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),

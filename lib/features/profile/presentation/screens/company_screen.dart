@@ -2,12 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
-import 'package:waypay/core/widgets/form_modal/label_text_field.dart';
-import 'package:waypay/features/admin_panel/presentation/cubit/company_cubit.dart';
-import 'package:waypay/features/admin_panel/data/models/company_model.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/core/widgets/form_modal/label_text_field.dart';
+import 'package:waypay_mobile/features/admin_panel/presentation/cubit/company_cubit.dart';
+import 'package:waypay_mobile/features/admin_panel/data/models/company_model.dart';
 
 class CompanyScreen extends StatefulWidget {
   const CompanyScreen({super.key});
@@ -38,7 +38,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
   String? _resolvePhotoUrl(String? path) {
     if (path == null || path.isEmpty) return null;
     if (path.startsWith('http')) return path;
-    return 'http://test.waypay.one:5000$path';
+    return 'http://test.waypay_mobile.one:5000$path';
   }
 
   Future<void> _pickImage() async {

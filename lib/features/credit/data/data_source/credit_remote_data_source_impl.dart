@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:waypay/features/credit/data/data_source/credit_remote_data_source.dart';
-import 'package:waypay/features/credit/data/models/credit_response_model.dart';
-import 'package:waypay/features/credit/data/models/get_query_credits.dart';
-import 'package:waypay/features/credit/data/models/credit_model.dart';
+import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_response_model.dart';
+import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 
 class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
   final Dio dio;
@@ -13,7 +13,10 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
   @override
   Future<CreditResponseModel> getCredits(GetCreditsQuery query) async {
     try {
-      final response = await dio.get('/api/Credit', queryParameters: query.toQueryParams());
+      final response = await dio.get(
+        '/api/Credit',
+        queryParameters: query.toQueryParams(),
+      );
 
       if (response.data is Map<String, dynamic>) {
         return CreditResponseModel.fromJson(response.data);
@@ -57,7 +60,9 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
   Future<void> deleteCreditById(int id) async {
     try {
       final response = await dio.delete('/api/Credit/$id');
-      debugPrint('📬 Ответ от сервера: ${response.statusCode} ${response.statusMessage}');
+      debugPrint(
+        '📬 Ответ от сервера: ${response.statusCode} ${response.statusMessage}',
+      );
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception('Ошибка при удалении договора');
       }
@@ -67,9 +72,15 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
   }
 
   @override
-  Future<CreditResponseModel> getCreditsByInvestorId(int investorId, GetCreditsQuery query) async {
+  Future<CreditResponseModel> getCreditsByInvestorId(
+    int investorId,
+    GetCreditsQuery query,
+  ) async {
     try {
-      final response = await dio.get('/api/Credit/investor/$investorId', queryParameters: query.toQueryParams());
+      final response = await dio.get(
+        '/api/Credit/investor/$investorId',
+        queryParameters: query.toQueryParams(),
+      );
       return CreditResponseModel.fromJson(response.data);
     } on DioException catch (e) {
       throw Exception('Ошибка загрузки кредитов инвестора: ${e.message}');

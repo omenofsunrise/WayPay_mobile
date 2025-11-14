@@ -31,18 +31,26 @@ class _TelegramLinkPreviewState extends State<TelegramLinkPreview> {
 
         setState(() {
           title =
-              document.querySelector('meta[property="og:title"]')?.attributes['content'] ??
+              document
+                  .querySelector('meta[property="og:title"]')
+                  ?.attributes['content'] ??
               document.querySelector('title')?.text;
 
           description =
-              document.querySelector('meta[property="og:description"]')?.attributes['content'] ??
-              document.querySelector('meta[name="description"]')?.attributes['content'];
+              document
+                  .querySelector('meta[property="og:description"]')
+                  ?.attributes['content'] ??
+              document
+                  .querySelector('meta[name="description"]')
+                  ?.attributes['content'];
 
-          image = document.querySelector('meta[property="og:image"]')?.attributes['content'];
+          image = document
+              .querySelector('meta[property="og:image"]')
+              ?.attributes['content'];
         });
       }
     } catch (e) {
-      debugPrint("Meta fetch failed: $e");
+      throw Exception(e);
     }
   }
 
@@ -50,13 +58,16 @@ class _TelegramLinkPreviewState extends State<TelegramLinkPreview> {
     final uri = Uri.parse(widget.url);
 
     try {
-      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
 
       if (!launched) {
-        debugPrint("Не удалось открыть ссылку: $uri");
+        throw Exception('Could not launch $uri');
       }
     } catch (e) {
-      debugPrint("Ошибка открытия ссылки: $e");
+      throw Exception(e);
     }
   }
 
@@ -94,7 +105,10 @@ class _TelegramLinkPreviewState extends State<TelegramLinkPreview> {
                       height: 60,
                       decoration: BoxDecoration(
                         color: Colors.transparent,
-                        border: Border.all(color: const Color(0xFFD1D5DB), width: 1),
+                        border: Border.all(
+                          color: const Color(0xFFD1D5DB),
+                          width: 1,
+                        ),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Icon(Icons.link, color: Colors.grey),
@@ -112,7 +126,11 @@ class _TelegramLinkPreviewState extends State<TelegramLinkPreview> {
                       title!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
                     ),
                   if (description != null)
                     Padding(
@@ -121,7 +139,10 @@ class _TelegramLinkPreviewState extends State<TelegramLinkPreview> {
                         description!,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
                   Padding(

@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/features/finance/data/data_source/budget_remote_data_source.dart';
-import 'package:waypay/features/finance/data/models/budget_outcome_model.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/features/finance/data/data_source/budget_remote_data_source.dart';
+import 'package:waypay_mobile/features/finance/data/models/budget_outcome_model.dart';
 
 part 'budget_expense_event.dart';
 part 'budget_expense_state.dart';

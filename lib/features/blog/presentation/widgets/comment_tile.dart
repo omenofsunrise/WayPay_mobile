@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/widgets/helpers.dart';
-import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:waypay/features/blog/data/models/comment_response.dart';
-import 'package:waypay/features/blog/presentation/bloc/comment_bloc.dart';
-import 'package:waypay/features/blog/presentation/bloc/comment_event.dart';
-import 'package:waypay/features/blog/data/models/comment_attachment_response.dart';
-import 'package:waypay/features/blog/presentation/widgets/image_modal_viewer.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/widgets/helpers.dart';
+import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:waypay_mobile/features/blog/data/models/comment_response.dart';
+import 'package:waypay_mobile/features/blog/presentation/bloc/comment_bloc.dart';
+import 'package:waypay_mobile/features/blog/presentation/bloc/comment_event.dart';
+import 'package:waypay_mobile/features/blog/data/models/comment_attachment_response.dart';
+import 'package:waypay_mobile/features/blog/presentation/widgets/image_modal_viewer.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 
 class CommentTile extends StatefulWidget {
   final CommentResponse comment;
@@ -45,7 +45,9 @@ class _CommentTileState extends State<CommentTile> {
   Future<void> _loadCurrentUserId() async {
     final info = await dataSource.getAuthInfo();
     final employeeJson = info['employee'] as Map<String, dynamic>?;
-    final employee = employeeJson != null ? Employee.fromJson(employeeJson) : null;
+    final employee = employeeJson != null
+        ? Employee.fromJson(employeeJson)
+        : null;
 
     if (mounted) {
       setState(() {
@@ -57,13 +59,16 @@ class _CommentTileState extends State<CommentTile> {
   String _resolveUrl(String? url, {bool isAvatar = false}) {
     if (url == null || url.isEmpty) return '';
     if (url.startsWith('/')) {
-      return isAvatar ? 'http://test.waypay.one:5000$url' : 'http://test.waypay.one:5003$url';
+      return isAvatar
+          ? 'https://web.waypay_mobile.one:5001$url'
+          : 'https://web.waypay_mobile.one:5002$url';
     }
     return url;
   }
 
   bool _isImageAttachment(CommentAttachmentResponse attachment) {
-    final name = (attachment.filePath ?? attachment.fileName ?? '').toLowerCase();
+    final name = (attachment.filePath ?? attachment.fileName ?? '')
+        .toLowerCase();
     return attachment.isImage ||
         name.endsWith('.png') ||
         name.endsWith('.jpg') ||
@@ -73,7 +78,8 @@ class _CommentTileState extends State<CommentTile> {
   }
 
   Widget _buildAttachments(BuildContext context) {
-    if (widget.comment.attachments == null || widget.comment.attachments!.isEmpty) {
+    if (widget.comment.attachments == null ||
+        widget.comment.attachments!.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -97,7 +103,11 @@ class _CommentTileState extends State<CommentTile> {
           } else {
             return Row(
               children: [
-                const Icon(Icons.insert_drive_file, size: 40, color: Colors.grey),
+                const Icon(
+                  Icons.insert_drive_file,
+                  size: 40,
+                  color: Colors.grey,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -121,9 +131,18 @@ class _CommentTileState extends State<CommentTile> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (value) {
         if (value == 'edit' && widget.onEdit != null) {
-          widget.onEdit!(widget.comment.id, widget.comment.content, widget.comment.attachments);
+          widget.onEdit!(
+            widget.comment.id,
+            widget.comment.content,
+            widget.comment.attachments,
+          );
         } else if (value == 'delete') {
-          context.read<CommentBloc>().add(DeleteComment(commentId: widget.comment.id, postId: widget.comment.postId));
+          context.read<CommentBloc>().add(
+            DeleteComment(
+              commentId: widget.comment.id,
+              postId: widget.comment.postId,
+            ),
+          );
         }
       },
       itemBuilder: (context) => [
@@ -132,7 +151,11 @@ class _CommentTileState extends State<CommentTile> {
           child: InkWell(
             onTap: () {
               Navigator.pop(context);
-              widget.onEdit?.call(widget.comment.id, widget.comment.content, widget.comment.attachments);
+              widget.onEdit?.call(
+                widget.comment.id,
+                widget.comment.content,
+                widget.comment.attachments,
+              );
             },
             child: const Padding(
               padding: EdgeInsets.symmetric(vertical: 8),
@@ -152,7 +175,10 @@ class _CommentTileState extends State<CommentTile> {
             onTap: () {
               Navigator.pop(context);
               context.read<CommentBloc>().add(
-                DeleteComment(commentId: widget.comment.id, postId: widget.comment.postId),
+                DeleteComment(
+                  commentId: widget.comment.id,
+                  postId: widget.comment.postId,
+                ),
               );
             },
             child: const Padding(
@@ -172,7 +198,9 @@ class _CommentTileState extends State<CommentTile> {
   }
 
   Widget _buildContent() {
-    final parent = widget.comment.parentId != null ? widget.commentById[widget.comment.parentId!] : null;
+    final parent = widget.comment.parentId != null
+        ? widget.commentById[widget.comment.parentId!]
+        : null;
 
     final content = widget.comment.content?.trim() ?? '';
 
@@ -185,7 +213,10 @@ class _CommentTileState extends State<CommentTile> {
           children: [
             TextSpan(
               text: '${parent.authorName ?? 'Пользователь'}, ',
-              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.teal),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.teal,
+              ),
             ),
             TextSpan(text: content),
           ],
@@ -232,7 +263,11 @@ class _CommentTileState extends State<CommentTile> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              buildAvatar(photoPath: widget.comment.authorPhotoPath, fullName: widget.comment.authorName, radius: 14),
+              buildAvatar(
+                photoPath: widget.comment.authorPhotoPath,
+                fullName: widget.comment.authorName,
+                radius: 14,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
@@ -248,11 +283,21 @@ class _CommentTileState extends State<CommentTile> {
                           ),
                         ),
                         Text(
-                          DateFormat('dd.MM.yyyy HH:mm').format(widget.comment.createdAt),
-                          style: const TextStyle(color: Colors.grey, fontSize: 12),
+                          DateFormat(
+                            'dd.MM.yyyy HH:mm',
+                          ).format(widget.comment.createdAt),
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
                         ),
-                        if (widget.isUserPost || widget.comment.authorId == currentUserId)
-                          Baseline(baseline: 18, baselineType: TextBaseline.alphabetic, child: _buildMenu(context)),
+                        if (widget.isUserPost ||
+                            widget.comment.authorId == currentUserId)
+                          Baseline(
+                            baseline: 18,
+                            baselineType: TextBaseline.alphabetic,
+                            child: _buildMenu(context),
+                          ),
                       ],
                     ),
                     _buildContent(),
@@ -262,12 +307,18 @@ class _CommentTileState extends State<CommentTile> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            context.read<CommentBloc>().add(ToggleLikeComment(widget.comment.id));
+                            context.read<CommentBloc>().add(
+                              ToggleLikeComment(widget.comment.id),
+                            );
                           },
                           child: Icon(
-                            widget.comment.isLikedByCurrentUser ? Icons.favorite : Icons.favorite_border,
+                            widget.comment.isLikedByCurrentUser
+                                ? Icons.favorite
+                                : Icons.favorite_border,
                             size: 16,
-                            color: widget.comment.isLikedByCurrentUser ? Colors.red : Colors.grey,
+                            color: widget.comment.isLikedByCurrentUser
+                                ? Colors.red
+                                : Colors.grey,
                           ),
                         ),
                         const SizedBox(width: 4),
@@ -281,7 +332,13 @@ class _CommentTileState extends State<CommentTile> {
                             children: [
                               Icon(Icons.reply, size: 16, color: Colors.grey),
                               SizedBox(width: 4),
-                              Text('Ответить', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                              Text(
+                                'Ответить',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
                             ],
                           ),
                         ),

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
-import 'package:waypay/core/widgets/form_modal/label_text_field.dart';
-import 'package:waypay/features/credit/data/models/credit_model.dart';
-import 'package:waypay/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
-import 'package:waypay/features/payment/data/models/expected/payment_item_model.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/core/widgets/form_modal/label_text_field.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
+import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
+import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 
 class CreatePaymentDialog extends StatefulWidget {
   final CreditModel credit;
@@ -41,23 +41,22 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Сведения о договоре',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            _buildLabeledField('№ договора', widget.credit.id.toString()),
-            _buildLabeledField('Инвестор', widget.credit.investorNickname),
-            _buildLabeledField('Клиент', widget.credit.clientFullName),
-            _buildLabeledField('Телефон', widget.credit.clientPhone),
+            // const Text(
+            //   'Сведения о договоре',
+            //   style: TextStyle(fontWeight: FontWeight.bold),
+            // ),
+            // const SizedBox(height: 12),
+            // _buildLabeledField('№ договора', widget.credit.id.toString()),
+            // _buildLabeledField('Инвестор', widget.credit.investorNickname),
+            // _buildLabeledField('Клиент', widget.credit.clientFullName),
+            // _buildLabeledField('Телефон', widget.credit.clientPhone),
 
-            const SizedBox(height: 20),
-            const Text(
-              'Сведения о платеже',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-
+            // const SizedBox(height: 20),
+            // const Text(
+            //   'Сведения о платеже',
+            //   style: TextStyle(fontWeight: FontWeight.bold),
+            // ),
+            // const SizedBox(height: 12),
             _buildDatePicker(),
             const SizedBox(height: 12),
             LabeledTextField(
@@ -70,16 +69,15 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
               ],
             ),
 
-            const SizedBox(height: 12),
-            _buildLabeledField(
-              'Текущая задолженность',
-              _formatCurrency(widget.credit.currentMonthDebt),
-            ),
-            _buildLabeledField(
-              'Остаток всего долга',
-              _formatCurrency(widget.credit.rest),
-            ),
-
+            // const SizedBox(height: 12),
+            // _buildLabeledField(
+            //   'Текущая задолженность',
+            //   _formatCurrency(widget.credit.currentMonthDebt),
+            // ),
+            // _buildLabeledField(
+            //   'Остаток всего долга',
+            //   _formatCurrency(widget.credit.rest),
+            // ),
             const SizedBox(height: 12),
             const Text('Способ оплаты'),
             _buildPaymentTypeSelector(),
@@ -178,7 +176,9 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
   }
 
   Future<void> _submitPayment() async {
-    final amount = double.tryParse(_amountController.text.replaceAll(',', '.'));
+    final text = _amountController.text.replaceAll(RegExp(r'[^0-9.]'), '');
+    final amount = double.tryParse(text);
+
     if (_selectedDate == null || amount == null || _selectedType == null) {
       ScaffoldMessenger.of(
         context,

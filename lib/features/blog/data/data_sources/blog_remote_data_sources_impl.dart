@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:waypay/features/blog/data/models/blog_post_response.dart';
-import 'package:waypay/features/blog/data/models/blog_post_response_paged_result.dart';
-import 'package:waypay/features/blog/data/data_sources/blog_remote_data_sources.dart';
-import 'package:waypay/features/blog/data/models/comment_response.dart';
+import 'package:waypay_mobile/features/blog/data/models/blog_post_response.dart';
+import 'package:waypay_mobile/features/blog/data/models/blog_post_response_paged_result.dart';
+import 'package:waypay_mobile/features/blog/data/data_sources/blog_remote_data_sources.dart';
+import 'package:waypay_mobile/features/blog/data/models/comment_response.dart';
 
 class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
   final Dio dio;
@@ -36,7 +36,9 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
       if (data is Map<String, dynamic>) {
         return BlogPostResponsePagedResult.fromJson(data);
       } else {
-        throw Exception('Неожиданный формат данных: ожидается объект с пагинацией');
+        throw Exception(
+          'Неожиданный формат данных: ожидается объект с пагинацией',
+        );
       }
     } on DioException catch (e) {
       throw Exception('Ошибка получения списка постов: ${e.message}');
@@ -72,7 +74,6 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
         options: Options(contentType: 'multipart/form-data'),
       );
     } on DioException catch (e) {
-      print('Ответ сервера: ${e.response?.data}');
       throw Exception('Ошибка при создании поста: ${e.message}');
     }
   }
@@ -91,7 +92,9 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
     try {
       await dio.delete('/api/Blog/$postId/attachments/$attachmentId');
     } on DioException catch (e) {
-      throw Exception('Ошибка при удалении вложения (postId=$postId, attachmentId=$attachmentId): ${e.message}');
+      throw Exception(
+        'Ошибка при удалении вложения (postId=$postId, attachmentId=$attachmentId): ${e.message}',
+      );
     }
   }
 
@@ -100,7 +103,9 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
     try {
       await dio.delete('/api/Blog/$postId');
     } on DioException catch (e) {
-      throw Exception('Ошибка при удалении поста (postId=$postId): ${e.message}');
+      throw Exception(
+        'Ошибка при удалении поста (postId=$postId): ${e.message}',
+      );
     }
   }
 
@@ -109,7 +114,9 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
     try {
       await dio.post('/api/Blog/$postId/like');
     } on DioException catch (e) {
-      throw Exception('Ошибка при добавлении лайка (postId=$postId): ${e.message}');
+      throw Exception(
+        'Ошибка при добавлении лайка (postId=$postId): ${e.message}',
+      );
     }
   }
 
@@ -123,7 +130,9 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
 
       return response;
     } on DioException catch (e) {
-      throw Exception('Ошибка при скачивании вложения (attachmentId=$attachmentId): ${e.message}');
+      throw Exception(
+        'Ошибка при скачивании вложения (attachmentId=$attachmentId): ${e.message}',
+      );
     }
   }
 
@@ -171,10 +180,14 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
       if (data is List) {
         return data.map((e) => CommentResponse.fromJson(e)).toList();
       } else {
-        throw Exception('Неверный формат ответа: ожидается список комментариев');
+        throw Exception(
+          'Неверный формат ответа: ожидается список комментариев',
+        );
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка при получении комментариев для поста $postId: ${e.message}');
+      throw Exception(
+        'Ошибка при получении комментариев для поста $postId: ${e.message}',
+      );
     }
   }
 
@@ -183,12 +196,17 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
     try {
       await dio.post('/api/BlogComment/$commentId/like');
     } on DioException catch (e) {
-      throw Exception('Ошибка при добавлении лайка комментарию (id=$commentId): ${e.message}');
+      throw Exception(
+        'Ошибка при добавлении лайка комментарию (id=$commentId): ${e.message}',
+      );
     }
   }
 
   @override
-  Future<void> updateCommentText({required int commentId, required String newText}) async {
+  Future<void> updateCommentText({
+    required int commentId,
+    required String newText,
+  }) async {
     try {
       await dio.put(
         '/api/BlogComment/$commentId/text',
@@ -196,7 +214,9 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
         options: Options(contentType: Headers.jsonContentType),
       );
     } on DioException catch (e) {
-      throw Exception('Ошибка при обновлении текста комментария (id=$commentId): ${e.message}');
+      throw Exception(
+        'Ошибка при обновлении текста комментария (id=$commentId): ${e.message}',
+      );
     }
   }
 
@@ -205,24 +225,37 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
     try {
       await dio.delete('/api/BlogComment/$commentId');
     } on DioException catch (e) {
-      throw Exception('Ошибка при удалении комментария (id=$commentId): ${e.message}');
+      throw Exception(
+        'Ошибка при удалении комментария (id=$commentId): ${e.message}',
+      );
     }
   }
 
   @override
-  Future<void> deleteCommentAttachment({required int commentId, required int attachmentId}) async {
+  Future<void> deleteCommentAttachment({
+    required int commentId,
+    required int attachmentId,
+  }) async {
     try {
       await dio.delete('/api/BlogComment/$commentId/attachments/$attachmentId');
     } on DioException catch (e) {
-      throw Exception('Ошибка при удалении вложения (commentId=$commentId, attachmentId=$attachmentId): ${e.message}');
+      throw Exception(
+        'Ошибка при удалении вложения (commentId=$commentId, attachmentId=$attachmentId): ${e.message}',
+      );
     }
   }
 
   @override
-  Future<CommentResponse> uploadCommentAttachment({required int commentId, required MultipartFile file}) async {
+  Future<CommentResponse> uploadCommentAttachment({
+    required int commentId,
+    required MultipartFile file,
+  }) async {
     final formData = FormData.fromMap({'file': file});
 
-    final response = await dio.post('/api/BlogComment/$commentId/attachments', data: formData);
+    final response = await dio.post(
+      '/api/BlogComment/$commentId/attachments',
+      data: formData,
+    );
 
     final data = response.data;
     if (data is Map<String, dynamic>) {

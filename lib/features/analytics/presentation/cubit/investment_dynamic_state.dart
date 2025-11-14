@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:waypay/features/analytics/data/models/graph_data.dart';
+import 'package:waypay_mobile/features/analytics/data/models/graph_data.dart';
 
 abstract class InvestmentDynamicState extends Equatable {
   const InvestmentDynamicState();

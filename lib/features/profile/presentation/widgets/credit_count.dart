@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/features/profile/presentation/cubit/credit_stats_cubit.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/features/profile/presentation/cubit/credit_stats_cubit.dart';
 
 class CreditCount extends StatefulWidget {
   final int? employeeId;
@@ -29,14 +29,31 @@ class _CreditCountState extends State<CreditCount> {
     final months = selectedPeriod == 'за текущий год' ? 12 : 12;
 
     if (widget.employeeId != null) {
-      cubit.loadStatsByEmployeeId(employeeId: widget.employeeId!, months: months);
+      cubit.loadStatsByEmployeeId(
+        employeeId: widget.employeeId!,
+        months: months,
+      );
     } else {
       cubit.loadStats(months: months);
     }
   }
 
   String _monthName(int month) {
-    const names = ['', 'Янв', 'Фев', 'Март', 'Апр', 'Май', 'Июнь', 'Июль', 'Авг', 'Сент', 'Окт', 'Нояб', 'Дек'];
+    const names = [
+      '',
+      'Янв',
+      'Фев',
+      'Март',
+      'Апр',
+      'Май',
+      'Июнь',
+      'Июль',
+      'Авг',
+      'Сент',
+      'Окт',
+      'Нояб',
+      'Дек',
+    ];
     return (month >= 1 && month <= 12) ? names[month] : '';
   }
 
@@ -46,10 +63,16 @@ class _CreditCountState extends State<CreditCount> {
     return BlocBuilder<CreditStatsCubit, CreditStatsState>(
       builder: (context, state) {
         if (state is CreditStatsLoading) {
-          return const SizedBox(height: 200, child: Center(child: CircularProgressIndicator()));
+          return const SizedBox(
+            height: 200,
+            child: Center(child: CircularProgressIndicator()),
+          );
         }
         if (state is CreditStatsError) {
-          return SizedBox(height: 200, child: Center(child: Text('Ошибка: ${state.message}')));
+          return SizedBox(
+            height: 200,
+            child: Center(child: Text('Ошибка: ${state.message}')),
+          );
         }
         if (state is CreditStatsLoaded) {
           final statsDesc = List.of(state.stats.reversed); // новые сверху
@@ -65,9 +88,17 @@ class _CreditCountState extends State<CreditCount> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Количество договоров', style: AppStyle.manrope(size: 15, weight: FontWeight.w400)),
+                      Text(
+                        'Количество договоров',
+                        style: AppStyle.manrope(
+                          size: 15,
+                          weight: FontWeight.w400,
+                        ),
+                      ),
                       Icon(
-                        _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                        _isExpanded
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
                         color: Color(AppColors.grey),
                       ),
                     ],
@@ -76,13 +107,21 @@ class _CreditCountState extends State<CreditCount> {
                 const SizedBox(height: 12),
                 if (_isExpanded)
                   Table(
-                    columnWidths: const {0: FlexColumnWidth(1), 1: FlexColumnWidth(1)},
+                    columnWidths: const {
+                      0: FlexColumnWidth(1),
+                      1: FlexColumnWidth(1),
+                    },
                     border: TableBorder.all(
                       color: Color(AppColors.borderColor),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     children: [
-                      TableRow(children: [_buildHeaderCell('Месяц'), _buildHeaderCell('Количество')]),
+                      TableRow(
+                        children: [
+                          _buildHeaderCell('Месяц'),
+                          _buildHeaderCell('Количество'),
+                        ],
+                      ),
                       ...List.generate(rowCount, (index) {
                         final e = statsDesc[index];
                         return TableRow(
@@ -107,7 +146,10 @@ class _CreditCountState extends State<CreditCount> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Center(
-        child: Text(text, style: AppStyle.manrope(size: 15, weight: FontWeight.w600)),
+        child: Text(
+          text,
+          style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
+        ),
       ),
     );
   }
@@ -121,7 +163,9 @@ class _CreditCountState extends State<CreditCount> {
           style: AppStyle.manrope(
             size: 15,
             weight: FontWeight.w400,
-            color: isMonth ? Color(AppColors.darkGrey) : Color(AppColors.comfPayment),
+            color: isMonth
+                ? Color(AppColors.darkGrey)
+                : Color(AppColors.comfPayment),
           ),
         ),
       ),

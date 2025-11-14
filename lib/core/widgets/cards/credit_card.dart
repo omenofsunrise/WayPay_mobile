@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/utilits/price_formatter.dart';
-import 'package:waypay/features/credit/data/models/credit_model.dart';
-import 'package:waypay/features/credit/presentation/widgets/credit_modal.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/utils/price_formatter.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
+import 'package:waypay_mobile/features/credit/presentation/widgets/credit_modal.dart';
 
 class CreditCardWidget extends StatelessWidget {
   final CreditModel credit;

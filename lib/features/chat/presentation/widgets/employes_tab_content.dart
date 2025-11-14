@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/helpers.dart';
-import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:waypay/features/chat/data/data_source/chat/chat_remote_data_source.dart';
-import 'package:waypay/features/chat/data/data_source/message/message_remote_data_source.dart';
-import 'package:waypay/features/chat/data/service/chat_hub_service.dart';
-import 'package:waypay/features/chat/presentation/bloc/chat/chat_bloc.dart';
-import 'package:waypay/features/chat/presentation/bloc/chat_info/chat_member_cubit.dart';
-import 'package:waypay/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
-import 'package:waypay/features/chat/presentation/screens/chat_screen.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/helpers.dart';
+import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source.dart';
+import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source.dart';
+import 'package:waypay_mobile/features/chat/data/service/chat_hub_service.dart';
+import 'package:waypay_mobile/features/chat/presentation/bloc/chat/chat_bloc.dart';
+import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/chat_member_cubit.dart';
+import 'package:waypay_mobile/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
+import 'package:waypay_mobile/features/chat/presentation/screens/chat_screen.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 
 class EmployesTabContent extends StatefulWidget {
   final int chatId;
@@ -29,7 +29,9 @@ class _EmployesTabContentState extends State<EmployesTabContent> {
     final info = await dataSource.getAuthInfo();
     final employeeJson = info['employee'] as Map<String, dynamic>?;
     setState(() {
-      _currentEmployee = employeeJson != null ? Employee.fromJson(employeeJson) : null;
+      _currentEmployee = employeeJson != null
+          ? Employee.fromJson(employeeJson)
+          : null;
     });
   }
 
@@ -51,13 +53,19 @@ class _EmployesTabContentState extends State<EmployesTabContent> {
 
           if (state.error != null) {
             return Center(
-              child: Text('Ошибка: ${state.error}', style: AppStyle.manrope(size: 16, weight: FontWeight.w400)),
+              child: Text(
+                'Ошибка: ${state.error}',
+                style: AppStyle.manrope(size: 16, weight: FontWeight.w400),
+              ),
             );
           }
 
           if (state.members.isEmpty) {
             return Center(
-              child: Text('Нет сотрудников', style: AppStyle.manrope(size: 16, weight: FontWeight.w400)),
+              child: Text(
+                'Нет сотрудников',
+                style: AppStyle.manrope(size: 16, weight: FontWeight.w400),
+              ),
             );
           }
 
@@ -73,7 +81,9 @@ class _EmployesTabContentState extends State<EmployesTabContent> {
                         final chatApi = getIt<ChatRemoteDataSource>();
 
                         try {
-                          final chat = await chatApi.getOrCreatePrivate(member.id);
+                          final chat = await chatApi.getOrCreatePrivate(
+                            member.id,
+                          );
                           if (!context.mounted) return;
                           Navigator.push(
                             context,
@@ -91,7 +101,9 @@ class _EmployesTabContentState extends State<EmployesTabContent> {
                                   chatName: chat.name,
                                   chatAvatarPath: chat.avatarPath,
                                   onChatUpdated: () {
-                                    context.read<ChatListBloc>().add(const ChatListRefreshed());
+                                    context.read<ChatListBloc>().add(
+                                      const ChatListRefreshed(),
+                                    );
                                   },
                                 ),
                               ),
@@ -104,10 +116,17 @@ class _EmployesTabContentState extends State<EmployesTabContent> {
                       }
                     : () {},
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   child: Row(
                     children: [
-                      buildAvatar(fullName: member.fullName, radius: 25, photoPath: member.photoPath),
+                      buildAvatar(
+                        fullName: member.fullName,
+                        radius: 25,
+                        photoPath: member.photoPath,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -115,11 +134,20 @@ class _EmployesTabContentState extends State<EmployesTabContent> {
                           children: [
                             Text(
                               member.fullName!,
-                              style: AppStyle.manrope(size: 14, weight: FontWeight.w600),
+                              style: AppStyle.manrope(
+                                size: 14,
+                                weight: FontWeight.w600,
+                              ),
                               overflow: TextOverflow.visible,
                               softWrap: true,
                             ),
-                            Text(member.role.toString(), style: AppStyle.manrope(size: 14, weight: FontWeight.w400)),
+                            Text(
+                              member.role.toString(),
+                              style: AppStyle.manrope(
+                                size: 14,
+                                weight: FontWeight.w400,
+                              ),
+                            ),
                           ],
                         ),
                       ),

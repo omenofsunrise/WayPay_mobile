@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/network/token_storage.dart';
-import 'package:waypay/features/todo/data/data_soucres/task_remote_data_source.dart';
-import 'package:waypay/features/todo/data/models/get_active_task_query.dart';
-import 'package:waypay/features/todo/data/models/task_request.dart';
-import 'package:waypay/features/todo/data/models/todo_model.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/network/token_storage.dart';
+import 'package:waypay_mobile/features/todo/data/data_soucres/task_remote_data_source.dart';
+import 'package:waypay_mobile/features/todo/data/models/get_active_task_query.dart';
+import 'package:waypay_mobile/features/todo/data/models/task_request.dart';
+import 'package:waypay_mobile/features/todo/data/models/todo_model.dart';
 
 part 'task_event.dart';
 part 'task_state.dart';

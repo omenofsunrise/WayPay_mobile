@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay/features/investors/data/models/investor_payout_model.dart';
-import 'package:waypay/features/investors/data/data_sources/investors_remote_data_source.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
+import 'package:waypay_mobile/features/investors/data/models/investor_payout_model.dart';
+import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
 
 class InvestorPayoutTable extends StatefulWidget {
   final int investorId;
@@ -22,12 +22,14 @@ class _InvestorPayoutTableState extends State<InvestorPayoutTable> {
   @override
   void initState() {
     super.initState();
-    _payoutsFuture = getIt<InvestorsRemoteDataSource>().getInvestorPayoutsByInvestorId(widget.investorId);
+    _payoutsFuture = getIt<InvestorsRemoteDataSource>()
+        .getInvestorPayoutsByInvestorId(widget.investorId);
   }
 
   String formatDate(DateTime date) => DateFormat('dd.MM.yyyy').format(date);
 
-  String formatAmount(double amount) => NumberFormat('#,##0', 'ru_RU').format(amount);
+  String formatAmount(double amount) =>
+      NumberFormat('#,##0', 'ru_RU').format(amount);
 
   @override
   Widget build(BuildContext context) {
@@ -35,10 +37,16 @@ class _InvestorPayoutTableState extends State<InvestorPayoutTable> {
       future: _payoutsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(height: 200, child: Center(child: CircularProgressIndicator()));
+          return const SizedBox(
+            height: 200,
+            child: Center(child: CircularProgressIndicator()),
+          );
         }
         if (snapshot.hasError) {
-          return SizedBox(height: 200, child: Center(child: Text('Ошибка: ${snapshot.error}')));
+          return SizedBox(
+            height: 200,
+            child: Center(child: Text('Ошибка: ${snapshot.error}')),
+          );
         }
 
         final payouts = snapshot.data ?? [];
@@ -52,8 +60,16 @@ class _InvestorPayoutTableState extends State<InvestorPayoutTable> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('История выплат', style: AppStyle.manrope(size: 15, weight: FontWeight.w400)),
-                  Icon(_isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: Color(AppColors.grey)),
+                  Text(
+                    'История выплат',
+                    style: AppStyle.manrope(size: 15, weight: FontWeight.w400),
+                  ),
+                  Icon(
+                    _isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: Color(AppColors.grey),
+                  ),
                 ],
               ),
             ),
@@ -61,7 +77,11 @@ class _InvestorPayoutTableState extends State<InvestorPayoutTable> {
             if (_isExpanded)
               hasPayouts
                   ? Table(
-                      columnWidths: const {0: FlexColumnWidth(1), 1: FlexColumnWidth(1), 2: FlexColumnWidth(1)},
+                      columnWidths: const {
+                        0: FlexColumnWidth(1),
+                        1: FlexColumnWidth(1),
+                        2: FlexColumnWidth(1),
+                      },
                       border: TableBorder.all(
                         color: Color(AppColors.borderColor),
                         borderRadius: BorderRadius.circular(10),
@@ -88,7 +108,13 @@ class _InvestorPayoutTableState extends State<InvestorPayoutTable> {
                   : Container(
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       alignment: Alignment.center,
-                      child: Text('Выплат нет', style: AppStyle.manrope(size: 15, weight: FontWeight.w400)),
+                      child: Text(
+                        'Выплат нет',
+                        style: AppStyle.manrope(
+                          size: 15,
+                          weight: FontWeight.w400,
+                        ),
+                      ),
                     ),
           ],
         );
@@ -100,7 +126,10 @@ class _InvestorPayoutTableState extends State<InvestorPayoutTable> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Center(
-        child: Text(text, style: AppStyle.manrope(size: 15, weight: FontWeight.w600)),
+        child: Text(
+          text,
+          style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
+        ),
       ),
     );
   }
@@ -111,7 +140,11 @@ class _InvestorPayoutTableState extends State<InvestorPayoutTable> {
       child: Center(
         child: Text(
           text,
-          style: AppStyle.manrope(size: 15, weight: FontWeight.w400, color: Color(AppColors.comfPayment)),
+          style: AppStyle.manrope(
+            size: 15,
+            weight: FontWeight.w400,
+            color: Color(AppColors.comfPayment),
+          ),
         ),
       ),
     );

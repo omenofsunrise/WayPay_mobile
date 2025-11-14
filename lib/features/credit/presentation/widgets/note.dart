@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/features/note/data/data_sources/note_remote_data_source.dart';
-import 'package:waypay/features/note/data/models/note_model.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/features/note/data/data_sources/note_remote_data_source.dart';
+import 'package:waypay_mobile/features/note/data/models/note_model.dart';
 import 'dart:convert';
 
 class Note extends StatelessWidget {

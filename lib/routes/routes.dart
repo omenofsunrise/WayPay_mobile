@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 enum Routes {
   userTypeSelectionScreen,
   phoneAuthScreen,
@@ -13,8 +11,17 @@ enum Routes {
   homeScreen,
   todoScreen,
   chatScreen,
-  blogCreen,
+  blogScreen,
   calculatorScreen,
+  mainClientScreen,
+  clientListScreen,
+  clientDetailScreen,
+  blacklistScreen,
+  blackCatalogScreen,
+  clientCreateScreen,
+  clientApplicationDetailScreen,
+  clientApplicationsScreen,
+  queueListScreen,
   newCreditProductsScreen,
   newCreditDetailsScreen,
   newCreditSchedulesScreen,
@@ -47,10 +54,28 @@ extension RoutesExtension on Routes {
         return '/todo_screen';
       case Routes.chatScreen:
         return '/chat_screen';
-      case Routes.blogCreen:
+      case Routes.blogScreen:
         return '/blog_creen';
       case Routes.calculatorScreen:
         return '/calculator_screen';
+      case Routes.mainClientScreen:
+        return '/main_client_screen';
+      case Routes.clientListScreen:
+        return '/client_list_screen';
+      case Routes.clientDetailScreen:
+        return '/client_detail_screen';
+      case Routes.blacklistScreen:
+        return '/blacklist_screen';
+      case Routes.blackCatalogScreen:
+        return '/black_catalog_screen';
+      case Routes.clientCreateScreen:
+        return '/client_create_screen';
+      case Routes.clientApplicationDetailScreen:
+        return '/client_application_detail_screen';
+      case Routes.clientApplicationsScreen:
+        return '/client_applications_screen';
+      case Routes.queueListScreen:
+        return '/queue_list_screen';
       case Routes.newCreditProductsScreen:
         return '/new_credit_products_screen';
       case Routes.newCreditDetailsScreen:
@@ -86,10 +111,28 @@ extension RoutesExtension on Routes {
         return 'TODO_SCREEN';
       case Routes.chatScreen:
         return 'CHAT_SCREEN';
-      case Routes.blogCreen:
+      case Routes.blogScreen:
         return 'BLOG_SCREEN';
       case Routes.calculatorScreen:
         return 'CALCULATOR_SCREEN';
+      case Routes.mainClientScreen:
+        return 'MAIN_CLIENT_SCREEN';
+      case Routes.clientListScreen:
+        return 'CLIENT_LIST_SCREEN';
+      case Routes.clientDetailScreen:
+        return 'CLIENT_DETAIL_SCREEN';
+      case Routes.blacklistScreen:
+        return 'BLACKLIST_SCREEN';
+      case Routes.blackCatalogScreen:
+        return 'BLACK_CATALOG_SCREEN';
+      case Routes.clientCreateScreen:
+        return 'CLIENT_CREATE_SCREEN';
+      case Routes.clientApplicationDetailScreen:
+        return 'CLIENT_APPLICATION_DETAIL_SCREEN';
+      case Routes.clientApplicationsScreen:
+        return 'CLIENT_APPLICATIONS_SCREEN';
+      case Routes.queueListScreen:
+        return 'QUEUE_LIST_SCREEN';
       case Routes.newCreditProductsScreen:
         return 'NEW_CREDIT_PRODUCTS_SCREEN';
       case Routes.newCreditDetailsScreen:

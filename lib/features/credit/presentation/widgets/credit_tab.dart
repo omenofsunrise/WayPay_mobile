@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/assets/resources.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:waypay_mobile/assets/resources.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
 
 enum CreditTab {
   all('Все договоры', SvgIcons.allCredits),
@@ -43,12 +44,12 @@ class CreditTabDropdown extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SvgIcon(
-                  assetPath: selectedTab.iconPath,
-                  width: 20,
-                  height: 20,
-                  color: Colors.black,
-                ),
+                // SvgPicture.asset(
+                //   selectedTab.iconPath,
+                //   width: 20,
+                //   height: 20,
+                //   color: Colors.black,
+                // ),
                 const SizedBox(width: 6),
                 Text(
                   selectedTab.label,
@@ -97,12 +98,12 @@ class CreditTabDropdown extends StatelessWidget {
                 size: 20,
               ),
               const SizedBox(width: 8),
-              SvgIcon(
-                assetPath: tab.iconPath,
-                width: 20,
-                height: 20,
-                color: Colors.black,
-              ),
+              // SvgPicture.asset(
+              //   tab.iconPath,
+              //   width: 20,
+              //   height: 20,
+              //   color: Colors.black,
+              // ),
               const SizedBox(width: 8),
               Text(
                 tab.label,

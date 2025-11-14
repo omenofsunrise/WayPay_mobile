@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:waypay/features/analytics/data/models/sell_info_response.dart';
+import 'package:waypay_mobile/features/analytics/data/models/sell_info_response.dart';
 
 abstract class SellInfoState extends Equatable {
   const SellInfoState();

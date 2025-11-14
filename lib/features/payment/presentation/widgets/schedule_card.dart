@@ -3,13 +3,13 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:waypay/assets/resources.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/form_modal/labeled_container.dart';
-import 'package:waypay/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
-import 'package:waypay/features/payment/data/models/schedule/schedule_model.dart';
+import 'package:waypay_mobile/assets/resources.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/app_modal.dart';
+import 'package:waypay_mobile/core/widgets/form_modal/labeled_container.dart';
+import 'package:waypay_mobile/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
+import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
 
 class ScheduleCard extends StatefulWidget {
   final ScheduleModel schedule;
@@ -29,14 +29,20 @@ class _ScheduleCardState extends State<ScheduleCard> {
   }
 
   String _formatCurrency(num amount) {
-    final formatter = NumberFormat.currency(locale: 'ru_RU', symbol: '₽', decimalDigits: 0);
+    final formatter = NumberFormat.currency(
+      locale: 'ru_RU',
+      symbol: '₽',
+      decimalDigits: 0,
+    );
     return formatter.format(amount);
   }
 
   void openWhatsApp(String phoneNumber) async {
     final dataSource = getIt<ScheduleRemoteDataSources>();
     final cleaned = phoneNumber.replaceAll(RegExp(r'\D'), '');
-    final formatted = cleaned.startsWith('8') ? '7${cleaned.substring(1)}' : cleaned;
+    final formatted = cleaned.startsWith('8')
+        ? '7${cleaned.substring(1)}'
+        : cleaned;
     final message = Uri.encodeComponent(
       'Напоминание о платеже:\nСумма: ${_formatCurrency(_schedule.paymentAmount)}\nДата: ${_formatDate(_schedule.paymentDate)}',
     );
@@ -70,10 +76,19 @@ class _ScheduleCardState extends State<ScheduleCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              LabeledContainer(label: 'Номер договора', text: _schedule.creditId.toString()),
+              LabeledContainer(
+                label: 'Номер договора',
+                text: _schedule.creditId.toString(),
+              ),
               LabeledContainer(label: 'ФИО', text: _schedule.clientName),
-              LabeledContainer(label: 'Платеж, руб', text: _formatCurrency(_schedule.paymentAmount)),
-              LabeledContainer(label: 'Дата платежа', text: _formatDate(_schedule.paymentDate)),
+              LabeledContainer(
+                label: 'Платеж, руб',
+                text: _formatCurrency(_schedule.paymentAmount),
+              ),
+              LabeledContainer(
+                label: 'Дата платежа',
+                text: _formatDate(_schedule.paymentDate),
+              ),
             ],
           ),
         ),
@@ -93,7 +108,8 @@ class _ScheduleCardState extends State<ScheduleCard> {
   @override
   Widget build(BuildContext context) {
     final paymentDate = DateTime.tryParse(widget.schedule.paymentDate);
-    final isOverdue = paymentDate != null && paymentDate.isBefore(DateTime.now());
+    final isOverdue =
+        paymentDate != null && paymentDate.isBefore(DateTime.now());
     return InkWell(
       onTap: () => _showClientModal(context),
       child: Container(
@@ -102,7 +118,13 @@ class _ScheduleCardState extends State<ScheduleCard> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: !isOverdue ? Colors.white : Color(AppColors.pinkTint),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -111,11 +133,18 @@ class _ScheduleCardState extends State<ScheduleCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('№${widget.schedule.creditId}', style: const TextStyle(fontSize: 16, color: Colors.black)),
+                  Text(
+                    '№${widget.schedule.creditId}',
+                    style: const TextStyle(fontSize: 16, color: Colors.black),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     widget.schedule.clientName,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -131,7 +160,11 @@ class _ScheduleCardState extends State<ScheduleCard> {
             GestureDetector(
               onTap: () => openWhatsApp(_schedule.clientPhone),
               child: _schedule.notified
-                  ? const Icon(Icons.check_rounded, size: 30, color: Colors.black)
+                  ? const Icon(
+                      Icons.check_rounded,
+                      size: 30,
+                      color: Colors.black,
+                    )
                   : Image.asset(Images.whatsappLogo, height: 60, width: 30),
             ),
           ],

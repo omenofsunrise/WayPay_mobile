@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TokenStorage {
   static const _accessKey = 'access_token';
@@ -9,125 +9,65 @@ class TokenStorage {
   static const _isAuthenticatedKey = 'is_authenticated';
   static const _pinCodeKey = 'pin_code';
 
+  static const Duration _defaultAccessTtl = Duration(minutes: 5);
+
+  String _ts() => DateTime.now().toIso8601String();
+
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,
+    Duration? accessTtl,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final now = DateTime.now();
-
+    final ttl = accessTtl ?? _defaultAccessTtl;
     await prefs.setString(_accessKey, accessToken);
     await prefs.setString(_refreshKey, refreshToken);
     await prefs.setString(
       _accessExpiryKey,
-      now.add(const Duration(minutes: 5)).toIso8601String(),
-    );
-
-    print(
-      '✅ Токены сохранены:\nAccessToken: $accessToken\nRefreshToken: $refreshToken',
+      DateTime.now().add(ttl).toIso8601String(),
     );
   }
 
-  Future<String?> getAccessToken() async {
+  Future<String?> getAccessToken({
+    Duration skew = const Duration(seconds: 30),
+  }) async {
     final prefs = await SharedPreferences.getInstance();
-    final expiryStr = prefs.getString(_accessExpiryKey);
     final access = prefs.getString(_accessKey);
-
+    final expiryStr = prefs.getString(_accessExpiryKey);
     if (access == null || expiryStr == null) {
-      print('⚠️ Access token или срок действия отсутствуют.');
       return null;
     }
 
     final expiry = DateTime.tryParse(expiryStr);
     final now = DateTime.now();
 
-    if (expiry != null && now.isAfter(expiry)) {
-      print('🔁 Access token истёк, обновляем...');
+    if (expiry != null && now.isAfter(expiry.subtract(skew))) {
       return await _refreshAccessToken();
     }
-
-    print('✅ Access token получен из кэша.');
     return access;
   }
 
-  Future<String?> _refreshAccessToken() async {
+  Future<String?> refreshNow() => _refreshAccessToken();
+
+  Future<void> debugExpireAccessTokenNow() async {
     final prefs = await SharedPreferences.getInstance();
-    final refresh = prefs.getString(_refreshKey);
-    final access = prefs.getString(_accessKey);
-    final pin = prefs.getString(_pinCodeKey);
+    await prefs.setString(
+      _accessExpiryKey,
+      DateTime.now().subtract(const Duration(seconds: 1)).toIso8601String(),
+    );
+  }
 
-    if (refresh == null || access == null) {
-      print('❌ Нет refresh или access токена.');
-      return null;
-    }
-
-    print('🔄 Отправка запроса на обновление токена...');
-    print('📤 AccessToken: ${access.substring(0, 15)}...');
-    print('📤 RefreshToken: ${refresh.substring(0, 10)}...');
-    if (pin != null) {
-      print('📌 PIN присутствует: ${'*' * pin.length}');
-    } else {
-      print('⚠️ PIN отсутствует');
-    }
-
-    final body = {
-      'accessToken': access,
-      'refreshToken': refresh,
-      if (pin != null) 'pinCode': pin,
-    };
-
-    try {
-      final response = await http.post(
-        Uri.parse('https://web.waypay.one:5001/api/Auth/refresh'),
-        headers: {'Content-Type': 'application/json', 'X-Environment': 'dev'},
-        body: jsonEncode(body),
-      );
-
-      print('📩 Ответ получен: статус ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-
-        final newAccess = data['accessToken'] as String?;
-        final newRefresh = data['refreshToken'] as String? ?? refresh;
-
-        if (newAccess != null) {
-          await saveTokens(accessToken: newAccess, refreshToken: newRefresh);
-          print('✅ Токены обновлены успешно.');
-          return newAccess;
-        } else {
-          print('❌ Не удалось получить новый accessToken из ответа.');
-          print('📩 Ответ: $data');
-          return null;
-        }
-      } else {
-        print(
-          '❌ Обновление токена не удалось. Код ответа: ${response.statusCode}',
-        );
-        print('📩 Заголовки ответа: ${response.headers}');
-        print('📩 Тело ответа: ${response.body}');
-
-        try {
-          final errorData = jsonDecode(response.body);
-          print('📛 Детали ошибки: $errorData');
-        } catch (e) {
-          print('⚠️ Не удалось распарсить тело ошибки как JSON: $e');
-        }
-
-        await clearAll();
-        return null;
-      }
-    } catch (e) {
-      print('❌ Исключение при обновлении токена: $e');
-      await clearAll();
-      return null;
-    }
+  Future<void> debugSetAccessTtl(Duration ttl) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _accessExpiryKey,
+      DateTime.now().add(ttl).toIso8601String(),
+    );
   }
 
   Future<void> setAuthenticated(bool isAuthenticated) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_isAuthenticatedKey, isAuthenticated);
-    print('🔐 Статус аутентификации: $isAuthenticated');
   }
 
   Future<bool> isAuthenticated() async {
@@ -138,13 +78,12 @@ class TokenStorage {
   Future<void> savePinCode(String pinCode) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_pinCodeKey, pinCode);
-    print('📌 PIN сохранён.');
   }
 
   Future<String?> getPinCode() async {
     final prefs = await SharedPreferences.getInstance();
     final pin = prefs.getString(_pinCodeKey);
-    if (pin == null) print('⚠️ PIN отсутствует.');
+    if (pin == null) {}
     return pin;
   }
 
@@ -155,6 +94,53 @@ class TokenStorage {
     await prefs.remove(_accessExpiryKey);
     await prefs.remove(_isAuthenticatedKey);
     await prefs.remove(_pinCodeKey);
-    print('🧹 Все данные пользователя удалены из кэша.');
+  }
+
+  Future<String?> _refreshAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final refresh = prefs.getString(_refreshKey);
+    final access = prefs.getString(_accessKey);
+    final pin = prefs.getString(_pinCodeKey);
+
+    if (refresh == null || access == null) {
+      return null;
+    }
+
+    final body = <String, dynamic>{
+      'accessToken': access,
+      'refreshToken': refresh,
+      if (pin != null) 'pinCode': pin,
+    };
+
+    try {
+      final resp = await http.post(
+        Uri.parse('https://web.waypay_mobile.one:5001/api/Auth/refresh'),
+        headers: {'Content-Type': 'application/json', 'X-Environment': 'dev'},
+        body: jsonEncode(body),
+      );
+
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body) as Map<String, dynamic>;
+        final newAccess = data['accessToken'] as String?;
+        final newRefresh = (data['refreshToken'] as String?) ?? refresh;
+
+        if (newAccess != null) {
+          await saveTokens(
+            accessToken: newAccess,
+            refreshToken: newRefresh,
+            accessTtl: _defaultAccessTtl,
+          );
+          return newAccess;
+        } else {
+          return null;
+        }
+      } else {
+        await clearAll();
+        return null;
+      }
+    } catch (e) {
+      await clearAll();
+      return null;
+    }
   }
 }

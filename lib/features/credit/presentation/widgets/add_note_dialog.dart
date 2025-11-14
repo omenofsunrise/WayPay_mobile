@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
-import 'package:waypay/core/widgets/inputs/custom_input.dart';
-import 'package:waypay/features/note/data/data_sources/note_remote_data_source.dart';
-import 'package:waypay/features/note/data/models/note_create_request.dart';
-import 'package:waypay/core/widgets/inputs/custom_calendar.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/core/widgets/inputs/custom_input.dart';
+import 'package:waypay_mobile/features/note/data/data_sources/note_remote_data_source.dart';
+import 'package:waypay_mobile/features/note/data/models/note_create_request.dart';
+import 'package:waypay_mobile/core/widgets/inputs/custom_calendar.dart';
 
 class AddNoteDialog extends StatefulWidget {
   final int creditId;

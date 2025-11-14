@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/storage/user_storage.dart';
-import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:waypay/features/auth/data/models/start_auth_request_model.dart';
-import 'package:waypay/features/auth/data/models/call_confirm_request_model.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
+import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:waypay_mobile/features/auth/data/models/start_auth_request_model.dart';
+import 'package:waypay_mobile/features/auth/data/models/call_confirm_request_model.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 
 part 'auth_state.dart';
 
@@ -45,8 +45,6 @@ class AuthCubit extends Cubit<AuthState> {
       final roleStr = employee['role']?.toString() ?? '';
       final role = EmployeeRoleMapper.fromApi(roleStr);
       await _userStorage.saveRole(role);
-
-      print('🔵 Роль сохранена: $role');
 
       final permissions = (employee['permissions'] as List<dynamic>)
           .map((p) => PermissionMapper.fromApi(p.toString()))

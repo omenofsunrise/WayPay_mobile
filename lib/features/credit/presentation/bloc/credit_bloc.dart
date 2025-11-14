@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/features/credit/data/data_source/credit_remote_data_source.dart';
-import 'package:waypay/features/credit/data/models/credit_model.dart';
-import 'package:waypay/features/credit/data/models/get_query_credits.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
+import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
 import 'credit_event.dart';
 import 'credit_state.dart';
 
@@ -25,7 +25,10 @@ class CreditBloc extends Bloc<CreditEvent, CreditState> {
     on<LoadInvestorCreditsEvent>(_onLoadInvestorCredits);
   }
 
-  Future<void> _onLoadCredits(LoadCreditsEvent event, Emitter<CreditState> emit) async {
+  Future<void> _onLoadCredits(
+    LoadCreditsEvent event,
+    Emitter<CreditState> emit,
+  ) async {
     if (event.refresh) {
       _currentPage = event.query.page ?? 1;
       _hasMore = true;
@@ -65,10 +68,17 @@ class CreditBloc extends Bloc<CreditEvent, CreditState> {
     }
   }
 
-  Future<void> _onSearchCredits(SearchCreditsEvent event, Emitter<CreditState> emit) async {
+  Future<void> _onSearchCredits(
+    SearchCreditsEvent event,
+    Emitter<CreditState> emit,
+  ) async {
     emit(CreditLoading());
     try {
-      final query = GetCreditsQuery(page: 1, pageSize: event.pageSize ?? 20, clientFullname: event.query);
+      final query = GetCreditsQuery(
+        page: 1,
+        pageSize: event.pageSize ?? 20,
+        clientFullname: event.query,
+      );
 
       _lastQuery = query;
 
@@ -88,7 +98,10 @@ class CreditBloc extends Bloc<CreditEvent, CreditState> {
     }
   }
 
-  Future<void> _onToggleFavourite(ToggleFavouriteEvent event, Emitter<CreditState> emit) async {
+  Future<void> _onToggleFavourite(
+    ToggleFavouriteEvent event,
+    Emitter<CreditState> emit,
+  ) async {
     try {
       final index = _credits.indexWhere((c) => c.id == event.creditId);
       if (index == -1) return;
@@ -102,7 +115,9 @@ class CreditBloc extends Bloc<CreditEvent, CreditState> {
           credits: List.from(_credits),
           hasMoreData: _hasMore,
           currentPage: _currentPage,
-          totalPages: (state is CreditLoaded) ? (state as CreditLoaded).totalPages : 1,
+          totalPages: (state is CreditLoaded)
+              ? (state as CreditLoaded).totalPages
+              : 1,
           totalCount: prevState?.totalCount ?? 0,
         ),
       );
@@ -113,7 +128,10 @@ class CreditBloc extends Bloc<CreditEvent, CreditState> {
     }
   }
 
-  Future<void> _onDeleteCredit(DeleteCreditEvent event, Emitter<CreditState> emit) async {
+  Future<void> _onDeleteCredit(
+    DeleteCreditEvent event,
+    Emitter<CreditState> emit,
+  ) async {
     debugPrint('🔴 Обработка DeleteCreditEvent: ${event.creditId}');
     try {
       await _dataSource.deleteCreditById(event.creditId);
@@ -137,7 +155,10 @@ class CreditBloc extends Bloc<CreditEvent, CreditState> {
     }
   }
 
-  Future<void> _onLoadInvestorCredits(LoadInvestorCreditsEvent event, Emitter<CreditState> emit) async {
+  Future<void> _onLoadInvestorCredits(
+    LoadInvestorCreditsEvent event,
+    Emitter<CreditState> emit,
+  ) async {
     if (event.refresh) {
       _currentPage = event.query.page ?? 1;
       _hasMore = true;
@@ -153,7 +174,10 @@ class CreditBloc extends Bloc<CreditEvent, CreditState> {
       final query = event.query.copyWith(page: _currentPage);
       _lastQuery = query;
 
-      final response = await _dataSource.getCreditsByInvestorId(event.investorId, query);
+      final response = await _dataSource.getCreditsByInvestorId(
+        event.investorId,
+        query,
+      );
 
       if (event.refresh) {
         _credits = response.items;

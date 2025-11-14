@@ -1,6 +1,6 @@
-import 'package:waypay/features/todo/data/models/get_active_task_query.dart';
-import 'package:waypay/features/todo/data/models/task_request.dart';
-import 'package:waypay/features/todo/data/models/todo_model.dart';
+import 'package:waypay_mobile/features/todo/data/models/get_active_task_query.dart';
+import 'package:waypay_mobile/features/todo/data/models/task_request.dart';
+import 'package:waypay_mobile/features/todo/data/models/todo_model.dart';
 
 abstract class TaskRemoteDataSource {
   Future<void> createTask(TaskRequest request);

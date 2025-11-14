@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:waypay/features/todo/data/data_soucres/task_remote_data_source.dart';
-import 'package:waypay/features/todo/data/models/get_active_task_query.dart';
-import 'package:waypay/features/todo/data/models/task_request.dart';
-import 'package:waypay/features/todo/data/models/todo_model.dart';
+import 'package:waypay_mobile/features/todo/data/data_soucres/task_remote_data_source.dart';
+import 'package:waypay_mobile/features/todo/data/models/get_active_task_query.dart';
+import 'package:waypay_mobile/features/todo/data/models/task_request.dart';
+import 'package:waypay_mobile/features/todo/data/models/todo_model.dart';
 
 class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
   final Dio dio;
@@ -17,12 +17,10 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
         data: request.toJson(),
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
-      print(request.toJson());
+
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception('Ошибка при создании задачи: ${response.statusCode}');
       }
-
-      print('✅ Задача создана');
     } on DioException catch (e) {
       throw Exception('Ошибка при создании задачи: ${e.message}');
     }
@@ -31,10 +29,15 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
   @override
   Future<List<TodoTask>> fetchActiveTasks(GetActiveTasksQuery query) async {
     try {
-      final response = await dio.get('/api/Task', queryParameters: query.toQueryParams());
+      final response = await dio.get(
+        '/api/Task',
+        queryParameters: query.toQueryParams(),
+      );
 
       if (response.statusCode == 200 && response.data is List) {
-        return (response.data as List).map((json) => TodoTask.fromJson(json)).toList();
+        return (response.data as List)
+            .map((json) => TodoTask.fromJson(json))
+            .toList();
       } else {
         throw Exception('Ошибка получения задач: ${response.statusCode}');
       }
@@ -82,7 +85,9 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
         throw Exception('Ошибка PATCH запроса: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Ошибка при обновлении статуса "$status" у задачи $id: $e');
+      throw Exception(
+        'Ошибка при обновлении статуса "$status" у задачи $id: $e',
+      );
     }
   }
 
@@ -98,8 +103,6 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
       if (response.statusCode != 200) {
         throw Exception('Ошибка при обновлении задачи: ${response.statusCode}');
       }
-
-      print('✅ Задача $id успешно обновлена');
     } on DioException catch (e) {
       throw Exception('Ошибка при обновлении задачи: ${e.message}');
     }

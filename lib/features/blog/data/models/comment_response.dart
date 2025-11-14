@@ -1,4 +1,4 @@
-import 'package:waypay/features/blog/data/models/comment_attachment_response.dart';
+import 'package:waypay_mobile/features/blog/data/models/comment_attachment_response.dart';
 
 class CommentResponse {
   final int id;

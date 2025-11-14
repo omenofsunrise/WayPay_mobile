@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:waypay/features/home/data/data_source/home_remote_data_source.dart';
-import 'package:waypay/features/home/data/models/employee_model.dart';
+import 'package:waypay_mobile/features/home/data/data_source/home_remote_data_source.dart';
+import 'package:waypay_mobile/features/home/data/models/employee_model.dart';
 
 class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   final Dio dio;

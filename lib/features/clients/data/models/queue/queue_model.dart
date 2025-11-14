@@ -1,4 +1,4 @@
-import 'package:waypay/features/clients/data/models/clients/client_model.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 
 class QueueItemModel {
   final int id;
@@ -61,7 +61,9 @@ class QueueResponseModel {
       pageSize: json['pageSize'],
       totalCount: json['totalCount'],
       totalPages: json['totalPages'],
-      items: (json['items'] as List).map((e) => QueueItemModel.fromJson(e)).toList(),
+      items: (json['items'] as List)
+          .map((e) => QueueItemModel.fromJson(e))
+          .toList(),
     );
   }
 

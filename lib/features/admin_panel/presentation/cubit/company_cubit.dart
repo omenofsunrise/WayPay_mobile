@@ -1,10 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/network/token_storage.dart';
-import 'package:waypay/features/admin_panel/data/data_sources/company_remote_data_source.dart';
-import 'package:waypay/features/admin_panel/data/models/company_model.dart';
-import 'package:waypay/features/admin_panel/data/models/post_company_model.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/network/token_storage.dart';
+import 'package:waypay_mobile/features/admin_panel/data/data_sources/company_remote_data_source.dart';
+import 'package:waypay_mobile/features/admin_panel/data/models/company_model.dart';
+import 'package:waypay_mobile/features/admin_panel/data/models/post_company_model.dart';
 
 part 'company_state.dart';
 

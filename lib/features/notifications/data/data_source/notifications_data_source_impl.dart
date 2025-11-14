@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:waypay/features/notifications/data/data_sources/notifications_data_source.dart';
-import 'package:waypay/features/notifications/data/models/notification_page.dart';
+import 'package:waypay_mobile/features/notifications/data/data_source/notifications_data_source.dart';
+import 'package:waypay_mobile/features/notifications/data/models/notification_page.dart';
 
 class NotificationsDataSourceImpl implements NotificationsDataSource {
   NotificationsDataSourceImpl(this._dio);

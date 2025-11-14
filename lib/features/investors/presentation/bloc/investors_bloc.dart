@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/network/token_storage.dart';
-import 'package:waypay/features/investors/data/data_sources/investors_remote_data_source.dart';
-import 'package:waypay/features/investors/data/models/investors_model.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/network/token_storage.dart';
+import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
+import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 
 part 'investors_event.dart';
 part 'investors_state.dart';

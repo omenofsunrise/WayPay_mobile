@@ -14,8 +14,6 @@ class ClientsResponseModel {
   });
 
   factory ClientsResponseModel.fromJson(Map<String, dynamic> json) {
-    print('🔄 Парсинг ответа API клиентов: $json');
-
     try {
       List<dynamic> items = [];
 
@@ -26,15 +24,12 @@ class ClientsResponseModel {
       } else if (json is List) {
         items = json as List;
       } else {
-        print('⚠️ Неожиданная структура ответа: $json');
         items = [];
       }
 
       final clients = items
           .map((item) => ClientModel.fromJson(item as Map<String, dynamic>))
           .toList();
-
-      print('✅ Распарсено ${clients.length} клиентов');
 
       return ClientsResponseModel(
         clients: clients,
@@ -43,8 +38,6 @@ class ClientsResponseModel {
         pageSize: json['pageSize'] as int? ?? 20,
       );
     } catch (e) {
-      print('❌ Ошибка парсинга клиентов: $e');
-      print('❌ JSON: $json');
       rethrow;
     }
   }

@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
-import 'package:waypay/features/credit/data/objectType/models/get_object_types_query.dart';
-import 'package:waypay/features/credit/data/objectType/models/object_type_model.dart';
-import 'package:waypay/features/credit/presentation/bloc/credit_bloc.dart';
-import 'package:waypay/features/credit/presentation/bloc/credit_event.dart';
-import 'package:waypay/features/credit/data/models/get_query_credits.dart';
-import 'package:waypay/core/widgets/inputs/custom_input.dart';
-import 'package:waypay/core/widgets/inputs/date_input.dart';
-import 'package:waypay/core/widgets/inputs/custom_select.dart';
-import 'package:waypay/features/credit/presentation/bloc/object_type_bloc.dart';
-import 'package:waypay/features/credit/presentation/bloc/object_type_event.dart';
-import 'package:waypay/features/credit/presentation/bloc/object_type_state.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/features/credit/data/objectType/models/get_object_types_query.dart';
+import 'package:waypay_mobile/features/credit/data/objectType/models/object_type_model.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/credit_event.dart';
+import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
+import 'package:waypay_mobile/core/widgets/inputs/custom_input.dart';
+import 'package:waypay_mobile/core/widgets/inputs/date_input.dart';
+import 'package:waypay_mobile/core/widgets/inputs/custom_select.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/object_type_bloc.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/object_type_event.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/object_type_state.dart';
 
 class CreditFilters extends StatefulWidget {
   final bool showIncomeFilters;

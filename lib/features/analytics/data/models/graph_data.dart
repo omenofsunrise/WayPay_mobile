@@ -1,4 +1,4 @@
-import 'package:waypay/features/analytics/data/models/period_value.dart';
+import 'package:waypay_mobile/features/analytics/data/models/period_value.dart';
 
 class GraphData {
   final String graphName;

@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/network/token_storage.dart';
-import 'package:waypay/features/product/data/data_sources/products_remote_data_source.dart';
-import 'package:waypay/features/product/data/models/product_model.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/network/token_storage.dart';
+import 'package:waypay_mobile/features/product/data/data_sources/products_remote_data_source.dart';
+import 'package:waypay_mobile/features/product/data/models/product_model.dart';
 
 part 'products_event.dart';
 part 'products_state.dart';

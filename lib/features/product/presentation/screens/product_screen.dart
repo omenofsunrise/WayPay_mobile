@@ -1,20 +1,20 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
-import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
-import 'package:waypay/core/widgets/pagination_widget.dart';
-import 'package:waypay/core/widgets/refresh.dart';
-import 'package:waypay/core/storage/user_storage.dart';
-import 'package:waypay/features/profile/data/models/employee.dart'
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
+import 'package:waypay_mobile/core/widgets/app_modal.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/core/widgets/pagination_widget.dart';
+import 'package:waypay_mobile/core/widgets/refresh.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart'
     show EmployeeRole, admin, director, superAdmin;
-import 'package:waypay/features/product/presentation/bloc/products_bloc.dart';
-import 'package:waypay/features/product/presentation/widgets/product_card.dart';
-import 'package:waypay/features/product/data/data_sources/products_remote_data_source.dart';
+import 'package:waypay_mobile/features/product/presentation/bloc/products_bloc.dart';
+import 'package:waypay_mobile/features/product/presentation/widgets/product_card.dart';
+import 'package:waypay_mobile/features/product/data/data_sources/products_remote_data_source.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});

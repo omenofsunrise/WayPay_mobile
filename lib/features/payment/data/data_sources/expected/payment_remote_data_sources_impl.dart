@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:waypay/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
-import 'package:waypay/features/payment/data/models/expected/get_payment_query.dart';
-import 'package:waypay/features/payment/data/models/expected/payment_item_model.dart';
+import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
+import 'package:waypay_mobile/features/payment/data/models/expected/get_payment_query.dart';
+import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 
 class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
   final Dio dio;
@@ -10,7 +10,10 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
   @override
   Future<PaymentListResponseModel> getPayment(GetPaymentsQuery query) async {
     try {
-      final response = await dio.get('/api/Payment', queryParameters: query.toQueryParams());
+      final response = await dio.get(
+        '/api/Payment',
+        queryParameters: query.toQueryParams(),
+      );
 
       final data = response.data;
 

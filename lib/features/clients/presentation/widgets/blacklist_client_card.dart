@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/storage/user_storage.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
-import 'package:waypay/core/widgets/form_modal/labeled_container.dart';
-import 'package:waypay/core/widgets/helpers.dart';
-import 'package:waypay/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources.dart';
-import 'package:waypay/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
-import 'package:waypay/features/clients/data/models/clients/client_model.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/app_modal.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/core/widgets/form_modal/labeled_container.dart';
+import 'package:waypay_mobile/core/widgets/helpers.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 
 class BlacklistClientCard extends StatefulWidget {
   final ClientModel client;

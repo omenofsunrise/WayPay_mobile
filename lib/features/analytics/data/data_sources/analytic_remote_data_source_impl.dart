@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:waypay/features/analytics/data/data_sources/analytic_remote_data_source.dart';
-import 'package:waypay/features/analytics/data/models/analytic_items_response.dart';
-import 'package:waypay/features/analytics/data/models/debt_dynamic_response.dart';
-import 'package:waypay/features/analytics/data/models/graph_data.dart';
-import 'package:waypay/features/analytics/data/models/sell_info_response.dart';
+import 'package:waypay_mobile/features/analytics/data/data_sources/analytic_remote_data_source.dart';
+import 'package:waypay_mobile/features/analytics/data/models/analytic_items_response.dart';
+import 'package:waypay_mobile/features/analytics/data/models/debt_dynamic_response.dart';
+import 'package:waypay_mobile/features/analytics/data/models/graph_data.dart';
+import 'package:waypay_mobile/features/analytics/data/models/sell_info_response.dart';
 
 class AnalyticRemoteDataSourceImpl implements AnalyticRemoteDataSource {
   final Dio dio;

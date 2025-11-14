@@ -2,22 +2,22 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
-import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
+import 'package:waypay_mobile/core/widgets/app_modal.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 
-import 'package:waypay/features/chat/data/data_source/chat/chat_remote_data_source.dart';
-import 'package:waypay/features/chat/data/data_source/message/message_remote_data_source.dart';
-import 'package:waypay/features/chat/data/service/chat_hub_service.dart';
+import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source.dart';
+import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source.dart';
+import 'package:waypay_mobile/features/chat/data/service/chat_hub_service.dart';
 
-import 'package:waypay/features/chat/presentation/bloc/chat/chat_bloc.dart';
-import 'package:waypay/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
+import 'package:waypay_mobile/features/chat/presentation/bloc/chat/chat_bloc.dart';
+import 'package:waypay_mobile/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
 
-import 'package:waypay/features/chat/presentation/screens/chat_screen.dart';
-import 'package:waypay/features/chat/presentation/widgets/chat_tile.dart';
+import 'package:waypay_mobile/features/chat/presentation/screens/chat_screen.dart';
+import 'package:waypay_mobile/features/chat/presentation/widgets/chat_tile.dart';
 
 class AllChatScreen extends StatefulWidget {
   const AllChatScreen({super.key});

@@ -1,16 +1,17 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/network/token_storage.dart';
-import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:waypay/features/profile/data/data_sources/employee_remote_data_source.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/network/token_storage.dart';
+import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 
 part 'profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   final AuthRemoteDataSource _dataSource = getIt<AuthRemoteDataSource>();
-  final EmployeeRemoteDataSource _employeeDataSource = getIt<EmployeeRemoteDataSource>();
+  final EmployeeRemoteDataSource _employeeDataSource =
+      getIt<EmployeeRemoteDataSource>();
   final TokenStorage _tokenStorage = getIt<TokenStorage>();
 
   ProfileCubit() : super(ProfileInitial());
@@ -36,7 +37,14 @@ class ProfileCubit extends Cubit<ProfileState> {
       final role = employee.role;
       final permissions = employee.permissions;
 
-      emit(ProfileLoaded(employee: employee, role: role, permissions: permissions, myProfile: true));
+      emit(
+        ProfileLoaded(
+          employee: employee,
+          role: role,
+          permissions: permissions,
+          myProfile: true,
+        ),
+      );
     } catch (e) {
       emit(ProfileError('Ошибка загрузки профиля: $e'));
     }
@@ -53,7 +61,8 @@ class ProfileCubit extends Cubit<ProfileState> {
 
     try {
       final authInfo = await _dataSource.getAuthInfo();
-      final currentUserId = (authInfo['employee'] as Map<String, dynamic>?)?['id'];
+      final currentUserId =
+          (authInfo['employee'] as Map<String, dynamic>?)?['id'];
 
       final employeeJson = await _employeeDataSource.getEmployeeById(id);
       final employee = Employee.fromJson(employeeJson);
@@ -71,7 +80,11 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
-  Future<void> updateEmployeeProfile({required int id, required String fullName, required String address}) async {
+  Future<void> updateEmployeeProfile({
+    required int id,
+    required String fullName,
+    required String address,
+  }) async {
     emit(ProfileLoading());
     try {
       final info = await _dataSource.getAuthInfo();
@@ -84,16 +97,23 @@ class ProfileCubit extends Cubit<ProfileState> {
 
       final employee = Employee.fromJson(employeeJson);
       if (employee.id == id) {
-        await _employeeDataSource.updateEmployeeProfile(id: id, fullName: fullName, address: address);
+        await _employeeDataSource.updateEmployeeProfile(
+          id: id,
+          fullName: fullName,
+          address: address,
+        );
       }
-      print('Профиль обновлён: ${employee.fullName}, ${employee.address}');
+
       await loadProfileById(id);
     } catch (e) {
       emit(ProfileError('Ошибка обновления профиля: $e'));
     }
   }
 
-  Future<void> uploadEmployeePhoto({required int id, required String filePath}) async {
+  Future<void> uploadEmployeePhoto({
+    required int id,
+    required String filePath,
+  }) async {
     emit(ProfileLoading());
     try {
       final info = await _dataSource.getAuthInfo();
@@ -106,7 +126,10 @@ class ProfileCubit extends Cubit<ProfileState> {
 
       final employee = Employee.fromJson(employeeJson);
       if (employee.id == id) {
-        await _employeeDataSource.uploadEmployeePhoto(id: id, filePath: filePath);
+        await _employeeDataSource.uploadEmployeePhoto(
+          id: id,
+          filePath: filePath,
+        );
       }
 
       await loadProfileById(id);
@@ -125,7 +148,12 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
-  Future<void> updateEmployeeById({required int id, String? role, String? phone, int? minSurcharge}) async {
+  Future<void> updateEmployeeById({
+    required int id,
+    String? role,
+    String? phone,
+    int? minSurcharge,
+  }) async {
     emit(ProfileLoading());
 
     try {

@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
-import 'package:waypay/features/chat/data/data_source/chat/chat_remote_data_source.dart';
-import 'package:waypay/features/chat/data/models/chat/chat_response.dart';
-import 'package:waypay/features/chat/data/service/chat_hub_service.dart';
+import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source.dart';
+import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
+import 'package:waypay_mobile/features/chat/data/service/chat_hub_service.dart';
 
 part 'chat_list_event.dart';
 part 'chat_list_state.dart';

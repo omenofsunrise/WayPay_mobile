@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/features/profile/data/data_sources/employee_remote_data_source.dart';
-import 'package:waypay/features/profile/data/models/payment_stat.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
+import 'package:waypay_mobile/features/profile/data/models/payment_stat.dart';
 
 part 'payment_stats_state.dart';
 
@@ -29,16 +29,14 @@ class PaymentStatsCubit extends Cubit<PaymentStatsState> {
     int months = 12,
   }) async {
     emit(PaymentStatsLoading());
-    print('👤 [Cubit] Loading stats for employeeId = $employeeId');
+
     try {
       final data = await _employeeRemoteDataSource.getPaymentsStatsById(
         employeeId: employeeId,
         months: months,
       );
       emit(PaymentStatsLoaded(data));
-    } catch (e, stack) {
-      print('❌ [Cubit Error] $e');
-      print(stack);
+    } catch (e) {
       emit(PaymentStatsError('Ошибка загрузки статистики сотрудника: $e'));
     }
   }

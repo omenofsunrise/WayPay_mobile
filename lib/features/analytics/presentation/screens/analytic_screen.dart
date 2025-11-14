@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
 
-import 'package:waypay/features/analytics/presentation/widgets/contract_count_pie.dart';
-import 'package:waypay/features/analytics/presentation/widgets/dashboard_info_card.dart';
-import 'package:waypay/features/analytics/presentation/widgets/investition_table.dart';
-import 'package:waypay/features/analytics/presentation/widgets/payment_dynamic_table.dart';
-import 'package:waypay/features/analytics/presentation/widgets/payment_stats_table.dart';
-import 'package:waypay/features/analytics/presentation/widgets/sales_purchase_pie_chart.dart';
-import 'package:waypay/features/analytics/presentation/widgets/period_appbar_action.dart';
-import 'package:waypay/features/analytics/presentation/widgets/dropdown.dart' show PeriodOption;
+import 'package:waypay_mobile/features/analytics/presentation/widgets/contract_count_pie.dart';
+import 'package:waypay_mobile/features/analytics/presentation/widgets/dashboard_info_card.dart';
+import 'package:waypay_mobile/features/analytics/presentation/widgets/investition_table.dart';
+import 'package:waypay_mobile/features/analytics/presentation/widgets/payment_dynamic_table.dart';
+import 'package:waypay_mobile/features/analytics/presentation/widgets/payment_stats_table.dart';
+import 'package:waypay_mobile/features/analytics/presentation/widgets/sales_purchase_pie_chart.dart';
+import 'package:waypay_mobile/features/analytics/presentation/widgets/period_appbar_action.dart';
+import 'package:waypay_mobile/features/analytics/presentation/widgets/dropdown.dart'
+    show PeriodOption;
 
-import 'package:waypay/features/analytics/presentation/cubit/analytic_items_cubit.dart';
-import 'package:waypay/features/analytics/presentation/cubit/investment_dynamic_cubit.dart';
-import 'package:waypay/features/analytics/presentation/cubit/sell_info_cubit.dart';
-import 'package:waypay/features/analytics/presentation/cubit/debt_dynamic_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/analytic_items_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/investment_dynamic_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/sell_info_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/debt_dynamic_cubit.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -72,7 +73,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         surfaceTintColor: Colors.transparent,
         centerTitle: false, // заголовок прижат к левому краю
         iconTheme: const IconThemeData(color: Colors.white),
-        title: Text('Аналитика', style: AppStyle.medium20.copyWith(color: const Color(AppColors.background))),
+        title: Text(
+          'Аналитика',
+          style: AppStyle.medium20.copyWith(
+            color: const Color(AppColors.background),
+          ),
+        ),
         actions: [
           PeriodAppBarAction(
             selected: _selected,

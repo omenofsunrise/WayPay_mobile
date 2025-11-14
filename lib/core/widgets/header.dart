@@ -1,22 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/features/notifications/presentation/widgets/notifications_bell_button.dart';
-import 'package:waypay/routes/routes.dart';
+import 'package:waypay_mobile/assets/resources.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/features/notifications/presentation/widgets/notifications_bell_button.dart';
+import 'package:waypay_mobile/routes/routes.dart';
 
 class Header extends StatelessWidget {
-  final String fullName;
+  final String title;
+  final String? fullName;
   final String? photoPath;
   final bool showBackButton;
   final VoidCallback? onBackPressed;
+  final bool showNotifications;
 
   const Header({
     super.key,
-    required this.fullName,
+    this.title = 'Добро пожаловать!',
+    this.fullName,
     this.photoPath,
     this.showBackButton = false,
     this.onBackPressed,
+    this.showNotifications = true,
   });
 
   @override
@@ -26,18 +32,30 @@ class Header extends StatelessWidget {
       child: Row(
         children: [
           if (showBackButton)
-            GestureDetector(
-              onTap: onBackPressed ?? () => context.pop(),
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: const Color(AppColors.primary).withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.arrow_back,
-                  color: Color(AppColors.primary),
+            Material(
+              shape: CircleBorder(),
+              clipBehavior: Clip.antiAlias,
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  if (onBackPressed != null) {
+                    onBackPressed!();
+                    return;
+                  }
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go(Routes.homeScreen.toPath);
+                  }
+                },
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(shape: BoxShape.circle),
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: SvgPicture.asset(SvgIcons.chevronLeft),
+                  ),
                 ),
               ),
             )
@@ -50,16 +68,20 @@ class Header extends StatelessWidget {
           const SizedBox(width: 12),
 
           // Приветствие
-          Text(
-            'Добро пожаловать!',
-            style: AppStyle.semiBold23.copyWith(fontWeight: FontWeight.w500),
+          Expanded(
+            child: Text(
+              title,
+              style: AppStyle.semiBold23.copyWith(fontWeight: FontWeight.w500),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
 
-          const Spacer(),
-
-          // Колокольчик уведомлений
-          NotificationsBellButton(iconSize: 26),
-          const SizedBox(width: 3),
+          if (showNotifications) ...[
+            const SizedBox(width: 12),
+            NotificationsBellButton(iconSize: 26),
+            const SizedBox(width: 3),
+          ],
         ],
       ),
     );
@@ -72,7 +94,7 @@ class Header extends StatelessWidget {
         backgroundImage: NetworkImage(photoPath!),
       );
     } else {
-      final initials = _getInitials(fullName);
+      final initials = _getInitials(fullName ?? '');
       return Container(
         width: 50,
         height: 50,
@@ -94,11 +116,16 @@ class Header extends StatelessWidget {
   }
 
   String _getInitials(String fullName) {
-    final parts = fullName.split(' ');
+    final parts = fullName
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .toList();
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    } else if (parts.isNotEmpty) {
-      return parts[0][0].toUpperCase();
+    }
+    if (parts.isNotEmpty) {
+      return parts.first[0].toUpperCase();
     }
     return 'U';
   }

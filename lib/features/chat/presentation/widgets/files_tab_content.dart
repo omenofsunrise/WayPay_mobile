@@ -8,11 +8,11 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/helpers.dart';
-import 'package:waypay/features/chat/data/models/chat/chat_response.dart';
-import 'package:waypay/features/chat/presentation/bloc/chat_info/chat_files_bloc.dart';
-import 'package:waypay/features/chat/presentation/bloc/chat_info/paged_bloc.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/helpers.dart';
+import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
+import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/chat_files_bloc.dart';
+import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/paged_bloc.dart';
 
 class FilesTabContent extends StatefulWidget {
   final int chatId;
@@ -26,19 +26,21 @@ class FilesTabContent extends StatefulWidget {
 class _FilesTabContentState extends State<FilesTabContent> {
   late final ChatFilesBloc bloc;
   final ScrollController _scrollController = ScrollController();
-  static const String _filesBase = 'http://test.waypay.one:5003';
+  static const String _filesBase = 'https://web.waypay_mobile.one:5002';
 
   @override
   void initState() {
     super.initState();
-    bloc = ChatFilesBloc(chatId: widget.chatId)..add(LoadPage<MessageAttachmentResponse>());
+    bloc = ChatFilesBloc(chatId: widget.chatId)
+      ..add(LoadPage<MessageAttachmentResponse>());
     _scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
     final state = bloc.state;
     if (state is PagedLoaded<MessageAttachmentResponse> && state.hasMore) {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
         bloc.add(LoadPage<MessageAttachmentResponse>());
       }
     }
@@ -51,7 +53,9 @@ class _FilesTabContentState extends State<FilesTabContent> {
     super.dispose();
   }
 
-  Map<String, List<MessageAttachmentResponse>> _groupByMonth(List<MessageAttachmentResponse> items) {
+  Map<String, List<MessageAttachmentResponse>> _groupByMonth(
+    List<MessageAttachmentResponse> items,
+  ) {
     const months = [
       'Январь',
       'Февраль',
@@ -108,9 +112,16 @@ class _FilesTabContentState extends State<FilesTabContent> {
       String? fileName;
       final cd = response.headers.map['content-disposition']?.join('; ');
       if (cd != null) {
-        final match = RegExp(r'filename\*?=([^;]+)', caseSensitive: false).firstMatch(cd);
+        final match = RegExp(
+          r'filename\*?=([^;]+)',
+          caseSensitive: false,
+        ).firstMatch(cd);
         if (match != null) {
-          fileName = match.group(1)?.replaceAll('UTF-8\'\'', '').replaceAll('"', '').trim();
+          fileName = match
+              .group(1)
+              ?.replaceAll('UTF-8\'\'', '')
+              .replaceAll('"', '')
+              .trim();
           if (fileName != null && fileName.contains('%')) {
             try {
               fileName = Uri.decodeFull(fileName);
@@ -121,12 +132,15 @@ class _FilesTabContentState extends State<FilesTabContent> {
       fileName ??= p.basename(Uri.parse(resolvedUrl).path);
       if (fileName.isEmpty || !fileName.contains('.')) {
         final ext = p.extension(fallbackFileName);
-        fileName = ext.isNotEmpty ? 'file$ext' : (fallbackFileName.isNotEmpty ? fallbackFileName : 'file.bin');
+        fileName = ext.isNotEmpty
+            ? 'file$ext'
+            : (fallbackFileName.isNotEmpty ? fallbackFileName : 'file.bin');
       }
 
       // MIME из заголовка или по расширению
       String? contentType = response.headers.value('content-type');
-      contentType ??= mime.lookupMimeType(fileName) ?? 'application/octet-stream';
+      contentType ??=
+          mime.lookupMimeType(fileName) ?? 'application/octet-stream';
 
       // Сохраняем во временную директорию
       final dir = await getTemporaryDirectory();
@@ -137,7 +151,10 @@ class _FilesTabContentState extends State<FilesTabContent> {
       // Открываем с явным типом
       final result = await OpenFilex.open(filePath, type: contentType);
       if (result.type != ResultType.done && mounted) {
-        showMessage('Не удалось открыть файл: ${result.message}. Попробуйте через браузер.', context);
+        showMessage(
+          'Не удалось открыть файл: ${result.message}. Попробуйте через браузер.',
+          context,
+        );
         final uri = Uri.tryParse(resolvedUrl);
         if (uri != null) {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -167,7 +184,10 @@ class _FilesTabContentState extends State<FilesTabContent> {
 
           if (state is PagedError<MessageAttachmentResponse>) {
             return Center(
-              child: Text(state.message, style: AppStyle.manrope(size: 16, weight: FontWeight.w600)),
+              child: Text(
+                state.message,
+                style: AppStyle.manrope(size: 16, weight: FontWeight.w600),
+              ),
             );
           }
 
@@ -181,7 +201,10 @@ class _FilesTabContentState extends State<FilesTabContent> {
 
           if (items.isEmpty) {
             return Center(
-              child: Text('Нет файлов', style: AppStyle.manrope(size: 16, weight: FontWeight.w600)),
+              child: Text(
+                'Нет файлов',
+                style: AppStyle.manrope(size: 16, weight: FontWeight.w600),
+              ),
             );
           }
 
@@ -197,15 +220,25 @@ class _FilesTabContentState extends State<FilesTabContent> {
 
                 return [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text(monthName, style: AppStyle.manrope(size: 16, weight: FontWeight.w500)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: Text(
+                      monthName,
+                      style: AppStyle.manrope(
+                        size: 16,
+                        weight: FontWeight.w500,
+                      ),
+                    ),
                   ),
                   GridView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: (MediaQuery.of(context).size.width ~/ 130).clamp(1, 10),
+                      crossAxisCount: (MediaQuery.of(context).size.width ~/ 130)
+                          .clamp(1, 10),
                       mainAxisSpacing: 8,
                       crossAxisSpacing: 8,
                       childAspectRatio: 1,
@@ -224,24 +257,39 @@ class _FilesTabContentState extends State<FilesTabContent> {
                         child: Container(
                           width: 120,
                           height: 120,
-                          decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(10)),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                           child: Center(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.insert_drive_file, size: 40, color: Colors.grey[700]),
+                                Icon(
+                                  Icons.insert_drive_file,
+                                  size: 40,
+                                  color: Colors.grey[700],
+                                ),
                                 const SizedBox(height: 8),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
                                   child: Text(
                                     file.fileName ?? '',
-                                    style: AppStyle.manrope(size: 14, weight: FontWeight.w500),
+                                    style: AppStyle.manrope(
+                                      size: 14,
+                                      weight: FontWeight.w500,
+                                    ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                                 Text(
                                   getFileExtension(file),
-                                  style: AppStyle.manrope(size: 12, weight: FontWeight.w400),
+                                  style: AppStyle.manrope(
+                                    size: 12,
+                                    weight: FontWeight.w400,
+                                  ),
                                 ),
                               ],
                             ),

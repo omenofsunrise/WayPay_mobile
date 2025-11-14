@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:waypay/features/credit/data/objectType/models/get_object_types_query.dart';
-import 'package:waypay/features/credit/data/objectType/models/object_type_model.dart';
+import 'package:waypay_mobile/features/credit/data/objectType/models/get_object_types_query.dart';
+import 'package:waypay_mobile/features/credit/data/objectType/models/object_type_model.dart';
 
 abstract class ObjectTypeRemoteDataSource {
   Future<ObjectTypeResponseModel> getObjectTypes(GetObjectTypesQuery query);

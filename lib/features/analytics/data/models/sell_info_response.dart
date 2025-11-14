@@ -1,4 +1,4 @@
-import 'package:waypay/features/analytics/data/models/graph_data.dart';
+import 'package:waypay_mobile/features/analytics/data/models/graph_data.dart';
 
 class SellInfoResponse {
   final GraphData sellsSum;

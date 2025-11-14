@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/inputs/custom_calendar.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/inputs/custom_calendar.dart';
 
 class DateInput extends StatefulWidget {
   final TextEditingController controller;

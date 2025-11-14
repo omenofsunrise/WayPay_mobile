@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/features/chat/data/data_source/chat/chat_remote_data_source.dart';
-import 'package:waypay/features/chat/data/models/chat/chat_member_response.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source.dart';
+import 'package:waypay_mobile/features/chat/data/models/chat/chat_member_response.dart';
 
 class ChatMembersState {
   final List<ChatMemberResponse> members;
@@ -10,10 +10,19 @@ class ChatMembersState {
 
   ChatMembersState({required this.members, required this.loading, this.error});
 
-  factory ChatMembersState.initial() => ChatMembersState(members: [], loading: false);
+  factory ChatMembersState.initial() =>
+      ChatMembersState(members: [], loading: false);
 
-  ChatMembersState copyWith({List<ChatMemberResponse>? members, bool? loading, String? error}) {
-    return ChatMembersState(members: members ?? this.members, loading: loading ?? this.loading, error: error);
+  ChatMembersState copyWith({
+    List<ChatMemberResponse>? members,
+    bool? loading,
+    String? error,
+  }) {
+    return ChatMembersState(
+      members: members ?? this.members,
+      loading: loading ?? this.loading,
+      error: error,
+    );
   }
 }
 

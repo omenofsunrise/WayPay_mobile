@@ -1,4 +1,4 @@
-import 'package:waypay/features/finance/data/models/budget_income_model.dart';
+import 'package:waypay_mobile/features/finance/data/models/budget_income_model.dart';
 
 class BudgetIncomeResponseModel {
   final List<BudgetIncomeModel> items;

@@ -1,0 +1,158 @@
+import 'package:flutter/material.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+
+class ContractHistoryCard extends StatelessWidget {
+  const ContractHistoryCard({
+    super.key,
+    required this.contractNumber,
+    required this.contractDate,
+    required this.clientName,
+    required this.paidAmount,
+    required this.remainingAmount,
+    this.onTap,
+  });
+
+  final String contractNumber;
+  final String contractDate;
+  final String clientName;
+  final String paidAmount;
+  final String remainingAmount;
+  final VoidCallback? onTap;
+
+  static const _shadow = [
+    BoxShadow(
+      color: Color(0x14000809),
+      offset: Offset(2, 2),
+      blurRadius: 4,
+      spreadRadius: 0,
+    ),
+    BoxShadow(
+      color: Color(0x05000809),
+      offset: Offset(0, 0),
+      blurRadius: 6,
+      spreadRadius: 0,
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(AppColors.white),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: _shadow,
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Договор $contractNumber',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Color(AppColors.black),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      contractDate,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Color(AppColors.darkGrey),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  clientName,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Color(AppColors.darkGrey),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _AmountColumn(
+                        label: 'Уплачено',
+                        value: paidAmount,
+                        valueColor: const Color(AppColors.primary),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _AmountColumn(
+                        label: 'Остаток',
+                        value: remainingAmount,
+                        valueColor: const Color(AppColors.red),
+                        alignRight: true,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AmountColumn extends StatelessWidget {
+  const _AmountColumn({
+    required this.label,
+    required this.value,
+    required this.valueColor,
+    this.alignRight = false,
+  });
+
+  final String label;
+  final String value;
+  final Color valueColor;
+  final bool alignRight;
+
+  @override
+  Widget build(BuildContext context) {
+    final textAlign = alignRight ? TextAlign.end : TextAlign.start;
+    return Column(
+      crossAxisAlignment: alignRight
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          textAlign: textAlign,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Color(AppColors.darkGrey),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          value,
+          textAlign: textAlign,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: valueColor,
+          ),
+        ),
+      ],
+    );
+  }
+}

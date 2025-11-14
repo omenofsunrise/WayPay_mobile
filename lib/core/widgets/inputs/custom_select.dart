@@ -15,7 +15,7 @@ class CustomSelect<T> extends StatefulWidget {
   final double? width;
 
   const CustomSelect({
-    Key? key,
+    super.key,
     this.placeholder,
     this.customPlaceholder,
     this.hasError = false,
@@ -28,7 +28,7 @@ class CustomSelect<T> extends StatefulWidget {
     this.required = false,
     this.margin,
     this.width,
-  }) : super(key: key);
+  });
 
   @override
   State<CustomSelect<T>> createState() => _CustomSelectState<T>();

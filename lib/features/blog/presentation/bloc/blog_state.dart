@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:waypay/features/blog/data/models/blog_post_response.dart';
-import 'package:waypay/features/blog/data/models/blog_post_response_paged_result.dart';
+import 'package:waypay_mobile/features/blog/data/models/blog_post_response.dart';
+import 'package:waypay_mobile/features/blog/data/models/blog_post_response_paged_result.dart';
 
 abstract class BlogState extends Equatable {
   const BlogState();

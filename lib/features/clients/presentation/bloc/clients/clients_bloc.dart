@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/network/token_storage.dart';
-import 'package:waypay/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
-import 'package:waypay/features/clients/data/models/clients/client_model.dart';
-import 'package:waypay/features/clients/data/models/clients/create_clients_requests.dart';
-import 'package:waypay/features/clients/data/models/clients/get_clients_query.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/network/token_storage.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/create_clients_requests.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/get_clients_query.dart';
 
 part 'clients_event.dart';
 part 'clients_state.dart';

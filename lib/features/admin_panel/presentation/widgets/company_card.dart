@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/form_modal/label_text_field.dart';
-import 'package:waypay/core/widgets/helpers.dart';
-import 'package:waypay/features/admin_panel/data/models/company_model.dart';
-import 'package:waypay/features/admin_panel/presentation/cubit/company_cubit.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/form_modal/label_text_field.dart';
+import 'package:waypay_mobile/core/widgets/helpers.dart';
+import 'package:waypay_mobile/features/admin_panel/data/models/company_model.dart';
+import 'package:waypay_mobile/features/admin_panel/presentation/cubit/company_cubit.dart';
 
 class CompanyCard extends StatefulWidget {
   final CompanyModel company;
@@ -78,7 +78,10 @@ class _CompanyCardState extends State<CompanyCard> {
         ? widget.company.phone.substring(1)
         : widget.company.phone;
     final phoneController = TextEditingController(text: phoneWithoutLeading8);
-    final phoneFormatter = MaskTextInputFormatter(mask: ' (###) ###-##-##', filter: {"#": RegExp(r'\d')});
+    final phoneFormatter = MaskTextInputFormatter(
+      mask: ' (###) ###-##-##',
+      filter: {"#": RegExp(r'\d')},
+    );
     phoneController.value = phoneFormatter.formatEditUpdate(
       TextEditingValue.empty,
       TextEditingValue(text: phoneController.text),
@@ -100,13 +103,18 @@ class _CompanyCardState extends State<CompanyCard> {
         builder: (context, setState) {
           return Dialog(
             backgroundColor: Color(AppColors.background),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Изменить телефон', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Изменить телефон',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 12),
                   LabeledTextField(
                     controller: phoneController,
@@ -127,20 +135,32 @@ class _CompanyCardState extends State<CompanyCard> {
                     children: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Отмена', style: TextStyle(color: Colors.black)),
+                        child: const Text(
+                          'Отмена',
+                          style: TextStyle(color: Colors.black),
+                        ),
                       ),
                       ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: const Color(AppColors.primary)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(AppColors.primary),
+                        ),
                         onPressed: () {
                           if (!validatePhone(phoneController.text)) {
                             setState(() {});
                             return;
                           }
-                          final newPhone = '8${phoneFormatter.getUnmaskedText()}';
+                          final newPhone =
+                              '8${phoneFormatter.getUnmaskedText()}';
                           Navigator.of(context).pop();
-                          context.read<CompanyCubit>().updatePhone(widget.company.id, newPhone);
+                          context.read<CompanyCubit>().updatePhone(
+                            widget.company.id,
+                            newPhone,
+                          );
                         },
-                        child: const Text('Сохранить', style: TextStyle(color: Colors.white)),
+                        child: const Text(
+                          'Сохранить',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ],
                   ),
@@ -202,18 +222,25 @@ class _CompanyCardState extends State<CompanyCard> {
         builder: (context, setState) {
           return Dialog(
             backgroundColor: Color(AppColors.background),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Изменить дату лицензии', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Изменить дату лицензии',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 12),
                   LabeledTextField(
                     controller: dateController,
                     keyboardType: TextInputType.datetime,
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                    ],
                     errorText: dateError,
                     label: 'Дата лицензии',
                     onChanged: (value) {
@@ -228,19 +255,30 @@ class _CompanyCardState extends State<CompanyCard> {
                     children: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Отмена', style: TextStyle(color: Colors.black)),
+                        child: const Text(
+                          'Отмена',
+                          style: TextStyle(color: Colors.black),
+                        ),
                       ),
                       ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: const Color(AppColors.primary)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(AppColors.primary),
+                        ),
                         onPressed: () {
                           if (!validateDate()) {
                             setState(() {});
                             return;
                           }
-                          context.read<CompanyCubit>().updateLicenceDate(widget.company.id, parsedDate!);
+                          context.read<CompanyCubit>().updateLicenceDate(
+                            widget.company.id,
+                            parsedDate!,
+                          );
                           Navigator.of(context).pop();
                         },
-                        child: const Text('Сохранить', style: TextStyle(color: Colors.white)),
+                        child: const Text(
+                          'Сохранить',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ],
                   ),
@@ -270,7 +308,11 @@ class _CompanyCardState extends State<CompanyCard> {
           children: [
             Text(
               widget.company.id.toString(),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
             const SizedBox(width: 24),
             Expanded(
@@ -279,18 +321,31 @@ class _CompanyCardState extends State<CompanyCard> {
                 children: [
                   Text(
                     widget.company.name,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                     softWrap: true,
                   ),
                   const SizedBox(height: 4),
-                  Text(widget.company.phone, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                  Text(
+                    widget.company.phone,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
                 ],
               ),
             ),
             Column(
               children: [
-                const Text('Лицензия до:', style: TextStyle(fontSize: 16, color: Colors.black)),
-                Text(_formatDate(widget.company.licenceDate), style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                const Text(
+                  'Лицензия до:',
+                  style: TextStyle(fontSize: 16, color: Colors.black),
+                ),
+                Text(
+                  _formatDate(widget.company.licenceDate),
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                ),
               ],
             ),
           ],

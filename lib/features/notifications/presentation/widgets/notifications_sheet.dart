@@ -1,21 +1,17 @@
-import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/features/notifications/data/models/notification_model.dart';
-import 'package:waypay/features/notifications/presentation/cubit/notifications_cubit.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/features/notifications/data/models/notification_model.dart';
+import 'package:waypay_mobile/features/notifications/presentation/cubit/notifications_cubit.dart';
 
 class NotificationsSheet extends StatelessWidget {
   const NotificationsSheet({super.key});
 
-  static Future<void> show(BuildContext context) async {
-    final cubit = context.read<NotificationsCubit>();
-    unawaited(cubit.load());
-
+  static Future<void> show(BuildContext context) {
     return showModalBottomSheet(
       context: context,
       useRootNavigator: true,
@@ -27,8 +23,8 @@ class NotificationsSheet extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       builder: (sheetContext) {
-        return BlocProvider.value(
-          value: cubit,
+        return BlocProvider(
+          create: (_) => getIt<NotificationsCubit>()..load(),
           child: const NotificationsSheet(),
         );
       },

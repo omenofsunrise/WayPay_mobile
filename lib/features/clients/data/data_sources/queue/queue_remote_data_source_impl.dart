@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:waypay/features/clients/data/data_sources/queue/queue_remote_data_source.dart';
-import 'package:waypay/features/clients/data/models/queue/get_queue_query_model.dart';
-import 'package:waypay/features/clients/data/models/queue/queue_model.dart';
-import 'package:waypay/features/clients/data/models/queue/queue_request_model.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/queue/queue_remote_data_source.dart';
+import 'package:waypay_mobile/features/clients/data/models/queue/get_queue_query_model.dart';
+import 'package:waypay_mobile/features/clients/data/models/queue/queue_model.dart';
+import 'package:waypay_mobile/features/clients/data/models/queue/queue_request_model.dart';
 
 class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
   final Dio dio;

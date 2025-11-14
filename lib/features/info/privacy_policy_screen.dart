@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
@@ -22,7 +22,9 @@ class PrivacyPolicyScreen extends StatelessWidget {
         centerTitle: true,
         title: Text(
           'Политика конфиденциальности',
-          style: AppStyle.medium20.copyWith(color: const Color(AppColors.background)),
+          style: AppStyle.medium20.copyWith(
+            color: const Color(AppColors.background),
+          ),
         ),
       ),
       backgroundColor: Color(AppColors.background),

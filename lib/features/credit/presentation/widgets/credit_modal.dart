@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/features/credit/presentation/widgets/add_note_dialog.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/features/credit/presentation/widgets/add_note_dialog.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 
-import 'package:waypay/core/storage/user_storage.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
-import 'package:waypay/features/credit/data/models/credit_model.dart';
-import 'package:waypay/features/credit/presentation/bloc/credit_bloc.dart';
-import 'package:waypay/features/credit/presentation/bloc/credit_event.dart';
-import 'package:waypay/features/credit/presentation/widgets/create_payment_dialog.dart';
-import 'package:waypay/features/credit/presentation/widgets/note.dart';
-import 'package:waypay/features/note/data/data_sources/note_remote_data_source.dart';
-import 'package:waypay/features/note/data/models/note_model.dart';
-import 'package:waypay/features/sold_products/data/data_sources/sold_product_remote_data_source.dart';
-import 'package:waypay/features/sold_products/data/models/sold_product_model.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/credit_event.dart';
+import 'package:waypay_mobile/features/credit/presentation/widgets/create_payment_dialog.dart';
+import 'package:waypay_mobile/features/credit/presentation/widgets/note.dart';
+import 'package:waypay_mobile/features/note/data/data_sources/note_remote_data_source.dart';
+import 'package:waypay_mobile/features/note/data/models/note_model.dart';
+import 'package:waypay_mobile/features/sold_products/data/data_sources/sold_product_remote_data_source.dart';
+import 'package:waypay_mobile/features/sold_products/data/models/sold_product_model.dart';
 
 class CreditFullScreen extends StatefulWidget {
   final CreditModel credit;

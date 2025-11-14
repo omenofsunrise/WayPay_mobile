@@ -1,7 +1,7 @@
-import 'package:waypay/features/analytics/data/models/analytic_items_response.dart';
-import 'package:waypay/features/analytics/data/models/debt_dynamic_response.dart';
-import 'package:waypay/features/analytics/data/models/graph_data.dart';
-import 'package:waypay/features/analytics/data/models/sell_info_response.dart';
+import 'package:waypay_mobile/features/analytics/data/models/analytic_items_response.dart';
+import 'package:waypay_mobile/features/analytics/data/models/debt_dynamic_response.dart';
+import 'package:waypay_mobile/features/analytics/data/models/graph_data.dart';
+import 'package:waypay_mobile/features/analytics/data/models/sell_info_response.dart';
 
 abstract class AnalyticRemoteDataSource {
   Future<AnalyticItemsResponse> getAnalyticItems({

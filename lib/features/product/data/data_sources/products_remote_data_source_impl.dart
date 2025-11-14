@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:waypay/features/product/data/data_sources/products_remote_data_source.dart';
-import 'package:waypay/features/product/data/models/products_response_model.dart';
+import 'package:waypay_mobile/features/product/data/data_sources/products_remote_data_source.dart';
+import 'package:waypay_mobile/features/product/data/models/products_response_model.dart';
 
-import 'package:waypay/features/product/data/models/product_model.dart';
+import 'package:waypay_mobile/features/product/data/models/product_model.dart';
 
 class ProductsRemoteDataSourceImpl implements ProductsRemoteDataSource {
   final Dio dio;

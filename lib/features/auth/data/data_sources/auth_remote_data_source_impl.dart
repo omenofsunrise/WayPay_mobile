@@ -1,12 +1,12 @@
 import 'package:dio/dio.dart';
-import 'package:waypay/core/network/token_storage.dart';
-import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:waypay/features/auth/data/models/call_confirm_request_model.dart';
-import 'package:waypay/features/auth/data/models/refresh_token_request_model.dart';
-import 'package:waypay/features/auth/data/models/refresh_token_response_model.dart';
-import 'package:waypay/features/auth/data/models/session_model.dart';
-import 'package:waypay/features/auth/data/models/start_auth_request_model.dart';
-import 'package:waypay/features/auth/data/models/start_auth_response_model.dart';
+import 'package:waypay_mobile/core/network/token_storage.dart';
+import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:waypay_mobile/features/auth/data/models/call_confirm_request_model.dart';
+import 'package:waypay_mobile/features/auth/data/models/refresh_token_request_model.dart';
+import 'package:waypay_mobile/features/auth/data/models/refresh_token_response_model.dart';
+import 'package:waypay_mobile/features/auth/data/models/session_model.dart';
+import 'package:waypay_mobile/features/auth/data/models/start_auth_request_model.dart';
+import 'package:waypay_mobile/features/auth/data/models/start_auth_response_model.dart';
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final Dio dio;

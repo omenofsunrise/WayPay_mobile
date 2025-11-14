@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:waypay/features/finance/data/data_source/budget_remote_data_source.dart';
-import 'package:waypay/features/finance/data/models/budget_income_response_model.dart';
-import 'package:waypay/features/finance/data/models/budget_outcome_response_model.dart';
-import 'package:waypay/features/finance/data/models/create_budget_income_dto.dart';
-import 'package:waypay/features/finance/data/models/create_budget_outcome_dto.dart';
+import 'package:waypay_mobile/features/finance/data/data_source/budget_remote_data_source.dart';
+import 'package:waypay_mobile/features/finance/data/models/budget_income_response_model.dart';
+import 'package:waypay_mobile/features/finance/data/models/budget_outcome_response_model.dart';
+import 'package:waypay_mobile/features/finance/data/models/create_budget_income_dto.dart';
+import 'package:waypay_mobile/features/finance/data/models/create_budget_outcome_dto.dart';
 
 class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
   final Dio dio;

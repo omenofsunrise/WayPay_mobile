@@ -1,5 +1,5 @@
-import 'package:waypay/features/payment/data/models/expected/get_payment_query.dart';
-import 'package:waypay/features/payment/data/models/expected/payment_item_model.dart';
+import 'package:waypay_mobile/features/payment/data/models/expected/get_payment_query.dart';
+import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 
 abstract class PaymentRemoteDataSources {
   Future<PaymentListResponseModel> getPayment(GetPaymentsQuery query);

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:waypay/assets/resources.dart' show Images;
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/network/token_storage.dart';
-import 'package:waypay/core/network/dio_client.dart';
-import 'package:waypay/core/storage/user_storage.dart';
-import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source_impl.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
-import 'package:waypay/routes/routes.dart';
+import 'package:waypay_mobile/assets/resources.dart' show Images;
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/network/token_storage.dart';
+import 'package:waypay_mobile/core/network/dio_client.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
+import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source_impl.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/routes/routes.dart';
 
 class PinCodeScreen extends StatefulWidget {
   const PinCodeScreen({super.key});
@@ -121,7 +121,7 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
         });
       } else {
         if (_firstPin == pin) {
-          final dio = createDio(baseUrl: 'https://web.waypay.one:5001');
+          final dio = createDio(baseUrl: 'https://web.waypay_mobile.one:5001');
           final authDataSource = AuthRemoteDataSourceImpl(dio);
 
           try {

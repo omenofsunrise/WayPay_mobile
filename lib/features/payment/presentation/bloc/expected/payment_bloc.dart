@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/network/token_storage.dart';
-import 'package:waypay/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
-import 'package:waypay/features/payment/data/models/expected/get_payment_query.dart';
-import 'package:waypay/features/payment/data/models/expected/payment_item_model.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/network/token_storage.dart';
+import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
+import 'package:waypay_mobile/features/payment/data/models/expected/get_payment_query.dart';
+import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 
 part 'payment_event.dart';
 part 'payment_state.dart';
 
 class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
-  final PaymentRemoteDataSources _paymentDataSource = getIt<PaymentRemoteDataSources>();
+  final PaymentRemoteDataSources _paymentDataSource =
+      getIt<PaymentRemoteDataSources>();
   final TokenStorage _tokenStorage = getIt<TokenStorage>();
 
   List<PaymentItemModel> _payments = [];
@@ -24,7 +25,10 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     on<DeletePayment>(_onDeletePayment);
   }
 
-  Future<void> _onLoadPayment(LoadPayment event, Emitter<PaymentState> emit) async {
+  Future<void> _onLoadPayment(
+    LoadPayment event,
+    Emitter<PaymentState> emit,
+  ) async {
     if (event.refresh) {
       _currentPage = event.page ?? 1;
       _hasMore = true;
@@ -81,11 +85,18 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     }
   }
 
-  Future<void> _onSearchPayment(SearchPayment event, Emitter<PaymentState> emit) async {
+  Future<void> _onSearchPayment(
+    SearchPayment event,
+    Emitter<PaymentState> emit,
+  ) async {
     emit(PaymentInitial());
 
     try {
-      final query = GetPaymentsQuery(page: 1, pageSize: event.pageSize ?? 20, clientFullname: event.query);
+      final query = GetPaymentsQuery(
+        page: 1,
+        pageSize: event.pageSize ?? 20,
+        clientFullname: event.query,
+      );
 
       final response = await _paymentDataSource.getPayment(query);
 
@@ -105,7 +116,10 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     }
   }
 
-  Future<void> _onConfirmPayment(ConfirmPayment event, Emitter<PaymentState> emit) async {
+  Future<void> _onConfirmPayment(
+    ConfirmPayment event,
+    Emitter<PaymentState> emit,
+  ) async {
     try {
       final token = await _tokenStorage.getAccessToken();
       if (token == null) {
@@ -121,7 +135,10 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     }
   }
 
-  Future<void> _onDeletePayment(DeletePayment event, Emitter<PaymentState> emit) async {
+  Future<void> _onDeletePayment(
+    DeletePayment event,
+    Emitter<PaymentState> emit,
+  ) async {
     try {
       final token = await _tokenStorage.getAccessToken();
       if (token == null) {

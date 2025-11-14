@@ -2,10 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 
-import 'package:waypay/features/profile/data/data_sources/employee_remote_data_source.dart';
-import 'package:waypay/features/profile/data/models/credit_stat.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
-import 'package:waypay/features/profile/data/models/payment_stat.dart';
+import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
+import 'package:waypay_mobile/features/profile/data/models/credit_stat.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/features/profile/data/models/payment_stat.dart';
 
 class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
   final Dio dio;

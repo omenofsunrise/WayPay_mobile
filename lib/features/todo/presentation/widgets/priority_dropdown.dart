@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/features/todo/data/models/todo_model.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/features/todo/data/models/todo_model.dart';
 
 class PriorityDropdown extends StatelessWidget {
   final TaskPriority selectedPriority;
@@ -21,7 +21,9 @@ class PriorityDropdown extends StatelessWidget {
         ? TaskPriority.values
         : TaskPriority.values.where((e) => e != TaskPriority.all).toList();
 
-    final effectiveSelectedPriority = options.contains(selectedPriority) ? selectedPriority : options.first;
+    final effectiveSelectedPriority = options.contains(selectedPriority)
+        ? selectedPriority
+        : options.first;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -44,7 +46,11 @@ class PriorityDropdown extends StatelessWidget {
               children: [
                 Text(
                   option.label,
-                  style: AppStyle.manrope(size: 14, weight: FontWeight.w400, color: Colors.black),
+                  style: AppStyle.manrope(
+                    size: 14,
+                    weight: FontWeight.w400,
+                    color: Colors.black,
+                  ),
                 ),
               ],
             ),

@@ -1,9 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
 
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/features/profile/data/data_sources/employee_remote_data_source.dart';
-import 'package:waypay/features/profile/data/models/credit_stat.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
+import 'package:waypay_mobile/features/profile/data/models/credit_stat.dart';
 
 part 'credit_stats_state.dart';
 
@@ -29,16 +29,14 @@ class CreditStatsCubit extends Cubit<CreditStatsState> {
     int months = 12,
   }) async {
     emit(CreditStatsLoading());
-    print('👤 [Cubit] Loading credit stats for employeeId = $employeeId');
+
     try {
       final data = await _employeeRemoteDataSource.getCreditsStatsById(
         employeeId: employeeId,
         months: months,
       );
       emit(CreditStatsLoaded(data));
-    } catch (e, stack) {
-      print('❌ [Cubit Error] $e');
-      print(stack);
+    } catch (e) {
       emit(
         CreditStatsError(
           'Ошибка загрузки статистики по договорам сотрудника: $e',

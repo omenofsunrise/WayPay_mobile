@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
-import 'package:waypay/features/admin_panel/data/data_sources/company_remote_data_source.dart';
-import 'package:waypay/features/admin_panel/data/models/company_model.dart';
-import 'package:waypay/features/admin_panel/data/models/post_company_model.dart';
-import 'package:waypay/features/info/data/models/common_info.dart';
+import 'package:waypay_mobile/features/admin_panel/data/data_sources/company_remote_data_source.dart';
+import 'package:waypay_mobile/features/admin_panel/data/models/company_model.dart';
+import 'package:waypay_mobile/features/admin_panel/data/models/post_company_model.dart';
+import 'package:waypay_mobile/features/info/data/models/common_info.dart';
 
 class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
   final Dio dio;
@@ -116,12 +116,17 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
   @override
   Future<CompanyCommonInfo> getCompanyCommonInfo() async {
     try {
-      final response = await dio.get('/api/Company/common-info', options: Options(headers: {'accept': 'text/plain'}));
+      final response = await dio.get(
+        '/api/Company/common-info',
+        options: Options(headers: {'accept': 'text/plain'}),
+      );
       final data = response.data;
 
       return CompanyCommonInfo.fromJson(data);
     } on DioException catch (e) {
-      throw Exception('Ошибка при загрузке общей информации компании: ${e.message}');
+      throw Exception(
+        'Ошибка при загрузке общей информации компании: ${e.message}',
+      );
     }
   }
 }

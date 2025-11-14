@@ -1,4 +1,4 @@
-import 'package:waypay/features/product/data/models/product_model.dart';
+import 'package:waypay_mobile/features/product/data/models/product_model.dart';
 
 class ProductsResponseModel {
   final List<ProductModel> products;

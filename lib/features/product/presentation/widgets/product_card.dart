@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:waypay/core/storage/user_storage.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/form_modal/app_form_modal.dart';
-import 'package:waypay/core/widgets/form_modal/form_field_config.dart';
-import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/widgets/form_modal/labeled_container.dart';
-import 'package:waypay/features/product/data/data_sources/products_remote_data_source.dart';
-import 'package:waypay/features/product/data/models/product_model.dart';
-import 'package:waypay/features/product/presentation/bloc/products_bloc.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/form_modal/app_form_modal.dart';
+import 'package:waypay_mobile/core/widgets/form_modal/form_field_config.dart';
+import 'package:waypay_mobile/core/widgets/app_modal.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/widgets/form_modal/labeled_container.dart';
+import 'package:waypay_mobile/features/product/data/data_sources/products_remote_data_source.dart';
+import 'package:waypay_mobile/features/product/data/models/product_model.dart';
+import 'package:waypay_mobile/features/product/presentation/bloc/products_bloc.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 
 class ProductCard extends StatelessWidget {
   final ProductModel product;
@@ -49,7 +49,9 @@ class ProductCard extends StatelessWidget {
                           child: const Text('Редактировать'),
                           onTap: () async {
                             context.pop();
-                            final nameController = TextEditingController(text: detailedProduct.name);
+                            final nameController = TextEditingController(
+                              text: detailedProduct.name,
+                            );
 
                             await showDialog(
                               context: context,
@@ -68,7 +70,9 @@ class ProductCard extends StatelessWidget {
                                   showDialog(
                                     context: context,
                                     barrierDismissible: false,
-                                    builder: (_) => const Center(child: CircularProgressIndicator()),
+                                    builder: (_) => const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
                                   );
                                   try {
                                     await dataSource.updateProduct(
@@ -76,16 +80,27 @@ class ProductCard extends StatelessWidget {
                                       name: nameController.text.trim(),
                                     );
                                     context.pop();
-                                    context.read<ProductsBloc>().add(LoadProductsEvent(refresh: true));
+                                    context.read<ProductsBloc>().add(
+                                      LoadProductsEvent(refresh: true),
+                                    );
                                   } catch (e) {
                                     context.pop();
                                     showDialog(
                                       context: context,
                                       builder: (_) => AlertDialog(
-                                        backgroundColor: Color(AppColors.background),
+                                        backgroundColor: Color(
+                                          AppColors.background,
+                                        ),
                                         title: const Text('Ошибка'),
-                                        content: Text('Не удалось обновить продукт.\n$e'),
-                                        actions: [TextButton(onPressed: () => context.pop(), child: const Text('Ок'))],
+                                        content: Text(
+                                          'Не удалось обновить продукт.\n$e',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => context.pop(),
+                                            child: const Text('Ок'),
+                                          ),
+                                        ],
                                       ),
                                     );
                                   }
@@ -103,10 +118,18 @@ class ProductCard extends StatelessWidget {
                               builder: (_) => AlertDialog(
                                 backgroundColor: Color(AppColors.background),
                                 title: const Text('Удаление продукта'),
-                                content: const Text('Вы уверены, что хотите удалить этот продукт?'),
+                                content: const Text(
+                                  'Вы уверены, что хотите удалить этот продукт?',
+                                ),
                                 actions: [
-                                  TextButton(onPressed: () => context.pop(false), child: const Text('Отмена')),
-                                  TextButton(onPressed: () => context.pop(true), child: const Text('Удалить')),
+                                  TextButton(
+                                    onPressed: () => context.pop(false),
+                                    child: const Text('Отмена'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => context.pop(true),
+                                    child: const Text('Удалить'),
+                                  ),
                                 ],
                               ),
                             );
@@ -115,21 +138,36 @@ class ProductCard extends StatelessWidget {
                               showDialog(
                                 context: context,
                                 barrierDismissible: false,
-                                builder: (_) => const Center(child: CircularProgressIndicator()),
+                                builder: (_) => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
                               );
                               try {
-                                await dataSource.deleteProduct(detailedProduct.id);
+                                await dataSource.deleteProduct(
+                                  detailedProduct.id,
+                                );
                                 context.pop();
-                                context.read<ProductsBloc>().add(LoadProductsEvent(refresh: true));
+                                context.read<ProductsBloc>().add(
+                                  LoadProductsEvent(refresh: true),
+                                );
                               } catch (e) {
                                 context.pop();
                                 showDialog(
                                   context: context,
                                   builder: (_) => AlertDialog(
-                                    backgroundColor: Color(AppColors.background),
+                                    backgroundColor: Color(
+                                      AppColors.background,
+                                    ),
                                     title: const Text('Ошибка'),
-                                    content: Text('Не удалось удалить продукт.\n$e'),
-                                    actions: [TextButton(onPressed: () => context.pop(), child: const Text('Ок'))],
+                                    content: Text(
+                                      'Не удалось удалить продукт.\n$e',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => context.pop(),
+                                        child: const Text('Ок'),
+                                      ),
+                                    ],
                                   ),
                                 );
                               }
@@ -140,7 +178,12 @@ class ProductCard extends StatelessWidget {
                     : null,
                 content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [LabeledContainer(label: 'Название:', text: detailedProduct.name)],
+                  children: [
+                    LabeledContainer(
+                      label: 'Название:',
+                      text: detailedProduct.name,
+                    ),
+                  ],
                 ),
               ),
             );
@@ -150,10 +193,19 @@ class ProductCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             padding: const EdgeInsets.all(16),
-            child: Text(product.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            child: Text(
+              product.name,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
           ),
         );
       },

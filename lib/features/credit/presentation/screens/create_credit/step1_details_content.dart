@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/inputs/custom_calendar.dart';
-import 'package:waypay/core/widgets/inputs/custom_input.dart';
-import 'package:waypay/core/widgets/inputs/date_input.dart';
-import 'package:waypay/features/credit/data/models/new_credit_model.dart';
-import 'package:waypay/features/credit/presentation/cubit/credit_creation_provider.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/inputs/custom_calendar.dart';
+import 'package:waypay_mobile/core/widgets/inputs/custom_input.dart';
+import 'package:waypay_mobile/core/widgets/inputs/date_input.dart';
+import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
+import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
 
 class Step1DetailsContent extends StatefulWidget {
   final TextEditingController firstPaymentController;

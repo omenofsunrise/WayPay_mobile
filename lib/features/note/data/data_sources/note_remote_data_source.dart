@@ -1,5 +1,5 @@
-import 'package:waypay/features/note/data/models/note_create_request.dart';
-import 'package:waypay/features/note/data/models/note_model.dart';
+import 'package:waypay_mobile/features/note/data/models/note_create_request.dart';
+import 'package:waypay_mobile/features/note/data/models/note_model.dart';
 
 abstract class NoteRemoteDataSource {
   Future<List<NoteModel>> fetchNotesByCreditId(int creditId);

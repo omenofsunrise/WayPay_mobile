@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/features/profile/data/data_sources/employee_remote_data_source.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'employees_event.dart';
 import 'employees_state.dart';
 
@@ -28,12 +28,6 @@ class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
         pageSize: pageSize,
         fullName: event.fullName,
       );
-
-      for (final employee in response.employees) {
-        print(
-          'Сотрудник: id=${employee.id}, ФИО=${employee.fullName}, Роль=${employee.roleLabel}',
-        );
-      }
 
       emit(
         EmployeesLoaded(

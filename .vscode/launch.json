@@ -5,18 +5,18 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "waypay",
+      "name": "waypay_mobile",
       "request": "launch",
       "type": "dart"
     },
     {
-      "name": "waypay (profile mode)",
+      "name": "waypay_mobile (profile mode)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "profile"
     },
     {
-      "name": "waypay (release mode)",
+      "name": "waypay_mobile (release mode)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "release"

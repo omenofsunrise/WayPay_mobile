@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:waypay/features/blog/data/models/comment_response.dart';
+import 'package:waypay_mobile/features/blog/data/models/comment_response.dart';
 
 abstract class CommentState extends Equatable {
   const CommentState();

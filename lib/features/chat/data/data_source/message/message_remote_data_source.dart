@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:waypay/features/chat/data/models/message/message_response.dart';
+import 'package:waypay_mobile/features/chat/data/models/message/message_response.dart';
 
 abstract class MessageRemoteDataSource {
   Future<List<MessageResponse>> getMessages(

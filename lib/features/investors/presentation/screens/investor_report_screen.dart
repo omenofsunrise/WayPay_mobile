@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay/assets/resources.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/features/investors/data/data_sources/investors_remote_data_source.dart';
-import 'package:waypay/features/investors/data/models/investors_model.dart';
-import 'package:waypay/features/investors/presentation/widgets/investor_credit_table.dart';
-import 'package:waypay/features/investors/presentation/widgets/investor_payout_table.dart';
+import 'package:waypay_mobile/assets/resources.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
+import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
+import 'package:waypay_mobile/features/investors/presentation/widgets/investor_credit_table.dart';
+import 'package:waypay_mobile/features/investors/presentation/widgets/investor_payout_table.dart';
 
 class InvestorReportScreen extends StatefulWidget {
   const InvestorReportScreen({super.key, required this.initialInvestor});
@@ -39,8 +39,12 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
       error = null;
     });
     try {
-      final investor = await getIt<InvestorsRemoteDataSource>().getInvestorById(investorId);
-      final report = await getIt<InvestorsRemoteDataSource>().getInvestorReport(investorId);
+      final investor = await getIt<InvestorsRemoteDataSource>().getInvestorById(
+        investorId,
+      );
+      final report = await getIt<InvestorsRemoteDataSource>().getInvestorReport(
+        investorId,
+      );
       if (!mounted) return;
       setState(() {
         selectedInvestor = investor;
@@ -111,7 +115,10 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
         surfaceTintColor: Colors.transparent,
         backgroundColor: const Color(AppColors.primary),
         elevation: 0,
-        title: Text('Отчёт: ${selectedInvestor.nickname}', style: AppStyle.medium20.copyWith(color: Colors.white)),
+        title: Text(
+          'Отчёт: ${selectedInvestor.nickname}',
+          style: AppStyle.medium20.copyWith(color: Colors.white),
+        ),
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
@@ -125,12 +132,20 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
             child: Container(
               decoration: const BoxDecoration(
                 color: Color(0xFFF5F5F5),
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
               ),
               child: isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : reportData == null
-                  ? Center(child: Text(error ?? 'Нет данных', textAlign: TextAlign.center))
+                  ? Center(
+                      child: Text(
+                        error ?? 'Нет данных',
+                        textAlign: TextAlign.center,
+                      ),
+                    )
                   : SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -152,7 +167,9 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
                                 ),
                                 _buildCard(
                                   'Незакрытые договоры',
-                                  formatNumber(reportData?['activeCreditsAmount']),
+                                  formatNumber(
+                                    reportData?['activeCreditsAmount'],
+                                  ),
                                   SvgIcons.credits,
                                 ),
                                 _buildCard(
@@ -163,7 +180,7 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
                                 _buildCard(
                                   'Доход инвестора',
                                   '${formatNumber(reportData?['investorIncome'])} ₽',
-                                  SvgIcons.investorCash,
+                                  SvgIcons.investorCahs,
                                 ),
                                 _buildCard(
                                   'Собственный доход',
@@ -175,7 +192,11 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
                                   '${formatNumber(reportData?['allSelfIncome'] + reportData?['investorIncome'])} ₽',
                                   SvgIcons.companyAmount,
                                 ),
-                                _buildCard('Касса', '${formatNumber(reportData?['balance'])} ₽', SvgIcons.cash),
+                                _buildCard(
+                                  'Касса',
+                                  '${formatNumber(reportData?['balance'])} ₽',
+                                  SvgIcons.cash,
+                                ),
                                 _buildCard(
                                   'Просрочка',
                                   '${formatNumber(reportData?['delinquencyAmount'])} ₽',
@@ -195,7 +216,9 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
                                 ),
                                 _buildCard(
                                   'Незакрытые договоры',
-                                  formatNumber(reportData?['activeCreditsAmount']),
+                                  formatNumber(
+                                    reportData?['activeCreditsAmount'],
+                                  ),
                                   SvgIcons.credits,
                                 ),
                                 _buildCard(
@@ -208,7 +231,11 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
                                   '${formatNumber(reportData?['allSelfIncome'])} ₽',
                                   SvgIcons.investorAmount,
                                 ),
-                                _buildCard('Касса', '${formatNumber(reportData?['balance'])} ₽', SvgIcons.cash),
+                                _buildCard(
+                                  'Касса',
+                                  '${formatNumber(reportData?['balance'])} ₽',
+                                  SvgIcons.cash,
+                                ),
                                 _buildCard(
                                   'Просрочка',
                                   '${formatNumber(reportData?['delinquencyAmount'])} ₽',
@@ -222,9 +249,13 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
                               ],
                             ],
                           ),
-                          InvestorPayoutTable(investorId: widget.initialInvestor.id),
+                          InvestorPayoutTable(
+                            investorId: widget.initialInvestor.id,
+                          ),
                           const SizedBox(height: 16),
-                          InvestorCreditsWidget(investorId: widget.initialInvestor.id),
+                          InvestorCreditsWidget(
+                            investorId: widget.initialInvestor.id,
+                          ),
                         ],
                       ),
                     ),

@@ -6,27 +6,31 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/helpers.dart';
-import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/helpers.dart';
+import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
 
-import 'package:waypay/features/blog/data/models/comment_attachment_response.dart';
-import 'package:waypay/features/blog/data/models/comment_response.dart';
-import 'package:waypay/features/blog/data/data_sources/blog_remote_data_sources.dart';
-import 'package:waypay/features/blog/presentation/widgets/comment_text_filed.dart';
-import 'package:waypay/features/blog/presentation/widgets/comment_tile.dart';
-import 'package:waypay/features/blog/presentation/bloc/comment_bloc.dart';
-import 'package:waypay/features/blog/presentation/bloc/comment_event.dart';
-import 'package:waypay/features/blog/presentation/bloc/comment_state.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/features/blog/data/models/comment_attachment_response.dart';
+import 'package:waypay_mobile/features/blog/data/models/comment_response.dart';
+import 'package:waypay_mobile/features/blog/data/data_sources/blog_remote_data_sources.dart';
+import 'package:waypay_mobile/features/blog/presentation/widgets/comment_text_filed.dart';
+import 'package:waypay_mobile/features/blog/presentation/widgets/comment_tile.dart';
+import 'package:waypay_mobile/features/blog/presentation/bloc/comment_bloc.dart';
+import 'package:waypay_mobile/features/blog/presentation/bloc/comment_event.dart';
+import 'package:waypay_mobile/features/blog/presentation/bloc/comment_state.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 
 class CommentsScreen extends StatefulWidget {
   final int postId;
   final bool isAuthor;
 
-  const CommentsScreen({super.key, required this.postId, required this.isAuthor});
+  const CommentsScreen({
+    super.key,
+    required this.postId,
+    required this.isAuthor,
+  });
 
   @override
   State<CommentsScreen> createState() => _CommentsScreenState();
@@ -58,23 +62,30 @@ class _CommentsScreenState extends State<CommentsScreen> {
       final info = await dataSourceAuth.getAuthInfo();
       final employeeJson = info['employee'] as Map<String, dynamic>?;
       setState(() {
-        _currentEmployee = employeeJson != null ? Employee.fromJson(employeeJson) : null;
+        _currentEmployee = employeeJson != null
+            ? Employee.fromJson(employeeJson)
+            : null;
       });
     } catch (e) {
-      print('Ошибка загрузки сотрудника: $e');
+      throw Exception(e);
     }
   }
 
   String _resolveUrl(String? url, {bool isAvatar = false}) {
     if (url == null || url.isEmpty) return '';
     if (url.startsWith('/')) {
-      return isAvatar ? 'http://test.waypay.one:5000$url' : 'http://test.waypay.one:5003$url';
+      return isAvatar
+          ? 'https://web.waypay_mobile.one:5001$url'
+          : 'https://web.waypay_mobile.one:5002$url';
     }
     return url;
   }
 
   Future<void> _pickImage() async {
-    final XFile? picked = await _imagePicker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+    final XFile? picked = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
 
     if (picked != null) {
       final file = File(picked.path);
@@ -86,7 +97,11 @@ class _CommentsScreenState extends State<CommentsScreen> {
 
       if (_editingCommentId != null) {
         context.read<CommentBloc>().add(
-          AddCommentAttachment(commentId: _editingCommentId!, file: multipart, postId: widget.postId),
+          AddCommentAttachment(
+            commentId: _editingCommentId!,
+            file: multipart,
+            postId: widget.postId,
+          ),
         );
       } else {
         setState(() {
@@ -105,7 +120,10 @@ class _CommentsScreenState extends State<CommentsScreen> {
       MediaType contentType;
 
       if (['png', 'jpg', 'jpeg', 'gif', 'webp'].contains(extension)) {
-        contentType = MediaType('image', extension == 'jpg' ? 'jpeg' : extension);
+        contentType = MediaType(
+          'image',
+          extension == 'jpg' ? 'jpeg' : extension,
+        );
       } else {
         contentType = MediaType('application', 'octet-stream');
       }
@@ -118,7 +136,11 @@ class _CommentsScreenState extends State<CommentsScreen> {
 
       if (_editingCommentId != null) {
         context.read<CommentBloc>().add(
-          AddCommentAttachment(commentId: _editingCommentId!, file: multipart, postId: widget.postId),
+          AddCommentAttachment(
+            commentId: _editingCommentId!,
+            file: multipart,
+            postId: widget.postId,
+          ),
         );
       } else {
         setState(() {
@@ -134,10 +156,22 @@ class _CommentsScreenState extends State<CommentsScreen> {
     final bloc = context.read<CommentBloc>();
 
     if (_editingCommentId != null) {
-      bloc.add(UpdateCommentText(commentId: _editingCommentId!, newText: text, postId: widget.postId));
+      bloc.add(
+        UpdateCommentText(
+          commentId: _editingCommentId!,
+          newText: text,
+          postId: widget.postId,
+        ),
+      );
 
       for (final file in _attachments) {
-        bloc.add(AddCommentAttachment(commentId: _editingCommentId!, file: file, postId: widget.postId));
+        bloc.add(
+          AddCommentAttachment(
+            commentId: _editingCommentId!,
+            file: file,
+            postId: widget.postId,
+          ),
+        );
       }
     } else {
       if (text.isEmpty && _attachments.isEmpty) return;
@@ -170,7 +204,11 @@ class _CommentsScreenState extends State<CommentsScreen> {
     FocusScope.of(context).requestFocus(_focusNode);
   }
 
-  void _startEditingComment(int commentId, String? oldText, List<CommentAttachmentResponse>? oldAttachments) {
+  void _startEditingComment(
+    int commentId,
+    String? oldText,
+    List<CommentAttachmentResponse>? oldAttachments,
+  ) {
     setState(() {
       _editingCommentId = commentId;
       _replyToCommentId = null;
@@ -208,7 +246,10 @@ class _CommentsScreenState extends State<CommentsScreen> {
                   width: 60,
                   height: 60,
                   margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(8)),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   child: att.isImage
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(8),
@@ -222,11 +263,16 @@ class _CommentsScreenState extends State<CommentsScreen> {
                     setState(() {});
                     if (_editingCommentId != null) {
                       getIt<BlogRemoteDataSources>()
-                          .deleteCommentAttachment(commentId: _editingCommentId!, attachmentId: removed.id)
+                          .deleteCommentAttachment(
+                            commentId: _editingCommentId!,
+                            attachmentId: removed.id,
+                          )
                           .catchError((e) {
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(SnackBar(content: Text('Ошибка удаления файла: $e')));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Ошибка удаления файла: $e'),
+                              ),
+                            );
                           });
                     }
                   },
@@ -254,11 +300,17 @@ class _CommentsScreenState extends State<CommentsScreen> {
                 width: 60,
                 height: 60,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(8)),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: isImage
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.file(_localFiles[localIndex], fit: BoxFit.cover),
+                        child: Image.file(
+                          _localFiles[localIndex],
+                          fit: BoxFit.cover,
+                        ),
                       )
                     : const Icon(Icons.insert_drive_file),
               ),
@@ -299,7 +351,10 @@ class _CommentsScreenState extends State<CommentsScreen> {
               onSend: _sendComment,
               onPickImage: _pickImage,
               onPickFile: _pickFile,
-              avatar: buildAvatar(photoPath: _currentEmployee?.photoPath ?? '', radius: 20),
+              avatar: buildAvatar(
+                photoPath: _currentEmployee?.photoPath ?? '',
+                radius: 20,
+              ),
               isEditing: isEditing,
               replyToCommentId: _replyToCommentId,
             ),
@@ -326,7 +381,12 @@ class _CommentsScreenState extends State<CommentsScreen> {
         surfaceTintColor: Colors.transparent,
         centerTitle: false,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: Text('Комментарии', style: AppStyle.medium20.copyWith(color: const Color(AppColors.background))),
+        title: Text(
+          'Комментарии',
+          style: AppStyle.medium20.copyWith(
+            color: const Color(AppColors.background),
+          ),
+        ),
       ),
 
       // контент — светлый фон со скруглением
@@ -366,7 +426,10 @@ class _CommentsScreenState extends State<CommentsScreen> {
 
                     return ListView.builder(
                       key: const PageStorageKey('comments_list'),
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 12,
+                      ),
                       itemCount: comments.length,
                       itemBuilder: (context, index) {
                         final comment = comments[index];
@@ -375,7 +438,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
                           comment: comment,
                           onReply: _setReplyTo,
                           isUserPost: widget.isAuthor,
-                          onEdit: (id, text, attachments) => _startEditingComment(id, text, attachments),
+                          onEdit: (id, text, attachments) =>
+                              _startEditingComment(id, text, attachments),
                           commentById: commentById,
                         );
                       },

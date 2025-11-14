@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/network/token_storage.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:waypay/features/auth/data/models/session_model.dart';
-import 'package:waypay/routes/routes.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/network/token_storage.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:waypay_mobile/features/auth/data/models/session_model.dart';
+import 'package:waypay_mobile/routes/routes.dart';
 
 class ActiveSessionsScreen extends StatefulWidget {
   const ActiveSessionsScreen({super.key});
@@ -57,8 +57,14 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
               : 'Вы уверены, что хотите завершить выбранную сессию?',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Отмена')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Завершить')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Завершить'),
+          ),
         ],
       ),
     );
@@ -83,12 +89,16 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
 
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Сессия завершена')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Сессия завершена')));
       _load();
     } catch (e) {
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ошибка завершения: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ошибка завершения: $e')));
     }
   }
 
@@ -112,7 +122,9 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
                 elevation: 0,
                 backgroundColor: Color(AppColors.greyLight),
                 foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: const Text('Обновить'),
             ),
@@ -128,11 +140,18 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 46),
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 46,
+                    ),
                     const SizedBox(height: 12),
                     Text(_error!, textAlign: TextAlign.center),
                     const SizedBox(height: 12),
-                    OutlinedButton(onPressed: _load, child: const Text('Повторить')),
+                    OutlinedButton(
+                      onPressed: _load,
+                      child: const Text('Повторить'),
+                    ),
                   ],
                 ),
               ),
@@ -161,7 +180,12 @@ class _SessionCard extends StatelessWidget {
   final DateFormat dateFmt;
   final Color accentColor;
 
-  const _SessionCard({required this.s, required this.onRevoke, required this.dateFmt, required this.accentColor});
+  const _SessionCard({
+    required this.s,
+    required this.onRevoke,
+    required this.dateFmt,
+    required this.accentColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +198,13 @@ class _SessionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: IntrinsicHeight(
         child: Row(
@@ -185,7 +215,10 @@ class _SessionCard extends StatelessWidget {
               width: 4,
               decoration: BoxDecoration(
                 color: stripeColor,
-                borderRadius: const BorderRadius.only(topLeft: Radius.circular(14), bottomLeft: Radius.circular(14)),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(14),
+                  bottomLeft: Radius.circular(14),
+                ),
               ),
             ),
 
@@ -204,20 +237,31 @@ class _SessionCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               'IP: ${s.ipAddress}',
-                              style: const TextStyle(fontSize: 15, color: Colors.black87, fontWeight: FontWeight.w500),
+                              style: const TextStyle(
+                                fontSize: 15,
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w500,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           if (s.isCurrentSession)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: accentColor.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 'Текущая',
-                                style: TextStyle(fontSize: 12, color: accentColor, fontWeight: FontWeight.w600),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: accentColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                         ],
@@ -251,10 +295,16 @@ class _SessionCard extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: accentColor,
                             foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          child: Text(s.isCurrentSession ? 'Завершить текущую сессию' : 'Завершить'),
+                          child: Text(
+                            s.isCurrentSession
+                                ? 'Завершить текущую сессию'
+                                : 'Завершить',
+                          ),
                         ),
                       ),
                     ],

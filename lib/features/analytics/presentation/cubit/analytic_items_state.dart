@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:waypay/features/analytics/data/models/analytic_items_response.dart';
+import 'package:waypay_mobile/features/analytics/data/models/analytic_items_response.dart';
 
 abstract class AnalyticItemsState extends Equatable {
   const AnalyticItemsState();

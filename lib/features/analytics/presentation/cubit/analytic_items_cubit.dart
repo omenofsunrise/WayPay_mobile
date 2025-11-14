@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/features/analytics/data/data_sources/analytic_remote_data_source.dart';
-import 'package:waypay/features/analytics/data/models/analytic_items_response.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/features/analytics/data/data_sources/analytic_remote_data_source.dart';
+import 'package:waypay_mobile/features/analytics/data/models/analytic_items_response.dart';
 import 'analytic_items_state.dart';
 
 class AnalyticItemsCubit extends Cubit<AnalyticItemsState> {

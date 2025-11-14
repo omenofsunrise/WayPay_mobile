@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/features/auth/presentation/bloc/auth_cubit.dart';
-import 'package:waypay/features/auth/presentation/widgets/call_confirmation_dialog.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
-import 'package:waypay/routes/routes.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/features/auth/presentation/bloc/auth_cubit.dart';
+import 'package:waypay_mobile/features/auth/presentation/widgets/call_confirmation_dialog.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/routes/routes.dart';
 
 class PhoneAuthScreen extends StatefulWidget {
   final String userType;

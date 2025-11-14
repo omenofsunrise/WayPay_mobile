@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/storage/user_storage.dart';
-import 'package:waypay/features/investors/data/models/investors_model.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
-import 'package:waypay/features/investors/presentation/screens/investor_report_screen.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
+import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/features/investors/presentation/screens/investor_report_screen.dart';
 
 class InvestorCard extends StatefulWidget {
   final InvestorsModel investor;
@@ -27,16 +27,27 @@ class _InvestorCardState extends State<InvestorCard> {
 
         return InkWell(
           onTap: () {
-            Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => InvestorReportScreen(initialInvestor: widget.investor)));
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) =>
+                    InvestorReportScreen(initialInvestor: widget.investor),
+              ),
+            );
           },
           child: Container(
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
-              color: widget.investor.isBlocked ? Colors.red.withOpacity(0.1) : Colors.white,
+              color: widget.investor.isBlocked
+                  ? Colors.red.withOpacity(0.1)
+                  : Colors.white,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -45,7 +56,11 @@ class _InvestorCardState extends State<InvestorCard> {
                   Expanded(
                     child: Text(
                       widget.investor.nickname,
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
                   Text(
@@ -53,7 +68,9 @@ class _InvestorCardState extends State<InvestorCard> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: isPositive ? const Color(AppColors.primaryLight) : const Color(AppColors.pinkTint),
+                      color: isPositive
+                          ? const Color(AppColors.primaryLight)
+                          : const Color(AppColors.pinkTint),
                     ),
                   ),
                 ],

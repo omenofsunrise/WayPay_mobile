@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/core/network/dio_client.dart';
-import 'package:waypay/core/storage/user_storage.dart';
-import 'package:waypay/features/home/domain/repositories/home_repository_impl.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/buttons/add_button.dart';
-import 'package:waypay/core/widgets/buttons/more_info_button.dart';
-import 'package:waypay/core/widgets/header.dart';
-import 'package:waypay/core/widgets/inputs/search_field.dart';
-import 'package:waypay/features/home/presentation/widgets/dashboard_card.dart';
-import 'package:waypay/features/home/presentation/widgets/section_title.dart';
-import 'package:waypay/features/home/data/models/employee_model.dart';
-import 'package:waypay/features/home/domain/usecases/get_employee_data_usecase.dart';
-import 'package:waypay/features/home/data/data_source/home_remote_data_source_impl.dart';
+import 'package:go_router/go_router.dart';
+import 'package:waypay_mobile/core/network/dio_client.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
+import 'package:waypay_mobile/core/widgets/search_field.dart';
+import 'package:waypay_mobile/features/home/domain/repositories/home_repository_impl.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/buttons/add_button.dart';
+import 'package:waypay_mobile/core/widgets/buttons/more_info_button.dart';
+import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_mobile/features/home/presentation/widgets/dashboard_card.dart';
+import 'package:waypay_mobile/features/home/presentation/widgets/section_title.dart';
+import 'package:waypay_mobile/features/home/data/models/employee_model.dart';
+import 'package:waypay_mobile/features/home/domain/usecases/get_employee_data_usecase.dart';
+import 'package:waypay_mobile/features/home/data/data_source/home_remote_data_source_impl.dart';
+import 'package:waypay_mobile/routes/routes.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -391,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Spacer(),
               MoreDetailsButton(
                 onPressed: () {
-                  // Навигация к клиентам
+                  context.pushNamed(Routes.mainClientScreen.toName);
                 },
               ),
             ],

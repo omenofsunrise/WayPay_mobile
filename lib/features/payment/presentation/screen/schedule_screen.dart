@@ -3,16 +3,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:waypay/core/network/token_storage.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
-import 'package:waypay/core/widgets/pagination_widget.dart';
-import 'package:waypay/core/widgets/refresh.dart';
-import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
-import 'package:waypay/features/payment/presentation/bloc/schedule/schedule_bloc.dart';
-import 'package:waypay/features/payment/presentation/widgets/schedule_card.dart';
-import 'package:waypay/routes/routes.dart';
+import 'package:waypay_mobile/core/network/token_storage.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
+import 'package:waypay_mobile/core/widgets/pagination_widget.dart';
+import 'package:waypay_mobile/core/widgets/refresh.dart';
+import 'package:waypay_mobile/core/widgets/app_modal.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/features/payment/presentation/bloc/schedule/schedule_bloc.dart';
+import 'package:waypay_mobile/features/payment/presentation/widgets/schedule_card.dart';
+import 'package:waypay_mobile/routes/routes.dart';
 
 class ScheduleScreen extends StatefulWidget {
   const ScheduleScreen({super.key});

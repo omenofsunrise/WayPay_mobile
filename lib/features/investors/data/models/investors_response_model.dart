@@ -1,4 +1,4 @@
-import 'package:waypay/features/investors/data/models/investors_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 
 class InvestorsResponseModel {
   final List<InvestorsModel> investors;
@@ -14,8 +14,6 @@ class InvestorsResponseModel {
   });
 
   factory InvestorsResponseModel.fromJson(Map<String, dynamic> json) {
-    print('🔄 Парсинг ответа API: $json');
-
     try {
       List<dynamic> items = [];
 
@@ -26,15 +24,12 @@ class InvestorsResponseModel {
       } else if (json is List) {
         items = json as List;
       } else {
-        print('⚠️ Неожиданная структура ответа: $json');
         items = [];
       }
 
       final investors = items
           .map((item) => InvestorsModel.fromJson(item as Map<String, dynamic>))
           .toList();
-
-      print('✅ Распарсено ${investors.length} инвесторов');
 
       return InvestorsResponseModel(
         investors: investors,
@@ -43,8 +38,6 @@ class InvestorsResponseModel {
         pageSize: json['pageSize'] as int? ?? 10,
       );
     } catch (e) {
-      print('❌ Ошибка парсинга: $e');
-      print('❌ JSON: $json');
       rethrow;
     }
   }

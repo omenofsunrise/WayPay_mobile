@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/helpers.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/helpers.dart';
 
 class ChatTile extends StatelessWidget {
   final String chatName;
@@ -46,7 +46,11 @@ class ChatTile extends StatelessWidget {
                     Expanded(
                       child: Text(
                         chatName,
-                        style: AppStyle.manrope(size: 14, weight: FontWeight.w600, color: const Color(AppColors.black)),
+                        style: AppStyle.manrope(
+                          size: 14,
+                          weight: FontWeight.w600,
+                          color: const Color(AppColors.black),
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -58,7 +62,10 @@ class ChatTile extends StatelessWidget {
                             width: 8,
                             height: 8,
                             child: DecoratedBox(
-                              decoration: BoxDecoration(color: Color(AppColors.comfPayment), shape: BoxShape.circle),
+                              decoration: BoxDecoration(
+                                color: Color(AppColors.comfPayment),
+                                shape: BoxShape.circle,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -77,7 +84,11 @@ class ChatTile extends StatelessWidget {
                 ),
                 Text(
                   subtitle,
-                  style: AppStyle.manrope(size: 14, weight: FontWeight.w400, color: const Color(AppColors.darkGrey)),
+                  style: AppStyle.manrope(
+                    size: 14,
+                    weight: FontWeight.w400,
+                    color: const Color(AppColors.darkGrey),
+                  ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),

@@ -9,36 +9,27 @@ class SimpleEmployeeDto {
   const SimpleEmployeeDto({required this.id, this.fullName, this.photoPath});
 
   SimpleEmployeeDto copyWith({int? id, String? fullName, String? photoPath}) =>
-      SimpleEmployeeDto(
-        id: id ?? this.id,
-        fullName: fullName ?? this.fullName,
-        photoPath: photoPath ?? this.photoPath,
-      );
+      SimpleEmployeeDto(id: id ?? this.id, fullName: fullName ?? this.fullName, photoPath: photoPath ?? this.photoPath);
 
-  factory SimpleEmployeeDto.fromJson(Map<String, dynamic> json) =>
-      SimpleEmployeeDto(
-        id: (json['id'] as num).toInt(),
-        fullName: json['fullName'] as String?,
-        photoPath: json['photoPath'] as String?,
-      );
+  factory SimpleEmployeeDto.fromJson(Map<String, dynamic> json) => SimpleEmployeeDto(
+    id: (json['id'] as num).toInt(),
+    fullName: json['fullName'] as String?,
+    photoPath: json['photoPath'] as String?,
+  );
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'fullName': fullName,
-    'photoPath': photoPath,
-  };
+  Map<String, dynamic> toJson() => {'id': id, 'fullName': fullName, 'photoPath': photoPath};
 }
 
 class MessageAttachmentResponse {
   final int id;
   final int messageId;
-  final String? fileName;
-  final String? fileUrl;
+  final String? fileName; // nullable
+  final String? fileUrl; // nullable
   final int fileSize;
-  final String? contentType;
-  final DateTime sentAt;
-  final int senderId;
-  final String? senderName;
+  final String? contentType; // nullable
+  final DateTime sentAt; // обязательный
+  final int? senderId; // nullable
+  final String? senderName; // nullable
 
   const MessageAttachmentResponse({
     required this.id,
@@ -48,7 +39,7 @@ class MessageAttachmentResponse {
     required this.fileSize,
     this.contentType,
     required this.sentAt,
-    required this.senderId,
+    this.senderId,
     this.senderName,
   });
 
@@ -74,18 +65,28 @@ class MessageAttachmentResponse {
     senderName: senderName ?? this.senderName,
   );
 
-  factory MessageAttachmentResponse.fromJson(Map<String, dynamic> json) =>
-      MessageAttachmentResponse(
-        id: (json['id'] as num).toInt(),
-        messageId: (json['messageId'] as num).toInt(),
-        fileName: json['fileName'] as String?,
-        fileUrl: json['fileUrl'] as String?,
-        fileSize: (json['fileSize'] as num).toInt(),
-        contentType: json['contentType'] as String?,
-        sentAt: DateTime.parse(json['sentAt'] as String),
-        senderId: (json['senderId'] as num).toInt(),
-        senderName: json['senderName'] as String?,
-      );
+  factory MessageAttachmentResponse.fromJson(Map<String, dynamic> json) {
+    // API иногда шлёт "0001-01-01T00:00:00", которое невалидно для UI → считаем как "сейчас"
+    final rawSentAt = json['sentAt'] as String;
+    late final DateTime parsedSentAt;
+    try {
+      parsedSentAt = DateTime.parse(rawSentAt);
+    } catch (_) {
+      parsedSentAt = DateTime.now(); // fallback
+    }
+
+    return MessageAttachmentResponse(
+      id: (json['id'] as num).toInt(),
+      messageId: (json['messageId'] as num).toInt(),
+      fileName: json['fileName'] as String?,
+      fileUrl: json['fileUrl'] as String?,
+      fileSize: (json['fileSize'] as num).toInt(),
+      contentType: json['contentType'] as String?,
+      sentAt: parsedSentAt,
+      senderId: (json['senderId'] as num?)?.toInt(),
+      senderName: json['senderName'] as String?,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -149,28 +150,22 @@ class MessageResponse {
     attachments: attachments ?? this.attachments,
   );
 
-  factory MessageResponse.fromJson(Map<String, dynamic> json) =>
-      MessageResponse(
-        id: (json['id'] as num).toInt(),
-        text: json['text'] as String?,
-        sentAt: DateTime.parse(json['sentAt'] as String),
-        updatedAt: _parseDate(json['updatedAt'] as String?),
-        isDeleted: json['isDeleted'] as bool? ?? false,
-        chatId: (json['chatId'] as num).toInt(),
-        postId: (json['postId'] as num?)?.toInt(),
-        sender: SimpleEmployeeDto.fromJson(
-          json['sender'] as Map<String, dynamic>,
-        ),
-        replyTo: (json['replyTo'] is Map && (json['replyTo'] as Map).isNotEmpty)
-            ? MessageResponse.fromJson(json['replyTo'] as Map<String, dynamic>)
-            : null,
-        attachments: (json['attachments'] as List?)
-            ?.map(
-              (e) =>
-                  MessageAttachmentResponse.fromJson(e as Map<String, dynamic>),
-            )
-            .toList(),
-      );
+  factory MessageResponse.fromJson(Map<String, dynamic> json) => MessageResponse(
+    id: (json['id'] as num).toInt(),
+    text: json['text'] as String?,
+    sentAt: DateTime.parse(json['sentAt'] as String),
+    updatedAt: _parseDate(json['updatedAt'] as String?),
+    isDeleted: json['isDeleted'] as bool? ?? false,
+    chatId: (json['chatId'] as num).toInt(),
+    postId: (json['postId'] as num?)?.toInt(),
+    sender: SimpleEmployeeDto.fromJson(json['sender'] as Map<String, dynamic>),
+    replyTo: (json['replyTo'] is Map && (json['replyTo'] as Map).isNotEmpty)
+        ? MessageResponse.fromJson(json['replyTo'] as Map<String, dynamic>)
+        : null,
+    attachments: (json['attachments'] as List?)
+        ?.map((e) => MessageAttachmentResponse.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 
   Map<String, dynamic> toJson() => {
     'id': id,

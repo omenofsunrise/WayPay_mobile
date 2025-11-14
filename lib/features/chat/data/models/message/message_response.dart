@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:waypay/features/chat/data/models/chat/chat_response.dart';
+import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
 
 DateTime? _parseDate(String? s) => s == null ? null : DateTime.parse(s);
 String? _dateToJson(DateTime? d) => d?.toUtc().toIso8601String();

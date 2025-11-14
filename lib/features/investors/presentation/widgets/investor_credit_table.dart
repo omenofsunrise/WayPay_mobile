@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/form_modal/labeled_container.dart';
-import 'package:waypay/core/widgets/pagination_widget.dart';
-import 'package:waypay/core/widgets/refresh.dart';
-import 'package:waypay/features/credit/data/models/credit_model.dart';
-import 'package:waypay/features/credit/data/models/get_query_credits.dart';
-import 'package:waypay/features/credit/presentation/bloc/credit_bloc.dart';
-import 'package:waypay/features/credit/presentation/bloc/credit_event.dart';
-import 'package:waypay/features/credit/presentation/bloc/credit_state.dart';
-import 'package:waypay/core/widgets/app_modal.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/form_modal/labeled_container.dart';
+import 'package:waypay_mobile/core/widgets/pagination_widget.dart';
+import 'package:waypay_mobile/core/widgets/refresh.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
+import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/credit_event.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/credit_state.dart';
+import 'package:waypay_mobile/core/widgets/app_modal.dart';
 
 class InvestorCreditsWidget extends StatefulWidget {
   final int investorId;
@@ -39,18 +39,35 @@ class _InvestorCreditsWidgetState extends State<InvestorCreditsWidget> {
         backgroundColor: Color(AppColors.background),
         title: 'Договор №${credit.id}',
         content: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.6,
+          ),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                LabeledContainer(label: 'Дата договора', text: _formatDate(credit.creditDate)),
+                LabeledContainer(
+                  label: 'Дата договора',
+                  text: _formatDate(credit.creditDate),
+                ),
                 LabeledContainer(label: 'Клиент', text: credit.clientFullName),
                 LabeledContainer(label: 'Телефон', text: credit.clientPhone),
-                LabeledContainer(label: 'Начислено', text: _formatCurrency(credit.accured.toDouble())),
-                LabeledContainer(label: 'Уплачено', text: _formatCurrency(credit.payed.toDouble())),
-                LabeledContainer(label: 'Остаток', text: _formatCurrency(credit.rest.toDouble())),
-                LabeledContainer(label: 'Долг', text: _formatCurrency(credit.debt.toDouble())),
+                LabeledContainer(
+                  label: 'Начислено',
+                  text: _formatCurrency(credit.accured.toDouble()),
+                ),
+                LabeledContainer(
+                  label: 'Уплачено',
+                  text: _formatCurrency(credit.payed.toDouble()),
+                ),
+                LabeledContainer(
+                  label: 'Остаток',
+                  text: _formatCurrency(credit.rest.toDouble()),
+                ),
+                LabeledContainer(
+                  label: 'Долг',
+                  text: _formatCurrency(credit.debt.toDouble()),
+                ),
               ],
             ),
           ),
@@ -68,7 +85,11 @@ class _InvestorCreditsWidgetState extends State<InvestorCreditsWidget> {
           LoadInvestorCreditsEvent(
             refresh: true,
             investorId: widget.investorId,
-            query: GetCreditsQuery(investorId: widget.investorId, page: 1, pageSize: 10),
+            query: GetCreditsQuery(
+              investorId: widget.investorId,
+              page: 1,
+              pageSize: 10,
+            ),
           ),
         );
         return bloc;
@@ -78,7 +99,9 @@ class _InvestorCreditsWidgetState extends State<InvestorCreditsWidget> {
           final List<CreditModel> displayedCredits;
 
           if (state is CreditLoaded && state.credits.isNotEmpty) {
-            displayedCredits = _isExpanded ? state.credits.cast<CreditModel>() : [state.credits.first];
+            displayedCredits = _isExpanded
+                ? state.credits.cast<CreditModel>()
+                : [state.credits.first];
           } else {
             displayedCredits = [];
           }
@@ -97,7 +120,11 @@ class _InvestorCreditsWidgetState extends State<InvestorCreditsWidget> {
                       LoadInvestorCreditsEvent(
                         refresh: true,
                         investorId: widget.investorId,
-                        query: GetCreditsQuery(investorId: widget.investorId, page: 1, pageSize: 10),
+                        query: GetCreditsQuery(
+                          investorId: widget.investorId,
+                          page: 1,
+                          pageSize: 10,
+                        ),
                       ),
                     );
                   },
@@ -110,9 +137,13 @@ class _InvestorCreditsWidgetState extends State<InvestorCreditsWidget> {
                                 margin: const EdgeInsets.only(bottom: 12),
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: credit.debt.toInt() != 0 ? Color(AppColors.pinkTint) : Colors.white,
+                                  color: credit.debt.toInt() != 0
+                                      ? Color(AppColors.pinkTint)
+                                      : Colors.white,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.grey.shade300),
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                  ),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,12 +152,17 @@ class _InvestorCreditsWidgetState extends State<InvestorCreditsWidget> {
                                       children: [
                                         Text(
                                           '№${credit.id}',
-                                          style: AppStyle.manrope(size: 14, weight: FontWeight.w500),
+                                          style: AppStyle.manrope(
+                                            size: 14,
+                                            weight: FontWeight.w500,
+                                          ),
                                         ),
                                         const Spacer(),
                                         Text(
                                           _formatDate(credit.creditDate),
-                                          style: const TextStyle(color: Colors.black54),
+                                          style: const TextStyle(
+                                            color: Colors.black54,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -135,12 +171,18 @@ class _InvestorCreditsWidgetState extends State<InvestorCreditsWidget> {
                                         Expanded(
                                           child: Text(
                                             credit.clientFullName,
-                                            style: AppStyle.manrope(size: 14, weight: FontWeight.w500),
+                                            style: AppStyle.manrope(
+                                              size: 14,
+                                              weight: FontWeight.w500,
+                                            ),
                                           ),
                                         ),
                                         Text(
                                           credit.clientPhone,
-                                          style: AppStyle.manrope(size: 14, weight: FontWeight.w500),
+                                          style: AppStyle.manrope(
+                                            size: 14,
+                                            weight: FontWeight.w500,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -155,7 +197,10 @@ class _InvestorCreditsWidgetState extends State<InvestorCreditsWidget> {
                               child: Center(
                                 child: Text(
                                   'Договоров нет',
-                                  style: AppStyle.manrope(size: 15, weight: FontWeight.w400),
+                                  style: AppStyle.manrope(
+                                    size: 15,
+                                    weight: FontWeight.w400,
+                                  ),
                                 ),
                               ),
                             ),
@@ -173,7 +218,11 @@ class _InvestorCreditsWidgetState extends State<InvestorCreditsWidget> {
                           LoadInvestorCreditsEvent(
                             refresh: true,
                             investorId: widget.investorId,
-                            query: GetCreditsQuery(investorId: widget.investorId, page: page, pageSize: 10),
+                            query: GetCreditsQuery(
+                              investorId: widget.investorId,
+                              page: page,
+                              pageSize: 10,
+                            ),
                           ),
                         );
                       },
@@ -191,10 +240,18 @@ class _InvestorCreditsWidgetState extends State<InvestorCreditsWidget> {
                 onTap: () => setState(() => _isExpanded = !_isExpanded),
                 child: Row(
                   children: [
-                    Text('Договоры', style: AppStyle.manrope(size: 15, weight: FontWeight.w400)),
+                    Text(
+                      'Договоры',
+                      style: AppStyle.manrope(
+                        size: 15,
+                        weight: FontWeight.w400,
+                      ),
+                    ),
                     const Spacer(),
                     Icon(
-                      _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                      _isExpanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
                       color: Color(AppColors.grey),
                     ),
                   ],

@@ -3,10 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/features/chat/data/models/chat/chat_response.dart';
-import 'package:waypay/features/chat/presentation/bloc/chat_info/chat_photo_bloc.dart';
-import 'package:waypay/features/chat/presentation/bloc/chat_info/paged_bloc.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
+import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/chat_photo_bloc.dart';
+import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/paged_bloc.dart';
 
 class PhotosTabContent extends StatefulWidget {
   final int chatId;
@@ -88,7 +88,7 @@ class _PhotosTabContentState extends State<PhotosTabContent> {
 
     final src = photo.fileUrl!.startsWith('http')
         ? photo.fileUrl!
-        : 'http://test.waypay.one:5003/${photo.fileUrl!}';
+        : 'https://web.waypay_mobile.one:5002/${photo.fileUrl!}';
 
     return GestureDetector(
       onTap: () {

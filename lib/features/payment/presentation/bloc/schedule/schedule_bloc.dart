@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/network/token_storage.dart';
-import 'package:waypay/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
-import 'package:waypay/features/payment/data/models/schedule/get_schedule_query.dart';
-import 'package:waypay/features/payment/data/models/schedule/schedule_model.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/network/token_storage.dart';
+import 'package:waypay_mobile/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
+import 'package:waypay_mobile/features/payment/data/models/schedule/get_schedule_query.dart';
+import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
 
 part 'schedule_event.dart';
 part 'schedule_state.dart';
 
 class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
-  final ScheduleRemoteDataSources _scheduleDataSource = getIt<ScheduleRemoteDataSources>();
+  final ScheduleRemoteDataSources _scheduleDataSource =
+      getIt<ScheduleRemoteDataSources>();
   final TokenStorage _tokenStorage = getIt<TokenStorage>();
 
   List<ScheduleModel> _schedules = [];
@@ -22,7 +23,10 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     on<SearchSchedule>(_onSearchSchedule);
   }
 
-  Future<void> _onLoadSchedule(LoadSchedule event, Emitter<ScheduleState> emit) async {
+  Future<void> _onLoadSchedule(
+    LoadSchedule event,
+    Emitter<ScheduleState> emit,
+  ) async {
     if (event.refresh) {
       _currentPage = event.page ?? 1;
       _hasMore = true;
@@ -77,7 +81,10 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     }
   }
 
-  Future<void> _onSearchSchedule(SearchSchedule event, Emitter<ScheduleState> emit) async {
+  Future<void> _onSearchSchedule(
+    SearchSchedule event,
+    Emitter<ScheduleState> emit,
+  ) async {
     emit(ScheduleInitial());
 
     try {
@@ -87,7 +94,11 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         return;
       }
 
-      final query = GetScheduleQuery(page: 1, pageSize: event.pageSize ?? 10, clientName: event.query);
+      final query = GetScheduleQuery(
+        page: 1,
+        pageSize: event.pageSize ?? 10,
+        clientName: event.query,
+      );
 
       final response = await _scheduleDataSource.getSchedule(query);
 

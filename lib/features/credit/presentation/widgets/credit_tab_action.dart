@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/assets/resources.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/features/credit/presentation/widgets/credit_tab.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/features/credit/presentation/widgets/credit_tab.dart';
 
 class CreditTabAppBarAction extends StatelessWidget {
   final CreditTab selectedTab;
@@ -19,11 +19,14 @@ class CreditTabAppBarAction extends StatelessWidget {
     return PopupMenuButton<CreditTab>(
       tooltip: 'Выбрать вкладку',
       // Используем SVG иконку выбранной вкладки
-      icon: SvgIcon(
-        assetPath: selectedTab.iconPath,
+      icon: SvgPicture.asset(
+        selectedTab.iconPath,
         width: 24,
         height: 24,
-        color: const Color(AppColors.uiBorder),
+        colorFilter: const ColorFilter.mode(
+          Color(AppColors.uiBorder),
+          BlendMode.srcIn,
+        ),
       ),
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -45,7 +48,15 @@ class CreditTabAppBarAction extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               // SVG иконка вкладки
-              SvgIcon(assetPath: tab.iconPath, width: 20, height: 20),
+              SvgPicture.asset(
+                tab.iconPath,
+                width: 20,
+                height: 20,
+                colorFilter: const ColorFilter.mode(
+                  Colors.black,
+                  BlendMode.srcIn,
+                ),
+              ),
               const SizedBox(width: 8),
               Text(
                 tab.label,

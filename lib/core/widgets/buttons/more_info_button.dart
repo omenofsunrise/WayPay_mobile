@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/features/home/presentation/widgets/section_title.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/features/home/presentation/widgets/section_title.dart';
 
 class MoreDetailsButton extends StatelessWidget {
   final String text;

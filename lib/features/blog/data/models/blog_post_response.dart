@@ -1,4 +1,4 @@
-import 'package:waypay/features/blog/data/models/file_attachment_response.dart';
+import 'package:waypay_mobile/features/blog/data/models/file_attachment_response.dart';
 
 class BlogPostResponse {
   final int id;
@@ -40,9 +40,13 @@ class BlogPostResponse {
       content: json['content'] as String?,
       isPublished: json['isPublished'] as bool,
       createdAt: DateTime.parse(json['createdAt']),
-      imageUrls: json['imageUrls'] != null ? List<String>.from(json['imageUrls']) : null,
+      imageUrls: json['imageUrls'] != null
+          ? List<String>.from(json['imageUrls'])
+          : null,
       attachments: json['attachments'] != null
-          ? (json['attachments'] as List).map((e) => FileAttachmentResponse.fromJson(e)).toList()
+          ? (json['attachments'] as List)
+                .map((e) => FileAttachmentResponse.fromJson(e))
+                .toList()
           : null,
       likesCount: json['likesCount'] as int,
       commentsCount: json['commentsCount'] as int,

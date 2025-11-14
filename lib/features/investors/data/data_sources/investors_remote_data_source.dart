@@ -1,7 +1,7 @@
-import 'package:waypay/features/investors/data/models/investor_payout_model.dart';
-import 'package:waypay/features/investors/data/models/investor_payout_response.dart';
-import 'package:waypay/features/investors/data/models/investors_model.dart';
-import 'package:waypay/features/investors/data/models/investors_response_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/investor_payout_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/investor_payout_response.dart';
+import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/investors_response_model.dart';
 
 abstract class InvestorsRemoteDataSource {
   Future<InvestorsResponseModel> getInvestors({
@@ -31,6 +31,11 @@ abstract class InvestorsRemoteDataSource {
   Future<void> toggleBlockInvestor(int id);
   Future<void> clearInvestor(int id);
   Future<Map<String, dynamic>> getInvestorReport(int id);
-  Future<InvestorPayoutResponse> createInvestorPayout({required int investorId, required double amount});
-  Future<List<InvestorPayoutModel>> getInvestorPayoutsByInvestorId(int investorId);
+  Future<InvestorPayoutResponse> createInvestorPayout({
+    required int investorId,
+    required double amount,
+  });
+  Future<List<InvestorPayoutModel>> getInvestorPayoutsByInvestorId(
+    int investorId,
+  );
 }

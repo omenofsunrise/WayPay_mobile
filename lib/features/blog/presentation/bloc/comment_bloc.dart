@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/features/blog/data/data_sources/blog_remote_data_sources.dart';
-import 'package:waypay/features/blog/data/models/comment_response.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/features/blog/data/data_sources/blog_remote_data_sources.dart';
+import 'package:waypay_mobile/features/blog/data/models/comment_response.dart';
 import 'comment_event.dart';
 import 'comment_state.dart';
 

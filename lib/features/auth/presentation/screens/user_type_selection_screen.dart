@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:waypay/assets/resources.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
-import 'package:waypay/routes/routes.dart';
+import 'package:waypay_mobile/assets/resources.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/routes/routes.dart';
 
 class UserTypeSelectionScreen extends StatefulWidget {
   const UserTypeSelectionScreen({super.key});
@@ -27,7 +27,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Image.asset(Images.waypayLogo, height: 200, width: 200),
+                Image.asset(Images.waypay_mobileLogo, height: 200, width: 200),
                 Column(
                   children: [
                     DefaultButton(

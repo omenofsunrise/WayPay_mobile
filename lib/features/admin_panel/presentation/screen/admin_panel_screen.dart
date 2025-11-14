@@ -3,16 +3,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:waypay/core/network/token_storage.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/app_drawer/app_drawer.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
-import 'package:waypay/core/widgets/form_modal/label_text_field.dart';
-import 'package:waypay/core/widgets/refresh.dart';
-import 'package:waypay/features/admin_panel/data/models/post_company_model.dart';
-import 'package:waypay/features/admin_panel/presentation/cubit/company_cubit.dart';
-import 'package:waypay/features/admin_panel/presentation/widgets/company_card.dart';
-import 'package:waypay/routes/routes.dart';
+import 'package:waypay_mobile/core/network/token_storage.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/core/widgets/form_modal/label_text_field.dart';
+import 'package:waypay_mobile/core/widgets/refresh.dart';
+import 'package:waypay_mobile/features/admin_panel/data/models/post_company_model.dart';
+import 'package:waypay_mobile/features/admin_panel/presentation/cubit/company_cubit.dart';
+import 'package:waypay_mobile/features/admin_panel/presentation/widgets/company_card.dart';
+import 'package:waypay_mobile/routes/routes.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});

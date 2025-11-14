@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:waypay/features/blog/presentation/screens/blog_screen.dart';
+import 'package:waypay_mobile/features/blog/presentation/screens/blog_screen.dart';
 
 abstract class BlogEvent extends Equatable {
   const BlogEvent();
@@ -14,7 +14,12 @@ class LoadBlogPosts extends BlogEvent {
   final String? search;
   final int? authorId;
 
-  const LoadBlogPosts({required this.feedType, required this.sortType, this.search, this.authorId});
+  const LoadBlogPosts({
+    required this.feedType,
+    required this.sortType,
+    this.search,
+    this.authorId,
+  });
 
   @override
   List<Object?> get props => [feedType, sortType, authorId];

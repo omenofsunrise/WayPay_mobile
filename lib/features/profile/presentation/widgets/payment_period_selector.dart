@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
 
 class PaymentStatsPeriodSelector extends StatefulWidget {
   final List<String> items;
@@ -15,10 +15,12 @@ class PaymentStatsPeriodSelector extends StatefulWidget {
   });
 
   @override
-  State<PaymentStatsPeriodSelector> createState() => _PaymentStatsPeriodSelectorState();
+  State<PaymentStatsPeriodSelector> createState() =>
+      _PaymentStatsPeriodSelectorState();
 }
 
-class _PaymentStatsPeriodSelectorState extends State<PaymentStatsPeriodSelector> {
+class _PaymentStatsPeriodSelectorState
+    extends State<PaymentStatsPeriodSelector> {
   late String _selectedPeriod;
 
   @override
@@ -44,12 +46,18 @@ class _PaymentStatsPeriodSelectorState extends State<PaymentStatsPeriodSelector>
           });
           widget.onChanged(value);
         },
-        itemBuilder: (context) =>
-            widget.items.map((item) => PopupMenuItem<String>(value: item, child: Text(item))).toList(),
+        itemBuilder: (context) => widget.items
+            .map(
+              (item) => PopupMenuItem<String>(value: item, child: Text(item)),
+            )
+            .toList(),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(_selectedPeriod, style: AppStyle.inter(size: 12, weight: FontWeight.w500)),
+            Text(
+              _selectedPeriod,
+              style: AppStyle.inter(size: 12, weight: FontWeight.w500),
+            ),
             const Icon(Icons.keyboard_arrow_down, size: 21),
           ],
         ),

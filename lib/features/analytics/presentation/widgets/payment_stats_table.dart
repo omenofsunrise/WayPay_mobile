@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/features/analytics/presentation/cubit/debt_dynamic_cubit.dart';
-import 'package:waypay/features/analytics/presentation/cubit/debt_dynamic_state.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/debt_dynamic_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/debt_dynamic_state.dart';
 
 class PaymentStatsTable extends StatefulWidget {
   const PaymentStatsTable({super.key});
@@ -18,16 +18,26 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
 
   @override
   Widget build(BuildContext context) {
-    final NumberFormat currencyFormatter = NumberFormat.currency(locale: 'ru_RU', symbol: '', decimalDigits: 0);
+    final NumberFormat currencyFormatter = NumberFormat.currency(
+      locale: 'ru_RU',
+      symbol: '',
+      decimalDigits: 0,
+    );
 
     return BlocBuilder<DebtDynamicCubit, DebtDynamicState>(
       builder: (context, state) {
         if (state is DebtDynamicLoading) {
-          return const SizedBox(height: 487, child: Center(child: CircularProgressIndicator()));
+          return const SizedBox(
+            height: 487,
+            child: Center(child: CircularProgressIndicator()),
+          );
         }
 
         if (state is DebtDynamicError) {
-          return SizedBox(height: 487, child: Center(child: Text('Ошибка: ${state.message}')));
+          return SizedBox(
+            height: 487,
+            child: Center(child: Text('Ошибка: ${state.message}')),
+          );
         }
 
         if (state is DebtDynamicLoaded) {
@@ -38,7 +48,9 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
           final payment = List.of(data.paymentsDynamic.periods.reversed);
 
           // На всякий случай синхронизируем длины
-          final rowCount = overdue.length < payment.length ? overdue.length : payment.length;
+          final rowCount = overdue.length < payment.length
+              ? overdue.length
+              : payment.length;
 
           return SizedBox(
             width: double.infinity,
@@ -52,16 +64,28 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
                     children: [
                       Text(
                         'Исполнение финансовых обязательств',
-                        style: AppStyle.manrope(size: 15, weight: FontWeight.w400),
+                        style: AppStyle.manrope(
+                          size: 15,
+                          weight: FontWeight.w400,
+                        ),
                       ),
-                      Icon(_isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: Colors.black54),
+                      Icon(
+                        _isExpanded
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                        color: Colors.black54,
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 20),
                 if (_isExpanded)
                   Table(
-                    columnWidths: const {0: IntrinsicColumnWidth(), 1: FlexColumnWidth(1), 2: FlexColumnWidth(1)},
+                    columnWidths: const {
+                      0: IntrinsicColumnWidth(),
+                      1: FlexColumnWidth(1),
+                      2: FlexColumnWidth(1),
+                    },
                     border: TableBorder.all(
                       color: Color(AppColors.borderColor),
                       borderRadius: BorderRadius.circular(10),
@@ -72,7 +96,13 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 17),
                             child: Center(
-                              child: Text('Дата', style: AppStyle.manrope(size: 15, weight: FontWeight.w600)),
+                              child: Text(
+                                'Дата',
+                                style: AppStyle.manrope(
+                                  size: 15,
+                                  weight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ),
                           Padding(
@@ -80,7 +110,10 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
                             child: Center(
                               child: Text(
                                 'Сумма просрочки, руб',
-                                style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
+                                style: AppStyle.manrope(
+                                  size: 15,
+                                  weight: FontWeight.w600,
+                                ),
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -90,7 +123,10 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
                             child: Center(
                               child: Text(
                                 'Сумма платежей, руб',
-                                style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
+                                style: AppStyle.manrope(
+                                  size: 15,
+                                  weight: FontWeight.w600,
+                                ),
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -152,7 +188,10 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
           );
         }
 
-        return const SizedBox(height: 100, child: Center(child: Text('Нет данных')));
+        return const SizedBox(
+          height: 100,
+          child: Center(child: Text('Нет данных')),
+        );
       },
     );
   }

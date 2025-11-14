@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
 
 class SectionTitle extends StatelessWidget {
   final String text;

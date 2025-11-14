@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/widgets/form_modal/labeled_container.dart';
-import 'package:waypay/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/form_modal/labeled_container.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 
-import 'package:waypay/core/storage/user_storage.dart';
-import 'package:waypay/core/widgets/app_modal.dart';
-import 'package:waypay/features/finance/data/data_source/budget_remote_data_source.dart';
-import 'package:waypay/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
-import 'package:waypay/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
+import 'package:waypay_mobile/core/widgets/app_modal.dart';
+import 'package:waypay_mobile/features/finance/data/data_source/budget_remote_data_source.dart';
+import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
+import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
 
 class BudgetCard extends StatelessWidget {
   final int id;
@@ -44,7 +44,11 @@ class BudgetCard extends StatelessWidget {
           builder: (_) => AppModal(
             backgroundColor: Color(AppColors.background),
             title: isIncome ? 'Детали прихода' : 'Детали расхода',
-            menuItems: (userStorage.hasViewContent([EmployeeRole.superAdmin, EmployeeRole.director]))
+            menuItems:
+                (userStorage.hasViewContent([
+                  EmployeeRole.superAdmin,
+                  EmployeeRole.director,
+                ]))
                 ? [
                     PopupMenuItem(
                       child: const Text('Удалить'),
@@ -58,8 +62,14 @@ class BudgetCard extends StatelessWidget {
                             title: const Text('Удаление'),
                             content: const Text('Удалить эту запись?'),
                             actions: [
-                              TextButton(onPressed: () => context.pop(false), child: const Text('Отмена')),
-                              TextButton(onPressed: () => context.pop(true), child: const Text('Удалить')),
+                              TextButton(
+                                onPressed: () => context.pop(false),
+                                child: const Text('Отмена'),
+                              ),
+                              TextButton(
+                                onPressed: () => context.pop(true),
+                                child: const Text('Удалить'),
+                              ),
                             ],
                           ),
                         );
@@ -68,26 +78,38 @@ class BudgetCard extends StatelessWidget {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (_) => const Center(child: CircularProgressIndicator()),
+                            builder: (_) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
                           );
                           try {
                             if (isIncome) {
-                              await getIt<BudgetRemoteDataSource>().deleteBudgetIncome(id);
+                              await getIt<BudgetRemoteDataSource>()
+                                  .deleteBudgetIncome(id);
                               if (context.mounted) {
                                 Navigator.pop(context);
-                                context.read<BudgetIncomeBloc>().add(LoadBudgetIncomeEvent());
-                                ScaffoldMessenger.of(
-                                  context,
-                                ).showSnackBar(const SnackBar(content: Text('Приход удален')));
+                                context.read<BudgetIncomeBloc>().add(
+                                  LoadBudgetIncomeEvent(),
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Приход удален'),
+                                  ),
+                                );
                               }
                             } else {
-                              await getIt<BudgetRemoteDataSource>().deleteBudgetOutcome(id);
+                              await getIt<BudgetRemoteDataSource>()
+                                  .deleteBudgetOutcome(id);
                               if (context.mounted) {
                                 Navigator.pop(context); // Закрыть загрузку
-                                context.read<BudgetExpenseBloc>().add(LoadBudgetExpenseEvent());
-                                ScaffoldMessenger.of(
-                                  context,
-                                ).showSnackBar(const SnackBar(content: Text('Расход удален')));
+                                context.read<BudgetExpenseBloc>().add(
+                                  LoadBudgetExpenseEvent(),
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Расход удален'),
+                                  ),
+                                );
                               }
                             }
                           } catch (e) {
@@ -100,7 +122,10 @@ class BudgetCard extends StatelessWidget {
                                   title: const Text('Ошибка'),
                                   content: Text('Не удалось удалить.\n$e'),
                                   actions: [
-                                    TextButton(onPressed: () => Navigator.pop(context), child: const Text('Ок')),
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('Ок'),
+                                    ),
                                   ],
                                 ),
                               );
@@ -114,9 +139,20 @@ class BudgetCard extends StatelessWidget {
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                LabeledContainer(label: 'Сумма', text: '${amount.toStringAsFixed(0)} ₽'),
-                LabeledContainer(label: 'Дата', text: createdAt != null ? formatDate(createdAt!) : 'не указана'),
-                LabeledContainer(label: 'Комментарий', text: (comment?.trim().isEmpty ?? true) ? '-' : comment!),
+                LabeledContainer(
+                  label: 'Сумма',
+                  text: '${amount.toStringAsFixed(0)} ₽',
+                ),
+                LabeledContainer(
+                  label: 'Дата',
+                  text: createdAt != null
+                      ? formatDate(createdAt!)
+                      : 'не указана',
+                ),
+                LabeledContainer(
+                  label: 'Комментарий',
+                  text: (comment?.trim().isEmpty ?? true) ? '-' : comment!,
+                ),
               ],
             ),
           ),
@@ -127,7 +163,13 @@ class BudgetCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -140,7 +182,11 @@ class BudgetCard extends StatelessWidget {
             ),
             Text(
               '${amount.toStringAsFixed(0)} ₽',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
             ),
           ],
         ),

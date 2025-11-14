@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/features/blog/data/data_sources/blog_remote_data_sources.dart';
-import 'package:waypay/features/blog/presentation/screens/blog_screen.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/features/blog/data/data_sources/blog_remote_data_sources.dart';
+import 'package:waypay_mobile/features/blog/presentation/screens/blog_screen.dart';
 import 'blog_event.dart';
 import 'blog_state.dart';
 
@@ -13,7 +13,10 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
     on<ToggleLikeChatPost>(_onToggleLikeChatPost);
   }
 
-  Future<void> _onLoadPosts(LoadBlogPosts event, Emitter<BlogState> emit) async {
+  Future<void> _onLoadPosts(
+    LoadBlogPosts event,
+    Emitter<BlogState> emit,
+  ) async {
     emit(BlogLoading());
 
     try {
@@ -30,11 +33,16 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
     }
   }
 
-  Future<void> _onLoadPostById(LoadBlogPostById event, Emitter<BlogState> emit) async {
+  Future<void> _onLoadPostById(
+    LoadBlogPostById event,
+    Emitter<BlogState> emit,
+  ) async {
     emit(BlogLoading());
 
     try {
-      final post = await getIt<BlogRemoteDataSources>().getBlogPostById(event.postId);
+      final post = await getIt<BlogRemoteDataSources>().getBlogPostById(
+        event.postId,
+      );
 
       emit(BlogPostLoaded(post));
     } catch (e) {
@@ -42,7 +50,10 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
     }
   }
 
-  Future<void> _onToggleLikePost(ToggleLikePost event, Emitter<BlogState> emit) async {
+  Future<void> _onToggleLikePost(
+    ToggleLikePost event,
+    Emitter<BlogState> emit,
+  ) async {
     if (state is BlogLoaded) {
       final current = state as BlogLoaded;
 
@@ -65,7 +76,10 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
     } catch (_) {}
   }
 
-  Future<void> _onToggleLikeChatPost(ToggleLikeChatPost event, Emitter<BlogState> emit) async {
+  Future<void> _onToggleLikeChatPost(
+    ToggleLikeChatPost event,
+    Emitter<BlogState> emit,
+  ) async {
     if (state is BlogPostLoaded) {
       final current = state as BlogPostLoaded;
 
@@ -73,7 +87,9 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
         final alreadyLiked = current.post.isLikedByCurrentUser;
         final updatedPost = current.post.copyWith(
           isLikedByCurrentUser: !alreadyLiked,
-          likesCount: alreadyLiked ? current.post.likesCount - 1 : current.post.likesCount + 1,
+          likesCount: alreadyLiked
+              ? current.post.likesCount - 1
+              : current.post.likesCount + 1,
         );
 
         emit(BlogPostLoaded(updatedPost));

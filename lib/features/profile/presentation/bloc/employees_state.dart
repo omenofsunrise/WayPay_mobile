@@ -1,4 +1,4 @@
-import 'package:waypay/features/profile/data/models/employee.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 
 abstract class EmployeesState {}
 

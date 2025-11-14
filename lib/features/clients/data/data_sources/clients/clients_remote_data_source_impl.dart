@@ -1,12 +1,12 @@
 import 'package:dio/dio.dart';
-import 'package:waypay/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
-import 'package:waypay/features/clients/data/models/clients/client_model.dart';
-import 'package:waypay/features/clients/data/models/clients/client_response_model.dart';
-import 'package:waypay/features/clients/data/models/clients/create_clients_requests.dart';
-import 'package:waypay/features/clients/data/models/clients/get_clients_query.dart';
-import 'package:waypay/features/clients/data/models/clients/update_client_doc_issue_date_requests.dart';
-import 'package:waypay/features/clients/data/models/clients/update_client_doc_request.dart';
-import 'package:waypay/features/clients/data/models/clients/update_client_request.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/client_response_model.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/create_clients_requests.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/get_clients_query.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/update_client_doc_issue_date_requests.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/update_client_doc_request.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/update_client_request.dart';
 
 class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
   final Dio dio;
@@ -16,14 +16,19 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
   @override
   Future<ClientsResponseModel> getClients(GetClientsQuery query) async {
     try {
-      final response = await dio.get('/api/Client', queryParameters: query.toQueryParams());
+      final response = await dio.get(
+        '/api/Client',
+        queryParameters: query.toQueryParams(),
+      );
 
       final data = response.data;
 
       if (data is Map<String, dynamic>) {
         return ClientsResponseModel.fromJson(data);
       } else {
-        throw Exception('Неожиданный формат данных: ожидается объект с пагинацией');
+        throw Exception(
+          'Неожиданный формат данных: ожидается объект с пагинацией',
+        );
       }
     } on DioException catch (e) {
       throw Exception('Ошибка получения клиентов: ${e.message}');
@@ -61,7 +66,9 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
     try {
       await dio.put('/api/Client/$id', data: request.toJson());
     } on DioException catch (e) {
-      throw Exception('Ошибка обновления основных данных клиента: ${e.message}');
+      throw Exception(
+        'Ошибка обновления основных данных клиента: ${e.message}',
+      );
     }
   }
 
@@ -75,7 +82,10 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
   }
 
   @override
-  Future<void> updateClientDocIssueDate(int id, UpdateClientDocIssueDateRequest request) async {
+  Future<void> updateClientDocIssueDate(
+    int id,
+    UpdateClientDocIssueDateRequest request,
+  ) async {
     try {
       await dio.put('/api/Client/$id/doc-issue-date', data: request.toJson());
     } on DioException catch (e) {

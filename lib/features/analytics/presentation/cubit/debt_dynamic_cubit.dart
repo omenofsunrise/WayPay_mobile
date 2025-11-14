@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/features/analytics/data/data_sources/analytic_remote_data_source.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/features/analytics/data/data_sources/analytic_remote_data_source.dart';
 import 'debt_dynamic_state.dart';
 
 class DebtDynamicCubit extends Cubit<DebtDynamicState> {

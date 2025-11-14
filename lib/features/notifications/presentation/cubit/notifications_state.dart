@@ -32,12 +32,11 @@ class NotificationsLoaded extends NotificationsState {
     NotificationPage? page,
     bool? hasMore,
     bool? isLoadingMore,
-  }) =>
-      NotificationsLoaded(
-        page ?? this.page,
-        hasMore: hasMore ?? this.hasMore,
-        isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      );
+  }) => NotificationsLoaded(
+    page ?? this.page,
+    hasMore: hasMore ?? this.hasMore,
+    isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+  );
 
   @override
   int get totalCount => page.totalCount;

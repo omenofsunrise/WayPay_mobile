@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:dio/dio.dart' show MultipartFile;
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/features/chat/data/data_source/chat/chat_remote_data_source.dart';
-import 'package:waypay/features/chat/data/data_source/message/message_remote_data_source.dart';
-import 'package:waypay/features/chat/data/models/chat/chat_member_response.dart';
-import 'package:waypay/features/chat/data/models/message/message_response.dart';
-import 'package:waypay/features/chat/data/service/chat_hub_service.dart';
+import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source.dart';
+import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source.dart';
+import 'package:waypay_mobile/features/chat/data/models/chat/chat_member_response.dart';
+import 'package:waypay_mobile/features/chat/data/models/message/message_response.dart';
+import 'package:waypay_mobile/features/chat/data/service/chat_hub_service.dart';
 
 part 'chat_event.dart';
 part 'chat_state.dart';

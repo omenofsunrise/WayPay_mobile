@@ -1,4 +1,4 @@
-import 'package:waypay/features/credit/data/models/get_query_credits.dart';
+import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
 
 abstract class CreditEvent {}
 
@@ -56,5 +56,9 @@ class LoadInvestorCreditsEvent extends CreditEvent {
   final int investorId;
   final GetCreditsQuery query;
 
-  LoadInvestorCreditsEvent({required this.investorId, required this.query, required this.refresh});
+  LoadInvestorCreditsEvent({
+    required this.investorId,
+    required this.query,
+    required this.refresh,
+  });
 }

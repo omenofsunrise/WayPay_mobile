@@ -1,4 +1,4 @@
-import 'package:waypay/features/credit/data/objectType/models/object_type_model.dart';
+import 'package:waypay_mobile/features/credit/data/objectType/models/object_type_model.dart';
 
 abstract class ObjectTypeState {}
 

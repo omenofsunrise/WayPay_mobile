@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/features/credit/data/models/new_credit_model.dart';
+import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 
 class CreditCreationCubit extends Cubit<CreateCreditRequest> {
   CreditCreationCubit()

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 
 class InvestorPayoutDialog extends StatefulWidget {
   final double maxAmount;

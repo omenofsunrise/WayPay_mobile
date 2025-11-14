@@ -7,10 +7,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/features/chat/data/models/chat/chat_response.dart';
-import 'package:waypay/features/chat/presentation/bloc/chat_info/chat_video_bloc.dart';
-import 'package:waypay/features/chat/presentation/bloc/chat_info/paged_bloc.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
+import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/chat_video_bloc.dart';
+import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/paged_bloc.dart';
 
 class VideosTabContent extends StatefulWidget {
   final int chatId;
@@ -23,20 +23,22 @@ class VideosTabContent extends StatefulWidget {
 
 class _VideosTabContentState extends State<VideosTabContent> {
   late final ChatVideosBloc bloc;
-  static const String _filesBase = 'http://test.waypay.one:5003';
+  static const String _filesBase = 'https://web.waypay_mobile.one:5002';
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    bloc = ChatVideosBloc(chatId: widget.chatId)..add(LoadPage<MessageAttachmentResponse>());
+    bloc = ChatVideosBloc(chatId: widget.chatId)
+      ..add(LoadPage<MessageAttachmentResponse>());
     _scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
     final state = bloc.state;
     if (state is PagedLoaded<MessageAttachmentResponse> && state.hasMore) {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
         bloc.add(LoadPage<MessageAttachmentResponse>());
       }
     }
@@ -49,7 +51,9 @@ class _VideosTabContentState extends State<VideosTabContent> {
     super.dispose();
   }
 
-  Map<String, List<MessageAttachmentResponse>> _groupByMonth(List<MessageAttachmentResponse> items) {
+  Map<String, List<MessageAttachmentResponse>> _groupByMonth(
+    List<MessageAttachmentResponse> items,
+  ) {
     const months = [
       'Январь',
       'Февраль',
@@ -112,9 +116,20 @@ class _VideosTabContentState extends State<VideosTabContent> {
           return Stack(
             children: [
               thumbData != null
-                  ? Image.memory(thumbData, fit: BoxFit.cover, width: double.infinity, height: double.infinity)
+                  ? Image.memory(
+                      thumbData,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                    )
                   : Container(color: Colors.grey[300]),
-              const Center(child: Icon(Icons.play_circle_outline, size: 40, color: Colors.white)),
+              const Center(
+                child: Icon(
+                  Icons.play_circle_outline,
+                  size: 40,
+                  color: Colors.white,
+                ),
+              ),
             ],
           );
         },
@@ -164,7 +179,9 @@ class _VideosTabContentState extends State<VideosTabContent> {
           color: Colors.black,
           alignment: Alignment.center,
           child: AspectRatio(
-            aspectRatio: controller.value.aspectRatio == 0 ? 16 / 9 : controller.value.aspectRatio,
+            aspectRatio: controller.value.aspectRatio == 0
+                ? 16 / 9
+                : controller.value.aspectRatio,
             child: Chewie(controller: chewie),
           ),
         ),
@@ -192,7 +209,10 @@ class _VideosTabContentState extends State<VideosTabContent> {
 
           if (state is PagedError<MessageAttachmentResponse>) {
             return Center(
-              child: Text(state.message, style: AppStyle.manrope(size: 16, weight: FontWeight.w600)),
+              child: Text(
+                state.message,
+                style: AppStyle.manrope(size: 16, weight: FontWeight.w600),
+              ),
             );
           }
 
@@ -203,7 +223,10 @@ class _VideosTabContentState extends State<VideosTabContent> {
 
           if (items.isEmpty) {
             return Center(
-              child: Text('Нет видео', style: AppStyle.manrope(size: 16, weight: FontWeight.w600)),
+              child: Text(
+                'Нет видео',
+                style: AppStyle.manrope(size: 16, weight: FontWeight.w600),
+              ),
             );
           }
 
@@ -219,22 +242,34 @@ class _VideosTabContentState extends State<VideosTabContent> {
 
                 return [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text(monthName, style: AppStyle.manrope(size: 16, weight: FontWeight.w500)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: Text(
+                      monthName,
+                      style: AppStyle.manrope(
+                        size: 16,
+                        weight: FontWeight.w500,
+                      ),
+                    ),
                   ),
                   GridView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: (MediaQuery.of(context).size.width ~/ 130).clamp(1, 10),
+                      crossAxisCount: (MediaQuery.of(context).size.width ~/ 130)
+                          .clamp(1, 10),
                       mainAxisSpacing: 8,
                       crossAxisSpacing: 8,
                       childAspectRatio: 1,
                     ),
                     itemCount: videos.length,
-                    itemBuilder: (context, index) =>
-                        Container(color: Colors.grey[300], child: _buildVideo(videos[index])),
+                    itemBuilder: (context, index) => Container(
+                      color: Colors.grey[300],
+                      child: _buildVideo(videos[index]),
+                    ),
                   ),
                 ];
               }),

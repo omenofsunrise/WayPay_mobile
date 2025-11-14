@@ -1,18 +1,19 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay/core/di/dependency_injection.dart';
-import 'package:waypay/core/network/token_storage.dart';
-import 'package:waypay/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
-import 'package:waypay/features/clients/data/models/queue/get_queue_query_model.dart';
-import 'package:waypay/features/clients/data/data_sources/queue/queue_remote_data_source.dart';
-import 'package:waypay/features/clients/data/models/queue/queue_model.dart';
-import 'package:waypay/features/clients/data/models/queue/queue_request_model.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/network/token_storage.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
+import 'package:waypay_mobile/features/clients/data/models/queue/get_queue_query_model.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/queue/queue_remote_data_source.dart';
+import 'package:waypay_mobile/features/clients/data/models/queue/queue_model.dart';
+import 'package:waypay_mobile/features/clients/data/models/queue/queue_request_model.dart';
 
 part 'queue_event.dart';
 part 'queue_state.dart';
 
 class QueueBloc extends Bloc<QueueEvent, QueueState> {
   final QueueRemoteDataSource _queueDataSource = getIt<QueueRemoteDataSource>();
-  final ClientRemoteDataSource _clientDataSource = getIt<ClientRemoteDataSource>();
+  final ClientRemoteDataSource _clientDataSource =
+      getIt<ClientRemoteDataSource>();
   final TokenStorage _tokenStorage = getIt<TokenStorage>();
 
   List<QueueItemModel> _queue = [];
@@ -74,18 +75,30 @@ class QueueBloc extends Bloc<QueueEvent, QueueState> {
       _hasMore = _currentPage < totalPages;
 
       emit(
-        QueueLoaded(queue: List.from(_queue), hasMoreData: _hasMore, currentPage: _currentPage, totalPages: totalPages),
+        QueueLoaded(
+          queue: List.from(_queue),
+          hasMoreData: _hasMore,
+          currentPage: _currentPage,
+          totalPages: totalPages,
+        ),
       );
     } catch (e) {
       emit(QueueError('Ошибка при загрузке очереди: $e'));
     }
   }
 
-  Future<void> _onSearchQueue(SearchQueue event, Emitter<QueueState> emit) async {
+  Future<void> _onSearchQueue(
+    SearchQueue event,
+    Emitter<QueueState> emit,
+  ) async {
     emit(QueueLoading());
 
     try {
-      final query = GetQueueQuery(name: event.query, page: 1, pageSize: event.pageSize ?? 20);
+      final query = GetQueueQuery(
+        name: event.query,
+        page: 1,
+        pageSize: event.pageSize ?? 20,
+      );
 
       final response = await _queueDataSource.getQueue(query);
 
@@ -94,7 +107,11 @@ class QueueBloc extends Bloc<QueueEvent, QueueState> {
           final client = await _clientDataSource.getClientById(item.clientId);
           item.client = client;
         } catch (e) {
-          emit(QueueError('Ошибка загрузки клиента для clientId ${item.clientId}: $e'));
+          emit(
+            QueueError(
+              'Ошибка загрузки клиента для clientId ${item.clientId}: $e',
+            ),
+          );
         }
       }
 
@@ -111,7 +128,10 @@ class QueueBloc extends Bloc<QueueEvent, QueueState> {
     }
   }
 
-  Future<void> _onAddQueueItem(AddQueueItem event, Emitter<QueueState> emit) async {
+  Future<void> _onAddQueueItem(
+    AddQueueItem event,
+    Emitter<QueueState> emit,
+  ) async {
     emit(QueueLoading());
     try {
       final token = await _tokenStorage.getAccessToken();
@@ -130,7 +150,10 @@ class QueueBloc extends Bloc<QueueEvent, QueueState> {
     }
   }
 
-  Future<void> _onDeleteQueueItem(DeleteQueueItem event, Emitter<QueueState> emit) async {
+  Future<void> _onDeleteQueueItem(
+    DeleteQueueItem event,
+    Emitter<QueueState> emit,
+  ) async {
     emit(QueueLoading());
     try {
       final token = await _tokenStorage.getAccessToken();
@@ -148,7 +171,10 @@ class QueueBloc extends Bloc<QueueEvent, QueueState> {
     }
   }
 
-  Future<void> _onCloseQueueItem(CloseQueueItem event, Emitter<QueueState> emit) async {
+  Future<void> _onCloseQueueItem(
+    CloseQueueItem event,
+    Emitter<QueueState> emit,
+  ) async {
     emit(QueueLoading());
     try {
       final token = await _tokenStorage.getAccessToken();

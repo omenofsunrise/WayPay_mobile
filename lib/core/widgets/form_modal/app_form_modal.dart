@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:waypay/core/theme/app_colors.dart';
-import 'package:waypay/core/theme/app_style.dart';
-import 'package:waypay/core/widgets/form_modal/form_field_config.dart';
-import 'package:waypay/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/form_modal/form_field_config.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 
 class AppFormModal extends StatelessWidget {
   final String title;
