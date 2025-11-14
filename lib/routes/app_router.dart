@@ -6,6 +6,7 @@ import 'package:waypay/features/auth/presentation/screens/pin_code_screen.dart';
 import 'package:waypay/features/bottom_navigation_bar/main_layout.dart';
 import 'package:waypay/features/calc/calculator_page.dart';
 import 'package:waypay/features/chat/presentation/screens/all_chat_screen.dart';
+import 'package:waypay/features/credit/presentation/screens/create_credit/new_credit_creation_screen.dart';
 import 'package:waypay/features/credit/presentation/screens/credit_screen.dart';
 import 'package:waypay/features/home/presentation/screens/home_screen.dart';
 import 'package:waypay/features/blog/presentation/screens/blog_screen.dart';
@@ -49,6 +50,9 @@ class AppRouter {
           Routes.creditsScreen.toPath,
           Routes.blogCreen.toPath,
           Routes.calculatorScreen.toPath,
+          Routes.newCreditProductsScreen.toPath,
+          Routes.newCreditDetailsScreen.toPath,
+          Routes.newCreditSchedulesScreen.toPath,
         };
         if (mainScreens.contains(here)) {
           return null;
@@ -91,6 +95,24 @@ class AppRouter {
         path: Routes.pinCodeScreen.toPath,
         name: Routes.pinCodeScreen.toName,
         builder: (context, state) => const PinCodeScreen(),
+      ),
+
+      GoRoute(
+        path: Routes.newCreditDetailsScreen.toPath,
+        name: Routes.newCreditDetailsScreen.toName,
+        builder: (context, state) => const NewCreditCreationScreen(),
+      ),
+
+      GoRoute(
+        path: Routes.newCreditProductsScreen.toPath,
+        name: Routes.newCreditProductsScreen.toName,
+        builder: (context, state) => const NewCreditCreationScreen(),
+      ),
+
+      GoRoute(
+        path: Routes.newCreditSchedulesScreen.toPath,
+        name: Routes.newCreditSchedulesScreen.toName,
+        builder: (context, state) => const NewCreditCreationScreen(),
       ),
 
       StatefulShellRoute.indexedStack(

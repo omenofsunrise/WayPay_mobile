@@ -15,6 +15,9 @@ enum Routes {
   chatScreen,
   blogCreen,
   calculatorScreen,
+  newCreditProductsScreen,
+  newCreditDetailsScreen,
+  newCreditSchedulesScreen,
 }
 
 extension RoutesExtension on Routes {
@@ -48,6 +51,12 @@ extension RoutesExtension on Routes {
         return '/blog_creen';
       case Routes.calculatorScreen:
         return '/calculator_screen';
+      case Routes.newCreditProductsScreen:
+        return '/new_credit_products_screen';
+      case Routes.newCreditDetailsScreen:
+        return '/new_credit_details_screen';
+      case Routes.newCreditSchedulesScreen:
+        return '/new_credit_schedules_screen';
     }
   }
 
@@ -81,6 +90,12 @@ extension RoutesExtension on Routes {
         return 'BLOG_SCREEN';
       case Routes.calculatorScreen:
         return 'CALCULATOR_SCREEN';
+      case Routes.newCreditProductsScreen:
+        return 'NEW_CREDIT_PRODUCTS_SCREEN';
+      case Routes.newCreditDetailsScreen:
+        return 'NEW_CREDIT_DETAILS_SCREEN';
+      case Routes.newCreditSchedulesScreen:
+        return 'NEW_CREDIT_SCHEDULES_SCREEN';
     }
   }
 }

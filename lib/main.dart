@@ -3,6 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay/core/di/dependency_injection.dart';
+import 'package:waypay/core/theme/app_colors.dart';
 import 'package:waypay/features/admin_panel/presentation/cubit/company_cubit.dart';
 import 'package:waypay/features/analytics/presentation/cubit/analytic_items_cubit.dart';
 import 'package:waypay/features/analytics/presentation/cubit/debt_dynamic_cubit.dart';
@@ -15,6 +16,7 @@ import 'package:waypay/features/blog/presentation/cubit/profile_blog_cubit.dart'
 import 'package:waypay/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
 import 'package:waypay/features/credit/presentation/bloc/credit_bloc.dart';
 import 'package:waypay/features/credit/presentation/bloc/object_type_bloc.dart';
+import 'package:waypay/features/credit/presentation/cubit/credit_creation_provider.dart';
 import 'package:waypay/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
 import 'package:waypay/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
 import 'package:waypay/features/investors/presentation/bloc/investors_bloc.dart';
@@ -90,6 +92,7 @@ class _MyAppState extends State<MyApp> {
               useMaterial3: true,
               appBarTheme: const AppBarTheme(
                 iconTheme: IconThemeData(color: Colors.white),
+                backgroundColor: Color(AppColors.background),
               ),
             ),
           );
@@ -117,6 +120,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (_) => getIt<ProfileBlogCubit>()),
         BlocProvider(create: (_) => getIt<ChatListBloc>()),
         BlocProvider(create: (context) => ObjectTypeBloc()),
+        BlocProvider(create: (_) => CreditCreationCubit()),
       ],
       child: app,
     );

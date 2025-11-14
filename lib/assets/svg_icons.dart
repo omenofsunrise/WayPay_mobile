@@ -4,6 +4,7 @@ class SvgIcons {
   SvgIcons._();
 
   static const String bell = 'assets/icons/bell.svg';
+  static const String arrowBack = 'assets/icons/arrowBack.svg';
 
   static const String blog = 'assets/icons/blog.svg';
   static const String menuCalculator = 'assets/icons/menuCalculator.svg';

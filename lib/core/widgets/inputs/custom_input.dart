@@ -9,6 +9,7 @@ class CustomInput extends StatefulWidget {
   final bool isDateField;
   final VoidCallback? onTap;
   final InputType inputType;
+  final ValueChanged<String>? onChanged;
 
   const CustomInput({
     super.key,
@@ -18,6 +19,7 @@ class CustomInput extends StatefulWidget {
     this.isDateField = false,
     this.onTap,
     this.inputType = InputType.text,
+    this.onChanged,
   });
 
   @override
@@ -39,6 +41,8 @@ class _CustomInputState extends State<CustomInput> {
     if (widget.inputType == InputType.fullname) {
       _formatFullName();
     }
+    // Вызываем внешний onChanged
+    widget.onChanged?.call(widget.controller.text);
   }
 
   void _formatFullName() {
@@ -91,6 +95,7 @@ class _CustomInputState extends State<CustomInput> {
               : widget.keyboardType,
           readOnly: widget.isDateField,
           onTap: widget.onTap,
+          onChanged: widget.onChanged, // Передаем onChanged в TextField
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,

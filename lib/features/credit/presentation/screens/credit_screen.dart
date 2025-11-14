@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:waypay/core/widgets/buttons/add_button.dart';
 import 'package:waypay/core/widgets/cards/credit_card.dart';
 import 'package:waypay/core/widgets/inputs/search_field.dart';
@@ -20,6 +21,7 @@ import 'package:waypay/features/credit/presentation/bloc/credit_event.dart';
 import 'package:waypay/features/credit/presentation/bloc/credit_state.dart';
 import 'package:waypay/features/credit/presentation/widgets/credit_filters.dart';
 import 'package:waypay/features/profile/data/models/employee.dart';
+import 'package:waypay/routes/routes.dart';
 
 class CreditsScreen extends StatefulWidget {
   const CreditsScreen({super.key});
@@ -124,6 +126,8 @@ class _CreditsScreenState extends State<CreditsScreen> {
             child: AddButton(
               onPressed: () {
                 print('Add button pressed');
+                // Навигация на первый экран создания кредита
+                context.push(Routes.newCreditDetailsScreen.toPath);
               },
             ),
           ),
