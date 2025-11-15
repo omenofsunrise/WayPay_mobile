@@ -51,7 +51,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
       final dir = await getTemporaryDirectory();
       final filename =
-          'waypay_mobile-raschet-${DateFormat('dd.MM.yyyy').format(DateTime.now())}.pdf';
+          'WayPay-raschet-${DateFormat('dd.MM.yyyy').format(DateTime.now())}.pdf';
       final file = File('${dir.path}/$filename');
       await file.writeAsBytes(bytes, flush: true);
 
@@ -397,7 +397,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           card(
             pw.Center(
               child: pw.Text(
-                '© ${DateTime.now().year} waypay_mobile. Все права защищены.',
+                '© ${DateTime.now().year} WayPay. Все права защищены.',
                 style: pw.TextStyle(fontSize: 12, color: textGrey),
               ),
             ),
@@ -493,26 +493,29 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const AppDrawer(),
-      backgroundColor: const Color(AppColors.primary),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        surfaceTintColor: Colors.transparent,
-        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.white,
+        backgroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Color(AppColors.black)),
         elevation: 0,
         title: Text(
           'Калькулятор',
-          style: AppStyle.medium20.copyWith(
-            color: const Color(AppColors.background),
+          style: AppStyle.manrope(
+            size: 18,
+            weight: FontWeight.w600,
+            color: const Color(AppColors.black),
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.ios_share, color: Colors.white),
+            icon: const Icon(Icons.ios_share, color: Colors.black),
             tooltip: 'Поделиться расчётом (PDF)',
             onPressed: _generateAndSharePdf,
           ),
 
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
+            icon: const Icon(Icons.refresh, color: Colors.black),
             tooltip: 'Сбросить',
             onPressed: () {
               setState(() {
@@ -534,13 +537,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         children: [
           Expanded(
             child: Container(
-              decoration: const BoxDecoration(
-                color: Color(AppColors.background),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
+              color: Colors.white,
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -705,7 +702,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       width: double.infinity,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: Color(AppColors.background),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: Color(AppColors.borderColor)),
           boxShadow: [
@@ -723,7 +720,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Результаты расчёта',
+                'Результаты',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
@@ -760,7 +757,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               Row(
                 children: [
                   Text(
-                    'Последний месяц\nоплаты',
+                    'Последний платёж',
                     style: AppStyle.manrope(
                       size: 15,
                       weight: FontWeight.w400,
