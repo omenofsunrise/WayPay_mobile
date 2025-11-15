@@ -23,7 +23,7 @@ class VideosTabContent extends StatefulWidget {
 
 class _VideosTabContentState extends State<VideosTabContent> {
   late final ChatVideosBloc bloc;
-  static const String _filesBase = 'https://web.waypay_mobile.one:5002';
+  static const String _filesBase = 'https://web.waypay.one:5002';
   final ScrollController _scrollController = ScrollController();
 
   @override

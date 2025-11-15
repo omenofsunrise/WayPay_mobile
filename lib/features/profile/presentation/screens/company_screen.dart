@@ -38,7 +38,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
   String? _resolvePhotoUrl(String? path) {
     if (path == null || path.isEmpty) return null;
     if (path.startsWith('http')) return path;
-    return 'http://test.waypay_mobile.one:5000$path';
+    return 'https://web.waypay.one:5002$path';
   }
 
   Future<void> _pickImage() async {

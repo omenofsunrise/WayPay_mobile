@@ -121,7 +121,7 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
         });
       } else {
         if (_firstPin == pin) {
-          final dio = createDio(baseUrl: 'https://web.waypay_mobile.one:5001');
+          final dio = createDio(baseUrl: 'https://web.waypay.one:5001');
           final authDataSource = AuthRemoteDataSourceImpl(dio);
 
           try {

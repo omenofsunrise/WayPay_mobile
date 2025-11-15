@@ -80,7 +80,7 @@ class _ChatScreenState extends State<ChatScreen> {
   int? _editingMessageId;
   bool get _isEditing => _editingMessageId != null;
 
-  static const String _filesBase = 'https://web.waypay_mobile.one:5002';
+  static const String _filesBase = 'https://web.waypay.one:5002';
 
   @override
   void initState() {

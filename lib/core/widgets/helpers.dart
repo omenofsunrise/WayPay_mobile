@@ -55,7 +55,7 @@ final _avatarColors = [
 String? _resolvePhotoUrl(String? path) {
   if (path == null || path.isEmpty) return null;
   if (path.startsWith('http')) return path;
-  return 'https://file.waypay_mobile.one${path.startsWith('/') ? '' : '/'}$path';
+  return 'https://file.waypay.one${path.startsWith('/') ? '' : '/'}$path';
 }
 
 Color _getColorFromName(String name) {

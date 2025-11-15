@@ -26,7 +26,7 @@ class FilesTabContent extends StatefulWidget {
 class _FilesTabContentState extends State<FilesTabContent> {
   late final ChatFilesBloc bloc;
   final ScrollController _scrollController = ScrollController();
-  static const String _filesBase = 'https://web.waypay_mobile.one:5002';
+  static const String _filesBase = 'https://web.waypay.one:5002';
 
   @override
   void initState() {

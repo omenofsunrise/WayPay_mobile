@@ -15,8 +15,8 @@ class MainLayout extends StatelessWidget {
     _NavItemConfig(icon: SvgIcons.todo),
     _NavItemConfig(icon: SvgIcons.chat),
     _NavItemConfig(icon: SvgIcons.add, activeIcon: SvgIcons.add),
-    _NavItemConfig(icon: SvgIcons.doc2),
-    _NavItemConfig(icon: SvgIcons.calc),
+    _NavItemConfig(icon: SvgIcons.blog),
+    _NavItemConfig(icon: SvgIcons.calculator),
   ];
 
   @override

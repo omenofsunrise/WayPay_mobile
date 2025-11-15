@@ -3,12 +3,13 @@ part of 'resources.dart';
 class SvgIcons {
   SvgIcons._();
 
-  static const String add = 'assets/icons/add.svg';
+  static const String add = 'assets/icons/newCredit.svg';
   static const String allCredits = 'assets/icons/all_credits.svg';
   static const String analyticsLogo = 'assets/icons/analyticsLogo.svg';
   static const String back = 'assets/icons/back.svg';
   static const String bell = 'assets/icons/bell.svg';
   static const String blogLogo = 'assets/icons/blogLogo.svg';
+  static const String blog = 'assets/icons/blog.svg';
   static const String book = 'assets/icons/book.svg';
   static const String calc = 'assets/icons/calc.svg';
   static const String calcLogo = 'assets/icons/calcLogo.svg';

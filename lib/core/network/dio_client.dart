@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'token_storage.dart';
 
-Dio createDio({String baseUrl = 'https://web.waypay_mobile.one:5001'}) {
+Dio createDio({String baseUrl = 'https://web.waypay.one:5001'}) {
   final tokenStorage = TokenStorage();
 
   final dio = Dio(

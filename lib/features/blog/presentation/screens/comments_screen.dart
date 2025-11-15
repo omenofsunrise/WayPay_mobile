@@ -75,8 +75,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
     if (url == null || url.isEmpty) return '';
     if (url.startsWith('/')) {
       return isAvatar
-          ? 'https://web.waypay_mobile.one:5001$url'
-          : 'https://web.waypay_mobile.one:5002$url';
+          ? 'https://web.waypay.one:5001$url'
+          : 'https://web.waypay.one:5002$url';
     }
     return url;
   }

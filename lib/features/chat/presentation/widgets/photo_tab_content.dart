@@ -88,7 +88,7 @@ class _PhotosTabContentState extends State<PhotosTabContent> {
 
     final src = photo.fileUrl!.startsWith('http')
         ? photo.fileUrl!
-        : 'https://web.waypay_mobile.one:5002/${photo.fileUrl!}';
+        : 'https://web.waypay.one:5002/${photo.fileUrl!}';
 
     return GestureDetector(
       onTap: () {

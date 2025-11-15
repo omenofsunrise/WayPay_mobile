@@ -81,7 +81,7 @@ final getIt = GetIt.instance;
 Future<void> initDependencies() async {
   getIt.registerLazySingleton(() => createDio());
   getIt.registerLazySingleton<Dio>(
-    () => createDio(baseUrl: 'https://web.waypay_mobile.one:5002'),
+    () => createDio(baseUrl: 'https://web.waypay.one:5002'),
     instanceName: 'second',
   );
   getIt.registerLazySingleton(() => TokenStorage());
@@ -156,7 +156,7 @@ Future<void> initDependencies() async {
   );
   getIt.registerLazySingleton<ChatHubService>(
     () => ChatHubService(
-      baseUrl: 'https://web.waypay_mobile.one:5002',
+      baseUrl: 'https://web.waypay.one:5002',
       tokenProvider: () async => await getIt<TokenStorage>().getAccessToken(),
     ),
   );
