@@ -10,9 +10,18 @@ class NoteRemoteDataSourceImpl implements NoteRemoteDataSource {
 
   @override
   Future<List<NoteModel>> fetchNotesByCreditId(int creditId) async {
+    return fetchNotesByType('credit', creditId);
+  }
+
+  @override
+  Future<List<NoteModel>> fetchNotesByType(
+    String type,
+    int noteableId, {
+    bool includeFiles = true,
+  }) async {
     final response = await dio.get(
-      '/api/Note/by-type/credit/$creditId',
-      queryParameters: {'includeFiles': true},
+      '/api/Note/by-type/$type/$noteableId',
+      queryParameters: {'includeFiles': includeFiles},
     );
 
     if (response.statusCode == 200) {
