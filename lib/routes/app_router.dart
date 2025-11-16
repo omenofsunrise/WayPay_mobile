@@ -216,7 +216,10 @@ class AppRouter {
                   GoRoute(
                     path: Routes.queueListScreen.toPath,
                     name: Routes.queueListScreen.toName,
-                    builder: (context, state) => const QueueListScreen(),
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => ClientsBloc(),
+                      child: const QueueListScreen(),
+                    ),
                   ),
                   GoRoute(
                     path: Routes.blacklistScreen.toPath,

@@ -1,66 +1,107 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/header.dart';
 import 'package:waypay_mobile/core/widgets/search_field.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
+import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
+import 'package:waypay_mobile/features/clients/presentation/bloc/queue/queue_bloc.dart';
+import 'package:waypay_mobile/features/clients/data/models/queue/queue_model.dart';
 import 'package:waypay_mobile/features/home/presentation/widgets/queue_client_card.dart';
+import 'package:waypay_mobile/features/clients/data/models/queue/queue_request_model.dart';
 
-class QueueListScreen extends StatefulWidget {
+class QueueListScreen extends StatelessWidget {
   const QueueListScreen({super.key});
 
   @override
-  State<QueueListScreen> createState() => _QueueListScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => QueueBloc()..add(LoadQueue(refresh: true)),
+      child: const _QueueListView(),
+    );
+  }
 }
 
-class _QueueListScreenState extends State<QueueListScreen> {
+class _QueueListView extends StatefulWidget {
+  const _QueueListView();
+
+  @override
+  State<_QueueListView> createState() => _QueueListViewState();
+}
+
+class _QueueListViewState extends State<_QueueListView> {
   final TextEditingController _searchController = TextEditingController();
-  final List<QueueEntry> _entries = _mockQueue;
-  late List<QueueEntry> _filteredEntries;
+  final NumberFormat _currencyFormat =
+      NumberFormat.currency(locale: 'ru_RU', symbol: '₽');
+  Timer? _debounce;
   bool _showSearchHint = false;
+  String _lastSubmittedQuery = '';
+
+  static const _searchDelay = Duration(milliseconds: 400);
 
   @override
   void initState() {
     super.initState();
-    _filteredEntries = _entries;
-    _searchController.addListener(_handleSearch);
-  }
-
-  void _handleSearch() => _applyFilter(_searchController.text);
-
-  void _applyFilter(String raw) {
-    final query = raw.trim();
-    final digits = query.replaceAll(RegExp(r'\D'), '');
-    final hintNeeded =
-        query.isNotEmpty && query.length < 4 && digits.length < 11;
-
-    if (query.isEmpty) {
-      setState(() {
-        _filteredEntries = _entries;
-        _showSearchHint = false;
-      });
-      return;
-    }
-
-    final lower = query.toLowerCase();
-
-    setState(() {
-      _filteredEntries = _entries.where((entry) {
-        final matchesNumber = entry.number.toLowerCase().contains(lower);
-        final matchesPhone =
-            digits.isNotEmpty && entry.phoneDigits.contains(digits);
-        final matchesName = entry.fullName.toLowerCase().contains(lower);
-        return matchesNumber || matchesPhone || matchesName;
-      }).toList();
-      _showSearchHint = hintNeeded;
-    });
+    _searchController.addListener(_onSearchChanged);
+    context
+        .read<ClientsBloc>()
+        .add(LoadClients(refresh: true, page: 1, pageSize: 10));
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_handleSearch);
-    _searchController.dispose();
+    _debounce?.cancel();
+    _searchController
+      ..removeListener(_onSearchChanged)
+      ..dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    final raw = _searchController.text;
+    _debounce?.cancel();
+
+    final query = raw.trim();
+    final digits = _normalizeDigits(query);
+
+    if (query.isEmpty) {
+      setState(() => _showSearchHint = false);
+      _lastSubmittedQuery = '';
+      context.read<QueueBloc>().add(LoadQueue(refresh: true));
+      return;
+    }
+
+    final meetsPhoneRequirement = digits.length >= 11;
+    final meetsNameRequirement = query.length >= 4;
+
+    if (meetsPhoneRequirement || meetsNameRequirement) {
+      setState(() => _showSearchHint = false);
+
+      _debounce = Timer(_searchDelay, () {
+        if (!mounted) return;
+        _lastSubmittedQuery = query;
+        context.read<QueueBloc>().add(SearchQueue(query, pageSize: 20));
+      });
+    } else {
+      setState(() => _showSearchHint = true);
+    }
+  }
+
+  String _normalizeDigits(String input) => input.replaceAll(RegExp(r'\D'), '');
+
+  void _retryLastSearch() {
+    if (_lastSubmittedQuery.isEmpty) {
+      context.read<QueueBloc>().add(LoadQueue(refresh: true));
+      return;
+    }
+    context
+        .read<QueueBloc>()
+        .add(SearchQueue(_lastSubmittedQuery, pageSize: 20));
   }
 
   void _showCreateQueueDialog() {
@@ -74,7 +115,14 @@ class _QueueListScreenState extends State<QueueListScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => const _CreateQueueModal(),
+      builder: (_) => BlocProvider.value(
+        value: context.read<QueueBloc>(),
+        child: BlocProvider(
+          create: (_) => ClientsBloc()
+            ..add(LoadClients(refresh: true, page: 1, pageSize: 10)),
+          child: const _CreateQueueModal(),
+        ),
+      ),
     ).whenComplete(() => BottomNavController.instance.show());
   }
 
@@ -91,7 +139,7 @@ class _QueueListScreenState extends State<QueueListScreen> {
               SliverToBoxAdapter(
                 child: Row(
                   children: [
-                    Expanded(
+                    const Expanded(
                       child: Header(
                         title: 'Очередь',
                         showBackButton: true,
@@ -118,7 +166,7 @@ class _QueueListScreenState extends State<QueueListScreen> {
                 child: SearchField(
                   controller: _searchController,
                   hintText: 'Поиск',
-                  onChanged: _applyFilter,
+                  onChanged: (_) => _onSearchChanged(),
                 ),
               ),
               if (_showSearchHint)
@@ -134,22 +182,9 @@ class _QueueListScreenState extends State<QueueListScreen> {
                     ),
                   ),
                 ),
-              const SliverToBoxAdapter(child: SizedBox(height: 16)),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final entry = _filteredEntries[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: QueueClientCard(
-                      number: entry.number,
-                      date: entry.date,
-                      fullName: entry.fullName,
-                      amount: entry.amount,
-                      phone: entry.phone,
-                      onTap: () {},
-                    ),
-                  );
-                }, childCount: _filteredEntries.length),
+              const SliverToBoxAdapter(child: SizedBox(height: 12)),
+              BlocBuilder<QueueBloc, QueueState>(
+                builder: (context, state) => _buildResultSliver(state),
               ),
             ],
           ),
@@ -157,49 +192,92 @@ class _QueueListScreenState extends State<QueueListScreen> {
       ),
     );
   }
+
+  Widget _buildResultSliver(QueueState state) {
+    if (state is QueueLoading) {
+      return const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.only(top: 32),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
+    if (state is QueueError) {
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 24),
+          child: Column(
+            children: [
+              Text(
+                state.message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.red),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: _retryLastSearch,
+                child: const Text('Повторить'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (state is QueueLoaded) {
+      if (state.queue.isEmpty) {
+        return const SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.only(top: 24),
+            child: Text(
+              'Очередь пуста',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Color(AppColors.darkGrey),
+              ),
+            ),
+          ),
+        );
+      }
+      return _buildQueueList(state.queue);
+    }
+
+    return const SliverToBoxAdapter(child: SizedBox.shrink());
+  }
+
+  SliverList _buildQueueList(List<QueueItemModel> queue) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          final item = queue[index];
+          final client = item.client;
+
+          final number = '№ ${item.positionInQueue}';
+          final date =
+              'от ${DateFormat('dd.MM.yyyy').format(item.createdAt)}';
+          final amount = _currencyFormat.format(item.sum);
+          final phone = client?.phone ?? '-';
+          final fullName = client?.fullName ?? 'Клиент ${item.clientId}';
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: QueueClientCard(
+              number: number,
+              date: date,
+              fullName: fullName,
+              amount: amount,
+              phone: phone,
+              onTap: () {},
+            ),
+          );
+        },
+        childCount: queue.length,
+      ),
+    );
+  }
 }
-
-class QueueEntry {
-  const QueueEntry({
-    required this.number,
-    required this.date,
-    required this.fullName,
-    required this.amount,
-    required this.phone,
-  });
-
-  final String number;
-  final String date;
-  final String fullName;
-  final String amount;
-  final String phone;
-
-  String get phoneDigits => phone.replaceAll(RegExp(r'\D'), '');
-}
-
-const List<QueueEntry> _mockQueue = [
-  QueueEntry(
-    number: '№ 234',
-    date: 'от 15.10.2025',
-    fullName: 'Мирошниченко Владислава Филипповна',
-    amount: '15 000₽',
-    phone: '+7(999)999-99-99',
-  ),
-  QueueEntry(
-    number: '№ 235',
-    date: 'от 12.10.2025',
-    fullName: 'Антонов Сергей Леонидович',
-    amount: '20 500₽',
-    phone: '+7(912)123-45-67',
-  ),
-  QueueEntry(
-    number: '№ 236',
-    date: 'от 10.10.2025',
-    fullName: 'Семенова Алина Викторовна',
-    amount: '11 000₽',
-    phone: '+7(995)321-44-55',
-  ),
-];
 
 class _CreateQueueModal extends StatefulWidget {
   const _CreateQueueModal();
@@ -213,34 +291,13 @@ class _CreateQueueModalState extends State<_CreateQueueModal> {
   final _amountController = TextEditingController();
   bool _highPriority = false;
   bool _canSubmit = false;
+  ClientModel? _selectedClient;
 
   @override
   void initState() {
     super.initState();
     _clientController.addListener(_handleChange);
     _amountController.addListener(_handleChange);
-  }
-
-  Future<void> _pickClient() async {
-    BottomNavController.instance.hide();
-    final client = await showModalBottomSheet<_ClientPickerResult>(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      clipBehavior: Clip.antiAlias,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) => const _ClientPickerModal(),
-    );
-    BottomNavController.instance.show();
-
-    if (client != null) {
-      setState(() {
-        _clientController.text = client.fullName;
-      });
-    }
   }
 
   @override
@@ -253,12 +310,66 @@ class _CreateQueueModalState extends State<_CreateQueueModal> {
   }
 
   void _handleChange() {
-    final filled =
-        _clientController.text.trim().isNotEmpty &&
-        _amountController.text.trim().isNotEmpty;
+    final hasClient = _selectedClient != null;
+    final digits =
+        _amountController.text.replaceAll(RegExp(r'\D'), '');
+    final hasAmount = digits.isNotEmpty;
+    final filled = hasClient && hasAmount;
     if (_canSubmit != filled) {
       setState(() => _canSubmit = filled);
     }
+  }
+
+  Future<void> _pickClient() async {
+    BottomNavController.instance.hide();
+    final client = await showModalBottomSheet<ClientModel>(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      clipBehavior: Clip.antiAlias,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => BlocProvider(
+        create: (_) => ClientsBloc(),
+        child: const _ClientPickerModal(),
+      ),
+    );
+    BottomNavController.instance.show();
+
+    if (client != null) {
+      setState(() {
+        _selectedClient = client;
+        _clientController.text = client.fullName;
+      });
+      _handleChange();
+    }
+  }
+
+  double? _parseAmount() {
+    final digits =
+        _amountController.text.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) return null;
+    return double.tryParse(digits);
+  }
+
+  void _submit() {
+    if (!_canSubmit || _selectedClient == null) return;
+    final amount = _parseAmount();
+    if (amount == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Введите корректную сумму')),
+      );
+      return;
+    }
+    final request = QueueRequestModel(
+      sum: amount,
+      clientId: _selectedClient!.id,
+      priority: _highPriority ? 1 : 0,
+    );
+    context.read<QueueBloc>().add(AddQueueItem(request));
+    Navigator.of(context).pop();
   }
 
   @override
@@ -305,20 +416,16 @@ class _CreateQueueModalState extends State<_CreateQueueModal> {
           ),
           const SizedBox(height: 12),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
                 'Высокий приоритет',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Color(AppColors.darkGrey),
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
-              const Spacer(),
               Switch(
                 value: _highPriority,
+                activeThumbColor: const Color(AppColors.primary),
                 onChanged: (value) => setState(() => _highPriority = value),
-                activeColor: const Color(AppColors.primary),
               ),
             ],
           ),
@@ -327,21 +434,24 @@ class _CreateQueueModalState extends State<_CreateQueueModal> {
             children: [
               Expanded(
                 child: DefaultButton(
-                  text: 'Отменить',
-                  color: const Color(0xFFB8BEC8),
-                  textColor: const Color(AppColors.black),
+                  text: 'Отмена',
+                  isGreen: false,
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: DefaultButton(
-                  text: 'Применить',
+                  text: 'Добавить',
+                  isGreen: true,
                   color: _canSubmit
                       ? const Color(AppColors.primary)
                       : const Color(0xFFA8DADB),
                   textColor: Colors.white,
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () {
+                    if (!_canSubmit) return;
+                    _submit();
+                  },
                 ),
               ),
             ],
@@ -407,15 +517,15 @@ class _ModalTextFieldState extends State<_ModalTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final bool hasValue = widget.controller.text.trim().isNotEmpty;
-    final bool isActive = _focusNode.hasFocus || hasValue;
+    final hasValue = widget.controller.text.trim().isNotEmpty;
+    final isActive = _focusNode.hasFocus || hasValue;
     const inactiveColor = Color(0xFFD9DDE5);
     const activeColor = Color(AppColors.primary);
 
-    OutlineInputBorder _border(Color color) => OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: color, width: 1.5),
-    );
+    OutlineInputBorder border(Color color) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: color, width: 1.5),
+        );
 
     return TextField(
       controller: widget.controller,
@@ -432,22 +542,14 @@ class _ModalTextFieldState extends State<_ModalTextField> {
           horizontal: 12,
           vertical: 14,
         ),
-        floatingLabelBehavior: FloatingLabelBehavior.auto,
+        border: border(inactiveColor),
+        enabledBorder: border(inactiveColor),
+        focusedBorder: border(activeColor),
         labelStyle: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: isActive ? activeColor : const Color(0xFF9CA3AF),
+          color: isActive ? activeColor : const Color(0xFF7C838D),
+          fontWeight: FontWeight.w500,
         ),
-        border: _border(isActive ? activeColor : inactiveColor),
-        enabledBorder: _border(isActive ? activeColor : inactiveColor),
-        focusedBorder: _border(activeColor),
       ),
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-        color: Color(AppColors.black),
-      ),
-      cursorColor: activeColor,
     );
   }
 }
@@ -461,74 +563,79 @@ class _ClientPickerModal extends StatefulWidget {
 
 class _ClientPickerModalState extends State<_ClientPickerModal> {
   final TextEditingController _searchController = TextEditingController();
-  final List<_ClientPickerResult> _clients = _mockClientsList;
-  late List<_ClientPickerResult> _filtered;
+  Timer? _debounce;
   bool _showSearchHint = false;
+  bool _hasValidSearch = false;
+  String _lastSubmittedQuery = '';
+
+  static const _searchDelay = Duration(milliseconds: 400);
 
   @override
   void initState() {
     super.initState();
-    _filtered = _clients;
+    _searchController.addListener(_onSearchChanged);
   }
-
-  void _applyFilter(String raw) {
-    final query = raw.trim();
-    final digits = _normalizeDigits(query);
-
-    if (query.isEmpty) {
-      setState(() {
-        _filtered = _clients;
-        _showSearchHint = false;
-      });
-      return;
-    }
-
-    if (digits.length >= 11) {
-      setState(() {
-        _filtered = _clients
-            .where((client) => client.phoneDigits.contains(digits))
-            .toList();
-        _showSearchHint = false;
-      });
-      return;
-    }
-
-    if (query.length >= 4) {
-      final lower = query.toLowerCase();
-      setState(() {
-        _filtered = _clients
-            .where((client) => client.fullName.toLowerCase().contains(lower))
-            .toList();
-        _showSearchHint = false;
-      });
-      return;
-    }
-
-    setState(() {
-      _filtered = _clients;
-      _showSearchHint = true;
-    });
-  }
-
-  String _normalizeDigits(String input) => input.replaceAll(RegExp(r'\D'), '');
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _debounce?.cancel();
+    _searchController
+      ..removeListener(_onSearchChanged)
+      ..dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    final raw = _searchController.text;
+    _debounce?.cancel();
+
+    final query = raw.trim();
+    final digits = query.replaceAll(RegExp(r'\D'), '');
+
+    if (query.isEmpty) {
+      setState(() {
+        _showSearchHint = false;
+        _hasValidSearch = false;
+      });
+      context.read<ClientsBloc>().add(LoadClients(refresh: true, page: 1, pageSize: 10));
+      return;
+    }
+
+    final meetsPhoneRequirement = digits.length >= 11;
+    final meetsNameRequirement = query.length >= 4;
+
+    if (meetsPhoneRequirement || meetsNameRequirement) {
+      setState(() {
+        _showSearchHint = false;
+        _hasValidSearch = true;
+      });
+      _debounce = Timer(_searchDelay, () {
+        if (!mounted) return;
+        _lastSubmittedQuery = query;
+        context.read<ClientsBloc>().add(SearchClients(query, pageSize: 10));
+      });
+    } else {
+      setState(() {
+        _showSearchHint = true;
+        _hasValidSearch = false;
+      });
+    }
+  }
+
+  void _retryLastSearch() {
+    if (_lastSubmittedQuery.isEmpty) return;
+    context
+        .read<ClientsBloc>()
+        .add(SearchClients(_lastSubmittedQuery, pageSize: 10));
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-        top: 24,
-      ),
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
@@ -548,7 +655,7 @@ class _ClientPickerModalState extends State<_ClientPickerModal> {
           SearchField(
             controller: _searchController,
             hintText: 'Поиск',
-            onChanged: _applyFilter,
+            onChanged: (_) => _onSearchChanged(),
           ),
           if (_showSearchHint)
             const Padding(
@@ -567,32 +674,8 @@ class _ClientPickerModalState extends State<_ClientPickerModal> {
           const SizedBox(height: 16),
           SizedBox(
             height: 320,
-            child: ListView.separated(
-              itemCount: _filtered.length,
-              separatorBuilder: (_, __) =>
-                  const Divider(height: 16, color: Color(0xFFE5E5EA)),
-              itemBuilder: (_, index) {
-                final client = _filtered[index];
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  onTap: () => Navigator.of(context).pop(client),
-                  title: Text(
-                    client.fullName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Color(AppColors.black),
-                    ),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [Text(client.birthDate), Text(client.phone)],
-                  ),
-                  trailing: Text(
-                    'ID ${client.id}',
-                    style: const TextStyle(color: Color(AppColors.darkGrey)),
-                  ),
-                );
-              },
+            child: BlocBuilder<ClientsBloc, ClientsState>(
+              builder: (context, state) => _buildResults(state),
             ),
           ),
           const SizedBox(height: 16),
@@ -607,53 +690,92 @@ class _ClientPickerModalState extends State<_ClientPickerModal> {
       ),
     );
   }
+
+  String _formatDate(DateTime date) => DateFormat('dd.MM.yyyy').format(date);
+
+  Widget _buildResults(ClientsState state) {
+    if (!_hasValidSearch) {
+      if (_searchController.text.trim().isEmpty) {
+        return const Center(
+          child: Text(
+            'Введите ФИО или номер телефона, чтобы найти клиента.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Color(AppColors.darkGrey)),
+          ),
+        );
+      }
+      if (_showSearchHint) {
+        return const Center(
+          child: Text(
+            'Введите минимум 4 символа ФИО или полный номер телефона',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Color(AppColors.darkGrey)),
+          ),
+        );
+      }
+      return const SizedBox.shrink();
+    }
+
+    if (state is ClientsLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state is ClientsError) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            state.message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.red),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: _retryLastSearch,
+            child: const Text('Повторить'),
+          ),
+        ],
+      );
+    }
+    if (state is ClientsLoaded) {
+      if (state.clients.isEmpty) {
+        return const Center(
+          child: Text(
+            'Клиенты не найдены',
+            style: TextStyle(color: Color(AppColors.darkGrey)),
+          ),
+        );
+      }
+      return ListView.separated(
+        itemCount: state.clients.length,
+        separatorBuilder: (_, __) =>
+            const Divider(height: 16, color: Color(0xFFE5E5EA)),
+        itemBuilder: (_, index) {
+          final client = state.clients[index];
+          return ListTile(
+            contentPadding: EdgeInsets.zero,
+            onTap: () => Navigator.of(context).pop(client),
+            title: Text(
+              client.fullName,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Color(AppColors.black),
+              ),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(_formatDate(client.birthdate)),
+                Text(client.phone),
+              ],
+            ),
+            trailing: Text(
+              'ID ${client.id}',
+              style: const TextStyle(color: Color(AppColors.darkGrey)),
+            ),
+          );
+        },
+      );
+    }
+    return const SizedBox.shrink();
+  }
 }
-
-class _ClientPickerResult {
-  const _ClientPickerResult({
-    required this.fullName,
-    required this.id,
-    required this.birthDate,
-    required this.phone,
-  });
-
-  final String fullName;
-  final String id;
-  final String birthDate;
-  final String phone;
-
-  String get phoneDigits => phone.replaceAll(RegExp(r'\D'), '');
-}
-
-const _mockClientsList = [
-  _ClientPickerResult(
-    fullName: 'Мирошниченко Владислава Филипповна',
-    id: '235',
-    birthDate: '05.11.1987',
-    phone: '+7(999)999-99-99',
-  ),
-  _ClientPickerResult(
-    fullName: 'Иванова Анна Сергеевна',
-    id: '236',
-    birthDate: '12.03.1990',
-    phone: '+7(988)888-88-88',
-  ),
-  _ClientPickerResult(
-    fullName: 'Петров Алексей Владимирович',
-    id: '237',
-    birthDate: '22.07.1985',
-    phone: '+7(977)777-77-77',
-  ),
-  _ClientPickerResult(
-    fullName: 'Сидорова Наталья Михайловна',
-    id: '238',
-    birthDate: '14.01.1992',
-    phone: '+7(966)666-66-66',
-  ),
-  _ClientPickerResult(
-    fullName: 'Кузнецов Дмитрий Андреевич',
-    id: '239',
-    birthDate: '30.09.1980',
-    phone: '+7(955)555-55-55',
-  ),
-];
