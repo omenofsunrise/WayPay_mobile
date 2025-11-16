@@ -38,10 +38,6 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
   late TextEditingController _firstPaymentAmountController;
   late TextEditingController _termMonthsController;
 
-  bool _updatingFromPercent = false;
-  bool _updatingFromAmount = false;
-  bool _externalUpdate = false;
-
   @override
   void initState() {
     super.initState();
@@ -55,141 +51,82 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
   @override
   void didUpdateWidget(Step3SchedulesContent oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    // Обновляем контроллеры только если изменения пришли извне
-    if (!_updatingFromPercent && !_updatingFromAmount) {
-      _externalUpdate = true;
-      _updateControllers();
-      _externalUpdate = false;
-    }
+    _updateControllers();
   }
 
   void _updateControllers() {
-    // Обновляем поле процента (только целые числа)
-    if (widget.firstPayment > 0 && widget.totalAmount > 0) {
-      final percent = (widget.firstPayment / widget.totalAmount * 100).round();
-      if (_firstPaymentPercentController.text != percent.toString()) {
-        _firstPaymentPercentController.text = percent.toString();
-      }
-    } else {
-      if (_firstPaymentPercentController.text.isNotEmpty && !_externalUpdate) {
-        _firstPaymentPercentController.text = '';
-      }
+    final currentPercentText = _firstPaymentPercentController.text;
+    final newPercent = widget.firstPayment > 0 && widget.totalAmount > 0
+        ? (widget.firstPayment / widget.totalAmount * 100).round()
+        : 0;
+    final newPercentText = newPercent.toString();
+
+    if (currentPercentText != newPercentText) {
+      _firstPaymentPercentController.text = newPercentText;
     }
 
-    // Обновляем поле суммы (полная сумма с копейками)
+    final currentAmountText = _firstPaymentAmountController.text;
     final newAmountText = widget.firstPayment > 0
-        ? widget.firstPayment.toStringAsFixed(2)
-        : '';
-    if (_firstPaymentAmountController.text != newAmountText) {
+        ? widget.firstPayment.toInt().toString()
+        : '0';
+
+    if (currentAmountText != newAmountText) {
       _firstPaymentAmountController.text = newAmountText;
     }
 
-    // Обновляем поле месяцев
+    final currentTermText = _termMonthsController.text;
     final newTermText = widget.termMonths > 0
         ? widget.termMonths.toString()
         : '';
-    if (_termMonthsController.text != newTermText) {
+
+    if (currentTermText != newTermText) {
       _termMonthsController.text = newTermText;
     }
   }
 
-  void _updateFromPercent(String percentValue) {
-    // Если обновление идет извне - игнорируем
-    if (_externalUpdate) return;
+  void _handlePercentInput(String percentValue) {
+    final filteredValue = percentValue.replaceAll(RegExp(r'[^0-9]'), '');
 
-    // Фильтруем запятые и точки
-    final filteredValue = percentValue.replaceAll(RegExp(r'[.,]'), '');
     if (filteredValue != percentValue) {
-      _firstPaymentPercentController.text = filteredValue;
-      _firstPaymentPercentController.selection = TextSelection.fromPosition(
-        TextPosition(offset: filteredValue.length),
-      );
       return;
     }
 
-    if (percentValue.isNotEmpty && widget.totalAmount > 0) {
-      final percent = int.tryParse(percentValue);
-      if (percent != null && percent >= 0 && percent <= 100) {
-        _updatingFromPercent = true;
-        final amount = widget.totalAmount * percent / 100;
-        widget.onFirstPaymentChanged(amount);
+    if (filteredValue.isNotEmpty) {
+      final percent = int.tryParse(filteredValue) ?? 0;
+      final clampedPercent = percent.clamp(0, 100);
 
-        // Обновляем поле суммы сразу (без ожидания внешнего обновления)
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _firstPaymentAmountController.text = amount.toStringAsFixed(2);
-          _updatingFromPercent = false;
-        });
+      double newAmount = 0;
+      if (widget.totalAmount > 0 && clampedPercent > 0) {
+        newAmount = (widget.totalAmount * clampedPercent / 100).floorToDouble();
       }
-    } else if (percentValue.isEmpty) {
-      _updatingFromPercent = true;
+
+      widget.onFirstPaymentChanged(newAmount);
+    } else {
       widget.onFirstPaymentChanged(0);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _firstPaymentAmountController.text = '';
-        _updatingFromPercent = false;
-      });
     }
   }
 
-  void _updateFromAmount(String amountValue) {
-    // Если обновление идет извне - игнорируем
-    if (_externalUpdate) return;
-
-    // Фильтруем запятые и точки, но сохраняем десятичные знаки
-    final filteredValue = amountValue.replaceAll(RegExp(r'[^0-9.]'), '');
-
-    // Проверяем на множественные точки
-    final dotCount = filteredValue.split('.').length - 1;
-    if (dotCount > 1) {
-      // Убираем лишние точки
-      final parts = filteredValue.split('.');
-      final validValue = '${parts[0]}.${parts.sublist(1).join('')}';
-      _firstPaymentAmountController.text = validValue;
-      _firstPaymentAmountController.selection = TextSelection.fromPosition(
-        TextPosition(offset: validValue.length),
-      );
-      return;
-    }
+  void _handleAmountInput(String amountValue) {
+    final filteredValue = amountValue.replaceAll(RegExp(r'[^0-9]'), '');
 
     if (filteredValue != amountValue) {
-      _firstPaymentAmountController.text = filteredValue;
-      _firstPaymentAmountController.selection = TextSelection.fromPosition(
-        TextPosition(offset: filteredValue.length),
-      );
       return;
     }
 
-    if (amountValue.isNotEmpty && widget.totalAmount > 0) {
-      final amount = double.tryParse(amountValue);
-      if (amount != null && amount >= 0 && amount <= widget.totalAmount) {
-        _updatingFromAmount = true;
-        widget.onFirstPaymentChanged(amount);
+    if (filteredValue.isNotEmpty) {
+      final amount = double.tryParse(filteredValue) ?? 0;
+      double clampedAmount = amount.clamp(0, widget.totalAmount);
 
-        // Обновляем поле процента сразу
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final percent = (amount / widget.totalAmount * 100).round();
-          _firstPaymentPercentController.text = percent.toString();
-          _updatingFromAmount = false;
-        });
-      }
-    } else if (amountValue.isEmpty) {
-      _updatingFromAmount = true;
+      widget.onFirstPaymentChanged(clampedAmount);
+    } else {
       widget.onFirstPaymentChanged(0);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _firstPaymentPercentController.text = '';
-        _updatingFromAmount = false;
-      });
     }
   }
 
-  void _updateTermMonths(String value) {
-    // Фильтруем запятые и точки для месяцев
-    final filteredValue = value.replaceAll(RegExp(r'[.,]'), '');
+  void _handleTermMonthsInput(String value) {
+    final filteredValue = value.replaceAll(RegExp(r'[^0-9]'), '');
+
     if (filteredValue != value) {
-      _termMonthsController.text = filteredValue;
-      _termMonthsController.selection = TextSelection.fromPosition(
-        TextPosition(offset: filteredValue.length),
-      );
       return;
     }
 
@@ -208,7 +145,6 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Чекбокс "Начинать выплаты со след месяца"
         CustomCheckbox(
           value: widget.nextMonthStart,
           onChanged: (value) => widget.onNextMonthStartChanged(value ?? false),
@@ -217,32 +153,29 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
 
         const SizedBox(height: 24),
 
-        // Поле "Первоначальный взнос %"
         CustomInput(
           controller: _firstPaymentPercentController,
           label: 'Первоначальный взнос %',
           keyboardType: TextInputType.number,
-          onChanged: _updateFromPercent,
+          onUserInput: _handlePercentInput,
         ),
 
         const SizedBox(height: 16),
 
-        // Поле "Рублей"
         CustomInput(
           controller: _firstPaymentAmountController,
           label: 'Рублей',
-          keyboardType: TextInputType.numberWithOptions(decimal: true),
-          onChanged: _updateFromAmount,
+          keyboardType: TextInputType.number,
+          onChanged: _handleAmountInput,
         ),
 
         const SizedBox(height: 16),
 
-        // Поле "Количество месяцев"
         CustomInput(
           controller: _termMonthsController,
           label: 'Количество месяцев',
           keyboardType: TextInputType.number,
-          onChanged: _updateTermMonths,
+          onChanged: _handleTermMonthsInput,
         ),
 
         const SizedBox(height: 16),
@@ -259,7 +192,6 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
 
         const SizedBox(height: 24),
 
-        // Итоговая информация
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
@@ -304,7 +236,7 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
                     style: AppStyle.manrope(size: 14, weight: FontWeight.w600),
                   ),
                   Text(
-                    '${widget.firstPayment.toStringAsFixed(2)} ₽',
+                    '${widget.firstPayment.toInt()} ₽',
                     style: AppStyle.manrope(size: 14, weight: FontWeight.w600),
                   ),
                 ],

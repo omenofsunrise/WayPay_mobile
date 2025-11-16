@@ -5,6 +5,6 @@ import 'package:waypay_mobile/assets/resources.dart';
 
 void main() {
   test('images assets test', () {
-    expect(File(Images.waypay_mobileLogo).existsSync(), isTrue);
+    expect(File(Images.waypayLogo).existsSync(), isTrue);
   });
 }

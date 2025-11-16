@@ -18,7 +18,6 @@ class CreditTabAppBarAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopupMenuButton<CreditTab>(
       tooltip: 'Выбрать вкладку',
-      // Используем SVG иконку выбранной вкладки
       icon: SvgPicture.asset(
         selectedTab.iconPath,
         width: 24,
@@ -47,7 +46,6 @@ class CreditTabAppBarAction extends StatelessWidget {
                 size: 20,
               ),
               const SizedBox(width: 10),
-              // SVG иконка вкладки
               SvgPicture.asset(
                 tab.iconPath,
                 width: 20,

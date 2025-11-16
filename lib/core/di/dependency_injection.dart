@@ -35,9 +35,9 @@ import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source_impl.dart';
-import 'package:waypay_mobile/features/credit/data/objectType/data_source/object_type_remote_data_source.dart';
+import 'package:waypay_mobile/features/objectType/data/data_source/object_type_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
-import 'package:waypay_mobile/features/credit/presentation/bloc/object_type_bloc.dart';
+import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
 import 'package:waypay_mobile/features/finance/data/data_source/budget_remote_data_source.dart';
 import 'package:waypay_mobile/features/finance/data/data_source/budget_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';

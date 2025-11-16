@@ -85,7 +85,6 @@ class _ControlCreditsScreenState extends State<ControlCreditsScreen> {
     );
   }
 
-  // маленькая кнопка в AppBar для выбора вкладки
   Widget _smallTabButton() {
     return PopupMenuButton<CreditTab>(
       tooltip: 'Вкладка',
@@ -144,7 +143,7 @@ class _ControlCreditsScreenState extends State<ControlCreditsScreen> {
           style: AppStyle.medium20.copyWith(color: Colors.white),
         ),
         actions: [
-          _smallTabButton(), // ← маленькая кнопка-меню
+          _smallTabButton(),
           IconButton(
             icon: const Icon(Icons.filter_alt, color: Colors.white),
             onPressed: () => _openFilterModal(context),
@@ -157,7 +156,6 @@ class _ControlCreditsScreenState extends State<ControlCreditsScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // CreditTabDropdown удалён — выбор через кнопку в AppBar
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(

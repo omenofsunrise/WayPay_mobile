@@ -15,7 +15,7 @@ import 'package:waypay_mobile/features/blog/presentation/bloc/comment_bloc.dart'
 import 'package:waypay_mobile/features/blog/presentation/cubit/profile_blog_cubit.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
-import 'package:waypay_mobile/features/credit/presentation/bloc/object_type_bloc.dart';
+import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
 import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_income_bloc.dart';

@@ -172,7 +172,6 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
 
                     const SizedBox(height: 24),
 
-                    // Секция проданных товаров
                     _buildSoldProductsSection(),
 
                     const SizedBox(height: 24),
@@ -181,7 +180,6 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
 
                     const SizedBox(height: 24),
 
-                    // Секция заметок
                     _buildNotesSection(),
 
                     const SizedBox(height: 80),

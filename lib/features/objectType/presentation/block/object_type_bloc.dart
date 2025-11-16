@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/features/credit/data/objectType/data_source/object_type_remote_data_source.dart';
-import 'package:waypay_mobile/features/credit/data/objectType/models/get_object_types_query.dart';
-import 'package:waypay_mobile/features/credit/data/objectType/models/object_type_model.dart';
+import 'package:waypay_mobile/features/objectType/data/data_source/object_type_remote_data_source.dart';
+import 'package:waypay_mobile/features/objectType/data/models/get_object_types_query.dart';
+import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
 import 'object_type_event.dart';
 import 'object_type_state.dart';
 
@@ -20,6 +20,7 @@ class ObjectTypeBloc extends Bloc<ObjectTypeEvent, ObjectTypeState> {
   ObjectTypeBloc() : super(ObjectTypeInitial()) {
     on<LoadObjectTypesEvent>(_onLoadObjectTypes);
     on<CreateObjectTypeEvent>(_onCreateObjectType);
+    on<EditObjectTypeEvent>(_onEditObjectType);
     on<UpdateObjectTypeEvent>(_onUpdateObjectType);
     on<DeleteObjectTypeEvent>(_onDeleteObjectType);
     on<CheckObjectTypeExistsEvent>(_onCheckObjectTypeExists);
@@ -72,7 +73,11 @@ class ObjectTypeBloc extends Bloc<ObjectTypeEvent, ObjectTypeState> {
     CreateObjectTypeEvent event,
     Emitter<ObjectTypeState> emit,
   ) async {
+    // Сохраняем предыдущее состояние
+    final previousState = state;
+
     try {
+      emit(ObjectTypeLoading());
       final createdObjectType = await _dataSource.createObjectType(
         event.request,
       );
@@ -80,38 +85,45 @@ class ObjectTypeBloc extends Bloc<ObjectTypeEvent, ObjectTypeState> {
       // Добавляем новый тип в список
       _objectTypes.insert(0, createdObjectType);
 
-      // Обновляем состояние если текущее состояние - loaded
-      if (state is ObjectTypeLoaded) {
-        final currentState = state as ObjectTypeLoaded;
-        emit(
-          currentState.copyWith(
-            objectTypes: List.from(_objectTypes),
-            totalCount: currentState.totalCount + 1,
-          ),
-        );
-      }
-
-      emit(ObjectTypeCreated(createdObjectType));
-
-      // Возвращаемся к предыдущему состоянию после успешного создания
-      if (state is ObjectTypeCreated) {
-        final currentState = state as ObjectTypeLoaded?;
-        if (currentState != null) {
-          emit(currentState);
-        } else {
-          emit(ObjectTypeInitial());
-        }
-      }
+      // Возвращаем обновленное состояние
+      emit(
+        ObjectTypeLoaded(
+          objectTypes: List.from(_objectTypes),
+          hasMoreData: _hasMore,
+          currentPage: _currentPage,
+          totalPages: previousState is ObjectTypeLoaded
+              ? previousState.totalPages
+              : 1,
+          totalCount:
+              (previousState is ObjectTypeLoaded
+                  ? previousState.totalCount
+                  : 0) +
+              1,
+        ),
+      );
     } catch (e) {
+      // В случае ошибки возвращаем предыдущее состояние
+      emit(previousState);
       emit(ObjectTypeError('Ошибка при создании типа объекта: $e'));
     }
+  }
+
+  Future<void> _onEditObjectType(
+    EditObjectTypeEvent event,
+    Emitter<ObjectTypeState> emit,
+  ) async {
+    emit(ObjectTypeEditing(event.objectType));
   }
 
   Future<void> _onUpdateObjectType(
     UpdateObjectTypeEvent event,
     Emitter<ObjectTypeState> emit,
   ) async {
+    // Сохраняем предыдущее состояние
+    final previousState = state;
+
     try {
+      emit(ObjectTypeLoading());
       final updatedObjectType = await _dataSource.updateObjectType(
         event.objectTypeId,
         event.request,
@@ -125,24 +137,27 @@ class ObjectTypeBloc extends Bloc<ObjectTypeEvent, ObjectTypeState> {
         _objectTypes[index] = updatedObjectType;
       }
 
-      // Обновляем состояние если текущее состояние - loaded
-      if (state is ObjectTypeLoaded) {
-        final currentState = state as ObjectTypeLoaded;
-        emit(currentState.copyWith(objectTypes: List.from(_objectTypes)));
-      }
-
-      emit(ObjectTypeUpdated(updatedObjectType));
-
-      // Возвращаемся к предыдущему состоянию после успешного обновления
-      if (state is ObjectTypeUpdated) {
-        final currentState = state as ObjectTypeLoaded?;
-        if (currentState != null) {
-          emit(currentState);
-        } else {
-          emit(ObjectTypeInitial());
-        }
+      // Возвращаем обновленное состояние
+      if (previousState is ObjectTypeLoaded) {
+        emit(previousState.copyWith(objectTypes: List.from(_objectTypes)));
+      } else {
+        emit(
+          ObjectTypeLoaded(
+            objectTypes: List.from(_objectTypes),
+            hasMoreData: _hasMore,
+            currentPage: _currentPage,
+            totalPages: previousState is ObjectTypeLoaded
+                ? previousState.totalPages
+                : 1,
+            totalCount: previousState is ObjectTypeLoaded
+                ? previousState.totalCount
+                : _objectTypes.length,
+          ),
+        );
       }
     } catch (e) {
+      // В случае ошибки возвращаем предыдущее состояние
+      emit(previousState);
       emit(ObjectTypeError('Ошибка при обновлении типа объекта: $e'));
     }
   }
@@ -151,32 +166,37 @@ class ObjectTypeBloc extends Bloc<ObjectTypeEvent, ObjectTypeState> {
     DeleteObjectTypeEvent event,
     Emitter<ObjectTypeState> emit,
   ) async {
+    // Сохраняем предыдущее состояние
+    final previousState = state;
+
     try {
+      emit(ObjectTypeLoading());
       await _dataSource.deleteObjectType(event.objectTypeId);
 
       _objectTypes.removeWhere((ot) => ot.id == event.objectTypeId);
 
-      if (state is ObjectTypeLoaded) {
-        final currentState = state as ObjectTypeLoaded;
+      // Возвращаем обновленное состояние
+      if (previousState is ObjectTypeLoaded) {
         emit(
-          currentState.copyWith(
+          previousState.copyWith(
             objectTypes: List.from(_objectTypes),
-            totalCount: currentState.totalCount - 1,
+            totalCount: previousState.totalCount - 1,
+          ),
+        );
+      } else {
+        emit(
+          ObjectTypeLoaded(
+            objectTypes: List.from(_objectTypes),
+            hasMoreData: _hasMore,
+            currentPage: _currentPage,
+            totalPages: 1,
+            totalCount: _objectTypes.length,
           ),
         );
       }
-
-      emit(ObjectTypeDeleted(event.objectTypeId));
-
-      if (state is ObjectTypeDeleted) {
-        final currentState = state as ObjectTypeLoaded?;
-        if (currentState != null) {
-          emit(currentState);
-        } else {
-          emit(ObjectTypeInitial());
-        }
-      }
     } catch (e) {
+      // В случае ошибки возвращаем предыдущее состояние
+      emit(previousState);
       emit(ObjectTypeError('Ошибка при удалении типа объекта: $e'));
     }
   }
@@ -192,10 +212,6 @@ class ObjectTypeBloc extends Bloc<ObjectTypeEvent, ObjectTypeState> {
           entityType: event.entityType,
         ),
       );
-
-      if (state is ObjectTypeLoaded) {
-        emit(state as ObjectTypeLoaded);
-      }
     } catch (e) {
       emit(
         ObjectTypeError('Ошибка при проверке существования типа объекта: $e'),

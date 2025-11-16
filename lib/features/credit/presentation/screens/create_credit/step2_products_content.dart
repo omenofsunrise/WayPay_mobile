@@ -85,7 +85,6 @@ class _Step2ProductsContentState extends State<Step2ProductsContent> {
 
         const SizedBox(height: 16),
 
-        // ИТОГОВАЯ СУММА - ДОБАВЛЯЕМ ЭТОТ ВИДЖЕТ
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),

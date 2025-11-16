@@ -200,7 +200,11 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
                 child: Form(
                   key: _formKey,
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.only(
+                      left: 16.0,
+                      right: 16.0,
+                      bottom: 16.0,
+                    ),
                     child: Column(
                       children: [
                         Expanded(
@@ -253,7 +257,9 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
             termMonths: state.creditRequest.termMonths,
             paymentDay: state.creditRequest.paymentDay,
             onPaymentDayChanged: _updatePaymentDay,
-            onFirstPaymentChanged: _updateFirstPayment,
+            onFirstPaymentChanged: (amount) {
+              context.read<CreditCreationCubit>().updateFirstPayment(amount);
+            },
             onTermMonthsChanged: _updateTermMonths,
             totalAmount: state.totalAmountWithSurcharge,
           );

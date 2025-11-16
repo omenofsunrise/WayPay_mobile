@@ -75,7 +75,6 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
     try {
       final dataSource = getIt<NoteRemoteDataSource>();
 
-      // Получаем дату напоминания, если она указана
       DateTime? reminderDate;
       if (_reminderDateController.text.isNotEmpty) {
         final parts = _reminderDateController.text.split('.');
@@ -91,7 +90,7 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
         noteableId: widget.creditId,
         content: _controller.text.trim(),
         remindDate: reminderDate,
-        file: _attachedFile?.path, // Передаем путь к файлу
+        file: _attachedFile?.path,
       );
 
       await dataSource.createNote(note);
@@ -132,7 +131,6 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
       ),
       child: Column(
         children: [
-          // Превью фотографии
           Container(
             height: 150,
             width: double.infinity,
@@ -145,7 +143,6 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
             ),
           ),
           const SizedBox(height: 8),
-          // Информация о файле и кнопка удаления
           Row(
             children: [
               const Icon(Icons.attach_file, size: 20, color: Colors.grey),
@@ -306,14 +303,12 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
             ),
             const SizedBox(height: 16),
 
-            // Поле даты напоминания (сверху)
             _buildReminderDateField(),
 
             const SizedBox(height: 16),
             CustomInput(controller: _controller, label: 'Текст заметки'),
             const SizedBox(height: 16),
 
-            // Превью прикрепленного файла
             _buildAttachedFilePreview(),
 
             Align(

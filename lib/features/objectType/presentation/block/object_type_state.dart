@@ -1,12 +1,12 @@
-import 'package:waypay_mobile/features/credit/data/objectType/models/object_type_model.dart';
+import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
 
 abstract class ObjectTypeState {}
 
-final class ObjectTypeInitial extends ObjectTypeState {}
+class ObjectTypeInitial extends ObjectTypeState {}
 
-final class ObjectTypeLoading extends ObjectTypeState {}
+class ObjectTypeLoading extends ObjectTypeState {}
 
-final class ObjectTypeLoaded extends ObjectTypeState {
+class ObjectTypeLoaded extends ObjectTypeState {
   final List<ObjectTypeModel> objectTypes;
   final bool hasMoreData;
   final int currentPage;
@@ -38,26 +38,17 @@ final class ObjectTypeLoaded extends ObjectTypeState {
   }
 }
 
-final class ObjectTypeError extends ObjectTypeState {
+class ObjectTypeError extends ObjectTypeState {
   final String message;
 
   ObjectTypeError(this.message);
 }
 
-final class ObjectTypeCreated extends ObjectTypeState {
+// УБИРАЕМ ObjectTypeCreated, ObjectTypeUpdated, ObjectTypeDeleted
+// так как они вызывают проблемы с кастингом
+
+class ObjectTypeEditing extends ObjectTypeState {
   final ObjectTypeModel objectType;
 
-  ObjectTypeCreated(this.objectType);
-}
-
-final class ObjectTypeUpdated extends ObjectTypeState {
-  final ObjectTypeModel objectType;
-
-  ObjectTypeUpdated(this.objectType);
-}
-
-final class ObjectTypeDeleted extends ObjectTypeState {
-  final int objectTypeId;
-
-  ObjectTypeDeleted(this.objectTypeId);
+  ObjectTypeEditing(this.objectType);
 }

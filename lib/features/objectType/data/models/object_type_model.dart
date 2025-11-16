@@ -21,11 +21,11 @@ class ObjectTypeModel {
     return {'id': id, 'name': name, 'entityType': entityType};
   }
 
-  ObjectTypeModel copyWith({int? id, String? name, String? entityType}) {
+  ObjectTypeModel copyWith({int? id, String? name}) {
     return ObjectTypeModel(
       id: id ?? this.id,
       name: name ?? this.name,
-      entityType: entityType ?? this.entityType,
+      entityType: entityType,
     );
   }
 }

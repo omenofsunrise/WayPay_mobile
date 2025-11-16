@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/core/widgets/buttons/add_button.dart';
 import 'package:waypay_mobile/core/widgets/cards/credit_card.dart';
 import 'package:waypay_mobile/core/widgets/search_field.dart';
-import 'package:waypay_mobile/features/credit/presentation/bloc/object_type_bloc.dart';
+import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
 import 'package:waypay_mobile/features/credit/presentation/widgets/credit_tab.dart';
 import 'package:waypay_mobile/features/credit/presentation/widgets/credit_tab_action.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
@@ -126,7 +126,6 @@ class _CreditsScreenState extends State<CreditsScreen> {
             child: AddButton(
               onPressed: () {
                 print('Add button pressed');
-                // Навигация на первый экран создания кредита
                 context.pushNamed(Routes.newCreditDetailsScreen.toName);
               },
             ),

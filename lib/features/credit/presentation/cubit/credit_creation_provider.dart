@@ -3,6 +3,7 @@ import 'package:waypay_mobile/features/clients/data/models/clients/client_model.
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
+import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
 
 class CreditCreationCubit extends Cubit<CreditCreationState> {
   CreditCreationCubit()
@@ -30,6 +31,8 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
           totalAmountWithSurcharge: 0,
           selectedClient: null,
           selectedInvestor: null,
+          selectedCatalog: null,
+          selectedCategory: null,
         ),
       );
 
@@ -47,6 +50,8 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     String? debtComment,
     ClientModel? selectedClient,
     InvestorsModel? selectedInvestor,
+    ObjectTypeModel? selectedCatalog,
+    ObjectTypeModel? selectedCategory,
   }) {
     final updatedRequest = state.creditRequest.copyWith(
       clientId: clientId,
@@ -67,8 +72,18 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
         creditRequest: updatedRequest,
         selectedClient: selectedClient ?? state.selectedClient,
         selectedInvestor: selectedInvestor ?? state.selectedInvestor,
+        selectedCatalog: selectedCatalog ?? state.selectedCatalog,
+        selectedCategory: selectedCategory ?? state.selectedCategory,
       ),
     );
+  }
+
+  void updateCatalog(ObjectTypeModel? catalog) {
+    emit(state.copyWith(selectedCatalog: catalog, keepCategory: true));
+  }
+
+  void updateCategory(ObjectTypeModel? category) {
+    emit(state.copyWith(selectedCategory: category, keepCatalog: true));
   }
 
   void updatePaymentInfo({
@@ -162,6 +177,56 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     }).toList();
   }
 
+  void updateFirstPaymentByAmount(double amount) {
+    final totalAmount = state.totalAmountWithSurcharge;
+    double adjustedAmount = amount;
+
+    if (adjustedAmount > totalAmount) {
+      adjustedAmount = totalAmount;
+    }
+
+    final updatedRequest = state.creditRequest.copyWith(
+      firstPayment: adjustedAmount,
+    );
+
+    emit(state.copyWith(creditRequest: updatedRequest));
+  }
+
+  void updateFirstPaymentByPercent(int percent) {
+    final totalAmount = state.totalAmountWithSurcharge;
+    double amount = 0;
+
+    if (percent > 0 && totalAmount > 0) {
+      amount = (totalAmount * percent / 100);
+      amount = amount.floorToDouble();
+    }
+
+    if (amount > totalAmount) {
+      amount = totalAmount;
+    }
+
+    final updatedRequest = state.creditRequest.copyWith(firstPayment: amount);
+
+    emit(state.copyWith(creditRequest: updatedRequest));
+  }
+
+  void updateFirstPayment(double amount) {
+    final totalAmount = state.totalAmountWithSurcharge;
+    double adjustedAmount = amount;
+
+    if (adjustedAmount > totalAmount) {
+      adjustedAmount = totalAmount;
+    }
+
+    adjustedAmount = adjustedAmount.floorToDouble();
+
+    final updatedRequest = state.creditRequest.copyWith(
+      firstPayment: adjustedAmount,
+    );
+
+    emit(state.copyWith(creditRequest: updatedRequest));
+  }
+
   double _calculateTotalAmountWithSurcharge(List<CreditProduct> products) {
     final total = products.fold(0.0, (sum, product) {
       final basePrice = product.price * product.quantity;
@@ -169,7 +234,6 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
       return sum + basePrice + surchargeAmount;
     });
 
-    // Округляем до 50 вверх
     return _roundUpToFifty(total);
   }
 

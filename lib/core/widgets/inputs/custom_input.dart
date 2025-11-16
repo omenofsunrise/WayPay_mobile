@@ -10,6 +10,7 @@ class CustomInput extends StatefulWidget {
   final VoidCallback? onTap;
   final InputType inputType;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onUserInput;
 
   const CustomInput({
     super.key,
@@ -20,6 +21,7 @@ class CustomInput extends StatefulWidget {
     this.onTap,
     this.inputType = InputType.text,
     this.onChanged,
+    this.onUserInput,
   });
 
   @override
@@ -30,6 +32,7 @@ enum InputType { text, fullname }
 
 class _CustomInputState extends State<CustomInput> {
   bool _isFocused = false;
+  final _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -41,7 +44,6 @@ class _CustomInputState extends State<CustomInput> {
     if (widget.inputType == InputType.fullname) {
       _formatFullName();
     }
-    // Вызываем внешний onChanged
     widget.onChanged?.call(widget.controller.text);
   }
 
@@ -95,8 +97,15 @@ class _CustomInputState extends State<CustomInput> {
               : widget.keyboardType,
           readOnly: widget.isDateField,
           onTap: widget.onTap,
-          onChanged: widget.onChanged, // Передаем onChanged в TextField
+          focusNode: _focusNode,
+          onChanged: (value) {
+            if (_focusNode.hasFocus) {
+              widget.onUserInput?.call(value);
+            }
+          },
           decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
               vertical: 14,

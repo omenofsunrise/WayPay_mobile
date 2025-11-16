@@ -133,6 +133,8 @@ class _DateInputState extends State<DateInput> {
         readOnly: false,
         onChanged: _onTextChanged,
         decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 14,
