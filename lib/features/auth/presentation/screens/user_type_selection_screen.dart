@@ -27,7 +27,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Image.asset(Images.waypay_mobileLogo, height: 200, width: 200),
+                Image.asset(Images.waypayLogo, height: 200, width: 200),
                 Column(
                   children: [
                     DefaultButton(
