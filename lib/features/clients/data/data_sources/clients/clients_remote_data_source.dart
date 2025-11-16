@@ -1,7 +1,11 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_response_model.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/create_clients_requests.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/get_clients_query.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/passport_photo_type.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/update_client_doc_issue_date_requests.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/update_client_doc_request.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/update_client_request.dart';
@@ -17,4 +21,11 @@ abstract class ClientRemoteDataSource {
     UpdateClientDocIssueDateRequest request,
   );
   Future<void> createClient(CreateClientRequest request);
+  Future<void> uploadPassportPhoto(
+    int id,
+    PassportPhotoType type,
+    File file,
+  );
+  Future<void> deletePassportPhoto(int id, PassportPhotoType type);
+  Future<Uint8List?> fetchPassportPhoto(int id, PassportPhotoType type);
 }

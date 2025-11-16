@@ -1,9 +1,13 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_response_model.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/create_clients_requests.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/get_clients_query.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/passport_photo_type.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/update_client_doc_issue_date_requests.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/update_client_doc_request.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/update_client_request.dart';
@@ -102,6 +106,58 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
         throw Exception('409 Клиент с такими данными уже существует');
       }
       throw Exception('Ошибка создания клиента: ${e.message}');
+    }
+  }
+
+  @override
+  Future<void> uploadPassportPhoto(
+    int id,
+    PassportPhotoType type,
+    File file,
+  ) async {
+    try {
+      final formData = FormData.fromMap({
+        'PhotoType': type.apiValue,
+        'File': await MultipartFile.fromFile(file.path),
+      });
+      await dio.post('/api/Client/$id/passport-photo', data: formData);
+    } on DioException catch (e) {
+      throw Exception('Ошибка загрузки фото паспорта: ${e.message}');
+    }
+  }
+
+  @override
+  Future<void> deletePassportPhoto(int id, PassportPhotoType type) async {
+    try {
+      await dio.delete(
+        '/api/Client/$id/passport-photo',
+        queryParameters: {'photoType': type.apiValue},
+      );
+    } on DioException catch (e) {
+      throw Exception('Ошибка удаления фото паспорта: ${e.message}');
+    }
+  }
+
+  @override
+  Future<Uint8List?> fetchPassportPhoto(int id, PassportPhotoType type) async {
+    try {
+      final response = await dio.get(
+        '/api/Client/$id/passport-photo',
+        queryParameters: {'photoType': type.apiValue},
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is Uint8List) return data;
+        if (data is List<int>) return Uint8List.fromList(data);
+      }
+      return null;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return null;
+      }
+      throw Exception('Ошибка получения фото паспорта: ${e.message}');
     }
   }
 }

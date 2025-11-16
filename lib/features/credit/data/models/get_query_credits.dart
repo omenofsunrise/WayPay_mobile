@@ -9,6 +9,7 @@ class GetCreditsQuery {
   final DateTime? dateFrom;
   final DateTime? dateTo;
   final String? investorNickname;
+  final int? clientId;
   final String? clientFullname;
   final bool? isFavourite;
   final bool? isActive;
@@ -30,6 +31,7 @@ class GetCreditsQuery {
     this.dateFrom,
     this.dateTo,
     this.investorNickname,
+    this.clientId,
     this.clientFullname,
     this.isFavourite,
     this.isActive,
@@ -53,6 +55,7 @@ class GetCreditsQuery {
       if (dateFrom != null) 'dateFrom': dateFrom!.toIso8601String(),
       if (dateTo != null) 'dateTo': dateTo!.toIso8601String(),
       if (investorNickname != null) 'investorNickname': investorNickname,
+      if (clientId != null) 'clientId': clientId,
       if (clientFullname != null) 'clientFullname': clientFullname,
       if (isFavourite != null) 'isFavourite': isFavourite,
       if (isActive != null) 'isActive': isActive,
@@ -76,6 +79,7 @@ class GetCreditsQuery {
     DateTime? dateFrom,
     DateTime? dateTo,
     String? investorNickname,
+    int? clientId,
     String? clientFullname,
     bool? isFavourite,
     bool? isActive,
@@ -97,6 +101,7 @@ class GetCreditsQuery {
       dateFrom: dateFrom ?? this.dateFrom,
       dateTo: dateTo ?? this.dateTo,
       investorNickname: investorNickname ?? this.investorNickname,
+      clientId: clientId ?? this.clientId,
       clientFullname: clientFullname ?? this.clientFullname,
       isFavourite: isFavourite ?? this.isFavourite,
       isActive: isActive ?? this.isActive,

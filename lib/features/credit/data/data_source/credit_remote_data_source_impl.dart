@@ -19,7 +19,21 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
       );
 
       if (response.data is Map<String, dynamic>) {
-        return CreditResponseModel.fromJson(response.data);
+        final creditResponse = CreditResponseModel.fromJson(response.data);
+
+        if (query.clientId != null) {
+          for (final credit in creditResponse.items) {
+            debugPrint(
+              'Client ${query.clientId} -> credit ${credit.id}: '
+              'paid=${credit.payed}, rest=${credit.rest}, debt=${credit.debt}',
+            );
+          }
+          if (creditResponse.items.isEmpty) {
+            debugPrint('Client ${query.clientId} has no credits in history.');
+          }
+        }
+
+        return creditResponse;
       } else {
         throw Exception('Неожиданный формат ответа');
       }
