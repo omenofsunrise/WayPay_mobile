@@ -98,14 +98,14 @@ class InfoSectionCard extends StatelessWidget {
 
 class InfoFieldData {
   const InfoFieldData({
-    required this.label,
+    this.label,
     required this.value,
     this.labelStyle,
     this.valueStyle,
     this.valueTextAlign = TextAlign.start,
   });
 
-  final String label;
+  final String? label;
   final String value;
   final TextStyle? labelStyle;
   final TextStyle? valueStyle;
@@ -122,17 +122,19 @@ class _FieldTile extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          data.label,
-          style:
-              data.labelStyle ??
-              const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Color(AppColors.darkGrey),
-              ),
-        ),
-        const SizedBox(height: 4),
+        if (data.label != null && data.label!.isNotEmpty) ...[
+          Text(
+            data.label!,
+            style:
+                data.labelStyle ??
+                const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(AppColors.darkGrey),
+                ),
+          ),
+          const SizedBox(height: 4),
+        ],
         Text(
           data.value,
           textAlign: data.valueTextAlign,

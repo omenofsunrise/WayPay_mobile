@@ -17,6 +17,10 @@ class EmployeeModel {
   // clients
   final int? clientsCount;
   final int? creditApplicationCount;
+  final int? queuesCount;
+  final int? creditsCount;
+  final int? blacklistCount;
+  final int? blackCatalogCount;
 
   // investors
   final num? balance;
@@ -41,6 +45,10 @@ class EmployeeModel {
     this.activeCreditsCount,
     this.clientsCount,
     this.creditApplicationCount,
+    this.queuesCount,
+    this.creditsCount,
+    this.blacklistCount,
+    this.blackCatalogCount,
     this.balance,
     this.investment,
     this.budgetIncome,
@@ -61,6 +69,10 @@ class EmployeeModel {
       activeCreditsCount: (json['activeCreditsCount'] as num?)?.toInt(),
       clientsCount: (json['clientsCount'] as num?)?.toInt(),
       creditApplicationCount: (json['creditApplicationCount'] as num?)?.toInt(),
+      queuesCount: (json['queuesCount'] as num?)?.toInt(),
+      creditsCount: (json['creditsCount'] as num?)?.toInt(),
+      blacklistCount: (json['blacklistCount'] as num?)?.toInt(),
+      blackCatalogCount: (json['blackCatalogCount'] as num?)?.toInt(),
       balance: json['balance'] as num?,
       investment: json['investment'] as num?,
       budgetIncome: json['budgetIncome'] as num?,
@@ -82,6 +94,10 @@ class EmployeeModel {
       'activeCreditsCount': activeCreditsCount,
       'clientsCount': clientsCount,
       'creditApplicationCount': creditApplicationCount,
+      'queuesCount': queuesCount,
+      'creditsCount': creditsCount,
+      'blacklistCount': blacklistCount,
+      'blackCatalogCount': blackCatalogCount,
       'balance': balance,
       'investment': investment,
       'budgetIncome': budgetIncome,
@@ -90,8 +106,6 @@ class EmployeeModel {
       'activeCompaniesCount': activeCompaniesCount,
     };
   }
-
-  static const _u = Object();
 
   EmployeeModel copyWith({
     String? fullname,
@@ -104,6 +118,10 @@ class EmployeeModel {
     int? activeCreditsCount,
     int? clientsCount,
     int? creditApplicationCount,
+    int? queuesCount,
+    int? creditsCount,
+    int? blacklistCount,
+    int? blackCatalogCount,
     num? balance,
     num? investment,
     num? budgetIncome,
@@ -125,6 +143,10 @@ class EmployeeModel {
       clientsCount: clientsCount ?? this.clientsCount,
       creditApplicationCount:
           creditApplicationCount ?? this.creditApplicationCount,
+      queuesCount: queuesCount ?? this.queuesCount,
+      creditsCount: creditsCount ?? this.creditsCount,
+      blacklistCount: blacklistCount ?? this.blacklistCount,
+      blackCatalogCount: blackCatalogCount ?? this.blackCatalogCount,
       balance: balance ?? this.balance,
       investment: investment ?? this.investment,
       budgetIncome: budgetIncome ?? this.budgetIncome,

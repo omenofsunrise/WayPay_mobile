@@ -1,9 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/buttons/add_button.dart';
 import 'package:waypay_mobile/core/widgets/header.dart';
 import 'package:waypay_mobile/core/widgets/search_field.dart';
-import 'package:waypay_mobile/core/widgets/buttons/add_button.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
+import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/features/home/presentation/widgets/client_info_card.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
@@ -16,69 +22,56 @@ class ClientListScreen extends StatefulWidget {
 
 class _ClientListScreenState extends State<ClientListScreen> {
   final TextEditingController _searchController = TextEditingController();
-  final List<ClientInfo> _clients = _mockClients;
-  late List<ClientInfo> _filteredClients;
+  final DateFormat _dateFormat = DateFormat('dd.MM.yyyy');
+  Timer? _debounce;
   bool _showSearchHint = false;
+  bool _hasValidSearch = false;
+  String _lastSubmittedQuery = '';
 
-  @override
-  void initState() {
-    super.initState();
-    _filteredClients = _clients;
-    _searchController.addListener(_handleSearch);
-  }
+  static const _searchDelay = Duration(milliseconds: 400);
 
-  void _handleSearch() => _applyFilter(_searchController.text);
+  void _onSearchChanged(String raw) {
+    _debounce?.cancel();
 
-  void _applyFilter(String raw) {
     final query = raw.trim();
     final digits = _normalizeDigits(query);
 
     if (query.isEmpty) {
       setState(() {
-        _filteredClients = _clients;
         _showSearchHint = false;
+        _hasValidSearch = false;
       });
+      _lastSubmittedQuery = '';
       return;
     }
 
-    if (digits.length >= 11) {
-      final filtered = _clients
-          .where(
-            (c) =>
-                c.phoneDigits.contains(digits) ||
-                c.whatsAppDigits.contains(digits),
-          )
-          .toList();
+    final meetsPhoneRequirement = digits.length >= 11;
+    final meetsNameRequirement = query.length >= 4;
+
+    if (meetsPhoneRequirement || meetsNameRequirement) {
       setState(() {
-        _filteredClients = filtered;
         _showSearchHint = false;
+        _hasValidSearch = true;
       });
-      return;
-    }
 
-    if (query.length >= 4) {
-      final lower = query.toLowerCase();
-      final filtered = _clients
-          .where((c) => c.fullName.toLowerCase().contains(lower))
-          .toList();
+      _debounce = Timer(_searchDelay, () {
+        if (!mounted) return;
+        _lastSubmittedQuery = query;
+        context.read<ClientsBloc>().add(SearchClients(query, pageSize: 20));
+      });
+    } else {
       setState(() {
-        _filteredClients = filtered;
-        _showSearchHint = false;
+        _showSearchHint = true;
+        _hasValidSearch = false;
       });
-      return;
     }
-
-    setState(() {
-      _filteredClients = _clients;
-      _showSearchHint = true;
-    });
   }
 
   String _normalizeDigits(String input) => input.replaceAll(RegExp(r'\D'), '');
 
   @override
   void dispose() {
-    _searchController.removeListener(_handleSearch);
+    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -104,7 +97,7 @@ class _ClientListScreenState extends State<ClientListScreen> {
                       child: SearchField(
                         controller: _searchController,
                         hintText: 'Поиск',
-                        onChanged: _applyFilter,
+                        onChanged: _onSearchChanged,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -129,24 +122,8 @@ class _ClientListScreenState extends State<ClientListScreen> {
                   ),
                 ),
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final client = _filteredClients[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: ClientInfoCard(
-                      fullName: client.fullName,
-                      clientId: client.id,
-                      birthDate: client.birthDate,
-                      phone: client.phone,
-                      whatsApp: client.whatsApp,
-                      onTap: () => context.pushNamed(
-                        Routes.clientDetailScreen.toName,
-                        extra: client,
-                      ),
-                    ),
-                  );
-                }, childCount: _filteredClients.length),
+              BlocBuilder<ClientsBloc, ClientsState>(
+                builder: (context, state) => _buildResultSliver(state),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
             ],
@@ -155,61 +132,122 @@ class _ClientListScreenState extends State<ClientListScreen> {
       ),
     );
   }
+
+  Widget _buildResultSliver(ClientsState state) {
+    if (!_hasValidSearch) {
+      if (_searchController.text.trim().isEmpty) {
+        return const SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.only(top: 32),
+            child: Text(
+              'Чтобы увидеть клиентов, введите ФИО или номер телефона в поиске.',
+              style: TextStyle(
+                fontSize: 15,
+                color: Color(AppColors.darkGrey),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+      }
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    if (state is ClientsLoading) {
+      return const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.only(top: 32),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
+    if (state is ClientsError) {
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 24),
+          child: Column(
+            children: [
+              Text(
+                state.message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.red),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: _lastSubmittedQuery.isEmpty ? null : _retryLastSearch,
+                child: const Text('Повторить'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (state is ClientsLoaded) {
+      if (state.clients.isEmpty) {
+        return const SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.only(top: 24),
+            child: Text(
+              'Клиенты не найдены',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Color(AppColors.darkGrey),
+              ),
+            ),
+          ),
+        );
+      }
+
+      return _buildClientList(state.clients);
+    }
+
+    return const SliverToBoxAdapter(child: SizedBox.shrink());
+  }
+
+  SliverList _buildClientList(List<ClientModel> clients) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          final client = clients[index];
+          final whatsApp = _resolveWhatsapp(client);
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: ClientInfoCard(
+              fullName: client.fullName,
+              clientId: client.id.toString(),
+              birthDate: _formatDate(client.birthdate),
+              phone: client.phone,
+              whatsApp: whatsApp,
+              onTap: () => context.pushNamed(
+                Routes.clientDetailScreen.toName,
+                extra: client,
+              ),
+            ),
+          );
+        },
+        childCount: clients.length,
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) => _dateFormat.format(date);
+
+  String _resolveWhatsapp(ClientModel client) {
+    final candidate = client.secondPhone?.trim();
+    if (candidate != null && candidate.isNotEmpty) {
+      return candidate;
+    }
+    return client.phone;
+  }
+
+  void _retryLastSearch() {
+    if (_lastSubmittedQuery.isEmpty) return;
+    context
+        .read<ClientsBloc>()
+        .add(SearchClients(_lastSubmittedQuery, pageSize: 20));
+  }
 }
-
-class ClientInfo {
-  const ClientInfo({
-    required this.fullName,
-    required this.id,
-    required this.birthDate,
-    required this.phone,
-    required this.whatsApp,
-  });
-
-  final String fullName;
-  final String id;
-  final String birthDate;
-  final String phone;
-  final String whatsApp;
-
-  String get phoneDigits => phone.replaceAll(RegExp(r'\D'), '');
-  String get whatsAppDigits => whatsApp.replaceAll(RegExp(r'\D'), '');
-}
-
-const List<ClientInfo> _mockClients = [
-  ClientInfo(
-    fullName: 'Мирошниченко Владислава Филипповна',
-    id: '234',
-    birthDate: '12.05.1987',
-    phone: '+7(999)999-99-99',
-    whatsApp: '+7(999)999-99-99',
-  ),
-  ClientInfo(
-    fullName: 'Антонов Сергей Леонидович',
-    id: '235',
-    birthDate: '03.11.1990',
-    phone: '+7(912)123-45-67',
-    whatsApp: '+7(912)123-45-67',
-  ),
-  ClientInfo(
-    fullName: 'Мирошниченко Владислава Филипповна',
-    id: '236',
-    birthDate: '12.05.1987',
-    phone: '+7(900)555-33-22',
-    whatsApp: '+7(900)555-33-22',
-  ),
-  ClientInfo(
-    fullName: 'Семенова Алина Викторовна',
-    id: '237',
-    birthDate: '21.01.1994',
-    phone: '+7(995)321-44-55',
-    whatsApp: '+7(995)321-44-55',
-  ),
-  ClientInfo(
-    fullName: 'Громов Михаил Сергеевич',
-    id: '238',
-    birthDate: '09.08.1983',
-    phone: '+7(913)876-54-32',
-    whatsApp: '+7(913)876-54-32',
-  ),
-];

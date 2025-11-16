@@ -98,7 +98,6 @@ class ContractHistoryCard extends StatelessWidget {
                         label: 'Остаток',
                         value: remainingAmount,
                         valueColor: const Color(AppColors.red),
-                        alignRight: true,
                       ),
                     ),
                   ],
@@ -117,25 +116,19 @@ class _AmountColumn extends StatelessWidget {
     required this.label,
     required this.value,
     required this.valueColor,
-    this.alignRight = false,
   });
 
   final String label;
   final String value;
   final Color valueColor;
-  final bool alignRight;
 
   @override
   Widget build(BuildContext context) {
-    final textAlign = alignRight ? TextAlign.end : TextAlign.start;
     return Column(
-      crossAxisAlignment: alignRight
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          textAlign: textAlign,
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -145,7 +138,6 @@ class _AmountColumn extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           value,
-          textAlign: textAlign,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,

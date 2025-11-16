@@ -122,7 +122,7 @@ class _MainClientScreenState extends State<MainClientScreen> {
                     child: MainClientCard(
                       icon: Icons.hourglass_empty_outlined,
                       title: 'Очередь',
-                      value: _formatCount(employeeData.creditApplicationCount),
+                      value: _formatCount(employeeData.queuesCount),
                       onTap: () =>
                           context.pushNamed(Routes.queueListScreen.toName),
                     ),
@@ -139,9 +139,18 @@ class _MainClientScreenState extends State<MainClientScreen> {
                   ),
                   SliverToBoxAdapter(
                     child: MainClientCard(
+                      icon: Icons.description_outlined,
+                      title: 'Кредиты',
+                      value: _formatCount(employeeData.creditsCount),
+                      onTap: () =>
+                          context.pushNamed(Routes.creditsScreen.toName),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: MainClientCard(
                       icon: Icons.block_outlined,
                       title: 'Черный список',
-                      value: _formatCount(employeeData.closedCreditsCount),
+                      value: _formatCount(employeeData.blacklistCount),
                       onTap: () =>
                           context.pushNamed(Routes.blacklistScreen.toName),
                     ),
@@ -150,7 +159,7 @@ class _MainClientScreenState extends State<MainClientScreen> {
                     child: MainClientCard(
                       icon: Icons.inventory_2_outlined,
                       title: 'Черный каталог',
-                      value: _formatCount(employeeData.closedCreditsCount),
+                      value: _formatCount(employeeData.blackCatalogCount),
                       onTap: () =>
                           context.pushNamed(Routes.blackCatalogScreen.toName),
                     ),
