@@ -126,12 +126,14 @@ class Guarantor {
 class CreditProduct {
   final String name;
   final double price;
+  final int quantity;
   final double? surcharge;
   final double? surchargeAmount;
 
   CreditProduct({
     required this.name,
     required this.price,
+    this.quantity = 1,
     this.surcharge,
     this.surchargeAmount,
   });
@@ -140,8 +142,41 @@ class CreditProduct {
     return {
       'name': name,
       'price': price,
+      'quantity': quantity,
       'surcharge': surcharge,
       'surchargeAmount': surchargeAmount,
     };
+  }
+
+  CreditProduct copyWith({
+    String? name,
+    double? price,
+    int? quantity,
+    double? surcharge,
+    double? surchargeAmount,
+  }) {
+    return CreditProduct(
+      name: name ?? this.name,
+      price: price ?? this.price,
+      quantity: quantity ?? this.quantity,
+      surcharge: surcharge ?? this.surcharge,
+      surchargeAmount: surchargeAmount ?? this.surchargeAmount,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is CreditProduct &&
+        other.name == name &&
+        other.price == price &&
+        other.quantity == quantity &&
+        other.surcharge == surcharge &&
+        other.surchargeAmount == surchargeAmount;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(name, price, quantity, surcharge, surchargeAmount);
   }
 }

@@ -10,6 +10,7 @@ import 'package:waypay_mobile/features/auth/presentation/screens/pin_code_screen
 
 import 'package:waypay_mobile/features/bottom_navigation_bar/main_layout.dart';
 import 'package:waypay_mobile/features/blog/presentation/screens/blog_screen.dart';
+import 'package:waypay_mobile/features/credit/presentation/screens/create_credit/custom_page_transitions.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/create_credit/new_credit_creation_screen.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/credit_screen.dart';
 import 'package:waypay_mobile/features/finance/presentation/screens/budget_screen.dart';
@@ -78,6 +79,25 @@ class AppRouter {
         path: '/',
         builder: (context, state) =>
             const PhoneAuthScreen(userType: 'employee'),
+      ),
+
+      GoRoute(
+        path: Routes.newCreditDetailsScreen.toPath,
+        name: Routes.newCreditDetailsScreen.toName,
+        pageBuilder: (context, state) =>
+            SlideLeftTransition(child: NewCreditCreationScreen()),
+      ),
+      GoRoute(
+        path: Routes.newCreditProductsScreen.toPath,
+        name: Routes.newCreditProductsScreen.toName,
+        pageBuilder: (context, state) =>
+            SlideLeftTransition(child: NewCreditCreationScreen()),
+      ),
+      GoRoute(
+        path: Routes.newCreditSchedulesScreen.toPath,
+        name: Routes.newCreditSchedulesScreen.toName,
+        pageBuilder: (context, state) =>
+            SlideLeftTransition(child: NewCreditCreationScreen()),
       ),
 
       GoRoute(
@@ -208,26 +228,6 @@ class AppRouter {
                     name: Routes.blackCatalogScreen.toName,
                     builder: (context, state) =>
                         const ClientBlackCatalogScreen(),
-                  ),
-                  GoRoute(
-                    path: Routes.newCreditDetailsScreen.toPath,
-                    name: Routes.newCreditDetailsScreen.toName,
-                    builder: (context, state) =>
-                        const NewCreditCreationScreen(),
-                  ),
-
-                  GoRoute(
-                    path: Routes.newCreditProductsScreen.toPath,
-                    name: Routes.newCreditProductsScreen.toName,
-                    builder: (context, state) =>
-                        const NewCreditCreationScreen(),
-                  ),
-
-                  GoRoute(
-                    path: Routes.newCreditSchedulesScreen.toPath,
-                    name: Routes.newCreditSchedulesScreen.toName,
-                    builder: (context, state) =>
-                        const NewCreditCreationScreen(),
                   ),
                 ],
               ),

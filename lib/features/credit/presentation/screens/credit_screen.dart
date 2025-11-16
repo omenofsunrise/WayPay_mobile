@@ -127,7 +127,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
               onPressed: () {
                 print('Add button pressed');
                 // Навигация на первый экран создания кредита
-                context.push(Routes.newCreditDetailsScreen.toPath);
+                context.pushNamed(Routes.newCreditDetailsScreen.toName);
               },
             ),
           ),

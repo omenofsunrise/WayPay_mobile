@@ -1,38 +1,72 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 
-class CreditCreationCubit extends Cubit<CreateCreditRequest> {
+class CreditCreationCubit extends Cubit<CreditCreationState> {
   CreditCreationCubit()
     : super(
-        CreateCreditRequest(
-          name: '',
-          creditTypeId: 0,
-          creditTabTypeId: 0,
-          guarantorClientId: 0,
-          creditDate: DateTime.now(),
-          firstPayment: 0,
-          termMonths: 0,
-          paymentDay: 1,
-          nextMonthStart: false,
-          inDebt: false,
-          products: [],
+        CreditCreationState(
+          creditRequest: CreateCreditRequest(
+            clientId: null,
+            name: '',
+            creditTypeId: 0,
+            creditTabTypeId: 0,
+            guarantorClientId: 0,
+            guarantor: null,
+            investorId: null,
+            poolId: null,
+            creditDate: DateTime.now(),
+            firstPayment: 0,
+            termMonths: 12,
+            paymentDay: 1,
+            nextMonthStart: false,
+            inDebt: false,
+            debtComment: null,
+            products: [CreditProduct(name: '', price: 0, quantity: 1)],
+          ),
+          markupType: 0,
+          totalAmountWithSurcharge: 0,
+          selectedClient: null,
+          selectedInvestor: null,
         ),
       );
 
   void updateBasicInfo({
+    int? clientId,
     String? name,
     int? creditTypeId,
     int? creditTabTypeId,
-    int? clientId,
+    int? guarantorClientId,
+    Guarantor? guarantor,
+    int? investorId,
+    int? poolId,
     DateTime? creditDate,
+    bool? inDebt,
+    String? debtComment,
+    ClientModel? selectedClient,
+    InvestorsModel? selectedInvestor,
   }) {
+    final updatedRequest = state.creditRequest.copyWith(
+      clientId: clientId,
+      name: name,
+      creditTypeId: creditTypeId,
+      creditTabTypeId: creditTabTypeId,
+      guarantorClientId: guarantorClientId,
+      guarantor: guarantor,
+      investorId: investorId,
+      poolId: poolId,
+      creditDate: creditDate,
+      inDebt: inDebt,
+      debtComment: debtComment,
+    );
+
     emit(
       state.copyWith(
-        name: name,
-        creditTypeId: creditTypeId,
-        creditTabTypeId: creditTabTypeId,
-        clientId: clientId,
-        creditDate: creditDate,
+        creditRequest: updatedRequest,
+        selectedClient: selectedClient ?? state.selectedClient,
+        selectedInvestor: selectedInvestor ?? state.selectedInvestor,
       ),
     );
   }
@@ -42,60 +76,104 @@ class CreditCreationCubit extends Cubit<CreateCreditRequest> {
     int? termMonths,
     int? paymentDay,
     bool? nextMonthStart,
-    bool? inDebt,
-    String? debtComment,
   }) {
-    emit(
-      state.copyWith(
-        firstPayment: firstPayment,
-        termMonths: termMonths,
-        paymentDay: paymentDay,
-        nextMonthStart: nextMonthStart,
-        inDebt: inDebt,
-        debtComment: debtComment,
-      ),
-    );
-  }
+    double adjustedFirstPayment =
+        firstPayment ?? state.creditRequest.firstPayment;
 
-  void updateGuarantorInfo({int? guarantorClientId, Guarantor? guarantor}) {
-    emit(
-      state.copyWith(
-        guarantorClientId: guarantorClientId,
-        guarantor: guarantor,
-      ),
+    if (adjustedFirstPayment > state.totalAmountWithSurcharge) {
+      adjustedFirstPayment = state.totalAmountWithSurcharge;
+    }
+
+    final updatedRequest = state.creditRequest.copyWith(
+      firstPayment: adjustedFirstPayment,
+      termMonths: termMonths,
+      paymentDay: paymentDay,
+      nextMonthStart: nextMonthStart,
     );
+
+    emit(state.copyWith(creditRequest: updatedRequest));
   }
 
   void updateProducts(List<CreditProduct> products) {
-    emit(state.copyWith(products: products));
-  }
+    final updatedProducts = _recalculateSurchargeAmounts(
+      products,
+      state.markupType,
+    );
+    final updatedRequest = state.creditRequest.copyWith(
+      products: updatedProducts,
+    );
+    final totalAmount = _calculateTotalAmountWithSurcharge(updatedProducts);
 
-  void addProduct(CreditProduct product) {
-    final newProducts = List<CreditProduct>.from(state.products)..add(product);
-    emit(state.copyWith(products: newProducts));
-  }
+    double firstPayment = updatedRequest.firstPayment;
+    if (firstPayment > totalAmount) {
+      firstPayment = totalAmount;
+      updatedRequest.firstPayment = firstPayment;
+    }
 
-  void removeProduct(int index) {
-    final newProducts = List<CreditProduct>.from(state.products)
-      ..removeAt(index);
-    emit(state.copyWith(products: newProducts));
-  }
-
-  void clear() {
     emit(
-      CreateCreditRequest(
-        name: '',
-        creditTypeId: 0,
-        creditTabTypeId: 0,
-        guarantorClientId: 0,
-        creditDate: DateTime.now(),
-        firstPayment: 0,
-        termMonths: 0,
-        paymentDay: 1,
-        nextMonthStart: false,
-        inDebt: false,
-        products: [],
+      state.copyWith(
+        creditRequest: updatedRequest,
+        totalAmountWithSurcharge: totalAmount,
       ),
     );
+  }
+
+  void updateMarkupType(int markupType) {
+    final updatedProducts = _recalculateSurchargeAmounts(
+      state.creditRequest.products,
+      markupType,
+    );
+
+    final updatedRequest = state.creditRequest.copyWith(
+      products: updatedProducts,
+    );
+    final totalAmount = _calculateTotalAmountWithSurcharge(updatedProducts);
+
+    double firstPayment = updatedRequest.firstPayment;
+    if (firstPayment > totalAmount) {
+      firstPayment = totalAmount;
+      updatedRequest.firstPayment = firstPayment;
+    }
+
+    emit(
+      state.copyWith(
+        markupType: markupType,
+        creditRequest: updatedRequest,
+        totalAmountWithSurcharge: totalAmount,
+      ),
+    );
+  }
+
+  List<CreditProduct> _recalculateSurchargeAmounts(
+    List<CreditProduct> products,
+    int markupType,
+  ) {
+    return products.map((product) {
+      double surchargeAmount = 0;
+
+      if (markupType == 0) {
+        surchargeAmount = product.surcharge ?? 0;
+      } else {
+        final surchargePercent = product.surcharge ?? 0;
+        surchargeAmount = (product.price * surchargePercent) / 100;
+      }
+
+      return product.copyWith(surchargeAmount: surchargeAmount);
+    }).toList();
+  }
+
+  double _calculateTotalAmountWithSurcharge(List<CreditProduct> products) {
+    final total = products.fold(0.0, (sum, product) {
+      final basePrice = product.price * product.quantity;
+      final surchargeAmount = product.surchargeAmount ?? 0;
+      return sum + basePrice + surchargeAmount;
+    });
+
+    // Округляем до 50 вверх
+    return _roundUpToFifty(total);
+  }
+
+  double _roundUpToFifty(double amount) {
+    return (amount / 50).ceil() * 50.0;
   }
 }

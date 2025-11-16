@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
+import 'package:waypay_mobile/features/credit/presentation/screens/create_credit/custom_page_transitions.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 import 'step1_details_content.dart';
 import 'step2_products_content.dart';
@@ -20,10 +22,11 @@ class NewCreditCreationScreen extends StatefulWidget {
 
 class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
   final _formKey = GlobalKey<FormState>();
-
   final _firstPaymentController = TextEditingController();
   final _termMonthsController = TextEditingController();
   final _paymentDayController = TextEditingController();
+  final _firstPaymentPercentController = TextEditingController();
+  final _firstPaymentAmountController = TextEditingController();
 
   @override
   void didChangeDependencies() {
@@ -33,9 +36,55 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
 
   void _initializeForm() {
     final state = context.read<CreditCreationCubit>().state;
-    _firstPaymentController.text = state.firstPayment.toString();
-    _termMonthsController.text = state.termMonths.toString();
-    _paymentDayController.text = state.paymentDay.toString();
+    final creditRequest = state.creditRequest;
+
+    _firstPaymentController.text = creditRequest.firstPayment.toString();
+    _termMonthsController.text = creditRequest.termMonths.toString();
+    _paymentDayController.text = creditRequest.paymentDay.toString();
+
+    _updateFirstPaymentFields(
+      creditRequest.firstPayment,
+      state.totalAmountWithSurcharge,
+    );
+  }
+
+  void _updateFirstPaymentFields(double firstPayment, double totalAmount) {
+    if (firstPayment > 0 && totalAmount > 0) {
+      final percent = (firstPayment / totalAmount * 100);
+      _firstPaymentPercentController.text = percent.toStringAsFixed(2);
+      _firstPaymentAmountController.text = firstPayment.toStringAsFixed(2);
+    } else {
+      _firstPaymentPercentController.text = '';
+      _firstPaymentAmountController.text = '';
+    }
+  }
+
+  void _updateFirstPayment(double amount) {
+    context.read<CreditCreationCubit>().updatePaymentInfo(firstPayment: amount);
+  }
+
+  void _updateTermMonths(int termMonths) {
+    context.read<CreditCreationCubit>().updatePaymentInfo(
+      termMonths: termMonths,
+    );
+  }
+
+  void _updateNextMonthStart(bool value) {
+    context.read<CreditCreationCubit>().updatePaymentInfo(
+      nextMonthStart: value,
+    );
+  }
+
+  void _updatePaymentDay(int day) {
+    context.read<CreditCreationCubit>().updatePaymentInfo(paymentDay: day);
+  }
+
+  void _updateMarkupType(int markupType) {
+    context.read<CreditCreationCubit>().updateMarkupType(markupType);
+  }
+
+  void _updateProducts(List<CreditProduct> products) {
+    context.read<CreditCreationCubit>().updateProducts(products);
   }
 
   int get _currentStep {
@@ -76,12 +125,25 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
   }
 
   void _handleBackButton() {
-    // Если есть предыдущий шаг, переходим на него
     if (_previousRoute != null) {
-      context.go(_previousRoute!);
+      _navigateBack();
     } else {
-      // Если это первый шаг, выходим из экрана создания кредита
       context.go(Routes.creditsScreen.toPath);
+    }
+  }
+
+  void _navigateBack() {
+    final page = SlideRightTransition(child: NewCreditCreationScreen());
+    context.pushReplacement(_previousRoute!, extra: page);
+  }
+
+  void _handleContinue() {
+    if (_formKey.currentState!.validate()) {
+      if (_nextRoute != null) {
+        context.go(_nextRoute!);
+      } else {
+        _finishCreditCreation();
+      }
     }
   }
 
@@ -98,20 +160,36 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: Color(AppColors.grey),
-          onPressed: _handleBackButton, // Используем нашу функцию
+          onPressed: _handleBackButton,
         ),
       ),
-      body: BlocListener<CreditCreationCubit, CreateCreditRequest>(
+      body: BlocListener<CreditCreationCubit, CreditCreationState>(
         listener: (context, state) {
-          if (_firstPaymentController.text.isEmpty) {
-            _firstPaymentController.text = state.firstPayment.toString();
+          final creditRequest = state.creditRequest;
+
+          if (_firstPaymentController.text.isEmpty ||
+              double.parse(_firstPaymentController.text) !=
+                  creditRequest.firstPayment) {
+            _firstPaymentController.text = creditRequest.firstPayment
+                .toString();
           }
-          if (_termMonthsController.text.isEmpty) {
-            _termMonthsController.text = state.termMonths.toString();
+
+          if (_termMonthsController.text.isEmpty ||
+              int.parse(_termMonthsController.text) !=
+                  creditRequest.termMonths) {
+            _termMonthsController.text = creditRequest.termMonths.toString();
           }
-          if (_paymentDayController.text.isEmpty) {
-            _paymentDayController.text = state.paymentDay.toString();
+
+          if (_paymentDayController.text.isEmpty ||
+              int.parse(_paymentDayController.text) !=
+                  creditRequest.paymentDay) {
+            _paymentDayController.text = creditRequest.paymentDay.toString();
           }
+
+          _updateFirstPaymentFields(
+            creditRequest.firstPayment,
+            state.totalAmountWithSurcharge,
+          );
         },
         child: Container(
           color: Color(AppColors.background),
@@ -154,15 +232,35 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
         paymentDayController: _paymentDayController,
       );
     } else if (location == Routes.newCreditProductsScreen.toPath) {
-      return const Step2ProductsContent();
+      return BlocBuilder<CreditCreationCubit, CreditCreationState>(
+        builder: (context, state) {
+          return Step2ProductsContent(
+            products: state.creditRequest.products,
+            onProductsChanged: _updateProducts,
+            markupType: state.markupType,
+            onMarkupTypeChanged: _updateMarkupType,
+            totalAmount: state.totalAmountWithSurcharge,
+          );
+        },
+      );
     } else if (location == Routes.newCreditSchedulesScreen.toPath) {
-      return const Step3SchedulesContent();
+      return BlocBuilder<CreditCreationCubit, CreditCreationState>(
+        builder: (context, state) {
+          return Step3SchedulesContent(
+            nextMonthStart: state.creditRequest.nextMonthStart,
+            onNextMonthStartChanged: _updateNextMonthStart,
+            firstPayment: state.creditRequest.firstPayment,
+            termMonths: state.creditRequest.termMonths,
+            paymentDay: state.creditRequest.paymentDay,
+            onPaymentDayChanged: _updatePaymentDay,
+            onFirstPaymentChanged: _updateFirstPayment,
+            onTermMonthsChanged: _updateTermMonths,
+            totalAmount: state.totalAmountWithSurcharge,
+          );
+        },
+      );
     }
-    return Step1DetailsContent(
-      firstPaymentController: _firstPaymentController,
-      termMonthsController: _termMonthsController,
-      paymentDayController: _paymentDayController,
-    );
+    return Container();
   }
 
   Widget _buildStepperWidget(int currentStep, int totalSteps) {
@@ -176,7 +274,7 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
             style: TextStyle(
               color: Color(AppColors.primary),
               fontSize: 16,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.normal,
             ),
           ),
         ],
@@ -192,7 +290,7 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
             Expanded(
               child: DefaultButton(
                 text: 'Назад',
-                onPressed: () => context.go(_previousRoute!),
+                onPressed: _navigateBack,
                 isGreen: false,
               ),
             ),
@@ -210,16 +308,6 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     );
   }
 
-  void _handleContinue() {
-    if (_formKey.currentState!.validate()) {
-      if (_nextRoute != null) {
-        context.go(_nextRoute!);
-      } else {
-        _finishCreditCreation();
-      }
-    }
-  }
-
   void _finishCreditCreation() {
     print('Завершение создания кредита');
     context.go(Routes.creditsScreen.toPath);
@@ -230,6 +318,8 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     _firstPaymentController.dispose();
     _termMonthsController.dispose();
     _paymentDayController.dispose();
+    _firstPaymentPercentController.dispose();
+    _firstPaymentAmountController.dispose();
     super.dispose();
   }
 }
