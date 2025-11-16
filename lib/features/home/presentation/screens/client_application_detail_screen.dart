@@ -1,20 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/features/home/presentation/screens/client_applications_screen.dart';
+import 'package:waypay_mobile/features/home/data/models/credit_applications/credit_application_model.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
 class ClientApplicationDetailScreen extends StatelessWidget {
-  const ClientApplicationDetailScreen({super.key, required this.application});
+  ClientApplicationDetailScreen({
+    super.key,
+    required this.application,
+  });
 
-  final ClientApplication application;
+  final CreditApplicationModel application;
+
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'ru_RU',
+    symbol: '₽',
+    decimalDigits: 0,
+  );
+  final DateFormat _dateFormat = DateFormat('dd.MM.yyyy');
+
+  String _formatCurrency(double? value) {
+    if (value == null) return '—';
+    return _currencyFormat.format(value);
+  }
+
+  String _formatTerm(int? months) {
+    if (months == null || months <= 0) return '—';
+    return '$months мес.';
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return '—';
+    return _dateFormat.format(date);
+  }
+
+  String _resolve(String? value) {
+    if (value == null || value.trim().isEmpty) return '—';
+    return value;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final applicationNumber =
+        application.applicationNumber ?? '№ ${application.id}';
+    final managerName = _resolve(application.managerName);
+    final clientName = _resolve(application.fullName);
+    final region = _resolve(application.region);
+    final district = _resolve(application.district);
+
     return Scaffold(
       backgroundColor: const Color(AppColors.background),
       body: SafeArea(
@@ -25,26 +63,34 @@ class ClientApplicationDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Header(
-                  title: 'Заявка ${application.applicationNumber}',
+                  title: 'Заявка $applicationNumber',
                   showBackButton: true,
                   showNotifications: false,
                 ),
                 const SizedBox(height: 16),
                 _InfoCard(
                   fields: [
-                    _InfoField('ФИО менеджера', application.managerName),
+                    _InfoField('ФИО менеджера', managerName),
                   ],
                 ),
                 const SizedBox(height: 12),
                 _InfoCard(
                   fields: [
-                    _InfoField('ФИО клиента', application.fullName),
-                    _InfoField('Регион', application.region),
-                    _InfoField('Район', application.district),
+                    _InfoField('ФИО клиента', clientName),
+                    _InfoField('Регион', region),
+                    _InfoField('Район', district),
                   ],
                 ),
                 const SizedBox(height: 12),
-                _ProductInfoCard(application: application),
+                _ProductInfoCard(
+                  title: _resolve(application.productName),
+                  term: _formatTerm(application.termMonths),
+                  firstPayment: _formatCurrency(application.firstPayment),
+                  date: _formatDate(application.createdDate),
+                  amount: _formatCurrency(
+                    application.productPrice ?? application.totalAmount,
+                  ),
+                ),
                 const SizedBox(height: 24),
                 Row(
                   children: [
@@ -72,7 +118,6 @@ class ClientApplicationDetailScreen extends StatelessWidget {
                           SvgIcons.add,
                           color: Colors.white,
                         ),
-
                         color: const Color(AppColors.primary),
                         textColor: Colors.white,
                         onPressed: () {},
@@ -151,9 +196,19 @@ class _InfoField {
 }
 
 class _ProductInfoCard extends StatelessWidget {
-  const _ProductInfoCard({required this.application});
+  const _ProductInfoCard({
+    required this.title,
+    required this.term,
+    required this.firstPayment,
+    required this.date,
+    required this.amount,
+  });
 
-  final ClientApplication application;
+  final String title;
+  final String term;
+  final String firstPayment;
+  final String date;
+  final String amount;
 
   @override
   Widget build(BuildContext context) {
@@ -189,7 +244,7 @@ class _ProductInfoCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            application.productName,
+            title,
             style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w600,
@@ -200,13 +255,13 @@ class _ProductInfoCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _ProductField(label: 'Срок', value: application.term),
+                child: _ProductField(label: 'Срок', value: term),
               ),
               const SizedBox(width: 32),
               Expanded(
                 child: _ProductField(
                   label: 'Первый взнос',
-                  value: application.firstPayment,
+                  value: firstPayment,
                 ),
               ),
             ],
@@ -217,14 +272,14 @@ class _ProductInfoCard extends StatelessWidget {
               Expanded(
                 child: _ProductField(
                   label: 'Дата',
-                  value: application.issueDate,
+                  value: date,
                 ),
               ),
               const SizedBox(width: 32),
               Expanded(
                 child: _ProductField(
                   label: 'Стоимость',
-                  value: application.amount,
+                  value: amount,
                 ),
               ),
             ],

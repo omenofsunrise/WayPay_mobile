@@ -1,6 +1,7 @@
 class CreateClientRequest {
   final String fullName;
   final String phone;
+  final String? secondPhone;
   final String doc;
   final String birthdate;
   final String? docIssueDate;
@@ -9,6 +10,7 @@ class CreateClientRequest {
   CreateClientRequest({
     required this.fullName,
     required this.phone,
+    this.secondPhone,
     required this.doc,
     required this.birthdate,
     this.docIssueDate,
@@ -19,6 +21,7 @@ class CreateClientRequest {
     return {
       'fullName': fullName,
       'phone': phone,
+      if (secondPhone != null) 'secondPhone': secondPhone,
       'doc': doc,
       'birthdate': birthdate,
       'docIssueDate': docIssueDate,

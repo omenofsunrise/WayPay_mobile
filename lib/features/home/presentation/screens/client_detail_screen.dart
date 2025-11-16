@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
@@ -64,8 +65,9 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content:
-              Text('Оба фото загружены. Удалите одно, чтобы загрузить новое.'),
+          content: Text(
+            'Оба фото загружены. Удалите одно, чтобы загрузить новое.',
+          ),
         ),
       );
       return;
@@ -81,29 +83,28 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
     final clientId = widget.client?.id;
     if (clientId == null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ID клиента недоступен')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('ID клиента недоступен')));
       return;
     }
 
     setState(() => _isUploadingPhoto = true);
     try {
       final file = File(picked.path);
+      final bytes = await file.readAsBytes();
       await _clientRemoteDataSource.uploadPassportPhoto(clientId, type, file);
+      await _cachePhotoBytes(clientId, type, bytes);
       if (!mounted) return;
-      setState(() => _upsertPassportPhoto(
-            type,
-            FileImage(file),
-          ));
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Фото паспорта загружено')),
-      );
+      setState(() => _upsertPassportPhoto(type, MemoryImage(bytes)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Фото паспорта загружено')));
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка загрузки фото: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Ошибка загрузки фото: $e')));
       }
     } finally {
       if (mounted) {
@@ -118,27 +119,28 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
     final clientId = widget.client?.id;
     if (clientId == null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ID клиента недоступен')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('ID клиента недоступен')));
       return;
     }
 
     setState(() => _isDeletingPhoto = true);
     try {
       await _clientRemoteDataSource.deletePassportPhoto(clientId, data.type);
+      await _clearCachedPhoto(clientId, data.type);
       if (!mounted) return;
       setState(() {
         _photos.removeAt(index);
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Фото удалено')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Фото удалено')));
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка удаления фото: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Ошибка удаления фото: $e')));
       }
     } finally {
       if (mounted) {
@@ -155,9 +157,7 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
         insetPadding: const EdgeInsets.all(16),
         child: GestureDetector(
           onTap: () => Navigator.of(context).pop(),
-          child: InteractiveViewer(
-            child: Image(image: photo.imageProvider),
-          ),
+          child: InteractiveViewer(child: Image(image: photo.imageProvider)),
         ),
       ),
     );
@@ -209,25 +209,30 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
 
     for (final type in PassportPhotoType.values) {
       try {
+        final cached = await _loadCachedPhoto(clientId, type);
+        if (cached != null && _isValidImageBytes(cached)) {
+          if (!mounted) return;
+          setState(() => _upsertPassportPhoto(type, MemoryImage(cached)));
+          continue;
+        }
+
         final bytes = await _clientRemoteDataSource.fetchPassportPhoto(
           clientId,
           type,
         );
         if (!mounted || bytes == null || !_isValidImageBytes(bytes)) continue;
-        setState(() => _upsertPassportPhoto(
-              type,
-              MemoryImage(bytes),
-            ));
+
+        await _cachePhotoBytes(clientId, type, bytes);
+
+        if (!mounted) return;
+        setState(() => _upsertPassportPhoto(type, MemoryImage(bytes)));
       } catch (e) {
         debugPrint('Ошибка получения фото ($type): $e');
       }
     }
   }
 
-  void _upsertPassportPhoto(
-    PassportPhotoType type,
-    ImageProvider provider,
-  ) {
+  void _upsertPassportPhoto(PassportPhotoType type, ImageProvider provider) {
     final data = _PassportPhotoData(type: type, imageProvider: provider);
     final index = _photos.indexWhere((element) => element.type == type);
     if (index >= 0) {
@@ -264,12 +269,41 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
     return jpeg || png || webp;
   }
 
+  String _photoCacheKey(int clientId, PassportPhotoType type) =>
+      'passport_photo_${clientId}_${type.name}';
+
+  Future<void> _cachePhotoBytes(
+    int clientId,
+    PassportPhotoType type,
+    Uint8List bytes,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_photoCacheKey(clientId, type), base64Encode(bytes));
+  }
+
+  Future<void> _clearCachedPhoto(int clientId, PassportPhotoType type) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_photoCacheKey(clientId, type));
+  }
+
+  Future<Uint8List?> _loadCachedPhoto(
+    int clientId,
+    PassportPhotoType type,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = prefs.getString(_photoCacheKey(clientId, type));
+    if (encoded == null) return null;
+    try {
+      return base64Decode(encoded);
+    } catch (_) {
+      await prefs.remove(_photoCacheKey(clientId, type));
+      return null;
+    }
+  }
+
   Widget _buildPassportPhotoArea() {
     if (_photos.isEmpty) {
-      return UploadPhotoPlaceholder(
-        height: 200,
-        onPressed: _addPhoto,
-      );
+      return UploadPhotoPlaceholder(height: 200, onPressed: _addPhoto);
     }
 
     return SizedBox(
@@ -327,9 +361,7 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 16)),
-              SliverToBoxAdapter(
-                child: _buildPassportPhotoArea(),
-              ),
+              SliverToBoxAdapter(child: _buildPassportPhotoArea()),
               if (_photos.isNotEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
@@ -422,10 +454,10 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
               ],
               const SliverToBoxAdapter(child: SizedBox(height: 20)),
               SliverToBoxAdapter(
-                  child: CustomTabSwitcher(
-                    controller: _tabController,
-                    tabs: const ['История', 'Комментарии'],
-                  ),
+                child: CustomTabSwitcher(
+                  controller: _tabController,
+                  tabs: const ['История', 'Комментарии'],
+                ),
               ),
               SliverToBoxAdapter(
                 child: SizedBox(
@@ -528,10 +560,7 @@ class _ClientHistoryTabState extends State<_ClientHistoryTab> {
             child: Text(
               'История договоров отсутствует',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                color: Color(AppColors.darkGrey),
-              ),
+              style: TextStyle(fontSize: 15, color: Color(AppColors.darkGrey)),
             ),
           );
         }
@@ -641,9 +670,9 @@ class _CommentsTabState extends State<_CommentsTab> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка при выборе файла: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ошибка при выборе файла: $e')));
     }
   }
 
@@ -682,15 +711,15 @@ class _CommentsTabState extends State<_CommentsTab> {
       await _loadNotes();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Комментарий добавлен')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Комментарий добавлен')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка при отправке: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Ошибка при отправке: $e')));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -705,24 +734,25 @@ class _CommentsTabState extends State<_CommentsTab> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка удаления: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ошибка удаления: $e')));
     }
   }
 
   Future<void> _openAttachment(NoteModel note) async {
     final base64Data = note.fileBase64;
     if (base64Data == null || base64Data.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Вложение отсутствует')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Вложение отсутствует')));
       return;
     }
 
     try {
-      final sanitized =
-          base64Data.contains(',') ? base64Data.split(',').last : base64Data;
+      final sanitized = base64Data.contains(',')
+          ? base64Data.split(',').last
+          : base64Data;
       final bytes = base64.decode(sanitized);
       final tempDir = await getTemporaryDirectory();
       final fileName = note.fileName?.isNotEmpty == true
@@ -733,9 +763,9 @@ class _CommentsTabState extends State<_CommentsTab> {
       await OpenFilex.open(file.path);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Не удалось открыть файл: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Не удалось открыть файл: $e')));
     }
   }
 
@@ -756,10 +786,7 @@ class _CommentsTabState extends State<_CommentsTab> {
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.red),
               ),
-              TextButton(
-                onPressed: _loadNotes,
-                child: const Text('Повторить'),
-              ),
+              TextButton(onPressed: _loadNotes, child: const Text('Повторить')),
             ],
           )
         else if (_notes.isEmpty)
@@ -768,10 +795,7 @@ class _CommentsTabState extends State<_CommentsTab> {
             child: Text(
               'Комментариев пока нет',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                color: Color(AppColors.darkGrey),
-              ),
+              style: TextStyle(fontSize: 15, color: Color(AppColors.darkGrey)),
             ),
           )
         else
@@ -779,7 +803,8 @@ class _CommentsTabState extends State<_CommentsTab> {
             (note) => _CommentCard(
               note: note,
               onDelete: () => _deleteNote(note),
-              onOpenAttachment: note.fileBase64?.isNotEmpty == true ||
+              onOpenAttachment:
+                  note.fileBase64?.isNotEmpty == true ||
                       (note.fileName?.isNotEmpty == true)
                   ? () => _openAttachment(note)
                   : null,
@@ -828,8 +853,9 @@ class _CommentsTabState extends State<_CommentsTab> {
                           ? 'Прикрепить файл (макс. 2 МБ)'
                           : _attachedFile!.path.split('/').last,
                       style: TextStyle(
-                        color:
-                            const Color(AppColors.primary).withOpacity(_attachedFile == null ? .8 : 1),
+                        color: const Color(
+                          AppColors.primary,
+                        ).withOpacity(_attachedFile == null ? .8 : 1),
                         fontSize: 14,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -862,7 +888,9 @@ class _CommentsTabState extends State<_CommentsTab> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       )
                     : const Text(
@@ -931,8 +959,9 @@ class _CommentCard extends StatelessWidget {
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor:
-                        const Color(AppColors.primary).withOpacity(.15),
+                    backgroundColor: const Color(
+                      AppColors.primary,
+                    ).withOpacity(.15),
                     radius: 18,
                     child: Text(
                       _initials,

@@ -1,165 +1,141 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/app_modal.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/form_modal/labeled_container.dart';
-import 'package:waypay_mobile/core/widgets/helpers.dart';
-import 'package:waypay_mobile/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources.dart';
-import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
-import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 
-class BlacklistClientCard extends StatefulWidget {
+class BlacklistClientCard extends StatelessWidget {
+  const BlacklistClientCard({
+    super.key,
+    required this.client,
+  });
+
   final ClientModel client;
-  final VoidCallback? onDeleted;
-  const BlacklistClientCard({super.key, required this.client, this.onDeleted});
 
-  @override
-  State<BlacklistClientCard> createState() => _BlacklistClientCardState();
-}
+  String _formatDate(DateTime date) =>
+      DateFormat('dd.MM.yyyy', 'ru').format(date);
 
-class _BlacklistClientCardState extends State<BlacklistClientCard> {
-  final userStorage = UserStorage();
-  Future<void> _loadClientAndShowModal(BuildContext context) async {
-    final dataSource = getIt<ClientRemoteDataSource>();
-    try {
-      final fullClient = await dataSource.getClientById(widget.client.id);
-      if (!context.mounted) return;
-      _showClientModal(context, fullClient);
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка загрузки клиента: $e')));
+  String _resolveWhatsapp() {
+    final candidate = client.secondPhone?.trim();
+    if (candidate != null && candidate.isNotEmpty) {
+      return candidate;
     }
-  }
-
-  void _handleRemoveFromBlacklist(BuildContext context) {
-    Future.delayed(Duration.zero, () async {
-      if (!context.mounted) return;
-      Navigator.of(context).pop();
-
-      final confirmed = await showConfirmDialog(
-        context: context,
-        title: 'Подтвердите удаление',
-        content: 'Вы действительно хотите убрать клиента из ЧС?',
-        confirmText: 'Удалить',
-      );
-
-      if (confirmed == true && context.mounted) {
-        _deleteFromBlacklist(context);
-      }
-    });
-  }
-
-  void _showClientModal(BuildContext context, ClientModel client) {
-    showDialog(
-      context: context,
-      builder: (_) => AppModal(
-        backgroundColor: Color(AppColors.background),
-        title: 'Данные',
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              LabeledContainer(label: 'ID', text: client.id.toString()),
-              LabeledContainer(label: 'ФИО', text: client.fullName),
-              LabeledContainer(
-                label: 'Дата рождения',
-                text: _formatDate(client.birthdate),
-              ),
-              LabeledContainer(
-                label: 'Адрес регистрации',
-                text: client.registrationAddress ?? '----',
-              ),
-              LabeledContainer(label: 'Документ', text: client.doc),
-              LabeledContainer(label: 'Телефон', text: client.phone),
-              SizedBox(height: 16),
-              if (userStorage.hasViewContent([EmployeeRole.superAdmin])) ...[
-                DefaultButton(
-                  text: 'Убрать из ЧС',
-                  isGreen: true,
-                  onPressed: () => _handleRemoveFromBlacklist(context),
-                ),
-                SizedBox(height: 12),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    final DateFormat formatter = DateFormat('dd MMMM yyyy', 'ru');
-    return formatter.format(date);
-  }
-
-  Future<void> _deleteFromBlacklist(BuildContext context) async {
-    final dataSource = getIt<BlacklistRemoteDataSources>();
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
-    try {
-      await dataSource.fromBlackList(widget.client.id);
-      if (!context.mounted) return;
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Клиент успешно удалён')));
-      if (widget.onDeleted != null) {
-        widget.onDeleted!();
-      }
-    } catch (e) {
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка удаления клиента: $e')));
-    }
+    return client.phone;
   }
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => _loadClientAndShowModal(context),
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.client.fullName,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              widget.client.phone,
-              style: const TextStyle(fontSize: 14, color: Colors.black),
-            ),
-          ],
-        ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x14000809),
+            offset: Offset(2, 2),
+            blurRadius: 4,
+          ),
+          BoxShadow(
+            color: Color(0x05000809),
+            offset: Offset(0, 0),
+            blurRadius: 6,
+          ),
+        ],
       ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  client.fullName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(AppColors.black),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'ID: ${client.id}',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(AppColors.darkGrey),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _InfoGroup(
+            title: 'Дата рождения',
+            value: _formatDate(client.birthdate),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _InfoGroup(
+                  title: 'Телефон',
+                  value: client.phone,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _InfoGroup(
+                  title: 'WhatsApp',
+                  value: _resolveWhatsapp(),
+                  alignRight: true,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoGroup extends StatelessWidget {
+  const _InfoGroup({
+    required this.title,
+    required this.value,
+    this.alignRight = false,
+  });
+
+  final String title;
+  final String value;
+  final bool alignRight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment:
+          alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: Color(AppColors.darkGrey),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Color(AppColors.black),
+          ),
+          textAlign: alignRight ? TextAlign.end : TextAlign.start,
+        ),
+      ],
     );
   }
 }

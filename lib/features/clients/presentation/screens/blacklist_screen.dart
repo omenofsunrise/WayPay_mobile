@@ -262,19 +262,6 @@ class _BlacklistScreenState extends State<BlacklistScreen> {
                                     itemBuilder: (context, index) {
                                       return BlacklistClientCard(
                                         client: state.clients[index],
-                                        onDeleted: () {
-                                          context.read<BlacklistBloc>().add(
-                                            LoadBlacklistedClients(
-                                              refresh: true,
-                                              page: 1,
-                                              pageSize: 10,
-                                              search:
-                                                  _searchController.text.isEmpty
-                                                  ? null
-                                                  : _searchController.text,
-                                            ),
-                                          );
-                                        },
                                       );
                                     },
                                   ),

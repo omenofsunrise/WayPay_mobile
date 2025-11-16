@@ -27,8 +27,11 @@ import 'package:waypay_mobile/features/chat/data/data_source/message/message_rem
 import 'package:waypay_mobile/features/chat/data/service/chat_hub_service.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat/chat_bloc.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/black_catalog/black_catalog_remote_data_source.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/black_catalog/black_catalog_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources_impl.dart';
+import 'package:waypay_mobile/features/clients/presentation/cubit/black_catalog/black_catalog_cubit.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source_impl.dart';
@@ -42,6 +45,9 @@ import 'package:waypay_mobile/features/finance/data/data_source/budget_remote_da
 import 'package:waypay_mobile/features/finance/data/data_source/budget_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
+import 'package:waypay_mobile/features/home/data/data_source/credit_application_remote_data_source.dart';
+import 'package:waypay_mobile/features/home/data/data_source/credit_application_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/home/presentation/cubit/client_applications/client_applications_cubit.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
@@ -154,6 +160,12 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton<SoldProductRemoteDataSource>(
     () => SoldProductRemoteDataSourceImpl(getIt<Dio>()),
   );
+  getIt.registerLazySingleton<BlackCatalogRemoteDataSource>(
+    () => BlackCatalogRemoteDataSourceImpl(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<CreditApplicationRemoteDataSource>(
+    () => CreditApplicationRemoteDataSourceImpl(getIt<Dio>()),
+  );
   getIt.registerLazySingleton<ChatHubService>(
     () => ChatHubService(
       baseUrl: 'https://web.waypay.one:5002',
@@ -164,6 +176,8 @@ Future<void> initDependencies() async {
   getIt.registerFactory(() => AuthCubit());
   getIt.registerFactory(() => InvestorsBloc());
   getIt.registerFactory(() => ClientsBloc());
+  getIt.registerFactory(() => BlackCatalogCubit());
+  getIt.registerFactory(() => ClientApplicationsCubit());
   getIt.registerFactory(() => BlacklistBloc());
   getIt.registerFactory(() => ProductsBloc());
   getIt.registerFactory(() => BudgetIncomeBloc());

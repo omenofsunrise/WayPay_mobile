@@ -45,8 +45,10 @@ class BlacklistBloc extends Bloc<BlacklistEvent, BlacklistState> {
         return;
       }
 
+      final phone = _extractPhone(event.search);
       final query = GetClientsQuery(
-        fullName: event.search,
+        fullName: phone == null ? event.search : null,
+        phone: phone,
         page: _currentPage,
         pageSize: event.pageSize ?? 20,
         sortBy: event.sortBy,
@@ -84,8 +86,10 @@ class BlacklistBloc extends Bloc<BlacklistEvent, BlacklistState> {
     emit(BlacklistLoading());
 
     try {
+      final phone = _extractPhone(event.query);
       final query = GetClientsQuery(
-        fullName: event.query,
+        fullName: phone == null ? event.query : null,
+        phone: phone,
         page: 1,
         pageSize: event.pageSize ?? 10,
       );
@@ -123,5 +127,14 @@ class BlacklistBloc extends Bloc<BlacklistEvent, BlacklistState> {
     } catch (e) {
       emit(BlacklistError('Не удалось добавить клиента в чёрный список: $e'));
     }
+  }
+
+  String? _extractPhone(String? value) {
+    if (value == null) return null;
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    if (digits.length >= 11) {
+      return digits;
+    }
+    return null;
   }
 }

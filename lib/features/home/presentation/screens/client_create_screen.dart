@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/header.dart';
 import 'package:waypay_mobile/core/widgets/inputs/custom_calendar.dart';
 import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/create_clients_requests.dart';
+import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 
 class ClientCreateScreen extends StatefulWidget {
   const ClientCreateScreen({super.key});
@@ -23,6 +26,11 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
 
   late final List<TextEditingController> _allControllers;
   bool _isFormValid = false;
+  bool _isSubmitting = false;
+  String? _submissionError;
+  bool _isFormattingPhone = false;
+  bool _isFormattingWhatsapp = false;
+  bool _isFormattingPassport = false;
 
   @override
   void initState() {
@@ -39,6 +47,9 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
     for (final controller in _allControllers) {
       controller.addListener(_handleFormChanged);
     }
+    _phoneController.addListener(_onMainPhoneChanged);
+    _whatsAppController.addListener(_onWhatsappChanged);
+    _passportNumberController.addListener(_onPassportChanged);
   }
 
   void _handleFormChanged() {
@@ -55,19 +66,146 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
   @override
   void dispose() {
     for (final controller in _allControllers) {
-      controller
-        ..removeListener(_handleFormChanged)
-        ..dispose();
+      controller.removeListener(_handleFormChanged);
+    }
+    _phoneController.removeListener(_onMainPhoneChanged);
+    _whatsAppController.removeListener(_onWhatsappChanged);
+    _passportNumberController.removeListener(_onPassportChanged);
+    for (final controller in _allControllers) {
+      controller.dispose();
     }
     super.dispose();
   }
 
   void _handleSave() {
-    if (!_isFormValid) return;
+    if (!_isFormValid || _isSubmitting) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Клиент сохранён (мок-данные)')),
+    final birthDate = _parseDate(_birthDateController.text);
+    final docIssueDate = _parseDate(_passportIssueDateController.text);
+    final phoneDigits = _normalizeDigits(_phoneController.text);
+    final whatsappDigits = _normalizeDigits(_whatsAppController.text);
+
+    if (birthDate == null) {
+      setState(() {
+        _submissionError = 'Введите корректную дату рождения';
+      });
+      return;
+    }
+
+    if (docIssueDate == null) {
+      setState(() {
+        _submissionError = 'Введите корректную дату выдачи паспорта';
+      });
+      return;
+    }
+
+    if (phoneDigits.length < 10) {
+      setState(() {
+        _submissionError = 'Введите корректный номер телефона';
+      });
+      return;
+    }
+
+    final request = CreateClientRequest(
+      fullName: _fullNameController.text.trim(),
+      phone: '8$phoneDigits',
+      doc: _passportNumberController.text.trim(),
+      birthdate: birthDate.toUtc().toIso8601String(),
+      docIssueDate: docIssueDate.toUtc().toIso8601String(),
+      registrationAddress: _registrationAddressController.text.trim(),
+      secondPhone: whatsappDigits.isNotEmpty ? '8$whatsappDigits' : null,
     );
+
+    setState(() {
+      _isSubmitting = true;
+      _submissionError = null;
+    });
+
+    context.read<ClientsBloc>().add(CreateClient(request));
+  }
+
+  String _normalizeDigits(String value) => value.replaceAll(RegExp(r'\D'), '');
+
+  void _onMainPhoneChanged() => _applyPhoneMask(_phoneController, false);
+
+  void _onWhatsappChanged() => _applyPhoneMask(_whatsAppController, true);
+
+  void _onPassportChanged() {
+    if (_isFormattingPassport) return;
+    _isFormattingPassport = true;
+    var digits = _normalizeDigits(_passportNumberController.text);
+    if (digits.length > 10) {
+      digits = digits.substring(0, 10);
+    }
+    final buffer = StringBuffer();
+    for (var i = 0; i < digits.length; i++) {
+      if (i == 4) buffer.write(' ');
+      buffer.write(digits[i]);
+    }
+    final formatted = buffer.toString();
+    _passportNumberController.value = TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+    _isFormattingPassport = false;
+  }
+
+  void _applyPhoneMask(TextEditingController controller, bool isWhatsapp) {
+    final isFormatting =
+        isWhatsapp ? _isFormattingWhatsapp : _isFormattingPhone;
+    if (isFormatting) return;
+
+    if (isWhatsapp) {
+      _isFormattingWhatsapp = true;
+    } else {
+      _isFormattingPhone = true;
+    }
+
+    var digits = _normalizeDigits(controller.text);
+    if (digits.startsWith('7') || digits.startsWith('8')) {
+      digits = digits.substring(1);
+    }
+    if (digits.length > 10) {
+      digits = digits.substring(0, 10);
+    }
+
+    String formatted;
+    if (digits.isEmpty) {
+      formatted = '';
+    } else {
+      final buffer = StringBuffer('+7 ');
+      buffer.write('(');
+      buffer.write(_slice(digits, 0, 3));
+      if (digits.length >= 3) {
+        buffer.write(') ');
+        buffer.write(_slice(digits, 3, 6));
+      }
+      if (digits.length >= 6) {
+        buffer.write('-');
+        buffer.write(_slice(digits, 6, 8));
+      }
+      if (digits.length >= 8) {
+        buffer.write('-');
+        buffer.write(_slice(digits, 8, 10));
+      }
+      formatted = buffer.toString().trimRight();
+    }
+    controller.value = TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+
+    if (isWhatsapp) {
+      _isFormattingWhatsapp = false;
+    } else {
+      _isFormattingPhone = false;
+    }
+  }
+
+  String _slice(String value, int start, int end) {
+    if (value.length <= start) return '';
+    final actualEnd = value.length < end ? value.length : end;
+    return value.substring(start, actualEnd);
   }
 
   Future<void> _pickDate(TextEditingController controller) async {
@@ -102,105 +240,141 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(AppColors.background),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Header(
-                  title: 'Создание клиента',
-                  showBackButton: true,
-                  showNotifications: false,
+    return BlocListener<ClientsBloc, ClientsState>(
+      listener: (context, state) {
+        if (state is ClientCreateSuccess) {
+          if (!mounted) return;
+          setState(() {
+            _isSubmitting = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Клиент успешно создан')),
+          );
+          Navigator.of(context).maybePop();
+        } else if (state is ClientsError) {
+          if (!mounted) return;
+          setState(() {
+            _isSubmitting = false;
+            _submissionError = state.message;
+          });
+        } else if (state is ClientsLoaded && state.errorMessage != null) {
+          if (!mounted) return;
+          setState(() {
+            _isSubmitting = false;
+            _submissionError = state.errorMessage;
+          });
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(AppColors.background),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Header(
+                    title: 'Создание клиента',
+                    showBackButton: true,
+                    showNotifications: false,
+                  ),
                 ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 8)),
-              SliverToBoxAdapter(
-                child: _Section(
-                  title: 'Основная информация',
-                  children: [
-                    ModalTextField(
-                      controller: _fullNameController,
-                      label: 'ФИО клиента',
-                      hintText: 'Введите ФИО',
-                      keyboardType: TextInputType.name,
-                    ),
-                    const SizedBox(height: 12),
-                    ModalTextField(
-                      controller: _birthDateController,
-                      label: 'Дата рождения',
-                      hintText: 'дд.мм.гггг',
-                      readOnly: true,
-                      onTap: () => _pickDate(_birthDateController),
-                      suffixIcon: const Icon(
-                        Icons.calendar_today,
-                        size: 20,
-                        color: Color(AppColors.primary),
+                const SliverToBoxAdapter(child: SizedBox(height: 8)),
+                SliverToBoxAdapter(
+                  child: _Section(
+                    title: 'Основная информация',
+                    children: [
+                      ModalTextField(
+                        controller: _fullNameController,
+                        label: 'ФИО клиента',
+                        hintText: 'Введите ФИО',
+                        keyboardType: TextInputType.name,
+                      ),
+                      const SizedBox(height: 12),
+                      ModalTextField(
+                        controller: _birthDateController,
+                        label: 'Дата рождения',
+                        hintText: 'дд.мм.гггг',
+                        readOnly: true,
+                        onTap: () => _pickDate(_birthDateController),
+                        suffixIcon: const Icon(
+                          Icons.calendar_today,
+                          size: 20,
+                          color: Color(AppColors.primary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                SliverToBoxAdapter(
+                  child: _Section(
+                    title: 'Паспортные данные',
+                    children: [
+                      ModalTextField(
+                        controller: _passportNumberController,
+                        label: 'Серия и номер паспорта',
+                        hintText: 'Введите данные',
+                        keyboardType: TextInputType.number,
+                      ),
+                      const SizedBox(height: 12),
+                      ModalTextField(
+                        controller: _passportIssueDateController,
+                        label: 'Дата выдачи',
+                        hintText: 'дд.мм.гггг',
+                        readOnly: true,
+                        onTap: () => _pickDate(_passportIssueDateController),
+                        suffixIcon: const Icon(
+                          Icons.calendar_today,
+                          size: 20,
+                          color: Color(AppColors.primary),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ModalTextField(
+                        controller: _registrationAddressController,
+                        label: 'Адрес регистрации',
+                        hintText: 'Введите адрес',
+                      ),
+                    ],
+                  ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                SliverToBoxAdapter(
+                  child: _Section(
+                    title: 'Контактные данные',
+                    children: [
+                      ModalTextField(
+                        controller: _phoneController,
+                        label: 'Телефон',
+                        hintText: '+7 (___) ___-__-__',
+                        keyboardType: TextInputType.phone,
+                      ),
+                      const SizedBox(height: 12),
+                      ModalTextField(
+                        controller: _whatsAppController,
+                        label: 'Whatsapp',
+                        hintText: '+7 (___) ___-__-__',
+                        keyboardType: TextInputType.phone,
+                      ),
+                    ],
+                  ),
+                ),
+                if (_submissionError != null)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Text(
+                        _submissionError!,
+                        style: const TextStyle(color: Colors.red),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 16)),
-              SliverToBoxAdapter(
-                child: _Section(
-                  title: 'Паспортные данные',
-                  children: [
-                    ModalTextField(
-                      controller: _passportNumberController,
-                      label: 'Серия и номер паспорта',
-                      hintText: 'Введите данные',
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: 12),
-                    ModalTextField(
-                      controller: _passportIssueDateController,
-                      label: 'Дата выдачи',
-                      hintText: 'дд.мм.гггг',
-                      readOnly: true,
-                      onTap: () => _pickDate(_passportIssueDateController),
-                      suffixIcon: const Icon(
-                        Icons.calendar_today,
-                        size: 20,
-                        color: Color(AppColors.primary),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ModalTextField(
-                      controller: _registrationAddressController,
-                      label: 'Адрес регистрации',
-                      hintText: 'Введите адрес',
-                    ),
-                  ],
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 16)),
-              SliverToBoxAdapter(
-                child: _Section(
-                  title: 'Контактные данные',
-                  children: [
-                    ModalTextField(
-                      controller: _phoneController,
-                      label: 'Телефон',
-                      hintText: '+7 (___) ___-__-__',
-                      keyboardType: TextInputType.phone,
-                    ),
-                    const SizedBox(height: 12),
-                    ModalTextField(
-                      controller: _whatsAppController,
-                      label: 'Whatsapp',
-                      hintText: '+7 (___) ___-__-__',
-                      keyboardType: TextInputType.phone,
-                    ),
-                  ],
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
-              SliverToBoxAdapter(child: _buildActions()),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
-            ],
+                  ),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                SliverToBoxAdapter(child: _buildActions()),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              ],
+            ),
           ),
         ),
       ),
@@ -208,7 +382,7 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
   }
 
   Widget _buildActions() {
-    final bool enabled = _isFormValid;
+    final bool enabled = _isFormValid && !_isSubmitting;
     return Row(
       children: [
         Expanded(
@@ -222,7 +396,7 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
         const SizedBox(width: 12),
         Expanded(
           child: DefaultButton(
-            text: 'Сохранить',
+            text: _isSubmitting ? 'Сохранение...' : 'Сохранить',
             onPressed: enabled ? _handleSave : () {},
             color: enabled
                 ? const Color(AppColors.primary)
