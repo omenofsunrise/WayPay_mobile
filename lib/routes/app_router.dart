@@ -32,6 +32,8 @@ import 'package:waypay_mobile/features/chat/presentation/screens/all_chat_screen
 import 'package:waypay_mobile/features/calc/calculator_page.dart';
 
 import 'package:waypay_mobile/routes/routes.dart';
+import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 
 class AppRouter {
   static final router = GoRouter(
@@ -157,7 +159,10 @@ class AppRouter {
                   GoRoute(
                     path: Routes.clientListScreen.toPath,
                     name: Routes.clientListScreen.toName,
-                    builder: (context, state) => const ClientListScreen(),
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => ClientsBloc(),
+                      child: const ClientListScreen(),
+                    ),
                   ),
                   GoRoute(
                     path: Routes.clientCreateScreen.toPath,
@@ -168,7 +173,7 @@ class AppRouter {
                     path: Routes.clientDetailScreen.toPath,
                     name: Routes.clientDetailScreen.toName,
                     builder: (context, state) {
-                      final client = state.extra as ClientInfo?;
+                      final client = state.extra as ClientModel?;
                       return ClientDetailScreen(client: client);
                     },
                   ),
