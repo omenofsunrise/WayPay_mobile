@@ -53,41 +53,57 @@ class ClientApplicationCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Expanded(
+                      child: Text(
+                        fullName,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(AppColors.black),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     Text(
                       applicationNumber,
                       style: const TextStyle(
                         fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Color(AppColors.darkGrey),
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      term,
-                      style: const TextStyle(
-                        fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: Color(AppColors.darkGrey),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
+                const Text(
+                  'Срок',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Color(AppColors.darkGrey),
+                  ),
+                ),
+                const SizedBox(height: 4),
                 Text(
-                  fullName,
+                  term,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: Color(AppColors.black),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
                       flex: 2,
-                      child: _InfoRow(label: 'Товар', value: productName),
+                      child: _InfoRow(
+                        label: 'Товар',
+                        value: productName,
+                        maxLines: 1,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -113,11 +129,13 @@ class _InfoRow extends StatelessWidget {
     required this.label,
     required this.value,
     this.alignRight = false,
+    this.maxLines,
   });
 
   final String label;
   final String value;
   final bool alignRight;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -143,6 +161,8 @@ class _InfoRow extends StatelessWidget {
             fontWeight: FontWeight.w600,
             color: Color(AppColors.black),
           ),
+          maxLines: maxLines,
+          overflow: maxLines != null ? TextOverflow.ellipsis : null,
         ),
       ],
     );

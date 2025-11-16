@@ -139,15 +139,6 @@ class _MainClientScreenState extends State<MainClientScreen> {
                   ),
                   SliverToBoxAdapter(
                     child: MainClientCard(
-                      icon: Icons.description_outlined,
-                      title: 'Кредиты',
-                      value: _formatCount(employeeData.creditsCount),
-                      onTap: () =>
-                          context.pushNamed(Routes.creditsScreen.toName),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: MainClientCard(
                       icon: Icons.block_outlined,
                       title: 'Черный список',
                       value: _formatCount(employeeData.blacklistCount),

@@ -1,16 +1,23 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/custom_tab_switcher.dart';
 import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
 import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+import 'package:waypay_mobile/core/widgets/search_field.dart';
+import 'package:waypay_mobile/features/home/data/models/credit_applications/credit_application_model.dart';
+import 'package:waypay_mobile/features/home/domain/entities/client_application_filters.dart';
+import 'package:waypay_mobile/features/home/presentation/cubit/client_applications/client_applications_cubit.dart';
 import 'package:waypay_mobile/features/home/presentation/widgets/client_application_card.dart';
 import 'package:waypay_mobile/routes/routes.dart';
-import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
 
 class ClientApplicationsScreen extends StatefulWidget {
   const ClientApplicationsScreen({super.key});
@@ -24,106 +31,104 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   late TabController _tabController;
-  final List<ClientApplication> _applications = _mockApplications;
-  String _searchQuery = '';
-  ClientApplicationFilters? _appliedFilters;
+  Timer? _debounce;
   bool _showSearchHint = false;
+  ClientApplicationFilters? _appliedFilters;
+  String _lastSubmittedQuery = '';
+
+  static const _searchDelay = Duration(milliseconds: 400);
+
+  ClientApplicationsTab get _currentTab =>
+      _tabController.index == 0
+          ? ClientApplicationsTab.all
+          : ClientApplicationsTab.mine;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
+    _tabController = TabController(length: 2, vsync: this)
+      ..addListener(_handleTabChange);
 
-  List<ClientApplication> _filterApplications({bool onlyMine = false}) {
-    final query = _searchQuery.trim().toLowerCase();
-    final queryDigits = query.replaceAll(RegExp(r'\D'), '');
-    final filters = _appliedFilters;
-    final hintNeeded =
-        _searchQuery.trim().isNotEmpty &&
-        _searchQuery.trim().length < 4 &&
-        queryDigits.length < 11;
-
-    final result = _applications.where((application) {
-      if (onlyMine && !application.isMine) return false;
-
-      final hasQuery = query.isNotEmpty;
-      final matchesName =
-          !hasQuery || application.fullName.toLowerCase().contains(query);
-      final matchesNumber =
-          !hasQuery ||
-          application.applicationNumber.toLowerCase().contains(query);
-      final matchesProduct =
-          !hasQuery || application.productName.toLowerCase().contains(query);
-      final matchesDigits =
-          hasQuery &&
-          queryDigits.isNotEmpty &&
-          application.applicationNumber
-              .replaceAll(RegExp(r'\D'), '')
-              .contains(queryDigits);
-
-      final matchesSearch =
-          matchesName || matchesNumber || matchesProduct || matchesDigits;
-      if (!matchesSearch) return false;
-
-      if (filters == null || filters.isEmpty) return true;
-      return _matchesFilters(application, filters);
-    }).toList();
-
-    if (_showSearchHint != hintNeeded) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() => _showSearchHint = hintNeeded);
-        }
-      });
-    }
-
-    return result;
-  }
-
-  bool _matchesFilters(
-    ClientApplication application,
-    ClientApplicationFilters filters,
-  ) {
-    final cost = _parseDigits(application.amount);
-    final term = _parseDigits(application.term);
-
-    if (filters.minCost != null && (cost == null || cost < filters.minCost!)) {
-      return false;
-    }
-    if (filters.maxCost != null && (cost == null || cost > filters.maxCost!)) {
-      return false;
-    }
-    if (filters.minTerm != null && (term == null || term < filters.minTerm!)) {
-      return false;
-    }
-    if (filters.maxTerm != null && (term == null || term > filters.maxTerm!)) {
-      return false;
-    }
-    if (filters.region != null &&
-        filters.region!.isNotEmpty &&
-        application.region.toLowerCase() != filters.region!.toLowerCase()) {
-      return false;
-    }
-    if (filters.district != null &&
-        filters.district!.isNotEmpty &&
-        application.district.toLowerCase() != filters.district!.toLowerCase()) {
-      return false;
-    }
-    return true;
-  }
-
-  int? _parseDigits(String source) {
-    final digits = source.replaceAll(RegExp(r'\D'), '');
-    if (digits.isEmpty) return null;
-    return int.tryParse(digits);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadCurrentTab(query: '');
+    });
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
-    _tabController.dispose();
+    _tabController
+      ..removeListener(_handleTabChange)
+      ..dispose();
     super.dispose();
+  }
+
+  void _handleTabChange() {
+    if (_tabController.indexIsChanging) return;
+    final cubit = context.read<ClientApplicationsCubit>();
+    final tabState =
+        _currentTab == ClientApplicationsTab.all ? cubit.state.allTab : cubit.state.myTab;
+    if (!tabState.initialized) {
+      _loadCurrentTab();
+    }
+  }
+
+  String _normalizeDigits(String input) => input.replaceAll(RegExp(r'\D'), '');
+
+  void _onSearchChanged(String raw) {
+    _debounce?.cancel();
+    final query = raw.trim();
+    final digits = _normalizeDigits(query);
+    final hasQuery = query.isNotEmpty;
+    final meetsPhoneRequirement = digits.length >= 11;
+    final meetsNameRequirement = query.length >= 4;
+    final shouldSearch = hasQuery && (meetsPhoneRequirement || meetsNameRequirement);
+
+    setState(() => _showSearchHint = hasQuery && !shouldSearch);
+
+    if (!hasQuery) {
+      _lastSubmittedQuery = '';
+      _loadCurrentTab(query: '');
+      return;
+    }
+
+    if (!shouldSearch) {
+      return;
+    }
+
+    _debounce = Timer(_searchDelay, () {
+      if (!mounted) return;
+      _lastSubmittedQuery = query;
+      _loadCurrentTab(query: query);
+    });
+  }
+
+  Future<void> _loadCurrentTab({
+    String? query,
+    ClientApplicationFilters? filters,
+    bool replaceFilters = false,
+  }) {
+    return _loadTab(
+      tab: _currentTab,
+      query: query,
+      filters: filters,
+      replaceFilters: replaceFilters,
+    );
+  }
+
+  Future<void> _loadTab({
+    required ClientApplicationsTab tab,
+    String? query,
+    ClientApplicationFilters? filters,
+    bool replaceFilters = false,
+  }) {
+    return context.read<ClientApplicationsCubit>().loadApplications(
+      tab: tab,
+      query: query ?? _lastSubmittedQuery,
+      filters: filters ?? _appliedFilters,
+      replaceFilters: replaceFilters,
+    );
   }
 
   Future<void> _openFilters() async {
@@ -142,14 +147,30 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
     );
     BottomNavController.instance.show();
     if (result != null) {
+      final applied = result.isEmpty ? null : result;
       setState(() {
-        _appliedFilters = result.isEmpty ? null : result;
+        _appliedFilters = applied;
       });
+      await _loadCurrentTab(
+        filters: applied,
+        replaceFilters: true,
+      );
     }
   }
 
-  void _clearAppliedFilters() {
+  Future<void> _clearAppliedFilters() async {
     setState(() => _appliedFilters = null);
+    await _loadCurrentTab(
+      filters: null,
+      replaceFilters: true,
+    );
+  }
+
+  void _openDetails(CreditApplicationModel application) {
+    context.pushNamed(
+      Routes.clientApplicationDetailScreen.toName,
+      extra: application,
+    );
   }
 
   @override
@@ -170,8 +191,7 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
                     child: SearchField(
                       controller: _searchController,
                       hintText: 'Поиск',
-                      onChanged: (value) =>
-                          setState(() => _searchQuery = value),
+                      onChanged: _onSearchChanged,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -224,15 +244,28 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    _ApplicationsListView(applications: _filterApplications()),
-                    _ApplicationsListView(
-                      applications: _filterApplications(onlyMine: true),
-                    ),
-                  ],
+                child: BlocBuilder<ClientApplicationsCubit,
+                    ClientApplicationsState>(
+                  builder: (context, state) {
+                    return TabBarView(
+                      controller: _tabController,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        _ApplicationsTabContent(
+                          data: state.allTab,
+                          onRetry: () =>
+                              _loadTab(tab: ClientApplicationsTab.all),
+                          onApplicationTap: _openDetails,
+                        ),
+                        _ApplicationsTabContent(
+                          data: state.myTab,
+                          onRetry: () =>
+                              _loadTab(tab: ClientApplicationsTab.mine),
+                          onApplicationTap: _openDetails,
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ],
@@ -243,145 +276,118 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
   }
 }
 
-class ClientApplication {
-  const ClientApplication({
-    required this.fullName,
-    required this.applicationNumber,
-    required this.term,
-    required this.productName,
-    required this.amount,
-    required this.region,
-    required this.district,
-    required this.managerName,
-    required this.firstPayment,
-    required this.issueDate,
-    this.isMine = false,
+class _ApplicationsTabContent extends StatelessWidget {
+  const _ApplicationsTabContent({
+    required this.data,
+    required this.onRetry,
+    required this.onApplicationTap,
   });
 
-  final String fullName;
-  final String applicationNumber;
-  final String term;
-  final String productName;
-  final String amount;
-  final String region;
-  final String district;
-  final String managerName;
-  final String firstPayment;
-  final String issueDate;
-  final bool isMine;
-}
+  final ClientApplicationsTabData data;
+  final Future<void> Function() onRetry;
+  final void Function(CreditApplicationModel) onApplicationTap;
 
-class ClientApplicationFilters {
-  const ClientApplicationFilters({
-    this.minCost,
-    this.maxCost,
-    this.minTerm,
-    this.maxTerm,
-    this.region,
-    this.district,
-  });
+  static final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'ru_RU',
+    symbol: '₽',
+    decimalDigits: 0,
+  );
+  static final DateFormat _dateFormat = DateFormat('dd.MM.yyyy');
 
-  final int? minCost;
-  final int? maxCost;
-  final int? minTerm;
-  final int? maxTerm;
-  final String? region;
-  final String? district;
+  String _formatCurrency(double? value) {
+    if (value == null) return '—';
+    return _currencyFormat.format(value);
+  }
 
-  bool get isEmpty =>
-      minCost == null &&
-      maxCost == null &&
-      minTerm == null &&
-      maxTerm == null &&
-      (region == null || region!.isEmpty) &&
-      (district == null || district!.isEmpty);
-}
+  String _formatTerm(int? months) {
+    if (months == null || months <= 0) return '—';
+    return '$months мес.';
+  }
 
-const List<ClientApplication> _mockApplications = [
-  ClientApplication(
-    fullName: 'Мирошниченко Владислава Филипповна',
-    applicationNumber: '№ 234',
-    term: '24 месяца',
-    productName: 'Iphone 17 Pro MAX 256GB',
-    amount: '124 000₽',
-    region: 'Чеченская республика',
-    district: 'Веденский',
-    managerName: 'Мирошниченко Владислава Филипповна',
-    firstPayment: '0₽',
-    issueDate: '12.10.2025',
-    isMine: true,
-  ),
-  ClientApplication(
-    fullName: 'Антонов Сергей Леонидович',
-    applicationNumber: '№ 235',
-    term: '18 месяцев',
-    productName: 'MacBook Air 15"',
-    amount: '215 000₽',
-    region: 'Республика Татарстан',
-    district: 'Грозненский',
-    managerName: 'Александр Громов',
-    firstPayment: '25 000₽',
-    issueDate: '05.09.2025',
-  ),
-  ClientApplication(
-    fullName: 'Семенова Алина Викторовна',
-    applicationNumber: '№ 236',
-    term: '36 месяцев',
-    productName: 'Volkswagen Polo',
-    amount: '980 000₽',
-    region: 'Чеченская республика',
-    district: 'Урус-Мартановский',
-    managerName: 'Егор Степанов',
-    firstPayment: '150 000₽',
-    issueDate: '01.08.2025',
-    isMine: true,
-  ),
-  ClientApplication(
-    fullName: 'Громов Михаил Сергеевич',
-    applicationNumber: '№ 237',
-    term: '12 месяцев',
-    productName: 'Ipad Air 128GB',
-    amount: '82 000₽',
-    region: 'Московская область',
-    district: 'Грозненский',
-    managerName: 'Ирина Логинова',
-    firstPayment: '10 000₽',
-    issueDate: '18.07.2025',
-  ),
-];
-
-class _ApplicationsListView extends StatelessWidget {
-  const _ApplicationsListView({required this.applications});
-
-  final List<ClientApplication> applications;
+  String _formatDate(DateTime? date) {
+    if (date == null) return '—';
+    return _dateFormat.format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (applications.isEmpty) {
+    if (data.isLoading && data.items.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (data.error != null) {
+      return _ErrorView(
+        message: data.error!,
+        onRetry: onRetry,
+      );
+    }
+
+    if (data.items.isEmpty) {
       return const _EmptyApplicationsView();
     }
 
-    return ListView.separated(
-      physics: const BouncingScrollPhysics(),
-      padding: EdgeInsets.zero,
-      itemCount: applications.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (_, index) {
-        final application = applications[index];
-        return ClientApplicationCard(
-          fullName: application.fullName,
-          applicationNumber: application.applicationNumber,
-          term: application.term,
-          productName: application.productName,
-          amount: application.amount,
-          onTap: () {
-            context.pushNamed(
-              Routes.clientApplicationDetailScreen.toName,
-              extra: application,
-            );
-          },
-        );
-      },
+    return RefreshIndicator(
+      color: const Color(AppColors.primary),
+      onRefresh: onRetry,
+      child: ListView.separated(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
+        padding: EdgeInsets.zero,
+        itemCount: data.items.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (_, index) {
+          final application = data.items[index];
+          final amountValue =
+              application.productPrice ?? application.totalAmount;
+
+          return ClientApplicationCard(
+            fullName: application.fullName ?? '—',
+            applicationNumber:
+                application.applicationNumber ?? '№ ${application.id}',
+            term: _formatTerm(application.termMonths),
+            productName: application.productName ?? '—',
+            amount: _formatCurrency(amountValue),
+            onTap: () => onApplicationTap(application),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  const _ErrorView({required this.message, required this.onRetry});
+
+  final String message;
+  final Future<void> Function() onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.red,
+                fontSize: 15,
+              ),
+            ),
+            const SizedBox(height: 12),
+            DefaultButton(
+              text: 'Повторить',
+              onPressed: () => onRetry(),
+              color: const Color(AppColors.primary),
+              textColor: Colors.white,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -453,13 +459,13 @@ class _FiltersFormState extends State<_FiltersForm> {
   final _districtController = TextEditingController();
 
   List<TextEditingController> get _controllers => [
-    _minCostController,
-    _maxCostController,
-    _minTermController,
-    _maxTermController,
-    _regionController,
-    _districtController,
-  ];
+        _minCostController,
+        _maxCostController,
+        _minTermController,
+        _maxTermController,
+        _regionController,
+        _districtController,
+      ];
 
   @override
   void initState() {
@@ -507,17 +513,17 @@ class _FiltersFormState extends State<_FiltersForm> {
   }
 
   ClientApplicationFilters _buildFilters() => ClientApplicationFilters(
-    minCost: _parseToInt(_minCostController.text),
-    maxCost: _parseToInt(_maxCostController.text),
-    minTerm: _parseToInt(_minTermController.text),
-    maxTerm: _parseToInt(_maxTermController.text),
-    region: _regionController.text.trim().isEmpty
-        ? null
-        : _regionController.text.trim(),
-    district: _districtController.text.trim().isEmpty
-        ? null
-        : _districtController.text.trim(),
-  );
+        minCost: _parseToInt(_minCostController.text),
+        maxCost: _parseToInt(_maxCostController.text),
+        minTerm: _parseToInt(_minTermController.text),
+        maxTerm: _parseToInt(_maxTermController.text),
+        region: _regionController.text.trim().isEmpty
+            ? null
+            : _regionController.text.trim(),
+        district: _districtController.text.trim().isEmpty
+            ? null
+            : _districtController.text.trim(),
+      );
 
   int? _parseToInt(String value) {
     final digits = value.replaceAll(RegExp(r'\D'), '');
@@ -604,7 +610,7 @@ class _FiltersFormState extends State<_FiltersForm> {
               context: context,
               builder: (_) => _SimpleSelector(
                 title: 'Регион',
-                items: [
+                items: const [
                   'Чеченская республика',
                   'Республика Татарстан',
                   'Московская область',
@@ -633,7 +639,11 @@ class _FiltersFormState extends State<_FiltersForm> {
               context: context,
               builder: (_) => _SimpleSelector(
                 title: 'Район',
-                items: ['Веденский', 'Грозненский', 'Урус-Мартановский'],
+                items: const [
+                  'Веденский',
+                  'Грозненский',
+                  'Урус-Мартановский',
+                ],
                 selected: _districtController.text,
               ),
             );
@@ -739,12 +749,10 @@ class _FilterButtonState extends State<_FilterButton> {
   @override
   Widget build(BuildContext context) {
     final bool highlight = _isOpen || widget.isActive;
-    final background = highlight
-        ? const Color(AppColors.primary)
-        : Colors.white;
-    final iconColor = highlight
-        ? const Color(0xFFB8BEC8)
-        : const Color(0xFF6B717C);
+    final background =
+        highlight ? const Color(AppColors.primary) : Colors.white;
+    final iconColor =
+        highlight ? const Color(0xFFB8BEC8) : const Color(0xFF6B717C);
 
     return SizedBox(
       width: 48,

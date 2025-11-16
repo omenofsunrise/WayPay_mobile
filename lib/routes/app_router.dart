@@ -14,6 +14,8 @@ import 'package:waypay_mobile/features/credit/presentation/screens/create_credit
 import 'package:waypay_mobile/features/credit/presentation/screens/create_credit/new_credit_creation_screen.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/credit_screen.dart';
 import 'package:waypay_mobile/features/finance/presentation/screens/budget_screen.dart';
+import 'package:waypay_mobile/features/home/data/models/credit_applications/credit_application_model.dart';
+import 'package:waypay_mobile/features/home/presentation/cubit/client_applications/client_applications_cubit.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/client_application_detail_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/client_applications_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/client_create_screen.dart';
@@ -33,6 +35,8 @@ import 'package:waypay_mobile/features/chat/presentation/screens/all_chat_screen
 import 'package:waypay_mobile/features/calc/calculator_page.dart';
 
 import 'package:waypay_mobile/routes/routes.dart';
+import 'package:waypay_mobile/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
+import 'package:waypay_mobile/features/clients/presentation/cubit/black_catalog/black_catalog_cubit.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 
@@ -187,7 +191,10 @@ class AppRouter {
                   GoRoute(
                     path: Routes.clientCreateScreen.toPath,
                     name: Routes.clientCreateScreen.toName,
-                    builder: (context, state) => const ClientCreateScreen(),
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => ClientsBloc(),
+                      child: const ClientCreateScreen(),
+                    ),
                   ),
                   GoRoute(
                     path: Routes.clientDetailScreen.toPath,
@@ -200,14 +207,17 @@ class AppRouter {
                   GoRoute(
                     path: Routes.clientApplicationsScreen.toPath,
                     name: Routes.clientApplicationsScreen.toName,
-                    builder: (context, state) =>
-                        const ClientApplicationsScreen(),
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => ClientApplicationsCubit(),
+                      child: const ClientApplicationsScreen(),
+                    ),
                   ),
                   GoRoute(
                     path: Routes.clientApplicationDetailScreen.toPath,
                     name: Routes.clientApplicationDetailScreen.toName,
                     builder: (context, state) {
-                      final application = state.extra as ClientApplication;
+                      final application =
+                          state.extra as CreditApplicationModel;
                       return ClientApplicationDetailScreen(
                         application: application,
                       );
@@ -216,18 +226,26 @@ class AppRouter {
                   GoRoute(
                     path: Routes.queueListScreen.toPath,
                     name: Routes.queueListScreen.toName,
-                    builder: (context, state) => const QueueListScreen(),
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => ClientsBloc(),
+                      child: const QueueListScreen(),
+                    ),
                   ),
                   GoRoute(
                     path: Routes.blacklistScreen.toPath,
                     name: Routes.blacklistScreen.toName,
-                    builder: (context, state) => const ClientBlacklistScreen(),
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => BlacklistBloc(),
+                      child: const ClientBlacklistScreen(),
+                    ),
                   ),
                   GoRoute(
                     path: Routes.blackCatalogScreen.toPath,
                     name: Routes.blackCatalogScreen.toName,
-                    builder: (context, state) =>
-                        const ClientBlackCatalogScreen(),
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => BlackCatalogCubit(),
+                      child: const ClientBlackCatalogScreen(),
+                    ),
                   ),
                 ],
               ),
