@@ -3,15 +3,14 @@ part of 'resources.dart';
 class SvgIcons {
   SvgIcons._();
 
-  static const String add = 'assets/icons/newCredit.svg';
+  static const String add = 'assets/icons/add.svg';
   static const String allCredits = 'assets/icons/all_credits.svg';
   static const String analyticsLogo = 'assets/icons/analyticsLogo.svg';
-  static const String back = 'assets/icons/back.svg';
+  static const String arrowBack = 'assets/icons/arrowBack.svg';
   static const String bell = 'assets/icons/bell.svg';
-  static const String blogLogo = 'assets/icons/blogLogo.svg';
   static const String blog = 'assets/icons/blog.svg';
+  static const String blogLogo = 'assets/icons/blogLogo.svg';
   static const String book = 'assets/icons/book.svg';
-  static const String calc = 'assets/icons/calc.svg';
   static const String calcLogo = 'assets/icons/calcLogo.svg';
   static const String calculator = 'assets/icons/calculator.svg';
   static const String cash = 'assets/icons/cash.svg';
@@ -29,7 +28,6 @@ class SvgIcons {
   static const String debtCredits = 'assets/icons/debt_credits.svg';
   static const String debtSelf = 'assets/icons/debt_self.svg';
   static const String delay = 'assets/icons/delay.svg';
-  static const String doc2 = 'assets/icons/doc-2.svg';
   static const String docIcon = 'assets/icons/doc_icon.svg';
   static const String fileDigit = 'assets/icons/file-digit.svg';
   static const String filter = 'assets/icons/filter.svg';
@@ -44,11 +42,12 @@ class SvgIcons {
   static const String logo = 'assets/icons/logo.svg';
   static const String moneyIcon = 'assets/icons/money_icon.svg';
   static const String moneybag = 'assets/icons/moneybag.svg';
+  static const String newCredit = 'assets/icons/newCredit.svg';
   static const String notebook = 'assets/icons/notebook.svg';
   static const String search = 'assets/icons/search.svg';
   static const String shieldPerson = 'assets/icons/shield_person.svg';
+  static const String todoCopy = 'assets/icons/todo copy.svg';
   static const String todo = 'assets/icons/todo.svg';
-  static const String todoIcon = 'assets/icons/todo_icon.svg';
   static const String users = 'assets/icons/users.svg';
   static const String vectorLogoBlack = 'assets/icons/vectorLogo_black.svg';
 }
