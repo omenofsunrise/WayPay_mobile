@@ -25,6 +25,7 @@ import 'package:waypay_mobile/features/finance/presentation/screens/budget_scree
 import 'package:waypay_mobile/features/finance/presentation/screens/income_payments_screen.dart';
 import 'package:waypay_mobile/features/payment/presentation/bloc/expected/payment_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
+import 'package:waypay_mobile/features/investors/presentation/screens/investors_hub_screen.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investors_screen.dart';
 import 'package:waypay_mobile/features/product/presentation/bloc/products_bloc.dart';
 import 'package:waypay_mobile/features/product/presentation/screens/product_screen.dart';
@@ -485,11 +486,7 @@ class _AppDrawerState extends State<AppDrawer> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => BlocProvider(
-                    create: (_) =>
-                        InvestorsBloc()..add(LoadInvestorsEvent(refresh: true)),
-                    child: const InvestorsScreen(),
-                  ),
+                  builder: (_) => const InvestorsHubScreen(),
                 ),
               );
             },

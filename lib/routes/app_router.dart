@@ -26,7 +26,12 @@ import 'package:waypay_mobile/features/home/presentation/screens/client_blacklis
 import 'package:waypay_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/main_client_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/queue_list_screen.dart';
+import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
+import 'package:waypay_mobile/features/investors/presentation/bloc/investor_pool_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
+import 'package:waypay_mobile/features/investors/presentation/screens/investor_pool_detail_screen.dart';
+import 'package:waypay_mobile/features/investors/presentation/screens/investor_pool_screen.dart';
+import 'package:waypay_mobile/features/investors/presentation/screens/investors_hub_screen.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investors_screen.dart';
 import 'package:waypay_mobile/features/product/presentation/screens/product_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/profile_screen.dart';
@@ -150,6 +155,30 @@ class AppRouter {
               child: const InvestorsScreen(),
             ),
           );
+        },
+      ),
+      GoRoute(
+        path: Routes.investorPoolScreen.toPath,
+        name: Routes.investorPoolScreen.toName,
+        builder: (context, state) => BlocProvider(
+          create: (_) =>
+              InvestorPoolBloc()..add(LoadInvestorPool(refresh: true)),
+          child: const InvestorPoolScreen(),
+        ),
+      ),
+      GoRoute(
+        path: Routes.investorPoolDetailScreen.toPath,
+        name: Routes.investorPoolDetailScreen.toName,
+        builder: (context, state) {
+          final pool = state.extra as InvestorPoolModel?;
+          if (pool == null) {
+            return const Scaffold(
+              body: Center(
+                child: Text('Нет данных пула'),
+              ),
+            );
+          }
+          return InvestorPoolDetailScreen(pool: pool);
         },
       ),
 
@@ -327,6 +356,11 @@ class AppRouter {
                         ..load(year: DateTime.now().year),
                       child: const PaymentAnalyticsScreen(),
                     ),
+                  ),
+                  GoRoute(
+                    path: Routes.investorsHubScreen.toPath,
+                    name: Routes.investorsHubScreen.toName,
+                    builder: (context, state) => const InvestorsHubScreen(),
                   ),
                 ],
               ),

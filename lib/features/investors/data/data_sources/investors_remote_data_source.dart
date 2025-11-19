@@ -2,9 +2,17 @@ import 'package:waypay_mobile/features/investors/data/models/investor_payout_mod
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_response.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_response_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/investor_pool_response_model.dart';
 
 abstract class InvestorsRemoteDataSource {
   Future<InvestorsResponseModel> getInvestors({
+    int? page,
+    int? pageSize,
+    String? sortBy,
+    String? sortDirection,
+    String? search,
+  });
+  Future<InvestorPoolResponseModel> getInvestorPools({
     int? page,
     int? pageSize,
     String? sortBy,
@@ -31,6 +39,7 @@ abstract class InvestorsRemoteDataSource {
   Future<void> toggleBlockInvestor(int id);
   Future<void> clearInvestor(int id);
   Future<Map<String, dynamic>> getInvestorReport(int id);
+  Future<Map<String, dynamic>> getInvestorPoolReport(int id);
   Future<InvestorPayoutResponse> createInvestorPayout({
     required int investorId,
     required double amount,

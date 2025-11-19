@@ -4,7 +4,9 @@ import 'package:waypay_mobile/features/investors/data/models/investor_payout_mod
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_request.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_response.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
 import '../models/investors_response_model.dart';
+import '../models/investor_pool_response_model.dart';
 
 class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   final Dio dio;
@@ -50,6 +52,47 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       }
     } catch (e) {
       throw Exception('Неизвестная ошибка: $e');
+    }
+  }
+
+  @override
+  Future<InvestorPoolResponseModel> getInvestorPools({
+    int? page,
+    int? pageSize,
+    String? sortBy,
+    String? sortDirection,
+    String? search,
+  }) async {
+    try {
+      // ignore: avoid_print
+      print(
+        '🔍 Запрос списка пулов: page=${page ?? 1}, pageSize=${pageSize ?? 20}, '
+        'sortBy=${sortBy ?? 'name'}, sortDirection=${sortDirection ?? 'asc'}, search=$search',
+      );
+      final queryParams = <String, dynamic>{
+        'page': page ?? 1,
+        'pageSize': pageSize ?? 20,
+        'sortBy': sortBy ?? 'name',
+        'sortDirection': sortDirection ?? 'asc',
+      };
+      if (search != null && search.isNotEmpty) {
+        queryParams['name'] = search;
+      }
+      final response = await dio.get(
+        'InvestorPool',
+        queryParameters: queryParams,
+      );
+      // ignore: avoid_print
+      print(
+        '✅ Ответ списка пулов: status=${response.statusCode}, items=${(response.data['items'] as List?)?.length ?? 0}',
+      );
+      // ignore: avoid_print
+      print('📦 Данные списка пулов: ${response.data}');
+      return InvestorPoolResponseModel.fromJson(response.data);
+    } on DioException catch (e) {
+      // ignore: avoid_print
+      print('❌ Ошибка списка пулов: ${e.response?.data ?? e.message}');
+      throw Exception('Ошибка загрузки пула инвесторов: ${e.response?.data ?? e.message}');
     }
   }
 
@@ -176,6 +219,25 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
       throw Exception('Ошибка получения отчета инвестора: ${e.message}');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getInvestorPoolReport(int id) async {
+    try {
+      // Log id to help diagnose server-side errors
+      // ignore: avoid_print
+      print('🔍 Запрос отчета пула для ID: $id');
+      final response = await dio.get('InvestorPool/report/$id');
+      // ignore: avoid_print
+      print('✅ Ответ отчета пула $id: ${response.statusCode}');
+      // ignore: avoid_print
+      print('📦 Данные отчета пула $id: ${response.data}');
+      return response.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      // ignore: avoid_print
+      print('❌ Ошибка отчета пула $id: ${e.response?.data ?? e.message}');
+      throw Exception('Ошибка получения отчета пула инвесторов: ${e.message}');
     }
   }
 
