@@ -2,6 +2,7 @@ import 'package:waypay_mobile/features/analytics/data/models/analytic_items_resp
 import 'package:waypay_mobile/features/analytics/data/models/debt_dynamic_response.dart';
 import 'package:waypay_mobile/features/analytics/data/models/graph_data.dart';
 import 'package:waypay_mobile/features/analytics/data/models/sell_info_response.dart';
+import 'package:waypay_mobile/features/payment/data/models/payment_schedule_summary.dart';
 
 abstract class AnalyticRemoteDataSource {
   Future<AnalyticItemsResponse> getAnalyticItems({
@@ -24,4 +25,5 @@ abstract class AnalyticRemoteDataSource {
     String? end,
     String? predefinedPeriod,
   });
+  Future<List<PaymentScheduleSummary>> getPaymentSchedules({int? year});
 }

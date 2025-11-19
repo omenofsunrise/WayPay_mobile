@@ -13,7 +13,7 @@ class BlacklistRemoteDataSourcesImpl implements BlacklistRemoteDataSources {
   ) async {
     try {
       final response = await dio.get(
-        '/api/Client/blacklist',
+        'Client/blacklist',
         queryParameters: query.toQueryParams(),
       );
 
@@ -34,7 +34,7 @@ class BlacklistRemoteDataSourcesImpl implements BlacklistRemoteDataSources {
   @override
   Future<void> fromBlackList(int id) async {
     try {
-      await dio.put('/api/Client/$id/from_blacklist');
+      await dio.put('Client/$id/from_blacklist');
     } on DioException catch (e) {
       if (e.response?.statusCode == 403) {
         throw Exception('Недостваточно прав');
@@ -48,7 +48,7 @@ class BlacklistRemoteDataSourcesImpl implements BlacklistRemoteDataSources {
   @override
   Future<void> toBlackList(int id) async {
     try {
-      await dio.put('/api/Client/$id/to_blacklist');
+      await dio.put('Client/$id/to_blacklist');
     } on DioException catch (e) {
       throw Exception(
         'Ошибка добавления клиента в черный список: ${e.message}',

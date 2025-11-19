@@ -10,7 +10,7 @@ class ProfileBlogRemoteDataSourcesImpl implements ProfileBlogRemoteDataSources {
   Future<ProfileBlogModel> getProfile(int id) async {
     try {
       final response = await dio.get(
-        '/api/Profile',
+        'Profile',
         queryParameters: {'id': id},
       );
       if (response.data is Map<String, dynamic>) {
@@ -29,7 +29,7 @@ class ProfileBlogRemoteDataSourcesImpl implements ProfileBlogRemoteDataSources {
       final formData = FormData.fromMap({'Description': description});
 
       await dio.put(
-        '/api/Profile/update',
+        'Profile/update',
         data: formData,
         options: Options(
           headers: {'Content-Type': 'multipart/form-data', 'accept': '*/*'},

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:waypay_mobile/core/config/api_config.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
@@ -38,7 +39,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
   String? _resolvePhotoUrl(String? path) {
     if (path == null || path.isEmpty) return null;
     if (path.startsWith('http')) return path;
-    return 'https://web.waypay.one:5002$path';
+    return '${ApiConfig.filesBaseUrl}$path';
   }
 
   Future<void> _pickImage() async {

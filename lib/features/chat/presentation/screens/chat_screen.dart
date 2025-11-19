@@ -15,7 +15,7 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-
+import 'package:waypay_mobile/core/config/api_config.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
@@ -80,7 +80,7 @@ class _ChatScreenState extends State<ChatScreen> {
   int? _editingMessageId;
   bool get _isEditing => _editingMessageId != null;
 
-  static const String _filesBase = 'https://web.waypay.one:5002';
+  static const String _filesBase = ApiConfig.filesBaseUrl;
 
   @override
   void initState() {

@@ -13,6 +13,7 @@ class LoadPayment extends PaymentEvent {
   final String? investorNickname;
   final DateTime? dateFrom;
   final DateTime? dateTo;
+  final bool? confirmed;
 
   LoadPayment({
     this.refresh = false,
@@ -24,6 +25,7 @@ class LoadPayment extends PaymentEvent {
     this.investorNickname,
     this.dateFrom,
     this.dateTo,
+    this.confirmed,
   });
 }
 

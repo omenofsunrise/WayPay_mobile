@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/config/api_config.dart';
 import 'package:waypay_mobile/features/home/data/data_source/home_remote_data_source.dart';
 import 'package:waypay_mobile/features/home/data/models/employee_model.dart';
 import 'package:waypay_mobile/features/home/data/models/main_client_stats_model.dart';
@@ -11,7 +12,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   @override
   Future<EmployeeModel> getEmployeeData() async {
     try {
-      final response = await dio.get('/employee');
+      final response = await dio.get('employee');
 
       if (response.statusCode == 200) {
         if (response.data is Map<String, dynamic>) {
@@ -63,7 +64,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
     try {
       final response = await dio.post(
-        '/graphql',
+        ApiConfig.graphqlUrl,
         data: {
           'query': query,
           'operationName': 'MainClientStats',

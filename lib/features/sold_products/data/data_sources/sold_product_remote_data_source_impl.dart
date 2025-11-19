@@ -11,7 +11,7 @@ class SoldProductRemoteDataSourceImpl implements SoldProductRemoteDataSource {
   Future<List<SoldProductModel>> fetchSoldProductsByCreditId(
     int creditId,
   ) async {
-    final response = await dio.get('/api/SoldProduct/by-credit/$creditId');
+    final response = await dio.get('SoldProduct/by-credit/$creditId');
 
     if (response.statusCode == 200) {
       final data = response.data as List;

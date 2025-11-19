@@ -13,7 +13,7 @@ class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
   Future<QueueResponseModel> getQueue(GetQueueQuery query) async {
     try {
       final response = await dio.get(
-        '/api/Queue',
+        'Queue',
         queryParameters: query.toQueryParams(),
       );
 
@@ -32,7 +32,7 @@ class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
   @override
   Future<void> addQueueItem(QueueRequestModel request) async {
     try {
-      await dio.post('/api/Queue', data: request.toJson());
+      await dio.post('Queue', data: request.toJson());
     } on DioException catch (e) {
       throw Exception('Ошибка добавления в очередь: ${e.message}');
     }
@@ -41,7 +41,7 @@ class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
   @override
   Future<QueueItemModel> getQueueById(int id) async {
     try {
-      final response = await dio.get('/api/Queue/$id');
+      final response = await dio.get('Queue/$id');
       final data = response.data;
       if (data is Map<String, dynamic>) {
         return QueueItemModel.fromJson(data);
@@ -56,7 +56,7 @@ class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
   @override
   Future<void> closeQueueById(int id) async {
     try {
-      await dio.post('/api/Queue/close/$id', data: {});
+      await dio.post('Queue/close/$id', data: {});
     } on DioException catch (e) {
       throw Exception('Ошибка закрытия очереди: ${e.message}');
     }
@@ -65,7 +65,7 @@ class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
   @override
   Future<void> deleteQueueById(int id) async {
     try {
-      await dio.delete('/api/Queue/$id');
+      await dio.delete('Queue/$id');
     } on DioException catch (e) {
       throw Exception('Ошибка удаления очереди: ${e.message}');
     }
@@ -74,7 +74,7 @@ class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
   @override
   Future<void> updateQueueById(int id, QueueRequestModel request) async {
     try {
-      await dio.put('/api/Queue/$id', data: request.toJson());
+      await dio.put('Queue/$id', data: request.toJson());
     } on DioException catch (e) {
       throw Exception('Ошибка обновления очереди: ${e.message}');
     }

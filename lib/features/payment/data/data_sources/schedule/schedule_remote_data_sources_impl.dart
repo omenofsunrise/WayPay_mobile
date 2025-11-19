@@ -12,7 +12,7 @@ class ScheduleRemoteDataSourcesImpl implements ScheduleRemoteDataSources {
   Future<ScheduleResponseModel> getSchedule(GetScheduleQuery query) async {
     try {
       final response = await dio.get(
-        '/api/Schedule',
+        'Schedule',
         queryParameters: query.toQueryParams(),
       );
       final data = response.data;
@@ -30,7 +30,7 @@ class ScheduleRemoteDataSourcesImpl implements ScheduleRemoteDataSources {
   @override
   Future<void> putSchedule(int id) async {
     try {
-      await dio.put('/api/Schedule/$id');
+      await dio.put('Schedule/$id');
     } on DioException catch (e) {
       throw Exception('Ошибка обновления статуса уведомления: ${e.message}');
     }

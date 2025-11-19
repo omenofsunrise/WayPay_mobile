@@ -68,6 +68,9 @@ import 'package:waypay_mobile/features/payment/presentation/bloc/schedule/schedu
 import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
 import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources_impl.dart';
 import 'package:waypay_mobile/features/payment/presentation/bloc/expected/payment_bloc.dart';
+import 'package:waypay_mobile/features/payment/presentation/cubit/payment_schedule_cubit.dart';
+import 'package:waypay_mobile/features/payment/presentation/cubit/payment_history_cubit.dart';
+import 'package:waypay_mobile/features/payment/presentation/cubit/schedule_preview_cubit.dart';
 import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
 import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_bloc.dart';
@@ -79,6 +82,7 @@ import 'package:waypay_mobile/features/sold_products/data/data_sources/sold_prod
 import 'package:waypay_mobile/features/todo/data/data_soucres/task_remote_data_source.dart';
 import 'package:waypay_mobile/features/todo/data/data_soucres/task_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/todo/presentation/bloc/task_bloc.dart';
+import '../config/api_config.dart';
 import '../network/dio_client.dart';
 import '../network/token_storage.dart';
 
@@ -87,7 +91,7 @@ final getIt = GetIt.instance;
 Future<void> initDependencies() async {
   getIt.registerLazySingleton(() => createDio());
   getIt.registerLazySingleton<Dio>(
-    () => createDio(baseUrl: 'https://web.waypay.one:5002'),
+    () => createDio(baseUrl: ApiConfig.apiSocialUrl),
     instanceName: 'second',
   );
   getIt.registerLazySingleton(() => TokenStorage());
@@ -168,7 +172,7 @@ Future<void> initDependencies() async {
   );
   getIt.registerLazySingleton<ChatHubService>(
     () => ChatHubService(
-      baseUrl: 'https://web.waypay.one:5002',
+      baseUrl: ApiConfig.filesBaseUrl,
       tokenProvider: () async => await getIt<TokenStorage>().getAccessToken(),
     ),
   );
@@ -184,6 +188,9 @@ Future<void> initDependencies() async {
   getIt.registerFactory(() => BudgetExpenseBloc());
   getIt.registerFactory(() => QueueBloc());
   getIt.registerFactory(() => PaymentBloc());
+  getIt.registerFactory(() => PaymentScheduleCubit());
+  getIt.registerFactory(() => PaymentHistoryCubit());
+  getIt.registerFactory(() => SchedulePreviewCubit());
   getIt.registerFactory(() => ScheduleBloc());
   getIt.registerFactory(() => CreditBloc());
   getIt.registerFactory(() => ProfileCubit());

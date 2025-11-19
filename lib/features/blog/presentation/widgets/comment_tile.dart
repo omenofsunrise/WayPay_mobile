@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:waypay_mobile/core/config/api_config.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
@@ -60,8 +61,8 @@ class _CommentTileState extends State<CommentTile> {
     if (url == null || url.isEmpty) return '';
     if (url.startsWith('/')) {
       return isAvatar
-          ? 'https://web.waypay.one:5001$url'
-          : 'https://web.waypay.one:5002$url';
+          ? '${ApiConfig.apiBaseUrl}$url'
+          : '${ApiConfig.filesBaseUrl}$url';
     }
     return url;
   }

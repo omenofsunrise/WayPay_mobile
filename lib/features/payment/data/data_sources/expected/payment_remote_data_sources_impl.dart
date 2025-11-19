@@ -11,7 +11,7 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
   Future<PaymentListResponseModel> getPayment(GetPaymentsQuery query) async {
     try {
       final response = await dio.get(
-        '/api/Payment',
+        'Payment',
         queryParameters: query.toQueryParams(),
       );
 
@@ -30,7 +30,7 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
   @override
   Future<PaymentItemModel> getPaymentById(int id) async {
     try {
-      final response = await dio.get('/api/Payment/$id');
+      final response = await dio.get('Payment/$id');
       final data = response.data;
       if (data is Map<String, dynamic>) {
         return PaymentItemModel.fromJson(data);
@@ -57,7 +57,7 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
         'type': paymentTypeToString(type),
       };
 
-      await dio.post('/api/Payment', data: payload);
+      await dio.post('Payment', data: payload);
     } on DioException catch (e) {
       throw Exception('Ошибка при создании платежа: ${e.message}');
     }
@@ -66,7 +66,7 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
   @override
   Future<void> confirmPayment(int id) async {
     try {
-      await dio.patch('/api/Payment/$id/confirm');
+      await dio.patch('Payment/$id/confirm');
     } on DioException catch (e) {
       throw Exception('Ошибка подтверждения платежа: ${e.message}');
     }
@@ -75,7 +75,7 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
   @override
   Future<void> deletePayment(int id) async {
     try {
-      await dio.delete('/api/Payment/$id');
+      await dio.delete('Payment/$id');
     } on DioException catch (e) {
       throw Exception('Ошибка при удалении платежа: ${e.message}');
     }

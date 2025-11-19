@@ -24,15 +24,12 @@ import 'package:waypay_mobile/features/credit/presentation/screens/credit_screen
 import 'package:waypay_mobile/features/finance/presentation/screens/budget_screen.dart';
 import 'package:waypay_mobile/features/finance/presentation/screens/income_payments_screen.dart';
 import 'package:waypay_mobile/features/payment/presentation/bloc/expected/payment_bloc.dart';
-import 'package:waypay_mobile/features/payment/presentation/screen/payment_screen.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investors_screen.dart';
 import 'package:waypay_mobile/features/product/presentation/bloc/products_bloc.dart';
 import 'package:waypay_mobile/features/product/presentation/screens/product_screen.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/queue/queue_bloc.dart';
 import 'package:waypay_mobile/features/clients/presentation/screens/queue_screen.dart';
-import 'package:waypay_mobile/features/payment/presentation/bloc/schedule/schedule_bloc.dart';
-import 'package:waypay_mobile/features/payment/presentation/screen/schedule_screen.dart';
 import 'package:waypay_mobile/features/todo/data/data_soucres/task_remote_data_source.dart';
 import 'package:waypay_mobile/features/todo/presentation/screen/todo_screen.dart';
 import 'package:waypay_mobile/routes/routes.dart';
@@ -465,31 +462,15 @@ class _AppDrawerState extends State<AppDrawer> {
           DrawerItem(
             title: 'Ожидаемые',
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BlocProvider(
-                    create: (_) => ScheduleBloc()
-                      ..add(LoadSchedule(refresh: true, page: 1, pageSize: 10)),
-                    child: const ScheduleScreen(),
-                  ),
-                ),
-              );
+              Navigator.pop(context);
+              context.pushNamed(Routes.scheduleScreen.toName);
             },
           ),
           DrawerItem(
             title: 'Журнал',
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BlocProvider(
-                    create: (_) => PaymentBloc()
-                      ..add(LoadPayment(refresh: true, page: 1, pageSize: 10)),
-                    child: const PaymentScreen(),
-                  ),
-                ),
-              );
+              Navigator.pop(context);
+              context.pushNamed(Routes.paymentScreen.toName);
             },
           ),
         ],

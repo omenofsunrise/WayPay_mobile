@@ -8,6 +8,7 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:waypay_mobile/core/config/api_config.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
 import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
@@ -26,7 +27,7 @@ class FilesTabContent extends StatefulWidget {
 class _FilesTabContentState extends State<FilesTabContent> {
   late final ChatFilesBloc bloc;
   final ScrollController _scrollController = ScrollController();
-  static const String _filesBase = 'https://web.waypay.one:5002';
+  static const String _filesBase = ApiConfig.filesBaseUrl;
 
   @override
   void initState() {

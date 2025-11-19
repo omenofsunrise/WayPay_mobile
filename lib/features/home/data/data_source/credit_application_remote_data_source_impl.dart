@@ -17,7 +17,7 @@ class CreditApplicationRemoteDataSourceImpl
   ) async {
     try {
       final response = await _dio.get(
-        '/api/CreditApplication',
+        'CreditApplication',
         queryParameters: query.toQueryParams(),
       );
 
@@ -43,7 +43,7 @@ class CreditApplicationRemoteDataSourceImpl
   ) async {
     try {
       final response = await _dio.post(
-        '/api/CreditApplication',
+        'CreditApplication',
         data: request.toJson(),
       );
 

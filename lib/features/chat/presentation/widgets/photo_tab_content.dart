@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:waypay_mobile/core/config/api_config.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/chat_photo_bloc.dart';
@@ -88,7 +89,7 @@ class _PhotosTabContentState extends State<PhotosTabContent> {
 
     final src = photo.fileUrl!.startsWith('http')
         ? photo.fileUrl!
-        : 'https://web.waypay.one:5002/${photo.fileUrl!}';
+        : '${ApiConfig.filesBaseUrl}/${photo.fileUrl!}';
 
     return GestureDetector(
       onTap: () {

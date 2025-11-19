@@ -7,6 +7,7 @@ class GetPaymentsQuery {
   final String? investorNickname;
   final DateTime? dateFrom;
   final DateTime? dateTo;
+  final bool? confirmed;
 
   GetPaymentsQuery({
     this.page = 1,
@@ -17,6 +18,7 @@ class GetPaymentsQuery {
     this.investorNickname,
     this.dateFrom,
     this.dateTo,
+    this.confirmed,
   });
 
   Map<String, dynamic> toQueryParams() {
@@ -41,6 +43,10 @@ class GetPaymentsQuery {
 
     if (dateTo != null) {
       params['dateTo'] = dateTo!.toIso8601String();
+    }
+
+    if (confirmed != null) {
+      params['confirmed'] = confirmed;
     }
 
     return params;

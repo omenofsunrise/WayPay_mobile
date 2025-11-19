@@ -13,7 +13,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   Future<int> getUnreadCount() async {
     try {
       final response = await dio.get(
-        '/api/Chats/unread-count',
+        'Chats/unread-count',
         options: Options(responseType: ResponseType.plain),
       );
 
@@ -33,7 +33,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   Future<List<ChatResponse>> getMyChats({String? search}) async {
     try {
       final response = await dio.get(
-        '/api/Chats/my',
+        'Chats/my',
         queryParameters: {
           if (search != null && search.isNotEmpty) 'search': search,
         },
@@ -55,7 +55,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   @override
   Future<List<ChatMemberResponse>> getMembers(int chatId) async {
     try {
-      final response = await dio.get('/api/Chats/$chatId/members');
+      final response = await dio.get('Chats/$chatId/members');
 
       if (response.data is List) {
         return (response.data as List)
@@ -73,7 +73,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   @override
   Future<ChatResponse> getOrCreatePrivate(int targetUserId) async {
     try {
-      final response = await dio.get('/api/Chats/private/$targetUserId');
+      final response = await dio.get('Chats/private/$targetUserId');
 
       final data = response.data;
       if (data == null) {
@@ -98,7 +98,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }) async {
     try {
       final response = await dio.get(
-        '/api/Chats/$chatId/photos',
+        'Chats/$chatId/photos',
         queryParameters: {'skip': skip, 'take': take},
         options: Options(
           responseType: ResponseType.json,
@@ -127,7 +127,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }) async {
     try {
       final response = await dio.get(
-        '/api/Chats/$chatId/files',
+        'Chats/$chatId/files',
         queryParameters: {'skip': skip, 'take': take},
         options: Options(
           responseType: ResponseType.json,
@@ -156,7 +156,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }) async {
     try {
       final response = await dio.get(
-        '/api/Chats/$chatId/videos',
+        'Chats/$chatId/videos',
         queryParameters: {'skip': skip, 'take': take},
         options: Options(
           responseType: ResponseType.json,
@@ -185,7 +185,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }) async {
     try {
       final response = await dio.get(
-        '/api/Chats/$chatId/links',
+        'Chats/$chatId/links',
         queryParameters: {'skip': skip, 'take': take},
         options: Options(
           responseType: ResponseType.json,
@@ -209,7 +209,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   @override
   Future<void> refreshChats() async {
     try {
-      final response = await dio.post('/api/Chats/refresh-chats');
+      final response = await dio.post('Chats/refresh-chats');
       if (response.statusCode != 200) {
         throw Exception('Ошибка обновления чатов');
       }
@@ -221,7 +221,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   @override
   Future<void> deletePrivateChat(int chatId) async {
     try {
-      final response = await dio.delete('/api/Chats/private/$chatId');
+      final response = await dio.delete('Chats/private/$chatId');
 
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception('Ошибка при удалении приватного чата');

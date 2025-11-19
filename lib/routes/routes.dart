@@ -25,6 +25,11 @@ enum Routes {
   newCreditProductsScreen,
   newCreditDetailsScreen,
   newCreditSchedulesScreen,
+  scheduleScreen,
+  paymentScreen,
+  paymentHistoryScreen,
+  paymentDetailScreen,
+  paymentAnalyticsScreen,
 }
 
 extension RoutesExtension on Routes {
@@ -82,6 +87,16 @@ extension RoutesExtension on Routes {
         return '/new_credit_details_screen';
       case Routes.newCreditSchedulesScreen:
         return '/new_credit_schedules_screen';
+      case Routes.scheduleScreen:
+        return '/schedule_screen';
+      case Routes.paymentScreen:
+        return '/payment_screen';
+      case Routes.paymentHistoryScreen:
+        return '/payment_history_screen';
+      case Routes.paymentDetailScreen:
+        return '/payment_detail_screen';
+      case Routes.paymentAnalyticsScreen:
+        return '/payment_analytics_screen';
     }
   }
 
@@ -139,6 +154,16 @@ extension RoutesExtension on Routes {
         return 'NEW_CREDIT_DETAILS_SCREEN';
       case Routes.newCreditSchedulesScreen:
         return 'NEW_CREDIT_SCHEDULES_SCREEN';
+      case Routes.scheduleScreen:
+        return 'SCHEDULE_SCREEN';
+      case Routes.paymentScreen:
+        return 'PAYMENT_SCREEN';
+      case Routes.paymentHistoryScreen:
+        return 'PAYMENT_HISTORY_SCREEN';
+      case Routes.paymentDetailScreen:
+        return 'PAYMENT_DETAIL_SCREEN';
+      case Routes.paymentAnalyticsScreen:
+        return 'PAYMENT_ANALYTICS_SCREEN';
     }
   }
 }

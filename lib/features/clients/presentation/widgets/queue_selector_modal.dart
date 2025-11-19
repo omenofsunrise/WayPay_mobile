@@ -7,9 +7,9 @@ import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/app_modal.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/form_modal/label_text_field.dart';
-import 'package:waypay_mobile/core/widgets/pagination_widget.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
+import 'package:waypay_mobile/features/clients/presentation/widgets/client_picker_modal.dart';
 
 class QueueSelectorModal extends StatelessWidget {
   final void Function(ClientModel selectedClient, int amount, bool highPriority)
@@ -126,8 +126,7 @@ class _QueueSelectorModalContentState
                 context: context,
                 builder: (_) => BlocProvider.value(
                   value: context.read<ClientsBloc>(),
-                  child: buildClientsSelectModal(
-                    context: context,
+                  child: ClientPickerModal(
                     initialSelected: _selectedClient,
                     onSelect: (client) {
                       setState(() => _selectedClient = client);
@@ -225,162 +224,4 @@ class _QueueSelectorModalContentState
     );
   }
 
-  Widget buildClientsSelectModal({
-    required BuildContext context,
-    ClientModel? initialSelected,
-    required ValueChanged<ClientModel> onSelect,
-  }) {
-    final TextEditingController searchController = TextEditingController();
-    ClientModel? selectedClient = initialSelected;
-
-    void onClientTap(ClientModel client) {
-      selectedClient = client;
-      onSelect(client);
-      Navigator.of(context).pop();
-    }
-
-    return AppModal(
-      title: 'Выберите клиента',
-      backgroundColor: Color(AppColors.background),
-      content: StatefulBuilder(
-        builder: (context, setState) {
-          return Column(
-            children: [
-              TextField(
-                controller: searchController,
-                style: const TextStyle(color: Colors.black87),
-                decoration: InputDecoration(
-                  hintText: 'Поиск по имени...',
-                  prefixIcon: const Icon(Icons.search, color: Colors.black54),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(AppColors.primary),
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(AppColors.primary),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(AppColors.primary),
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-                onChanged: (value) {
-                  if (value.trim().isNotEmpty) {
-                    context.read<ClientsBloc>().add(
-                      SearchClients(value.trim(), pageSize: 10),
-                    );
-                  } else {
-                    context.read<ClientsBloc>().add(
-                      LoadClients(refresh: true, page: 1, pageSize: 10),
-                    );
-                  }
-                },
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.4,
-                child: BlocBuilder<ClientsBloc, ClientsState>(
-                  builder: (context, state) {
-                    if (state is ClientsLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (state is ClientsError) {
-                      return Center(
-                        child: Text(
-                          'Ошибка: ${state.message}',
-                          style: const TextStyle(color: Colors.black),
-                        ),
-                      );
-                    }
-                    if (state is ClientsLoaded) {
-                      if (state.clients.isEmpty) {
-                        return const Center(
-                          child: Text(
-                            'Клиенты не найдены',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        );
-                      }
-                      return Column(
-                        children: [
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: state.clients.length,
-                              itemBuilder: (context, index) {
-                                final client = state.clients[index];
-                                final isSelected = client == selectedClient;
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      selectedClient = client;
-                                    });
-                                    onClientTap(client);
-                                  },
-                                  child: Container(
-                                    margin: const EdgeInsets.symmetric(
-                                      vertical: 4,
-                                    ),
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? Colors.grey.shade200
-                                          : Colors.white,
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? const Color(AppColors.primary)
-                                            : Colors.grey.shade300,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      client.fullName,
-                                      style: const TextStyle(
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          PaginationWidget(
-                            isCompact: true,
-                            currentPage: state.currentPage,
-                            totalPages: state.totalPages,
-                            onPageSelected: (page) {
-                              context.read<ClientsBloc>().add(
-                                LoadClients(
-                                  refresh: true,
-                                  page: page,
-                                  pageSize: 10,
-                                  search: searchController.text.isEmpty
-                                      ? null
-                                      : searchController.text,
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      );
-                    }
-                    return const SizedBox();
-                  },
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
 }

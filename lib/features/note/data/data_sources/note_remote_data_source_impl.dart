@@ -20,7 +20,7 @@ class NoteRemoteDataSourceImpl implements NoteRemoteDataSource {
     bool includeFiles = true,
   }) async {
     final response = await dio.get(
-      '/api/Note/by-type/$type/$noteableId',
+      'Note/by-type/$type/$noteableId',
       queryParameters: {'includeFiles': includeFiles},
     );
 
@@ -34,7 +34,7 @@ class NoteRemoteDataSourceImpl implements NoteRemoteDataSource {
 
   @override
   Future<void> deleteNote(int id) async {
-    final response = await dio.delete('/api/Note/$id');
+    final response = await dio.delete('Note/$id');
     if (response.statusCode != 200) {
       throw Exception('Не удалось удалить заметку');
     }
@@ -51,7 +51,7 @@ class NoteRemoteDataSourceImpl implements NoteRemoteDataSource {
       if (note.file != null) 'File': await MultipartFile.fromFile(note.file!),
     });
 
-    final response = await dio.post('/api/Note', data: formData);
+    final response = await dio.post('Note', data: formData);
 
     if (response.statusCode != 200) {
       throw Exception('Не удалось создать заметку');

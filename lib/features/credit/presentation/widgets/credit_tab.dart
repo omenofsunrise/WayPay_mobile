@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
@@ -7,7 +6,7 @@ import 'package:waypay_mobile/core/theme/app_style.dart';
 enum CreditTab {
   all('Все договоры', SvgIcons.allCredits),
   favourite('Важные', SvgIcons.importantCredits),
-  debtors('Должники', SvgIcons.debtCredits),
+  debtors('Должники', SvgIcons.debt),
   archived('В архиве', SvgIcons.inactiveCredits);
 
   final String label;

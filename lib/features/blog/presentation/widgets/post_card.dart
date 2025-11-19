@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
+import 'package:waypay_mobile/core/config/api_config.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
@@ -74,8 +75,8 @@ class _PostCardState extends State<PostCard> {
     if (url == null || url.isEmpty) return '';
     if (url.startsWith('/')) {
       return isAvatar
-          ? 'https://web.waypay.one:5001$url'
-          : 'https://web.waypay.one:5002$url';
+          ? '${ApiConfig.apiBaseUrl}$url'
+          : '${ApiConfig.filesBaseUrl}$url';
     }
     return url;
   }

@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:waypay_mobile/core/config/api_config.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/chat_video_bloc.dart';
@@ -23,7 +24,7 @@ class VideosTabContent extends StatefulWidget {
 
 class _VideosTabContentState extends State<VideosTabContent> {
   late final ChatVideosBloc bloc;
-  static const String _filesBase = 'https://web.waypay.one:5002';
+  static const String _filesBase = ApiConfig.filesBaseUrl;
   final ScrollController _scrollController = ScrollController();
 
   @override

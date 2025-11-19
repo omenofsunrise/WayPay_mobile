@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:waypay_mobile/core/config/api_config.dart';
 
 class TokenStorage {
   static const _accessKey = 'access_token';
@@ -114,7 +115,7 @@ class TokenStorage {
 
     try {
       final resp = await http.post(
-        Uri.parse('https://web.waypay.one:5001/api/Auth/refresh'),
+        Uri.parse('${ApiConfig.apiBaseUrl}/Auth/refresh'),
         headers: {'Content-Type': 'application/json', 'X-Environment': 'dev'},
         body: jsonEncode(body),
       );

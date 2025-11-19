@@ -7,7 +7,7 @@ class DefaultButton extends StatefulWidget {
 
   final Color? color;
   final Color? textColor;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool showIcon;
   final IconData? icon;
   final Widget? iconWidget;
@@ -17,7 +17,7 @@ class DefaultButton extends StatefulWidget {
   const DefaultButton({
     super.key,
     required this.text,
-    required this.onPressed,
+    this.onPressed,
     this.color,
     this.textColor,
     this.showIcon = false,
@@ -39,6 +39,7 @@ class _DefaultButtonState extends State<DefaultButton> {
             ? const Color(AppColors.primary)
             : const Color(AppColors.greyLight));
 
+    final bool enabled = widget.onPressed != null;
     final bool isGrey = bg == const Color(AppColors.greyLight);
     final Color fg =
         widget.textColor ??
@@ -50,11 +51,14 @@ class _DefaultButtonState extends State<DefaultButton> {
             ? Icon(widget.icon, color: fg, size: 20)
             : Icon(Icons.info, color: fg, size: 20));
 
+    final Color displayColor =
+        enabled ? bg : bg.withOpacity(0.6);
+
     return GestureDetector(
-      onTap: widget.onPressed,
+      onTap: enabled ? widget.onPressed : null,
       child: Container(
         decoration: BoxDecoration(
-          color: bg,
+          color: displayColor,
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -64,7 +68,12 @@ class _DefaultButtonState extends State<DefaultButton> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (widget.showIcon) ...[iconWidget!, const SizedBox(width: 8)],
-              Text(widget.text, style: AppStyle.manrope16.copyWith(color: fg)),
+              Text(
+                widget.text,
+                style: AppStyle.manrope16.copyWith(
+                  color: fg.withOpacity(enabled ? 1 : 0.5),
+                ),
+              ),
             ],
           ),
         ),

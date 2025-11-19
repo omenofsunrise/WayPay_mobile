@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/assets/resources.dart' show Images;
+import 'package:waypay_mobile/core/config/api_config.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
 import 'package:waypay_mobile/core/network/dio_client.dart';
@@ -121,7 +122,7 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
         });
       } else {
         if (_firstPin == pin) {
-          final dio = createDio(baseUrl: 'https://web.waypay.one:5001');
+          final dio = createDio(baseUrl: ApiConfig.apiBaseUrl);
           final authDataSource = AuthRemoteDataSourceImpl(dio);
 
           try {

@@ -13,7 +13,7 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
   Future<void> createTask(TaskRequest request) async {
     try {
       final response = await dio.post(
-        '/api/Task',
+        'Task',
         data: request.toJson(),
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
@@ -30,7 +30,7 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
   Future<List<TodoTask>> fetchActiveTasks(GetActiveTasksQuery query) async {
     try {
       final response = await dio.get(
-        '/api/Task',
+        'Task',
         queryParameters: query.toQueryParams(),
       );
 
@@ -69,7 +69,7 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
   @override
   Future<void> deleteTask(int id) async {
     try {
-      final response = await dio.delete('/api/Task/$id');
+      final response = await dio.delete('Task/$id');
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception('Ошибка при удалении задачи: ${response.statusCode}');
       }
@@ -80,7 +80,7 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
 
   Future<void> _patchTaskStatus(int id, String status) async {
     try {
-      final response = await dio.patch('/api/Task/$id/$status');
+      final response = await dio.patch('Task/$id/$status');
       if (response.statusCode != 200) {
         throw Exception('Ошибка PATCH запроса: ${response.statusCode}');
       }
@@ -95,7 +95,7 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
   Future<void> updateTask(int id, TaskRequest request) async {
     try {
       final response = await dio.put(
-        '/api/Task/$id',
+        'Task/$id',
         data: request.toJson(),
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
@@ -111,7 +111,7 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
   @override
   Future<int> getActiveCountTasks() async {
     try {
-      final response = await dio.get('/api/Task/active-count');
+      final response = await dio.get('Task/active-count');
 
       if (response.statusCode == 200) {
         final data = response.data;

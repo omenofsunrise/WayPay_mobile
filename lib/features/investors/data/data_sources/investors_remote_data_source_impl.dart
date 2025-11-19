@@ -33,7 +33,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       }
 
       final response = await dio.get(
-        '/api/Investor',
+        'Investor',
         queryParameters: queryParams,
       );
 
@@ -56,7 +56,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   @override
   Future<InvestorsModel> getInvestorById(int id) async {
     try {
-      final response = await dio.get('/api/Investor/$id');
+      final response = await dio.get('Investor/$id');
 
       print('✅ Загружен инвестор по ID: ${response.data}');
 
@@ -84,7 +84,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
         'investmentAmount': investmentAmount,
       };
 
-      final response = await dio.post('/api/Investor', data: payload);
+      final response = await dio.post('Investor', data: payload);
 
       print('✅ Инвестор создан: ${response.statusCode}');
     } on DioException catch (e) {
@@ -96,7 +96,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   @override
   Future<void> deleteInvestor(int id) async {
     try {
-      final response = await dio.delete('/api/Investor/$id');
+      final response = await dio.delete('Investor/$id');
       print('✅ Инвестор удалён: ${response.statusCode}');
     } on DioException catch (e) {
       print('❌ Ошибка удаления инвестора: ${e.response?.data}');
@@ -120,7 +120,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
         'investorPie': investorPie,
       };
 
-      final response = await dio.put('/api/Investor/$id', data: payload);
+      final response = await dio.put('Investor/$id', data: payload);
 
       print('✅ Инвестор обновлён: ${response.statusCode}');
     } on DioException catch (e) {
@@ -135,7 +135,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       final payload = {'amount': amount};
 
       final response = await dio.put(
-        '/api/Investor/$id/add-investment',
+        'Investor/$id/add-investment',
         data: payload,
       );
 
@@ -149,7 +149,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   @override
   Future<void> toggleBlockInvestor(int id) async {
     try {
-      final response = await dio.patch('/api/Investor/toggle-block/$id');
+      final response = await dio.patch('Investor/toggle-block/$id');
       print('✅ Статус блокировки изменён: ${response.statusCode}');
     } on DioException catch (e) {
       print('❌ Ошибка смены блокировки: ${e.response?.data}');
@@ -160,7 +160,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   @override
   Future<void> clearInvestor(int id) async {
     try {
-      await dio.patch('/api/Investor/clear/$id');
+      await dio.patch('Investor/clear/$id');
     } on DioException catch (e) {
       throw Exception(
         'Не удалось аннулировать инвестора.\n${e.response?.data}',
@@ -171,7 +171,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   @override
   Future<Map<String, dynamic>> getInvestorReport(int id) async {
     try {
-      final response = await dio.get('/api/Investor/report/$id');
+      final response = await dio.get('Investor/report/$id');
 
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
@@ -186,7 +186,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   }) async {
     try {
       final response = await dio.post(
-        '/api/InvestorPayouts',
+        'InvestorPayouts',
         data: InvestorPayoutRequest(
           investorId: investorId,
           amount: amount,
@@ -205,7 +205,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   ) async {
     try {
       final response = await dio.get(
-        '/api/InvestorPayouts/investor/$investorId',
+        'InvestorPayouts/investor/$investorId',
       );
 
       if (response.data is List) {
