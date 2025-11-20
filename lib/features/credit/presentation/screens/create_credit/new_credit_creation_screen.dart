@@ -75,6 +75,12 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     );
   }
 
+  void _updateCurrentMonthStart(bool value) {
+    context.read<CreditCreationCubit>().updatePaymentInfo(
+      currentMonthStart: value,
+    );
+  }
+
   void _updatePaymentDay(int day) {
     context.read<CreditCreationCubit>().updatePaymentInfo(paymentDay: day);
   }
@@ -252,7 +258,9 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
         builder: (context, state) {
           return Step3SchedulesContent(
             nextMonthStart: state.creditRequest.nextMonthStart,
+            currentMonthStart: state.creditRequest.currentMonthStart,
             onNextMonthStartChanged: _updateNextMonthStart,
+            onCurrentMonthStartChanged: _updateCurrentMonthStart,
             firstPayment: state.creditRequest.firstPayment,
             termMonths: state.creditRequest.termMonths,
             paymentDay: state.creditRequest.paymentDay,

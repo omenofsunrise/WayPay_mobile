@@ -5,7 +5,6 @@ import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/custom_checkbox.dart';
 import 'package:waypay_mobile/core/widgets/inputs/custom_input.dart';
 import 'package:waypay_mobile/core/widgets/inputs/date_input.dart';
-import 'package:waypay_mobile/features/clients/presentation/widgets/client_selector_modal.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
 import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
@@ -81,23 +80,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
     }
   }
 
-  Future<void> _showClientPicker() async {
-    final client = await showDialog<ClientModel>(
-      context: context,
-      builder: (context) => ClientSelectorModal(
-        onSave: (selectedClient) {
-          Navigator.of(context).pop(selectedClient);
-        },
-      ),
-    );
-
-    if (client != null) {
-      context.read<CreditCreationCubit>().updateBasicInfo(
-        clientId: client.id,
-        selectedClient: client,
-      );
-    }
-  }
+  Future<void> _showClientPicker() async {}
 
   Future<void> _showCatalogPicker() async {
     final state = context.read<CreditCreationCubit>().state;
@@ -301,7 +284,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Основная информация',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
               ),
             ),
 
@@ -355,13 +338,13 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
                 isSelected: selectedInvestor != null,
               ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Сведения о покупателе',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
               ),
             ),
 
@@ -374,13 +357,13 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
               isSelected: selectedClient != null,
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 24),
 
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Дополнительно',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
               ),
             ),
 
