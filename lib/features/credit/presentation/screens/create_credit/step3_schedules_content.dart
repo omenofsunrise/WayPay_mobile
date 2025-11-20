@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/CustomRadioButton';
-import 'package:waypay_mobile/core/widgets/custom_checkbox.dart';
 import 'package:waypay_mobile/core/widgets/inputs/custom_input.dart';
 import 'package:waypay_mobile/core/widgets/inputs/custom_select.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
+import 'package:waypay_mobile/features/credit/data/models/schedule_preview_model.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/credit_event.dart';
+import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
 
 class Step3SchedulesContent extends StatefulWidget {
   final bool nextMonthStart;
   final bool currentMonthStart;
   final ValueChanged<bool> onNextMonthStartChanged;
   final ValueChanged<bool> onCurrentMonthStartChanged;
+  final VoidCallback onNearestMonthStartChanged;
   final double firstPayment;
   final int termMonths;
   final int? paymentDay;
@@ -25,6 +30,7 @@ class Step3SchedulesContent extends StatefulWidget {
     required this.currentMonthStart,
     required this.onNextMonthStartChanged,
     required this.onCurrentMonthStartChanged,
+    required this.onNearestMonthStartChanged,
     required this.firstPayment,
     required this.termMonths,
     required this.paymentDay,
@@ -46,17 +52,40 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
   @override
   void initState() {
     super.initState();
+
     _firstPaymentPercentController = TextEditingController();
     _firstPaymentAmountController = TextEditingController();
     _termMonthsController = TextEditingController();
 
-    _updateControllers();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateControllers();
+      _loadSchedulePreview();
+    });
+  }
+
+  bool get _isNearestMonthSelected {
+    return !widget.nextMonthStart && !widget.currentMonthStart;
+  }
+
+  bool get _isCurrentMonthSelected {
+    return widget.currentMonthStart;
+  }
+
+  bool get _isNextMonthSelected {
+    return widget.nextMonthStart;
   }
 
   @override
   void didUpdateWidget(Step3SchedulesContent oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateControllers();
+    if (oldWidget.firstPayment != widget.firstPayment ||
+        oldWidget.termMonths != widget.termMonths ||
+        oldWidget.paymentDay != widget.paymentDay ||
+        oldWidget.currentMonthStart != widget.currentMonthStart ||
+        oldWidget.nextMonthStart != widget.nextMonthStart) {
+      _loadSchedulePreview();
+    }
   }
 
   void _updateControllers() {
@@ -145,162 +174,241 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     }
   }
 
+  void _handleNearestMonthSelection() {
+    widget.onNearestMonthStartChanged();
+  }
+
+  void _handleCurrentMonthSelection() {
+    widget.onCurrentMonthStartChanged(true);
+    widget.onNextMonthStartChanged(false);
+  }
+
+  void _handleNextMonthSelection() {
+    widget.onNextMonthStartChanged(true);
+    widget.onCurrentMonthStartChanged(false);
+  }
+
+  void _loadSchedulePreview() {
+    context.read<CreditBloc>().add(
+      LoadSchedulePreviewEvent(
+        totalAmount: widget.totalAmount,
+        firstPayment: widget.firstPayment,
+        termMonths: widget.termMonths,
+        paymentDay: widget.paymentDay ?? 1,
+        currentMonthStart: widget.currentMonthStart,
+        nextMonthStart: widget.nextMonthStart,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<CreditCreationCubit, CreditCreationState>(
+      builder: (context, state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Основная информация',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+              ),
+            ),
+            const SizedBox(height: 8),
+            CustomRadioButton(
+              value: true,
+              groupValue: _isNearestMonthSelected,
+              onChanged: (_) => _handleNearestMonthSelection(),
+              label: 'Начинать с ближайшего месяца',
+            ),
+
+            const SizedBox(height: 8),
+
+            CustomRadioButton(
+              value: true,
+              groupValue: _isCurrentMonthSelected,
+              onChanged: (_) => _handleCurrentMonthSelection(),
+              label: 'Начинать с текущего месяца',
+            ),
+
+            const SizedBox(height: 8),
+
+            CustomRadioButton(
+              value: true,
+              groupValue: _isNextMonthSelected,
+              onChanged: (_) => _handleNextMonthSelection(),
+              label: 'Начинать со следующего месяца',
+            ),
+
+            const SizedBox(height: 24),
+
+            CustomInput(
+              controller: _firstPaymentPercentController,
+              label: 'Первоначальный взнос %',
+              keyboardType: TextInputType.number,
+              onUserInput: _handlePercentInput,
+            ),
+
+            const SizedBox(height: 16),
+
+            CustomInput(
+              controller: _firstPaymentAmountController,
+              label: 'Рублей',
+              keyboardType: TextInputType.number,
+              onChanged: _handleAmountInput,
+            ),
+
+            const SizedBox(height: 16),
+
+            CustomInput(
+              controller: _termMonthsController,
+              label: 'Количество месяцев',
+              keyboardType: TextInputType.number,
+              onChanged: _handleTermMonthsInput,
+            ),
+
+            const SizedBox(height: 16),
+
+            CustomSelect<int>(
+              customPlaceholder: 'Уплата до',
+              value: widget.paymentDay,
+              onChange: widget.onPaymentDayChanged,
+              options: List.generate(31, (index) {
+                final day = index + 1;
+                return CustomSelectOption<int>(value: day, label: '$day число');
+              }),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Preview платежей
+            _buildSchedulePreview(state),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSchedulePreview(CreditCreationState state) {
+    if (state.schedulePreviewLoading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (state.schedulePreviewError != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            state.schedulePreviewError!,
+            style: TextStyle(color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Начинать с ближайшего месяца',
-          style: AppStyle.manrope(
-            size: 14,
-            weight: FontWeight.w500,
-            color: Color(AppColors.darkGrey),
-          ),
-        ),
-
-        const SizedBox(height: 12),
-
-        CustomRadioButton(
-          value: true,
-          groupValue: widget.currentMonthStart,
-          onChanged: (value) {
-            if (value == true) {
-              widget.onCurrentMonthStartChanged(true);
-              widget.onNextMonthStartChanged(false);
-            }
-          },
-          label: 'Начинать с текущего месяца',
-          description: 'Первый платеж в этом месяце',
-        ),
-
-        const SizedBox(height: 8),
-
-        CustomRadioButton(
-          value: true,
-          groupValue: widget.nextMonthStart,
-          onChanged: (value) {
-            if (value == true) {
-              widget.onNextMonthStartChanged(true);
-              widget.onCurrentMonthStartChanged(false);
-            }
-          },
-          label: 'Начинать со следующего месяца',
-          description: 'Первый платеж в следующем месяце',
-        ),
-
-        const SizedBox(height: 24),
-
-        CustomInput(
-          controller: _firstPaymentPercentController,
-          label: 'Первоначальный взнос %',
-          keyboardType: TextInputType.number,
-          onUserInput: _handlePercentInput,
-        ),
-
         const SizedBox(height: 16),
-
-        CustomInput(
-          controller: _firstPaymentAmountController,
-          label: 'Рублей',
-          keyboardType: TextInputType.number,
-          onChanged: _handleAmountInput,
-        ),
-
-        const SizedBox(height: 16),
-
-        CustomInput(
-          controller: _termMonthsController,
-          label: 'Количество месяцев',
-          keyboardType: TextInputType.number,
-          onChanged: _handleTermMonthsInput,
-        ),
-
-        const SizedBox(height: 16),
-
-        CustomSelect<int>(
-          customPlaceholder: 'Уплата до',
-          value: widget.paymentDay,
-          onChange: widget.onPaymentDayChanged,
-          options: List.generate(31, (index) {
-            final day = index + 1;
-            return CustomSelectOption<int>(value: day, label: '$day число');
-          }),
-        ),
-
-        const SizedBox(height: 24),
 
         Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Color(AppColors.lightGreyBackground),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: Color(AppColors.primary).withOpacity(0.2),
+            color: Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            border: Border(
+              bottom: BorderSide(color: Colors.grey.shade300, width: 1.0),
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Финансовая информация',
-                style: AppStyle.manrope(
-                  size: 14,
-                  weight: FontWeight.w500,
-                  color: Color(AppColors.darkGrey),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Общая сумма:',
-                    style: AppStyle.manrope(size: 14, weight: FontWeight.w600),
-                  ),
-                  Text(
-                    '${widget.totalAmount.toStringAsFixed(2)} ₽',
-                    style: AppStyle.manrope(size: 14, weight: FontWeight.w600),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Первоначальный взнос:',
-                    style: AppStyle.manrope(size: 14, weight: FontWeight.w600),
-                  ),
-                  Text(
-                    '${widget.firstPayment.toInt()} ₽',
-                    style: AppStyle.manrope(size: 14, weight: FontWeight.w600),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Сумма кредита:',
-                    style: AppStyle.manrope(size: 14, weight: FontWeight.w600),
-                  ),
-                  Text(
-                    '${(widget.totalAmount - widget.firstPayment).toStringAsFixed(2)} ₽',
-                    style: AppStyle.manrope(
-                      size: 14,
-                      weight: FontWeight.w700,
-                      color: Color(AppColors.primary),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          child: const Padding(
+            padding: EdgeInsets.only(left: 8.0, right: 8.0),
+            child: _TableHeader(),
+          ),
+        ),
+
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(12),
+            ),
+          ),
+          child: ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: state.schedulePreview.length,
+            itemBuilder: (context, index) {
+              final payment = state.schedulePreview[index];
+              return _buildPaymentItem(payment, index);
+            },
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPaymentItem(SchedulePreviewModel payment, int index) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Color(AppColors.greyLight)),
+          left: BorderSide(color: Colors.transparent),
+          right: BorderSide(color: Colors.transparent),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${payment.paymentDate.day.toString().padLeft(2, '0')}.'
+                  '${payment.paymentDate.month.toString().padLeft(2, '0')}.'
+                  '${payment.paymentDate.year}',
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+                if (payment.comment != null && payment.comment!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    payment.comment!,
+                    style: TextStyle(
+                      color: Color(AppColors.grey),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          Expanded(
+            flex: 2,
+            child: Text(
+              '${payment.rest.toStringAsFixed(0)} ₽',
+              style: TextStyle(color: Color(AppColors.grey), fontSize: 14),
+              textAlign: TextAlign.right,
+            ),
+          ),
+
+          Expanded(
+            flex: 2,
+            child: Text(
+              '${payment.paymentAmount.toStringAsFixed(0)} ₽',
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -310,5 +418,46 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     _firstPaymentAmountController.dispose();
     _termMonthsController.dispose();
     super.dispose();
+  }
+}
+
+class _TableHeader extends StatelessWidget {
+  const _TableHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Colors.transparent)),
+      ),
+      child: const Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              'Дата',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'Остаток',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              textAlign: TextAlign.right,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'Платёж',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

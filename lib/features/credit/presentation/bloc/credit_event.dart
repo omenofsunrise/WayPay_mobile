@@ -62,3 +62,21 @@ class LoadInvestorCreditsEvent extends CreditEvent {
     required this.refresh,
   });
 }
+
+class LoadSchedulePreviewEvent extends CreditEvent {
+  final double totalAmount;
+  final double firstPayment;
+  final int termMonths;
+  final int paymentDay;
+  final bool currentMonthStart;
+  final bool nextMonthStart;
+
+  LoadSchedulePreviewEvent({
+    required this.totalAmount,
+    required this.firstPayment,
+    required this.termMonths,
+    required this.paymentDay,
+    required this.currentMonthStart,
+    required this.nextMonthStart,
+  });
+}

@@ -1,4 +1,5 @@
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
+import 'package:waypay_mobile/features/credit/data/models/schedule_preview_model.dart';
 
 abstract class CreditState {}
 
@@ -42,4 +43,18 @@ final class CreditError extends CreditState {
   final String message;
 
   CreditError(this.message);
+}
+
+final class SchedulePreviewLoaded extends CreditState {
+  final List<SchedulePreviewModel> schedulePreview;
+
+  SchedulePreviewLoaded({required this.schedulePreview});
+}
+
+final class SchedulePreviewLoading extends CreditState {}
+
+final class SchedulePreviewError extends CreditState {
+  final String message;
+
+  SchedulePreviewError(this.message);
 }

@@ -1,11 +1,17 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
+import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
 
 class CreditCreationCubit extends Cubit<CreditCreationState> {
+  final CreditRemoteDataSource _dataSource = getIt<CreditRemoteDataSource>();
+  Timer? _debounceTimer;
+
   CreditCreationCubit()
     : super(
         CreditCreationState(
@@ -34,6 +40,9 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
           selectedInvestor: null,
           selectedCatalog: null,
           selectedCategory: null,
+          schedulePreview: [],
+          schedulePreviewLoading: false,
+          schedulePreviewError: null,
         ),
       );
 
@@ -110,6 +119,8 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     );
 
     emit(state.copyWith(creditRequest: updatedRequest));
+
+    _loadSchedulePreviewDebounced();
   }
 
   void updateProducts(List<CreditProduct> products) {
@@ -134,6 +145,8 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
         totalAmountWithSurcharge: totalAmount,
       ),
     );
+
+    _loadSchedulePreviewDebounced();
   }
 
   void updateMarkupType(int markupType) {
@@ -160,6 +173,8 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
         totalAmountWithSurcharge: totalAmount,
       ),
     );
+
+    _loadSchedulePreviewDebounced();
   }
 
   void updateStartMonthOption(bool isCurrentMonth) {
@@ -237,6 +252,67 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     );
 
     emit(state.copyWith(creditRequest: updatedRequest));
+
+    _loadSchedulePreviewDebounced();
+  }
+
+  void _loadSchedulePreviewDebounced() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      _loadSchedulePreview();
+    });
+  }
+
+  Future<void> _loadSchedulePreview() async {
+    if (state.totalAmountWithSurcharge <= 0 ||
+        state.creditRequest.termMonths <= 0) {
+      return;
+    }
+
+    final currentState = state;
+
+    emit(
+      currentState.copyWith(
+        schedulePreviewLoading: true,
+        schedulePreviewError: null,
+      ),
+    );
+
+    try {
+      final preview = await _dataSource.getSchedulePreview(
+        totalAmount: state.totalAmountWithSurcharge,
+        firstPayment: state.creditRequest.firstPayment,
+        termMonths: state.creditRequest.termMonths,
+        paymentDay: state.creditRequest.paymentDay,
+        currentMonthStart: state.creditRequest.currentMonthStart,
+        nextMonthStart: state.creditRequest.nextMonthStart,
+      );
+
+      emit(
+        state.copyWith(
+          schedulePreview: preview,
+          schedulePreviewLoading: false,
+          schedulePreviewError: null,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          schedulePreviewLoading: false,
+          schedulePreviewError: 'Ошибка загрузки графика платежей: $e',
+        ),
+      );
+    }
+  }
+
+  void refreshSchedulePreview() {
+    _loadSchedulePreview();
+  }
+
+  @override
+  Future<void> close() {
+    _debounceTimer?.cancel();
+    return super.close();
   }
 
   double _calculateTotalAmountWithSurcharge(List<CreditProduct> products) {

@@ -4,6 +4,7 @@ import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_dat
 import 'package:waypay_mobile/features/credit/data/models/credit_response_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
+import 'package:waypay_mobile/features/credit/data/models/schedule_preview_model.dart';
 
 class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
   final Dio dio;
@@ -98,6 +99,39 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
       return CreditResponseModel.fromJson(response.data);
     } on DioException catch (e) {
       throw Exception('Ошибка загрузки кредитов инвестора: ${e.message}');
+    }
+  }
+
+  @override
+  Future<List<SchedulePreviewModel>> getSchedulePreview({
+    required double totalAmount,
+    required double firstPayment,
+    required int termMonths,
+    required int paymentDay,
+    required bool currentMonthStart,
+    required bool nextMonthStart,
+  }) async {
+    try {
+      final requestBody = {
+        'totalAmount': totalAmount,
+        'firstPayment': firstPayment,
+        'termMonths': termMonths,
+        'paymentDay': paymentDay,
+        'currentMonthStart': currentMonthStart,
+        'nextMonthStart': nextMonthStart,
+      };
+
+      final response = await dio.post('Schedule/preview', data: requestBody);
+
+      if (response.data is List) {
+        return (response.data as List)
+            .map((item) => SchedulePreviewModel.fromJson(item))
+            .toList();
+      } else {
+        throw Exception('Неожиданный формат ответа для preview платежей');
+      }
+    } on DioException catch (e) {
+      throw Exception('Ошибка загрузки preview платежей: ${e.message}');
     }
   }
 }

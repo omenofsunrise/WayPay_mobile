@@ -69,15 +69,24 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     );
   }
 
-  void _updateNextMonthStart(bool value) {
+  void _updateNearestMonthStart() {
     context.read<CreditCreationCubit>().updatePaymentInfo(
-      nextMonthStart: value,
+      nextMonthStart: false,
+      currentMonthStart: false,
     );
   }
 
   void _updateCurrentMonthStart(bool value) {
     context.read<CreditCreationCubit>().updatePaymentInfo(
       currentMonthStart: value,
+      nextMonthStart: !value,
+    );
+  }
+
+  void _updateNextMonthStart(bool value) {
+    context.read<CreditCreationCubit>().updatePaymentInfo(
+      nextMonthStart: value,
+      currentMonthStart: !value,
     );
   }
 
@@ -261,6 +270,7 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
             currentMonthStart: state.creditRequest.currentMonthStart,
             onNextMonthStartChanged: _updateNextMonthStart,
             onCurrentMonthStartChanged: _updateCurrentMonthStart,
+            onNearestMonthStartChanged: _updateNearestMonthStart,
             firstPayment: state.creditRequest.firstPayment,
             termMonths: state.creditRequest.termMonths,
             paymentDay: state.creditRequest.paymentDay,

@@ -143,8 +143,6 @@ class _Step2ProductsContentState extends State<Step2ProductsContent> {
             text: '+ Добавить товар',
           ),
         ),
-
-        // Итоговая сумма перенесена вниз
       ],
     );
   }
@@ -386,7 +384,7 @@ class __ProductItemState extends State<_ProductItem> {
                 style: AppStyle.manrope(size: 14, weight: FontWeight.w500),
               ),
               Text(
-                '${totalPrice.toStringAsFixed(2)} ₽',
+                '${totalPrice.toStringAsFixed(0)} ₽',
                 style: AppStyle.manrope(
                   size: 14,
                   weight: FontWeight.w700,

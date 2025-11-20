@@ -12,12 +12,13 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   @override
   Future<EmployeeModel> getEmployeeData() async {
     try {
-      final response = await dio.get('employee');
+      final response = await dio.get('Dashboard/employee');
 
       if (response.statusCode == 200) {
         if (response.data is Map<String, dynamic>) {
-          final employee =
-              EmployeeModel.fromJson(response.data as Map<String, dynamic>);
+          final employee = EmployeeModel.fromJson(
+            response.data as Map<String, dynamic>,
+          );
           final stats = await _fetchMainClientStats();
           return employee.copyWith(
             clientsCount: stats.clientsCount,
@@ -65,10 +66,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     try {
       final response = await dio.post(
         ApiConfig.graphqlUrl,
-        data: {
-          'query': query,
-          'operationName': 'MainClientStats',
-        },
+        data: {'query': query, 'operationName': 'MainClientStats'},
       );
 
       if (response.statusCode != 200) {

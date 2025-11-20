@@ -14,7 +14,7 @@ class CreateCreditRequest {
   int termMonths;
   int paymentDay;
   bool nextMonthStart;
-  bool currentMonthStart; // Новое поле
+  bool currentMonthStart;
   bool inDebt;
   String? debtComment;
   List<CreditProduct> products;
@@ -33,7 +33,7 @@ class CreateCreditRequest {
     required this.termMonths,
     required this.paymentDay,
     required this.nextMonthStart,
-    required this.currentMonthStart, // Новое поле
+    required this.currentMonthStart,
     required this.inDebt,
     this.debtComment,
     required this.products,
@@ -53,7 +53,7 @@ class CreateCreditRequest {
     int? termMonths,
     int? paymentDay,
     bool? nextMonthStart,
-    bool? currentMonthStart, // Новое поле
+    bool? currentMonthStart,
     bool? inDebt,
     String? debtComment,
     List<CreditProduct>? products,
@@ -72,8 +72,7 @@ class CreateCreditRequest {
       termMonths: termMonths ?? this.termMonths,
       paymentDay: paymentDay ?? this.paymentDay,
       nextMonthStart: nextMonthStart ?? this.nextMonthStart,
-      currentMonthStart:
-          currentMonthStart ?? this.currentMonthStart, // Новое поле
+      currentMonthStart: currentMonthStart ?? this.currentMonthStart,
       inDebt: inDebt ?? this.inDebt,
       debtComment: debtComment ?? this.debtComment,
       products: products ?? this.products,
@@ -95,7 +94,7 @@ class CreateCreditRequest {
       'termMonths': termMonths,
       'paymentDay': paymentDay,
       'nextMonthStart': nextMonthStart,
-      'currentMonthStart': currentMonthStart, // Новое поле
+      'currentMonthStart': currentMonthStart,
       'inDebt': inDebt,
       'debtComment': debtComment,
       'products': products.map((p) => p.toJson()).toList(),

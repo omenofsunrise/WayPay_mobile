@@ -1,5 +1,6 @@
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
+import 'package:waypay_mobile/features/credit/data/models/schedule_preview_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
 
@@ -11,6 +12,9 @@ class CreditCreationState {
   final InvestorsModel? selectedInvestor;
   final ObjectTypeModel? selectedCatalog;
   final ObjectTypeModel? selectedCategory;
+  final List<SchedulePreviewModel> schedulePreview;
+  final bool schedulePreviewLoading;
+  final String? schedulePreviewError;
 
   CreditCreationState({
     required this.creditRequest,
@@ -20,6 +24,9 @@ class CreditCreationState {
     this.selectedInvestor,
     this.selectedCatalog,
     this.selectedCategory,
+    this.schedulePreview = const [],
+    this.schedulePreviewLoading = false,
+    this.schedulePreviewError,
   });
 
   CreditCreationState copyWith({
@@ -30,6 +37,9 @@ class CreditCreationState {
     InvestorsModel? selectedInvestor,
     ObjectTypeModel? selectedCatalog,
     ObjectTypeModel? selectedCategory,
+    List<SchedulePreviewModel>? schedulePreview,
+    bool? schedulePreviewLoading,
+    String? schedulePreviewError,
     bool keepCatalog = false,
     bool keepCategory = false,
   }) {
@@ -44,6 +54,10 @@ class CreditCreationState {
       selectedCategory: keepCategory
           ? this.selectedCategory
           : (selectedCategory),
+      schedulePreview: schedulePreview ?? this.schedulePreview,
+      schedulePreviewLoading:
+          schedulePreviewLoading ?? this.schedulePreviewLoading,
+      schedulePreviewError: schedulePreviewError ?? this.schedulePreviewError,
     );
   }
 }
