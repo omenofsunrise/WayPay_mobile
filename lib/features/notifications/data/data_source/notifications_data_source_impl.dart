@@ -19,13 +19,37 @@ class NotificationsDataSourceImpl implements NotificationsDataSource {
         options: Options(headers: {'accept': 'text/plain'}),
       );
       if (response.data is Map<String, dynamic>) {
-        return NotificationPage.fromJson(response.data as Map<String, dynamic>);
+        final pageData =
+            NotificationPage.fromJson(response.data as Map<String, dynamic>);
+        final unreadOnPage =
+            pageData.items.where((item) => !item.isRead).length;
+        final ids = pageData.items.map((e) => '#${e.id}-${e.isRead ? 'read' : 'unread'}').join(', ');
+        // ignore: avoid_print
+        print(
+          '🔔 Notifications page=$page fetched ${pageData.items.length} items '
+          '(unread on page: $unreadOnPage) -> [$ids]',
+        );
+        return pageData;
       }
       throw const FormatException('Некорректный формат ответа');
     } on DioException catch (e) {
       final details = e.response?.data;
       throw Exception(
         'Не удалось получить уведомления: ${e.message} | $details',
+      );
+    }
+  }
+
+  @override
+  Future<void> markAsRead(int id) async {
+    try {
+      await _dio.patch('Notification/read/$id');
+      // ignore: avoid_print
+      print('📨 Notification $id помечено как прочитанное');
+    } on DioException catch (e) {
+      final details = e.response?.data;
+      throw Exception(
+        'Не удалось обновить статус уведомления: ${e.message} | $details',
       );
     }
   }

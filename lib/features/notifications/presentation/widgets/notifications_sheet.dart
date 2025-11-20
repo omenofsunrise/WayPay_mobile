@@ -24,7 +24,7 @@ class NotificationsSheet extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       builder: (sheetContext) {
         return BlocProvider(
-          create: (_) => getIt<NotificationsCubit>()..load(),
+          create: (_) => getIt<NotificationsCubit>()..load(markAsRead: true),
           child: const NotificationsSheet(),
         );
       },
@@ -136,65 +136,81 @@ class _NotificationTile extends StatelessWidget {
     final date = DateFormat('dd.MM.yyyy').format(item.dateTime.toLocal());
     final initials = _extractInitials(item.senderFullname);
     final avatar = item.senderAvatarPath;
+    final isUnread = !item.isRead;
+    final cubit = context.read<NotificationsCubit>();
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CircleAvatar(
-          radius: 24,
-          backgroundColor: Color(AppColors.primaryLight),
-          backgroundImage: avatar != null && avatar.isNotEmpty
-              ? CachedNetworkImageProvider(avatar)
-              : null,
-          child: (avatar == null || avatar.isEmpty)
-              ? Text(
-                  initials,
-                  style: AppStyle.manrope(
-                    size: 16,
-                    weight: FontWeight.w600,
-                    color: const Color(AppColors.white),
-                  ),
-                )
-              : null,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            // spacing доступен в Flutter 3.22+, если у вас ниже — замените на SizedBox
-            spacing: 4,
-            children: [
-              Text(
-                date,
-                style: AppStyle.manrope(
-                  size: 12,
-                  weight: FontWeight.w400,
-                  color: const Color(AppColors.grey),
-                ),
-              ),
-              if ((item.title ?? '').isNotEmpty)
-                Text(
-                  item.title!,
-                  style: AppStyle.manrope(
-                    size: 16,
-                    weight: FontWeight.w600,
-                    color: const Color(AppColors.black),
-                  ),
-                ),
-              if ((item.message ?? '').isNotEmpty)
-                Text(
-                  item.message!,
-                  style: AppStyle.manrope(
-                    size: 14,
-                    weight: FontWeight.w400,
-                    color: const Color(AppColors.black),
-                  ),
-                ),
-            ],
+    return InkWell(
+      onTap: () => cubit.markAsRead(item.id),
+      borderRadius: BorderRadius.circular(12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 24,
+            backgroundColor: Color(AppColors.primaryLight),
+            backgroundImage: avatar != null && avatar.isNotEmpty
+                ? CachedNetworkImageProvider(avatar)
+                : null,
+            child: (avatar == null || avatar.isEmpty)
+                ? Text(
+                    initials,
+                    style: AppStyle.manrope(
+                      size: 16,
+                      weight: FontWeight.w600,
+                      color: const Color(AppColors.white),
+                    ),
+                  )
+                : null,
           ),
-        ),
-        // Убрали IconButton с крестиком удаления
-      ],
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 4,
+              children: [
+                Text(
+                  date,
+                  style: AppStyle.manrope(
+                    size: 12,
+                    weight: FontWeight.w400,
+                    color: const Color(AppColors.grey),
+                  ),
+                ),
+                if ((item.title ?? '').isNotEmpty)
+                  Text(
+                    item.title!,
+                    style: AppStyle.manrope(
+                      size: 16,
+                      weight: isUnread ? FontWeight.w600 : FontWeight.w500,
+                      color: Color(
+                        isUnread ? AppColors.black : AppColors.darkGrey,
+                      ),
+                    ),
+                  ),
+                if ((item.message ?? '').isNotEmpty)
+                  Text(
+                    item.message!,
+                    style: AppStyle.manrope(
+                      size: 14,
+                      weight: FontWeight.w400,
+                      color: const Color(AppColors.black),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (isUnread)
+            Container(
+              width: 10,
+              height: 10,
+              margin: const EdgeInsets.only(left: 8, top: 8),
+              decoration: const BoxDecoration(
+                color: Color(AppColors.primary),
+                shape: BoxShape.circle,
+              ),
+            ),
+        ],
+      ),
     );
   }
 

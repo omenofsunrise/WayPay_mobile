@@ -4,6 +4,7 @@ abstract class NotificationsState {
   const NotificationsState();
 
   int get totalCount => 0;
+  int get unreadCount => 0;
 }
 
 class NotificationsInitial extends NotificationsState {
@@ -40,6 +41,9 @@ class NotificationsLoaded extends NotificationsState {
 
   @override
   int get totalCount => page.totalCount;
+
+  @override
+  int get unreadCount => items.where((item) => !item.isRead).length;
 }
 
 class NotificationsError extends NotificationsState {

@@ -20,7 +20,7 @@ class NotificationPage {
     return NotificationPage(
       page: page,
       pageSize: pageSize,
-      totalCount: totalCount ?? newItems.length,
+      totalCount: totalCount ?? this.totalCount,
       totalPages: totalPages,
       items: newItems,
     );

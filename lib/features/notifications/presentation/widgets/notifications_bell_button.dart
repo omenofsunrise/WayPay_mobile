@@ -53,9 +53,9 @@ class _NotificationsBellButtonBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<NotificationsCubit, NotificationsState>(
       builder: (context, state) {
-        final count = state.totalCount;
-        final badgeVisible = showBadge && count > 0;
-        final badgeText = count > 99 ? '99+' : '$count';
+        final unread = state.unreadCount;
+        final badgeVisible = showBadge && unread > 0;
+        final badgeText = unread > 99 ? '99+' : '$unread';
         final hitSize = iconSize < 44 ? 44.0 : iconSize;
         final iconTint = iconColor ?? const Color(AppColors.darkGrey);
         final bubbleColor = badgeColor ?? const Color(AppColors.primaryLight);
