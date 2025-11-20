@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/CustomRadioButton';
 import 'package:waypay_mobile/core/widgets/custom_checkbox.dart';
 import 'package:waypay_mobile/core/widgets/inputs/custom_input.dart';
 import 'package:waypay_mobile/core/widgets/inputs/custom_select.dart';
 
 class Step3SchedulesContent extends StatefulWidget {
   final bool nextMonthStart;
+  final bool currentMonthStart;
   final ValueChanged<bool> onNextMonthStartChanged;
+  final ValueChanged<bool> onCurrentMonthStartChanged;
   final double firstPayment;
   final int termMonths;
   final int? paymentDay;
@@ -19,7 +22,9 @@ class Step3SchedulesContent extends StatefulWidget {
   const Step3SchedulesContent({
     super.key,
     required this.nextMonthStart,
+    required this.currentMonthStart,
     required this.onNextMonthStartChanged,
+    required this.onCurrentMonthStartChanged,
     required this.firstPayment,
     required this.termMonths,
     required this.paymentDay,
@@ -145,10 +150,43 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CustomCheckbox(
-          value: widget.nextMonthStart,
-          onChanged: (value) => widget.onNextMonthStartChanged(value ?? false),
-          label: 'Начинать выплаты со след месяца',
+        Text(
+          'Начинать с ближайшего месяца',
+          style: AppStyle.manrope(
+            size: 14,
+            weight: FontWeight.w500,
+            color: Color(AppColors.darkGrey),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        CustomRadioButton(
+          value: true,
+          groupValue: widget.currentMonthStart,
+          onChanged: (value) {
+            if (value == true) {
+              widget.onCurrentMonthStartChanged(true);
+              widget.onNextMonthStartChanged(false);
+            }
+          },
+          label: 'Начинать с текущего месяца',
+          description: 'Первый платеж в этом месяце',
+        ),
+
+        const SizedBox(height: 8),
+
+        CustomRadioButton(
+          value: true,
+          groupValue: widget.nextMonthStart,
+          onChanged: (value) {
+            if (value == true) {
+              widget.onNextMonthStartChanged(true);
+              widget.onCurrentMonthStartChanged(false);
+            }
+          },
+          label: 'Начинать со следующего месяца',
+          description: 'Первый платеж в следующем месяце',
         ),
 
         const SizedBox(height: 24),

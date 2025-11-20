@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/inputs/custom_input.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 
@@ -73,72 +74,19 @@ class _Step2ProductsContentState extends State<Step2ProductsContent> {
         Row(
           children: [
             const Expanded(
-              child: Text(
-                'Список товаров',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              child: const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Основная информация',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                ),
               ),
             ),
             const SizedBox(width: 16),
             _buildMarkupTypeToggle(),
           ],
         ),
-
         const SizedBox(height: 16),
-
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Color(AppColors.lightGreyBackground),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: Color(AppColors.primary).withOpacity(0.2),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Итоговая сумма',
-                style: AppStyle.manrope(
-                  size: 14,
-                  weight: FontWeight.w500,
-                  color: Color(AppColors.darkGrey),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Общая стоимость:',
-                    style: AppStyle.manrope(size: 16, weight: FontWeight.w600),
-                  ),
-                  Text(
-                    '${widget.totalAmount.toStringAsFixed(2)} ₽',
-                    style: AppStyle.manrope(
-                      size: 18,
-                      weight: FontWeight.w700,
-                      color: Color(AppColors.primary),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'округлено до 50 ₽',
-                style: AppStyle.manrope(
-                  size: 12,
-                  weight: FontWeight.w400,
-                  color: Color(AppColors.grey),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
         ...widget.products.asMap().entries.map((entry) {
           final index = entry.key;
           final product = entry.value;
@@ -154,28 +102,49 @@ class _Step2ProductsContentState extends State<Step2ProductsContent> {
           );
         }).toList(),
 
-        Padding(
-          padding: const EdgeInsets.only(top: 16),
-          child: ElevatedButton(
-            onPressed: _addProduct,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(AppColors.primary),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              minimumSize: const Size(double.infinity, 48),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+        const SizedBox(height: 16),
+        if (widget.products.length > 1)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.add, size: 20),
-                SizedBox(width: 8),
-                Text('Добавить товар'),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Итого товаров на сумму:',
+                      style: AppStyle.manrope(
+                        size: 19,
+                        weight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      '${widget.totalAmount.toStringAsFixed(2)} ₽',
+                      style: AppStyle.manrope(
+                        size: 18,
+                        weight: FontWeight.w700,
+                        color: Color(AppColors.primary),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
+
+        Padding(
+          padding: const EdgeInsets.only(top: 16, bottom: 8),
+          child: DefaultButton(
+            onPressed: _addProduct,
+            isGreen: true,
+            text: '+ Добавить товар',
+          ),
         ),
+
+        // Итоговая сумма перенесена вниз
       ],
     );
   }
@@ -336,102 +305,102 @@ class __ProductItemState extends State<_ProductItem> {
         (widget.product.price * widget.product.quantity) +
         (widget.product.surchargeAmount ?? 0);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Color(AppColors.lightGreyBackground)),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Товар № ${widget.index + 1}',
+              style: AppStyle.manrope(size: 16, weight: FontWeight.w400),
+            ),
+            const Spacer(),
+            if (widget.canRemove)
+              IconButton(
+                onPressed: widget.onRemove,
+                icon: Icon(
+                  Icons.delete_outline,
+                  color: Color(AppColors.primary),
+                ),
+                iconSize: 20,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+          ],
+        ),
+
+        const SizedBox(height: 12),
+
+        CustomInput(
+          controller: _nameController,
+          label: 'Название товара',
+          onChanged: (value) => _updateProduct(),
+        ),
+
+        const SizedBox(height: 12),
+
+        Row(
+          children: [
+            Expanded(
+              child: CustomInput(
+                controller: _priceController,
+                label: 'Стоимость, ₽',
+                keyboardType: TextInputType.number,
+                onChanged: (value) => _updateProduct(),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: CustomInput(
+                controller: _quantityController,
+                label: 'Кол-во',
+                keyboardType: TextInputType.number,
+                onChanged: (value) => _updateProduct(),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 12),
+
+        CustomInput(
+          controller: _surchargeController,
+          label: widget.markupType == 0 ? 'Надбавка, ₽' : 'Надбавка, %',
+          keyboardType: TextInputType.number,
+          onChanged: (value) => _updateProduct(),
+        ),
+
+        const SizedBox(height: 12),
+
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Color(AppColors.lightGreyBackground),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Товар ${widget.index + 1}',
-                style: AppStyle.manrope(size: 16, weight: FontWeight.w600),
+                'Цена товара:',
+                style: AppStyle.manrope(size: 14, weight: FontWeight.w500),
               ),
-              const Spacer(),
-              if (widget.canRemove)
-                IconButton(
-                  onPressed: widget.onRemove,
-                  icon: Icon(Icons.delete_outline, color: Color(AppColors.red)),
-                  iconSize: 20,
-                ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          CustomInput(
-            controller: _nameController,
-            label: 'Название товара',
-            onChanged: (value) => _updateProduct(),
-          ),
-
-          const SizedBox(height: 12),
-
-          Row(
-            children: [
-              Expanded(
-                child: CustomInput(
-                  controller: _priceController,
-                  label: 'Стоимость, ₽',
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) => _updateProduct(),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: CustomInput(
-                  controller: _quantityController,
-                  label: 'Кол-во',
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) => _updateProduct(),
+              Text(
+                '${totalPrice.toStringAsFixed(2)} ₽',
+                style: AppStyle.manrope(
+                  size: 14,
+                  weight: FontWeight.w700,
+                  color: Color(AppColors.primary),
                 ),
               ),
             ],
           ),
+        ),
 
-          const SizedBox(height: 12),
-
-          // Надбавка
-          CustomInput(
-            controller: _surchargeController,
-            label: widget.markupType == 0 ? 'Надбавка, ₽' : 'Надбавка, %',
-            keyboardType: TextInputType.number,
-            onChanged: (value) => _updateProduct(),
-          ),
-
-          const SizedBox(height: 12),
-
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Color(AppColors.lightGreyBackground),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Цена товара:',
-                  style: AppStyle.manrope(size: 14, weight: FontWeight.w500),
-                ),
-                Text(
-                  '${totalPrice.toStringAsFixed(2)} ₽',
-                  style: AppStyle.manrope(
-                    size: 14,
-                    weight: FontWeight.w700,
-                    color: Color(AppColors.primary),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        const SizedBox(height: 16),
+        const Divider(height: 1, color: Color(0xFFE2E8F0)),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }

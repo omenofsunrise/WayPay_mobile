@@ -23,6 +23,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
             termMonths: 12,
             paymentDay: 1,
             nextMonthStart: false,
+            currentMonthStart: false,
             inDebt: false,
             debtComment: null,
             products: [CreditProduct(name: '', price: 0, quantity: 1)],
@@ -91,6 +92,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     int? termMonths,
     int? paymentDay,
     bool? nextMonthStart,
+    bool? currentMonthStart,
   }) {
     double adjustedFirstPayment =
         firstPayment ?? state.creditRequest.firstPayment;
@@ -104,6 +106,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
       termMonths: termMonths,
       paymentDay: paymentDay,
       nextMonthStart: nextMonthStart,
+      currentMonthStart: currentMonthStart,
     );
 
     emit(state.copyWith(creditRequest: updatedRequest));
@@ -157,6 +160,15 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
         totalAmountWithSurcharge: totalAmount,
       ),
     );
+  }
+
+  void updateStartMonthOption(bool isCurrentMonth) {
+    final updatedRequest = state.creditRequest.copyWith(
+      currentMonthStart: isCurrentMonth,
+      nextMonthStart: !isCurrentMonth,
+    );
+
+    emit(state.copyWith(creditRequest: updatedRequest));
   }
 
   List<CreditProduct> _recalculateSurchargeAmounts(

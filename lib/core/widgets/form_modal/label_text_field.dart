@@ -46,7 +46,6 @@ class LabeledTextField extends StatefulWidget {
 class _LabeledTextFieldState extends State<LabeledTextField> {
   bool _isFormatting = false;
 
-  // Телефон: маска БЕЗ начальной "8", её показывайте через prefix/prefixText
   late final MaskTextInputFormatter maskFormatter = MaskTextInputFormatter(
     mask: '(###) ###-##-##',
     filter: {"#": RegExp(r'[0-9]')},
