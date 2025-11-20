@@ -27,6 +27,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final AuthRemoteDataSource dataSource = getIt<AuthRemoteDataSource>();
   Employee? currentUser;
   final _tokenStorage = TokenStorage();
@@ -165,81 +166,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       drawer: const AppDrawer(),
-      backgroundColor: Color(AppColors.primary),
-      appBar: AppBar(
-        surfaceTintColor: Colors.transparent,
-        backgroundColor: Color(AppColors.primary),
-        elevation: 0,
-        title: Text(
-          'Профиль',
-          style: AppStyle.medium20.copyWith(
-            color: const Color(AppColors.background),
-          ),
-        ),
-        iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          if (_selectedIndex == 0)
-            BlocBuilder<ProfileCubit, ProfileState>(
-              bloc: _profileCubit,
-              builder: (context, state) {
-                if (state is ProfileLoaded && currentUser != null) {
-                  final editable = canEditEmployee(
-                    currentUser: currentUser!,
-                    targetEmployee: state.employee,
-                  );
-                  if (editable) {
-                    return IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.white),
-                      tooltip: 'Редактировать',
-                      onPressed: () async {
-                        await showDialog(
-                          context: context,
-                          builder: (context) => BlocProvider.value(
-                            value: _profileCubit,
-                            child: EditProfileModal(currentUser: currentUser!),
-                          ),
-                        );
-                        if (widget.employeeId == null) {
-                          _profileCubit.loadProfile();
-                        } else {
-                          _profileCubit.loadProfileById(widget.employeeId!);
-                        }
-                      },
-                    );
-                  }
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            tooltip: 'Выйти',
-            onPressed: _logout,
-          ),
-        ],
-      ),
-
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Color(AppColors.background),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          children: [
-            BlocBuilder<ProfileCubit, ProfileState>(
-              bloc: _profileCubit,
-              builder: (context, state) {
-                if (state is ProfileLoaded && state.myProfile) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 16,
-                    ),
-                    child: SingleChildScrollView(
+      backgroundColor: const Color(AppColors.background),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTopBar(),
+              const SizedBox(height: 16),
+              BlocBuilder<ProfileCubit, ProfileState>(
+                bloc: _profileCubit,
+                builder: (context, state) {
+                  if (state is ProfileLoaded && state.myProfile) {
+                    return SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: List.generate(
@@ -250,16 +192,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-            Expanded(child: _buildTabContent(_selectedIndex)),
-          ],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+              const SizedBox(height: 16),
+              Expanded(child: _buildTabContent(_selectedIndex)),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTopBar() {
+    return Row(
+      children: [
+        IconButton(
+          onPressed: () {
+            if (_scaffoldKey.currentState?.isDrawerOpen ?? false) return;
+            _scaffoldKey.currentState?.openDrawer();
+          },
+          icon: const Icon(Icons.menu, color: Color(AppColors.black)),
+          style: IconButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            'Профиль',
+            style: AppStyle.semiBold23.copyWith(
+              color: const Color(AppColors.black),
+            ),
+          ),
+        ),
+        if (_selectedIndex == 0)
+          BlocBuilder<ProfileCubit, ProfileState>(
+            bloc: _profileCubit,
+            builder: (context, state) {
+              if (state is ProfileLoaded && currentUser != null) {
+                final editable = canEditEmployee(
+                  currentUser: currentUser!,
+                  targetEmployee: state.employee,
+                );
+                if (editable) {
+                  return IconButton(
+                    icon: const Icon(Icons.edit, color: Color(AppColors.black)),
+                    tooltip: 'Редактировать',
+                    onPressed: () async {
+                      await showDialog(
+                        context: context,
+                        builder: (context) => BlocProvider.value(
+                          value: _profileCubit,
+                          child: EditProfileModal(currentUser: currentUser!),
+                        ),
+                      );
+                      if (widget.employeeId == null) {
+                        _profileCubit.loadProfile();
+                      } else {
+                        _profileCubit.loadProfileById(widget.employeeId!);
+                      }
+                    },
+                  );
+                }
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        const SizedBox(width: 4),
+        IconButton(
+          icon: const Icon(Icons.logout, color: Color(AppColors.black)),
+          tooltip: 'Выйти',
+          onPressed: _logout,
+        ),
+      ],
     );
   }
 }
