@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/config/api_config.dart';
 import 'token_storage.dart';
 
-Dio createDio({String baseUrl = 'https://web.waypay.one:5001'}) {
+Dio createDio({String baseUrl = ApiConfig.apiBaseUrl}) {
   final tokenStorage = TokenStorage();
+  final normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : '$baseUrl/';
 
   final dio = Dio(
     BaseOptions(
-      baseUrl: baseUrl,
+      baseUrl: normalizedBaseUrl,
       connectTimeout: const Duration(seconds: 20),
       receiveTimeout: const Duration(seconds: 20),
       sendTimeout: const Duration(seconds: 20),
@@ -33,7 +35,7 @@ Dio createDio({String baseUrl = 'https://web.waypay.one:5001'}) {
         final req = error.requestOptions;
 
         final alreadyRetried = req.extra['__retried__'] == true;
-        final isRefreshCall = req.path.contains('/api/Auth/refresh');
+        final isRefreshCall = req.path.contains('Auth/refresh');
 
         if (is401 && !alreadyRetried && !isRefreshCall) {
           if (isRefreshing) {

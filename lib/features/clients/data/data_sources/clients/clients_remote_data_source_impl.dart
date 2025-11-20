@@ -21,7 +21,7 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
   Future<ClientsResponseModel> getClients(GetClientsQuery query) async {
     try {
       final response = await dio.get(
-        '/api/Client',
+        'Client',
         queryParameters: query.toQueryParams(),
       );
 
@@ -42,7 +42,7 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
   @override
   Future<ClientModel> getClientById(int id) async {
     try {
-      final response = await dio.get('/api/Client/$id');
+      final response = await dio.get('Client/$id');
 
       final data = response.data;
 
@@ -59,7 +59,7 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
   @override
   Future<void> deleteClient(int id) async {
     try {
-      await dio.delete('/api/Client/$id');
+      await dio.delete('Client/$id');
     } on DioException catch (e) {
       throw Exception('Ошибка удаления клиента: ${e.message}');
     }
@@ -68,7 +68,7 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
   @override
   Future<void> updateClientBasic(int id, UpdateClientRequest request) async {
     try {
-      await dio.put('/api/Client/$id', data: request.toJson());
+      await dio.put('Client/$id', data: request.toJson());
     } on DioException catch (e) {
       throw Exception(
         'Ошибка обновления основных данных клиента: ${e.message}',
@@ -79,7 +79,7 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
   @override
   Future<void> updateClientDoc(int id, UpdateClientDocRequest request) async {
     try {
-      await dio.put('/api/Client/$id/doc', data: request.toJson());
+      await dio.put('Client/$id/doc', data: request.toJson());
     } on DioException catch (e) {
       throw Exception('Ошибка обновления документа клиента: ${e.message}');
     }
@@ -91,7 +91,7 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
     UpdateClientDocIssueDateRequest request,
   ) async {
     try {
-      await dio.put('/api/Client/$id/doc-issue-date', data: request.toJson());
+      await dio.put('Client/$id/doc-issue-date', data: request.toJson());
     } on DioException catch (e) {
       throw Exception('Ошибка обновления даты документа клиента: ${e.message}');
     }
@@ -100,7 +100,7 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
   @override
   Future<void> createClient(CreateClientRequest request) async {
     try {
-      await dio.post('/api/Client', data: request.toJson());
+      await dio.post('Client', data: request.toJson());
     } on DioException catch (e) {
       if (e.response?.statusCode == 409) {
         throw Exception('409 Клиент с такими данными уже существует');
@@ -120,7 +120,7 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
         'PhotoType': type.apiValue,
         'File': await MultipartFile.fromFile(file.path),
       });
-      await dio.post('/api/Client/$id/passport-photo', data: formData);
+      await dio.post('Client/$id/passport-photo', data: formData);
     } on DioException catch (e) {
       throw Exception('Ошибка загрузки фото паспорта: ${e.message}');
     }
@@ -130,7 +130,7 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
   Future<void> deletePassportPhoto(int id, PassportPhotoType type) async {
     try {
       await dio.delete(
-        '/api/Client/$id/passport-photo',
+        'Client/$id/passport-photo',
         queryParameters: {'photoType': type.apiValue},
       );
     } on DioException catch (e) {
@@ -142,7 +142,7 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
   Future<Uint8List?> fetchPassportPhoto(int id, PassportPhotoType type) async {
     try {
       final response = await dio.get(
-        '/api/Client/$id/passport-photo',
+        'Client/$id/passport-photo',
         queryParameters: {'photoType': type.apiValue},
         options: Options(responseType: ResponseType.bytes),
       );

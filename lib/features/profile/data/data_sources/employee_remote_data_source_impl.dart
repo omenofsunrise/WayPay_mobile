@@ -30,7 +30,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
         ),
       });
 
-      await dio.put('/api/Employee/photo', data: formData);
+      await dio.put('Employee/photo', data: formData);
     } on DioException catch (e) {
       throw Exception('Ошибка загрузки фото: ${e.message}');
     }
@@ -50,7 +50,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
       });
 
       await dio.put(
-        '/api/Employee',
+        'Employee',
         data: formData,
         options: Options(contentType: 'multipart/form-data'),
       );
@@ -62,7 +62,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
   @override
   Future<void> deleteEmployeePhoto() async {
     try {
-      await dio.delete('/api/Employee/photo');
+      await dio.delete('Employee/photo');
     } on DioException catch (e) {
       throw Exception('Ошибка удаления фото: ${e.message}');
     }
@@ -87,7 +87,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
     if (sortDirection != null) queryParams['sortDirection'] = sortDirection;
 
     final response = await dio.get(
-      '/api/Employee',
+      'Employee',
       queryParameters: queryParams,
     );
 
@@ -106,7 +106,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
   Future<void> updateEmployeeRole(int id, String newRole) async {
     try {
       final response = await dio.patch(
-        '/api/Employee/role/$id',
+        'Employee/role/$id',
         data: '"$newRole"',
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
@@ -124,7 +124,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
   @override
   Future<void> updateEmployeePhone(int id, String phone) async {
     final response = await dio.patch(
-      '/api/Employee/phone/$id',
+      'Employee/phone/$id',
       data: '"$phone"',
       options: Options(headers: {'Content-Type': 'application/json'}),
     );
@@ -136,7 +136,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
   @override
   Future<void> updateEmployeeMinSurcharge(int id, int minSurcharge) async {
     final response = await dio.patch(
-      '/api/Employee/min-surcharge/$id',
+      'Employee/min-surcharge/$id',
       data: minSurcharge,
       options: Options(headers: {'Content-Type': 'application/json'}),
     );
@@ -171,7 +171,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
 
     try {
       final response = await dio.post(
-        '/api/Employee',
+        'Employee',
         data: formData,
         options: Options(contentType: 'multipart/form-data'),
       );
@@ -191,7 +191,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
 
   @override
   Future<Map<String, dynamic>> getEmployeeById(int id) async {
-    final response = await dio.get('/api/Employee/$id');
+    final response = await dio.get('Employee/$id');
     if (response.statusCode == 200) {
       return response.data;
     } else {
@@ -202,7 +202,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
   @override
   @override
   Future<void> deleteEmployee(int id) async {
-    final response = await dio.delete('/api/Employee/$id');
+    final response = await dio.delete('Employee/$id');
 
     if (response.statusCode == 200 || response.statusCode == 204) {
       return;
@@ -214,7 +214,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
   @override
   Future<List<CreditStat>> getCreditsStats({int months = 12}) async {
     final response = await dio.get(
-      '/api/Employee/credits-stats',
+      'Employee/credits-stats',
       queryParameters: {'months': months},
     );
 
@@ -229,7 +229,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
   @override
   Future<List<PaymentStat>> getPaymentsStats({int months = 12}) async {
     final response = await dio.get(
-      '/api/Employee/payments-stats',
+      'Employee/payments-stats',
       queryParameters: {'months': months},
     );
     if (response.statusCode == 200 && response.data is List) {
@@ -246,7 +246,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
     required int employeeId,
     int months = 12,
   }) async {
-    final url = '/api/Employee/payments-stats$employeeId';
+    final url = 'Employee/payments-stats$employeeId';
     print('📡 [Request] GET $url?months=$months');
 
     final response = await dio.get(url, queryParameters: {'months': months});
@@ -267,7 +267,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
     int months = 12,
   }) async {
     try {
-      final url = '/api/Employee/credits-stats$employeeId';
+      final url = 'Employee/credits-stats$employeeId';
       final query = {'months': months};
 
       print('📡 [Request] GET $url?months=$months');
@@ -294,7 +294,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
   @override
   Future<List<EmployeeName>> getEmployeeFullNames() async {
     try {
-      final response = await dio.get('/api/Employee/fullnames');
+      final response = await dio.get('Employee/fullnames');
 
       print('📡 [Request] GET /api/Employee/fullnames');
       print('✅ [Response ${response.statusCode}] ${response.data}');

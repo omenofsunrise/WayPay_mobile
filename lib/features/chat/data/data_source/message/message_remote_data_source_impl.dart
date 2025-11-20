@@ -18,7 +18,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
   }) async {
     try {
       final response = await dio.get(
-        '/api/chats/$chatId/Messages',
+        'chats/$chatId/Messages',
         queryParameters: {
           'skip': skip,
           'take': take,
@@ -44,7 +44,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
   Future<int> getChatUnreadCount(int chatId) async {
     try {
       final response = await dio.get(
-        '/api/chats/$chatId/Messages/unread-count',
+        'chats/$chatId/Messages/unread-count',
         options: Options(
           responseType: ResponseType.plain,
           headers: {'accept': 'text/plain'},
@@ -66,7 +66,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
   @override
   Future<void> sendTyping(int chatId) async {
     try {
-      final response = await dio.post('/api/chats/$chatId/Messages/typing');
+      final response = await dio.post('chats/$chatId/Messages/typing');
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception('Ошибка отправки typing-события');
       }
@@ -100,7 +100,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
       }
 
       final response = await dio.post(
-        '/api/chats/$chatId/Messages',
+        'chats/$chatId/Messages',
         data: formData,
         options: Options(
           contentType: 'multipart/form-data',
@@ -126,7 +126,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
   ) async {
     try {
       final response = await dio.put(
-        '/api/chats/$chatId/Messages/$messageId',
+        'chats/$chatId/Messages/$messageId',
         data: jsonEncode(text),
         options: Options(
           contentType: 'application/json',
@@ -148,7 +148,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
   Future<void> deleteMessage(int chatId, int messageId) async {
     try {
       final response = await dio.delete(
-        '/api/chats/$chatId/Messages/$messageId',
+        'chats/$chatId/Messages/$messageId',
       );
 
       if (response.statusCode != 200 && response.statusCode != 204) {
@@ -162,7 +162,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
   @override
   Future<void> markAsRead(int chatId) async {
     try {
-      final response = await dio.post('/api/chats/$chatId/Messages/read');
+      final response = await dio.post('chats/$chatId/Messages/read');
 
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception('Ошибка при отметке сообщений как прочитанных');

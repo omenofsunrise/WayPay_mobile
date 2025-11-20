@@ -24,7 +24,7 @@ class ObjectTypeRemoteDataSourceImpl implements ObjectTypeRemoteDataSource {
   ) async {
     try {
       final response = await dio.get(
-        '/api/ObjectType',
+        'ObjectType',
         queryParameters: query.toQueryParams(),
       );
 
@@ -44,7 +44,7 @@ class ObjectTypeRemoteDataSourceImpl implements ObjectTypeRemoteDataSource {
   ) async {
     try {
       final response = await dio.post(
-        '/api/ObjectType',
+        'ObjectType',
         data: request.toJson(),
       );
 
@@ -65,7 +65,7 @@ class ObjectTypeRemoteDataSourceImpl implements ObjectTypeRemoteDataSource {
   ) async {
     try {
       final response = await dio.put(
-        '/api/ObjectType/$id',
+        'ObjectType/$id',
         data: request.toJson(),
       );
 
@@ -82,7 +82,7 @@ class ObjectTypeRemoteDataSourceImpl implements ObjectTypeRemoteDataSource {
   @override
   Future<void> deleteObjectType(int id) async {
     try {
-      final response = await dio.delete('/api/ObjectType/$id');
+      final response = await dio.delete('ObjectType/$id');
 
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception('Ошибка при удалении типа объекта');
@@ -96,7 +96,7 @@ class ObjectTypeRemoteDataSourceImpl implements ObjectTypeRemoteDataSource {
   Future<bool> checkObjectTypeExists(CheckObjectTypeExistsQuery query) async {
     try {
       final response = await dio.get(
-        '/api/ObjectType/exists',
+        'ObjectType/exists',
         queryParameters: query.toQueryParams(),
       );
 

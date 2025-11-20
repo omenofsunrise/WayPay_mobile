@@ -26,13 +26,30 @@ import 'package:waypay_mobile/features/home/presentation/screens/client_blacklis
 import 'package:waypay_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/main_client_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/queue_list_screen.dart';
+import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
+import 'package:waypay_mobile/features/investors/presentation/bloc/investor_pool_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
+import 'package:waypay_mobile/features/investors/presentation/screens/investor_pool_detail_screen.dart';
+import 'package:waypay_mobile/features/investors/presentation/screens/investor_pool_screen.dart';
+import 'package:waypay_mobile/features/investors/presentation/screens/investors_hub_screen.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investors_screen.dart';
 import 'package:waypay_mobile/features/product/presentation/screens/product_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/profile_screen.dart';
 import 'package:waypay_mobile/features/todo/presentation/screen/todo_screen.dart';
 import 'package:waypay_mobile/features/chat/presentation/screens/all_chat_screen.dart';
 import 'package:waypay_mobile/features/calc/calculator_page.dart';
+import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
+import 'package:waypay_mobile/features/payment/presentation/bloc/expected/payment_bloc.dart';
+import 'package:waypay_mobile/features/payment/presentation/bloc/schedule/schedule_bloc.dart';
+import 'package:waypay_mobile/features/payment/presentation/cubit/payment_schedule_cubit.dart';
+import 'package:waypay_mobile/features/payment/presentation/cubit/payment_history_cubit.dart';
+import 'package:waypay_mobile/features/payment/presentation/cubit/schedule_preview_cubit.dart';
+import 'package:waypay_mobile/features/payment/presentation/screen/payment_analytics_screen.dart';
+import 'package:waypay_mobile/features/payment/presentation/screen/payment_detail_screen.dart';
+import 'package:waypay_mobile/features/payment/presentation/screen/payment_history_screen.dart';
+import 'package:waypay_mobile/features/payment/presentation/screen/payment_screen.dart';
+import 'package:waypay_mobile/features/payment/presentation/screen/schedule_screen.dart';
+import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 
 import 'package:waypay_mobile/routes/routes.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
@@ -103,7 +120,6 @@ class AppRouter {
         pageBuilder: (context, state) =>
             SlideLeftTransition(child: NewCreditCreationScreen()),
       ),
-
       GoRoute(
         path: Routes.phoneAuthScreen.toPath,
         name: Routes.phoneAuthScreen.toName,
@@ -139,6 +155,30 @@ class AppRouter {
               child: const InvestorsScreen(),
             ),
           );
+        },
+      ),
+      GoRoute(
+        path: Routes.investorPoolScreen.toPath,
+        name: Routes.investorPoolScreen.toName,
+        builder: (context, state) => BlocProvider(
+          create: (_) =>
+              InvestorPoolBloc()..add(LoadInvestorPool(refresh: true)),
+          child: const InvestorPoolScreen(),
+        ),
+      ),
+      GoRoute(
+        path: Routes.investorPoolDetailScreen.toPath,
+        name: Routes.investorPoolDetailScreen.toName,
+        builder: (context, state) {
+          final pool = state.extra as InvestorPoolModel?;
+          if (pool == null) {
+            return const Scaffold(
+              body: Center(
+                child: Text('Нет данных пула'),
+              ),
+            );
+          }
+          return InvestorPoolDetailScreen(pool: pool);
         },
       ),
 
@@ -246,6 +286,81 @@ class AppRouter {
                       create: (_) => BlackCatalogCubit(),
                       child: const ClientBlackCatalogScreen(),
                     ),
+                  ),
+                  GoRoute(
+                    path: Routes.paymentScreen.toPath,
+                    name: Routes.paymentScreen.toName,
+                    builder: (context, state) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(
+                          create: (_) => PaymentBloc()
+                            ..add(
+                              LoadPayment(refresh: true, page: 1, pageSize: 10),
+                            ),
+                        ),
+                        BlocProvider(
+                          create: (_) => PaymentScheduleCubit()
+                            ..load(year: DateTime.now().year),
+                        ),
+                        BlocProvider(
+                          create: (_) => SchedulePreviewCubit(),
+                        ),
+                        BlocProvider(
+                          create: (_) => PaymentHistoryCubit()..load(limit: 2),
+                        ),
+                      ],
+                      child: const PaymentScreen(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: Routes.scheduleScreen.toPath,
+                    name: Routes.scheduleScreen.toName,
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => ScheduleBloc(),
+                      child: const ScheduleScreen(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: Routes.paymentHistoryScreen.toPath,
+                    name: Routes.paymentHistoryScreen.toName,
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => PaymentBloc()
+                        ..add(
+                          LoadPayment(refresh: true, page: 1, pageSize: 10),
+                        ),
+                      child: const PaymentHistoryScreen(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: Routes.paymentDetailScreen.toPath,
+                    name: Routes.paymentDetailScreen.toName,
+                    builder: (context, state) {
+                      final extra = state.extra;
+                      if (extra is ScheduleModel) {
+                        return PaymentDetailScreen(schedule: extra);
+                      } else if (extra is PaymentItemModel) {
+                        return PaymentDetailScreen(payment: extra);
+                      }
+                      return const Scaffold(
+                        body: Center(
+                          child: Text('Нет данных для платежа'),
+                        ),
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: Routes.paymentAnalyticsScreen.toPath,
+                    name: Routes.paymentAnalyticsScreen.toName,
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => PaymentScheduleCubit()
+                        ..load(year: DateTime.now().year),
+                      child: const PaymentAnalyticsScreen(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: Routes.investorsHubScreen.toPath,
+                    name: Routes.investorsHubScreen.toName,
+                    builder: (context, state) => const InvestorsHubScreen(),
                   ),
                 ],
               ),

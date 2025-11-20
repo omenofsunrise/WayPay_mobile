@@ -15,7 +15,7 @@ class BlackCatalogRemoteDataSourceImpl
   ) async {
     try {
       final response = await _dio.get(
-        '/api/BlackList',
+        'BlackList',
         queryParameters: query.toQueryParams(),
       );
       final data = response.data;

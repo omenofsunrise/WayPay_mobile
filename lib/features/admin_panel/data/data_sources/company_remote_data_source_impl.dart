@@ -14,7 +14,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
   @override
   Future<List<CompanyModel>> getCompanies() async {
     try {
-      final response = await dio.get('/api/Company/all');
+      final response = await dio.get('Company/all');
       final data = response.data as List;
 
       return data.map((json) => CompanyModel.fromJson(json)).toList();
@@ -26,7 +26,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
   @override
   Future<CompanyModel> getSingleCompany() async {
     try {
-      final response = await dio.get('/api/Company');
+      final response = await dio.get('Company');
       final data = response.data as Map<String, dynamic>;
       return CompanyModel.fromJson(data);
     } on DioException catch (e) {
@@ -37,7 +37,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
   @override
   Future<void> createCompany(CompanyCreateRequest request) async {
     try {
-      await dio.post('/api/Company', data: request.toJson());
+      await dio.post('Company', data: request.toJson());
     } on DioException catch (e) {
       throw Exception('Ошибка при создании компании: ${e.message}');
     }
@@ -47,7 +47,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
   Future<void> updateCompanyLicenceDate(int id, DateTime newDate) async {
     try {
       await dio.patch(
-        '/api/Company/licence-date/$id',
+        'Company/licence-date/$id',
         data: '"${newDate.toUtc().toIso8601String()}"',
         options: Options(contentType: Headers.jsonContentType),
       );
@@ -60,7 +60,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
   Future<void> updateCompanyPhone(int id, String newPhone) async {
     try {
       await dio.patch(
-        '/api/Company/phone/$id',
+        'Company/phone/$id',
         data: '"$newPhone"',
         options: Options(contentType: Headers.jsonContentType),
       );
@@ -72,7 +72,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
   @override
   Future<void> deleteCompany(int id) async {
     try {
-      final response = await dio.delete('/api/Company/$id');
+      final response = await dio.delete('Company/$id');
 
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception('Ошибка при удалении компании');
@@ -97,7 +97,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
         ),
       });
 
-      await dio.patch('/api/Company/photo', data: formData);
+      await dio.patch('Company/photo', data: formData);
     } on DioException catch (e) {
       throw Exception('Ошибка при загрузке логотипа: ${e.message}');
     }
@@ -107,7 +107,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
   Future<void> updateCompany(CompanyModel company) async {
     try {
       final data = company.toUpdateJson();
-      await dio.put('/api/Company', data: data);
+      await dio.put('Company', data: data);
     } on DioException catch (e) {
       throw Exception('Ошибка при обновлении данных компании: ${e.message}');
     }
@@ -117,7 +117,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
   Future<CompanyCommonInfo> getCompanyCommonInfo() async {
     try {
       final response = await dio.get(
-        '/api/Company/common-info',
+        'Company/common-info',
         options: Options(headers: {'accept': 'text/plain'}),
       );
       final data = response.data;

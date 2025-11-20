@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
@@ -11,12 +10,14 @@ import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/custom_tab_switcher.dart';
 import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_mobile/core/widgets/filters/filter_components.dart';
 import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
 import 'package:waypay_mobile/core/widgets/search_field.dart';
 import 'package:waypay_mobile/features/home/data/models/credit_applications/credit_application_model.dart';
 import 'package:waypay_mobile/features/home/domain/entities/client_application_filters.dart';
 import 'package:waypay_mobile/features/home/presentation/cubit/client_applications/client_applications_cubit.dart';
 import 'package:waypay_mobile/features/home/presentation/widgets/client_application_card.dart';
+import 'package:waypay_mobile/features/home/presentation/widgets/client_applications_filters.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
 class ClientApplicationsScreen extends StatefulWidget {
@@ -142,8 +143,9 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) =>
-          _ClientApplicationsFiltersSheet(initialFilters: _appliedFilters),
+      builder: (_) => ClientApplicationsFiltersSheet(
+        initialFilters: _appliedFilters,
+      ),
     );
     BottomNavController.instance.show();
     if (result != null) {
@@ -195,7 +197,7 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
                     ),
                   ),
                   const SizedBox(width: 12),
-                  _FilterButton(
+                  FilterButton(
                     onTap: _openFilters,
                     isActive: _appliedFilters != null,
                   ),
@@ -422,352 +424,3 @@ class _EmptyApplicationsView extends StatelessWidget {
   }
 }
 
-class _ClientApplicationsFiltersSheet extends StatelessWidget {
-  const _ClientApplicationsFiltersSheet({this.initialFilters});
-
-  final ClientApplicationFilters? initialFilters;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-        top: 24,
-      ),
-      child: _FiltersForm(initialFilters: initialFilters),
-    );
-  }
-}
-
-class _FiltersForm extends StatefulWidget {
-  const _FiltersForm({this.initialFilters});
-
-  final ClientApplicationFilters? initialFilters;
-
-  @override
-  State<_FiltersForm> createState() => _FiltersFormState();
-}
-
-class _FiltersFormState extends State<_FiltersForm> {
-  final _minCostController = TextEditingController();
-  final _maxCostController = TextEditingController();
-  final _minTermController = TextEditingController();
-  final _maxTermController = TextEditingController();
-  final _regionController = TextEditingController();
-  final _districtController = TextEditingController();
-
-  List<TextEditingController> get _controllers => [
-        _minCostController,
-        _maxCostController,
-        _minTermController,
-        _maxTermController,
-        _regionController,
-        _districtController,
-      ];
-
-  @override
-  void initState() {
-    super.initState();
-    _applyInitialValues();
-    for (final controller in _controllers) {
-      controller.addListener(_onFieldsChanged);
-    }
-  }
-
-  @override
-  void dispose() {
-    for (final controller in _controllers) {
-      controller
-        ..removeListener(_onFieldsChanged)
-        ..dispose();
-    }
-    super.dispose();
-  }
-
-  void _clearAll() {
-    for (final controller in _controllers) {
-      controller.clear();
-    }
-    setState(() {});
-  }
-
-  void _onFieldsChanged() => setState(() {});
-
-  bool get _hasAnyValue => _controllers.any((c) => c.text.trim().isNotEmpty);
-
-  void _applyInitialValues() {
-    final filters = widget.initialFilters;
-    if (filters == null || filters.isEmpty) return;
-    _minCostController.text =
-        filters.minCost?.toString() ?? _minCostController.text;
-    _maxCostController.text =
-        filters.maxCost?.toString() ?? _maxCostController.text;
-    _minTermController.text =
-        filters.minTerm?.toString() ?? _minTermController.text;
-    _maxTermController.text =
-        filters.maxTerm?.toString() ?? _maxTermController.text;
-    _regionController.text = filters.region ?? '';
-    _districtController.text = filters.district ?? '';
-  }
-
-  ClientApplicationFilters _buildFilters() => ClientApplicationFilters(
-        minCost: _parseToInt(_minCostController.text),
-        maxCost: _parseToInt(_maxCostController.text),
-        minTerm: _parseToInt(_minTermController.text),
-        maxTerm: _parseToInt(_maxTermController.text),
-        region: _regionController.text.trim().isEmpty
-            ? null
-            : _regionController.text.trim(),
-        district: _districtController.text.trim().isEmpty
-            ? null
-            : _districtController.text.trim(),
-      );
-
-  int? _parseToInt(String value) {
-    final digits = value.replaceAll(RegExp(r'\D'), '');
-    if (digits.isEmpty) return null;
-    return int.tryParse(digits);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Expanded(
-              child: Text(
-                'Фильтры',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-              ),
-            ),
-            IconButton(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.close),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: ModalTextField(
-                controller: _minCostController,
-                label: 'Мин. стоимость',
-                hintText: 'Введите сумму',
-                keyboardType: TextInputType.number,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ModalTextField(
-                controller: _maxCostController,
-                label: 'Макс. стоимость',
-                hintText: 'Введите сумму',
-                keyboardType: TextInputType.number,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: ModalTextField(
-                controller: _minTermController,
-                label: 'Мин. срок месяцев',
-                hintText: 'Введите срок',
-                keyboardType: TextInputType.number,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ModalTextField(
-                controller: _maxTermController,
-                label: 'Макс. срок месяцев',
-                hintText: 'Введите срок',
-                keyboardType: TextInputType.number,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        ModalTextField(
-          controller: _regionController,
-          label: 'Регион',
-          readOnly: true,
-          hintText: 'Выберите регион',
-          suffixIcon: const Icon(
-            Icons.expand_more,
-            color: Color(AppColors.darkGrey),
-          ),
-          onTap: () async {
-            final selected = await showModalBottomSheet<String>(
-              context: context,
-              builder: (_) => _SimpleSelector(
-                title: 'Регион',
-                items: const [
-                  'Чеченская республика',
-                  'Республика Татарстан',
-                  'Московская область',
-                ],
-                selected: _regionController.text,
-              ),
-            );
-            if (selected != null) {
-              _regionController.text = selected;
-              setState(() {});
-            }
-          },
-        ),
-        const SizedBox(height: 12),
-        ModalTextField(
-          controller: _districtController,
-          label: 'Район',
-          readOnly: true,
-          hintText: 'Выберите район',
-          suffixIcon: const Icon(
-            Icons.expand_more,
-            color: Color(AppColors.darkGrey),
-          ),
-          onTap: () async {
-            final selected = await showModalBottomSheet<String>(
-              context: context,
-              builder: (_) => _SimpleSelector(
-                title: 'Район',
-                items: const [
-                  'Веденский',
-                  'Грозненский',
-                  'Урус-Мартановский',
-                ],
-                selected: _districtController.text,
-              ),
-            );
-            if (selected != null) {
-              _districtController.text = selected;
-              setState(() {});
-            }
-          },
-        ),
-        const SizedBox(height: 24),
-        Row(
-          children: [
-            Expanded(
-              child: DefaultButton(
-                text: 'Сбросить',
-                color: const Color(0xFFB8BEC8),
-                textColor: const Color(AppColors.black),
-                onPressed: _clearAll,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DefaultButton(
-                text: 'Применить',
-                color: _hasAnyValue
-                    ? const Color(AppColors.primary)
-                    : const Color(0xFFA8DADB),
-                textColor: Colors.white,
-                onPressed: () {
-                  if (!_hasAnyValue) return;
-                  Navigator.of(context).pop(_buildFilters());
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _SimpleSelector extends StatelessWidget {
-  const _SimpleSelector({
-    required this.title,
-    required this.items,
-    this.selected,
-  });
-
-  final String title;
-  final List<String> items;
-  final String? selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 12),
-            ...items.map(
-              (item) => ListTile(
-                title: Text(item),
-                trailing: selected == item
-                    ? const Icon(Icons.check, color: Color(AppColors.primary))
-                    : null,
-                onTap: () => Navigator.of(context).pop(item),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FilterButton extends StatefulWidget {
-  const _FilterButton({required this.onTap, required this.isActive});
-
-  final Future<void> Function() onTap;
-  final bool isActive;
-
-  @override
-  State<_FilterButton> createState() => _FilterButtonState();
-}
-
-class _FilterButtonState extends State<_FilterButton> {
-  bool _isOpen = false;
-
-  Future<void> _openFilters() async {
-    setState(() => _isOpen = true);
-    await widget.onTap();
-    if (mounted) {
-      setState(() => _isOpen = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bool highlight = _isOpen || widget.isActive;
-    final background =
-        highlight ? const Color(AppColors.primary) : Colors.white;
-    final iconColor =
-        highlight ? const Color(0xFFB8BEC8) : const Color(0xFF6B717C);
-
-    return SizedBox(
-      width: 48,
-      height: 48,
-      child: Material(
-        color: background,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: _openFilters,
-          child: Center(
-            child: SvgPicture.asset(SvgIcons.filter, color: iconColor),
-          ),
-        ),
-      ),
-    );
-  }
-}

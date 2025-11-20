@@ -56,6 +56,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         investorNickname: event.investorNickname,
         dateFrom: event.dateFrom,
         dateTo: event.dateTo,
+        confirmed: event.confirmed,
       );
 
       final response = await _paymentDataSource.getPayment(query);

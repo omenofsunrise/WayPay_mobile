@@ -11,6 +11,7 @@ class ModalTextField extends StatefulWidget {
     this.readOnly = false,
     this.onTap,
     this.suffixIcon,
+    this.suffixIconConstraints,
   });
 
   final TextEditingController controller;
@@ -20,6 +21,7 @@ class ModalTextField extends StatefulWidget {
   final bool readOnly;
   final VoidCallback? onTap;
   final Widget? suffixIcon;
+  final BoxConstraints? suffixIconConstraints;
 
   @override
   State<ModalTextField> createState() => _ModalTextFieldState();
@@ -78,6 +80,13 @@ class _ModalTextFieldState extends State<ModalTextField> {
         labelText: widget.label,
         hintText: widget.hintText,
         suffixIcon: widget.suffixIcon,
+        suffixIconConstraints: widget.suffixIconConstraints ??
+            const BoxConstraints(
+              minHeight: 24,
+              minWidth: 24,
+              maxHeight: 28,
+              maxWidth: 28,
+            ),
         filled: true,
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(

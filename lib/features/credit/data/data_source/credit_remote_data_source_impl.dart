@@ -14,7 +14,7 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
   Future<CreditResponseModel> getCredits(GetCreditsQuery query) async {
     try {
       final response = await dio.get(
-        '/api/Credit',
+        'Credit',
         queryParameters: query.toQueryParams(),
       );
 
@@ -45,7 +45,7 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
   @override
   Future<CreditModel> getCreditById(int id) async {
     try {
-      final response = await dio.get('/api/Credit/$id');
+      final response = await dio.get('Credit/$id');
 
       if (response.data is Map<String, dynamic>) {
         return CreditModel.fromJson(response.data);
@@ -60,7 +60,7 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
   @override
   Future<void> toggleFavourite(int creditId) async {
     try {
-      final response = await dio.put('/api/Credit/$creditId/toggle-favourite');
+      final response = await dio.put('Credit/$creditId/toggle-favourite');
 
       if (response.statusCode != 200) {
         throw Exception('Ошибка при обновлении избранного');
@@ -73,7 +73,7 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
   @override
   Future<void> deleteCreditById(int id) async {
     try {
-      final response = await dio.delete('/api/Credit/$id');
+      final response = await dio.delete('Credit/$id');
       debugPrint(
         '📬 Ответ от сервера: ${response.statusCode} ${response.statusMessage}',
       );
@@ -92,7 +92,7 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
   ) async {
     try {
       final response = await dio.get(
-        '/api/Credit/investor/$investorId',
+        'Credit/investor/$investorId',
         queryParameters: query.toQueryParams(),
       );
       return CreditResponseModel.fromJson(response.data);

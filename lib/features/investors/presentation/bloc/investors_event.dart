@@ -5,8 +5,13 @@ abstract class InvestorsEvent {}
 class LoadInvestorsEvent extends InvestorsEvent {
   final bool refresh;
   final int? page;
+  final int pageSize;
 
-  LoadInvestorsEvent({this.refresh = false, this.page});
+  LoadInvestorsEvent({
+    this.refresh = false,
+    this.page,
+    this.pageSize = 10,
+  });
 }
 
 class SearchInvestorsEvent extends InvestorsEvent {

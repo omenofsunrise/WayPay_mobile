@@ -321,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Spacer(),
               MoreDetailsButton(
                 onPressed: () {
-                  // Навигация к платежам
+                  context.pushNamed(Routes.paymentScreen.toName);
                 },
               ),
             ],
@@ -431,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Spacer(),
               MoreDetailsButton(
                 onPressed: () {
-                  // Навигация к инвесторам
+                  context.pushNamed(Routes.investorsHubScreen.toName);
                 },
               ),
             ],

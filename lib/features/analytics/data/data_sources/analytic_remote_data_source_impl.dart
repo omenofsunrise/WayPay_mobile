@@ -1,9 +1,12 @@
+import 'dart:developer' as developer;
+
 import 'package:dio/dio.dart';
 import 'package:waypay_mobile/features/analytics/data/data_sources/analytic_remote_data_source.dart';
 import 'package:waypay_mobile/features/analytics/data/models/analytic_items_response.dart';
 import 'package:waypay_mobile/features/analytics/data/models/debt_dynamic_response.dart';
 import 'package:waypay_mobile/features/analytics/data/models/graph_data.dart';
 import 'package:waypay_mobile/features/analytics/data/models/sell_info_response.dart';
+import 'package:waypay_mobile/features/payment/data/models/payment_schedule_summary.dart';
 
 class AnalyticRemoteDataSourceImpl implements AnalyticRemoteDataSource {
   final Dio dio;
@@ -18,7 +21,7 @@ class AnalyticRemoteDataSourceImpl implements AnalyticRemoteDataSource {
   }) async {
     try {
       final response = await dio.get(
-        '/api/Analytic/items',
+        'Analytic/items',
         queryParameters: {
           if (start != null) 'start': start,
           if (end != null) 'end': end,
@@ -42,7 +45,7 @@ class AnalyticRemoteDataSourceImpl implements AnalyticRemoteDataSource {
   }) async {
     try {
       final response = await dio.get(
-        '/api/Analytic/sell-info',
+        'Analytic/sell-info',
         queryParameters: {
           if (start != null) 'start': start,
           if (end != null) 'end': end,
@@ -66,7 +69,7 @@ class AnalyticRemoteDataSourceImpl implements AnalyticRemoteDataSource {
   }) async {
     try {
       final response = await dio.get(
-        '/api/Analytic/InvestmentAmountDynamic',
+        'Analytic/InvestmentAmountDynamic',
         queryParameters: {
           if (start != null) 'start': start,
           if (end != null) 'end': end,
@@ -90,7 +93,7 @@ class AnalyticRemoteDataSourceImpl implements AnalyticRemoteDataSource {
   }) async {
     try {
       final response = await dio.get(
-        '/api/Analytic/DebtDynamic',
+        'Analytic/DebtDynamic',
         queryParameters: {
           if (start != null) 'start': start,
           if (end != null) 'end': end,
@@ -103,6 +106,44 @@ class AnalyticRemoteDataSourceImpl implements AnalyticRemoteDataSource {
       throw Exception(
         'Ошибка получения DebtDynamic: ${e.response?.data ?? e.message}',
       );
+    }
+  }
+
+  @override
+  Future<List<PaymentScheduleSummary>> getPaymentSchedules({int? year}) async {
+    try {
+      final response = await dio.get(
+        'Analytic/schedules',
+        queryParameters: {
+          if (year != null) 'year': year,
+        },
+      );
+      final data = response.data;
+      if (data is List) {
+        return data
+            .map(
+              (item) =>
+                  PaymentScheduleSummary.fromJson(item as Map<String, dynamic>),
+            )
+            .toList();
+      }
+      throw Exception('Неожиданный формат данных расписания платежей');
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      final body = e.response?.data;
+      final params = e.requestOptions.queryParameters;
+      final message = 'Ошибка получения аналитики платежей '
+          '[status=$status, params=$params, body=$body]';
+      developer.log(
+        'getPaymentSchedules error',
+        error: e,
+        name: 'AnalyticRemoteDataSource',
+      );
+      developer.log(
+        message,
+        name: 'AnalyticRemoteDataSource',
+      );
+      throw Exception(message);
     }
   }
 }

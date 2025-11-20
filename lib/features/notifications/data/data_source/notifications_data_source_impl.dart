@@ -14,7 +14,7 @@ class NotificationsDataSourceImpl implements NotificationsDataSource {
   }) async {
     try {
       final response = await _dio.get(
-        '/api/Notification/my',
+        'Notification/my',
         queryParameters: {'Page': page, 'PageSize': pageSize},
         options: Options(headers: {'accept': 'text/plain'}),
       );

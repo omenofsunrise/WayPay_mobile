@@ -20,7 +20,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
   }) async {
     try {
       final response = await dio.get(
-        '/api/Blog',
+        'Blog',
         queryParameters: {
           if (filter != null) 'Filter': filter,
           if (sortBy != null) 'SortBy': sortBy,
@@ -69,7 +69,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
       }
 
       await dio.post(
-        '/api/Blog',
+        'Blog',
         data: formData,
         options: Options(contentType: 'multipart/form-data'),
       );
@@ -81,7 +81,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
   @override
   Future<void> publishPost(int id) async {
     try {
-      await dio.put('/api/Blog/$id/publish');
+      await dio.put('Blog/$id/publish');
     } on DioException catch (e) {
       throw Exception('Ошибка публикации поста: ${e.message}');
     }
@@ -90,7 +90,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
   @override
   Future<void> deleteAttachment(int postId, int attachmentId) async {
     try {
-      await dio.delete('/api/Blog/$postId/attachments/$attachmentId');
+      await dio.delete('Blog/$postId/attachments/$attachmentId');
     } on DioException catch (e) {
       throw Exception(
         'Ошибка при удалении вложения (postId=$postId, attachmentId=$attachmentId): ${e.message}',
@@ -101,7 +101,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
   @override
   Future<void> deletePost(int postId) async {
     try {
-      await dio.delete('/api/Blog/$postId');
+      await dio.delete('Blog/$postId');
     } on DioException catch (e) {
       throw Exception(
         'Ошибка при удалении поста (postId=$postId): ${e.message}',
@@ -112,7 +112,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
   @override
   Future<void> likePost(int postId) async {
     try {
-      await dio.post('/api/Blog/$postId/like');
+      await dio.post('Blog/$postId/like');
     } on DioException catch (e) {
       throw Exception(
         'Ошибка при добавлении лайка (postId=$postId): ${e.message}',
@@ -124,7 +124,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
   Future<Response<dynamic>> downloadAttachment(int attachmentId) async {
     try {
       final response = await dio.get(
-        '/api/Blog/attachments/$attachmentId/download',
+        'Blog/attachments/$attachmentId/download',
         options: Options(responseType: ResponseType.bytes),
       );
 
@@ -158,7 +158,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
         }
       }
 
-      final response = await dio.post('/api/BlogComment', data: formData);
+      final response = await dio.post('BlogComment', data: formData);
 
       final data = response.data;
       if (data is Map<String, dynamic>) {
@@ -174,7 +174,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
   @override
   Future<List<CommentResponse>> getCommentsByPostId(int postId) async {
     try {
-      final response = await dio.get('/api/BlogComment/post/$postId');
+      final response = await dio.get('BlogComment/post/$postId');
 
       final data = response.data;
       if (data is List) {
@@ -194,7 +194,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
   @override
   Future<void> likeComment(int commentId) async {
     try {
-      await dio.post('/api/BlogComment/$commentId/like');
+      await dio.post('BlogComment/$commentId/like');
     } on DioException catch (e) {
       throw Exception(
         'Ошибка при добавлении лайка комментарию (id=$commentId): ${e.message}',
@@ -209,7 +209,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
   }) async {
     try {
       await dio.put(
-        '/api/BlogComment/$commentId/text',
+        'BlogComment/$commentId/text',
         data: '"$newText"',
         options: Options(contentType: Headers.jsonContentType),
       );
@@ -223,7 +223,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
   @override
   Future<void> deleteComment(int commentId) async {
     try {
-      await dio.delete('/api/BlogComment/$commentId');
+      await dio.delete('BlogComment/$commentId');
     } on DioException catch (e) {
       throw Exception(
         'Ошибка при удалении комментария (id=$commentId): ${e.message}',
@@ -237,7 +237,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
     required int attachmentId,
   }) async {
     try {
-      await dio.delete('/api/BlogComment/$commentId/attachments/$attachmentId');
+      await dio.delete('BlogComment/$commentId/attachments/$attachmentId');
     } on DioException catch (e) {
       throw Exception(
         'Ошибка при удалении вложения (commentId=$commentId, attachmentId=$attachmentId): ${e.message}',
@@ -253,7 +253,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
     final formData = FormData.fromMap({'file': file});
 
     final response = await dio.post(
-      '/api/BlogComment/$commentId/attachments',
+      'BlogComment/$commentId/attachments',
       data: formData,
     );
 
@@ -268,7 +268,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
   @override
   Future<BlogPostResponse> getBlogPostById(int id) async {
     try {
-      final response = await dio.get('/api/Blog/$id');
+      final response = await dio.get('Blog/$id');
 
       final data = response.data;
       if (data is Map<String, dynamic>) {

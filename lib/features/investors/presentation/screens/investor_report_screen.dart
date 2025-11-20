@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/header.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/investors/presentation/widgets/investor_credit_table.dart';
@@ -70,10 +70,16 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
   }
 
   String formatNumber(dynamic value) {
-    if (value == null) return '-';
+    if (value == null) return '—';
     final num? number = num.tryParse(value.toString());
     if (number == null) return value.toString();
     return NumberFormat('#,##0', 'ru_RU').format(number);
+  }
+
+  double _asDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0;
+    return 0;
   }
 
   Widget _buildCard(String title, String value, String icon) {
@@ -82,7 +88,7 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+        boxShadow: const [BoxShadow(color: Color(0x14000809), blurRadius: 4)],
       ),
       child: Center(
         child: Column(
@@ -110,155 +116,288 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(AppColors.primary),
-      appBar: AppBar(
-        surfaceTintColor: Colors.transparent,
-        backgroundColor: const Color(AppColors.primary),
-        elevation: 0,
-        title: Text(
-          'Отчёт: ${selectedInvestor.nickname}',
-          style: AppStyle.medium20.copyWith(color: Colors.white),
-        ),
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(Icons.arrow_back),
+      backgroundColor: const Color(AppColors.background),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Header(
+                title: 'Детали инвестора',
+                showBackButton: true,
+                showNotifications: true,
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : reportData == null
+                        ? Center(
+                            child: Text(
+                              error ?? 'Нет данных',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Color(AppColors.darkGrey),
+                              ),
+                            ),
+                          )
+                        : RefreshIndicator(
+                            onRefresh: () =>
+                                _loadInvestorAndReport(selectedInvestor.id),
+                            child: SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _NicknameCard(name: selectedInvestor.fullName),
+                                  const SizedBox(height: 16),
+                                  _AnalyticsGrid(metrics: _buildMetrics()),
+                                ],
+                              ),
+                            ),
+                          ),
+              ),
+            ],
+          ),
         ),
       ),
-      body: Column(
+    );
+  }
+
+  List<_MetricData> _buildMetrics() {
+    final isCompany = reportData?['isCompany'] == true;
+    final metrics = <_MetricData>[
+      _MetricData(
+        title: 'Касса',
+        value: '${formatNumber(reportData?['balance'] ?? selectedInvestor.balance)} ₽',
+        icon: SvgIcons.cash,
+      ),
+      _MetricData(
+        title: 'Активные договоры',
+        value: formatNumber(reportData?['activeCreditsAmount']),
+        icon: SvgIcons.credits,
+      ),
+      _MetricData(
+        title: 'Инвестиции',
+        value: '${formatNumber(reportData?['investment'] ?? selectedInvestor.investmentAmount)} ₽',
+        icon: SvgIcons.investition,
+      ),
+      _MetricData(
+        title: 'Общий доход',
+        value:
+            '${formatNumber(_asDouble(reportData?['allSelfIncome']) + _asDouble(reportData?['investorIncome']))} ₽',
+        icon: SvgIcons.companyAmount,
+      ),
+      _MetricData(
+        title: 'Просрочка',
+        value: '${formatNumber(reportData?['delinquencyAmount'])} ₽',
+        icon: SvgIcons.delay,
+        valueColor: const Color(AppColors.red),
+      ),
+    ];
+
+    if (!isCompany) {
+      metrics.insert(
+        4,
+        _MetricData(
+          title: 'Доход инвестора',
+          value: '${formatNumber(reportData?['investorIncome'])} ₽',
+          icon: SvgIcons.investorCahs,
+        ),
+      );
+      metrics.insert(
+        5,
+        _MetricData(
+          title: 'Доход компании',
+          value: '${formatNumber(reportData?['allSelfIncome'])} ₽',
+          icon: SvgIcons.companyAmount,
+        ),
+      );
+    } else {
+      metrics.insert(
+        4,
+        _MetricData(
+          title: 'Доход компании',
+          value: '${formatNumber(reportData?['investorIncome'])} ₽',
+          icon: SvgIcons.companyAmount,
+        ),
+      );
+      metrics.insert(
+        5,
+        _MetricData(
+          title: 'Доход от инвестора',
+          value: '${formatNumber(reportData?['allSelfIncome'])} ₽',
+          icon: SvgIcons.investorAmount,
+        ),
+      );
+    }
+
+    return metrics;
+  }
+}
+
+class _NicknameCard extends StatelessWidget {
+  const _NicknameCard({required this.name});
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x14000809),
+            offset: Offset(2, 2),
+            blurRadius: 4,
+          ),
+          BoxShadow(
+            color: Color(0x05000809),
+            offset: Offset(0, 0),
+            blurRadius: 6,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFF5F5F5),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
+          const Text(
+            'Никнейм',
+            style: TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w400,
+              fontSize: 14,
+              height: 24 / 14,
+              color: Color(AppColors.darkGrey),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            name,
+            style: const TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+              height: 24 / 16,
+              color: Color(AppColors.black),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnalyticsGrid extends StatelessWidget {
+  const _AnalyticsGrid({required this.metrics});
+
+  final List<_MetricData> metrics;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final itemWidth = (constraints.maxWidth - 16) / 2;
+        return Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: metrics
+              .map(
+                (metric) => SizedBox(
+                  width: itemWidth,
+                  child: _MetricCard(metric: metric),
+                ),
+              )
+              .toList(),
+        );
+      },
+    );
+  }
+}
+
+class _MetricData {
+  const _MetricData({
+    required this.title,
+    required this.value,
+    required this.icon,
+    this.valueColor = const Color(AppColors.black),
+  });
+
+  final String title;
+  final String value;
+  final String icon;
+  final Color valueColor;
+}
+
+class _MetricCard extends StatelessWidget {
+  const _MetricCard({required this.metric});
+
+  final _MetricData metric;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x14000809),
+            offset: Offset(2, 2),
+            blurRadius: 4,
+          ),
+          BoxShadow(
+            color: Color(0x05000809),
+            offset: Offset(0, 0),
+            blurRadius: 6,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE4F4F1),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Center(
+                  child: SvgPicture.asset(metric.icon, width: 28, height: 28),
                 ),
               ),
-              child: isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : reportData == null
-                  ? Center(
-                      child: Text(
-                        error ?? 'Нет данных',
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 16),
-                          GridView.count(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                            childAspectRatio: 0.8,
-                            children: [
-                              if (reportData?['isCompany'] == false) ...[
-                                _buildCard(
-                                  'Инвестиция',
-                                  '${formatNumber(reportData?['investment'])} ₽',
-                                  SvgIcons.investition,
-                                ),
-                                _buildCard(
-                                  'Незакрытые договоры',
-                                  formatNumber(
-                                    reportData?['activeCreditsAmount'],
-                                  ),
-                                  SvgIcons.credits,
-                                ),
-                                _buildCard(
-                                  'Доля инвестора',
-                                  '${selectedInvestor.investorPie} %',
-                                  SvgIcons.investorPercent,
-                                ),
-                                _buildCard(
-                                  'Доход инвестора',
-                                  '${formatNumber(reportData?['investorIncome'])} ₽',
-                                  SvgIcons.investorCahs,
-                                ),
-                                _buildCard(
-                                  'Собственный доход',
-                                  '${formatNumber(reportData?['allSelfIncome'])} ₽',
-                                  SvgIcons.debtSelf,
-                                ),
-                                _buildCard(
-                                  'Общий доход',
-                                  '${formatNumber(reportData?['allSelfIncome'] + reportData?['investorIncome'])} ₽',
-                                  SvgIcons.companyAmount,
-                                ),
-                                _buildCard(
-                                  'Касса',
-                                  '${formatNumber(reportData?['balance'])} ₽',
-                                  SvgIcons.cash,
-                                ),
-                                _buildCard(
-                                  'Просрочка',
-                                  '${formatNumber(reportData?['delinquencyAmount'])} ₽',
-                                  SvgIcons.delay,
-                                ),
-                                _buildCard(
-                                  'Доходы по платежам в текущем месяце',
-                                  '${formatNumber(reportData?['paymentIncome'])} ₽',
-                                  SvgIcons.debt,
-                                ),
-                              ],
-                              if (reportData?['isCompany'] == true) ...[
-                                _buildCard(
-                                  'Инвестиция',
-                                  '${formatNumber(reportData?['investment'])} ₽',
-                                  SvgIcons.investition,
-                                ),
-                                _buildCard(
-                                  'Незакрытые договоры',
-                                  formatNumber(
-                                    reportData?['activeCreditsAmount'],
-                                  ),
-                                  SvgIcons.credits,
-                                ),
-                                _buildCard(
-                                  'Доход компании',
-                                  '${formatNumber(reportData?['investorIncome'])} ₽',
-                                  SvgIcons.companyAmount,
-                                ),
-                                _buildCard(
-                                  'Доход от инвестора',
-                                  '${formatNumber(reportData?['allSelfIncome'])} ₽',
-                                  SvgIcons.investorAmount,
-                                ),
-                                _buildCard(
-                                  'Касса',
-                                  '${formatNumber(reportData?['balance'])} ₽',
-                                  SvgIcons.cash,
-                                ),
-                                _buildCard(
-                                  'Просрочка',
-                                  '${formatNumber(reportData?['delinquencyAmount'])} ₽',
-                                  SvgIcons.delay,
-                                ),
-                                _buildCard(
-                                  'Доходы по платежам в текущем месяце',
-                                  '${formatNumber(reportData?['paymentIncome'])} ₽',
-                                  SvgIcons.debt,
-                                ),
-                              ],
-                            ],
-                          ),
-                          InvestorPayoutTable(
-                            investorId: widget.initialInvestor.id,
-                          ),
-                          const SizedBox(height: 16),
-                          InvestorCreditsWidget(
-                            investorId: widget.initialInvestor.id,
-                          ),
-                        ],
-                      ),
-                    ),
+              const Spacer(),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            metric.title,
+            style: const TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+              height: 20 / 14,
+              color: Color(AppColors.darkGrey),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            metric.value,
+            style: TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w600,
+              fontSize: 22,
+              height: 1.1,
+              color: metric.valueColor,
             ),
           ),
         ],

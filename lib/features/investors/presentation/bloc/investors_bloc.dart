@@ -12,6 +12,9 @@ class InvestorsBloc extends Bloc<InvestorsEvent, InvestorsState> {
   final _tokenStorage = getIt<TokenStorage>();
 
   String? _searchQuery;
+  List<InvestorsModel> _investors = [];
+  int _currentPage = 1;
+  bool _hasMore = true;
 
   InvestorsBloc() : super(InvestorsInitial()) {
     on<LoadInvestorsEvent>(_onLoadInvestors);
@@ -24,7 +27,16 @@ class InvestorsBloc extends Bloc<InvestorsEvent, InvestorsState> {
     LoadInvestorsEvent event,
     Emitter<InvestorsState> emit,
   ) async {
-    emit(InvestorsLoading());
+    if (event.refresh) {
+      _currentPage = event.page ?? 1;
+      _hasMore = true;
+      _investors.clear();
+      emit(InvestorsLoading());
+    } else if (!_hasMore) {
+      return;
+    } else {
+      _currentPage = event.page ?? _currentPage;
+    }
 
     try {
       final accessToken = await _tokenStorage.getAccessToken();
@@ -34,18 +46,27 @@ class InvestorsBloc extends Bloc<InvestorsEvent, InvestorsState> {
       }
 
       final response = await _investorDataSource.getInvestors(
-        page: event.page ?? 1,
-        pageSize: 10,
+        page: _currentPage,
+        pageSize: event.pageSize ?? 10,
         search: _searchQuery,
       );
 
+      if (event.refresh) {
+        _investors = response.investors;
+      } else {
+        _investors.addAll(response.investors);
+      }
+
+      final totalPages = (response.totalCount / response.pageSize).ceil();
+      _hasMore = _currentPage < totalPages;
+
       emit(
         InvestorsLoaded(
-          investors: response.investors,
-          hasMoreData: response.investors.isNotEmpty,
+          investors: List.from(_investors),
+          hasMoreData: _hasMore,
           totalCount: response.totalCount,
           perPage: response.pageSize,
-          currentPage: response.page,
+          currentPage: _currentPage,
         ),
       );
     } catch (e) {

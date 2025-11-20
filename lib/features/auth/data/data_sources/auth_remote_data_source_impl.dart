@@ -20,7 +20,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       print('➡️ Старт авторизации: ${request.toJson()}');
       final response = await dio.post(
-        '/api/Auth/start',
+        'Auth/start',
         data: request.toJson(),
       );
       print('✅ Успешный ответ startAuth: ${response.data}');
@@ -36,7 +36,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       print('➡️ Подтверждение звонка: ${request.toJson()}');
       final response = await dio.post(
-        '/api/Auth/confirm',
+        'Auth/confirm',
         data: request.toJson(),
       );
 
@@ -85,7 +85,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       print('🔄 Запрос на обновление токена: $body');
 
       final response = await dio.post(
-        '/api/Auth/refresh',
+        'Auth/refresh',
         data: body,
         options: Options(
           headers: {'Authorization': 'Bearer ${request.accessToken}'},
@@ -117,7 +117,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<Map<String, dynamic>> getAuthInfo() async {
     try {
       print('📥 Получение информации о пользователе...');
-      final response = await dio.get('/api/Auth/info');
+      final response = await dio.get('Auth/info');
       print('✅ Информация получена: ${response.data}');
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
@@ -138,7 +138,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       print('🛡️ AccessToken: ${accessToken?.substring(0, 10)}...');
 
       final response = await dio.post(
-        '/api/Auth/setup-pin',
+        'Auth/setup-pin',
         data: {'pinCode': pinCode},
         options: Options(
           headers: {
@@ -228,7 +228,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final access = await tokenStorage.getAccessToken();
 
       final response = await dio.get(
-        '/api/Auth/sessions',
+        'Auth/sessions',
         options: access != null
             ? Options(headers: {'Authorization': 'Bearer $access'})
             : null,
@@ -264,7 +264,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     Future<Response<dynamic>> post(dynamic body) {
       return dio.post(
-        '/api/Auth/revoke-session',
+        'Auth/revoke-session',
         data: body,
         options: Options(headers: headers),
       );

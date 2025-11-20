@@ -4,7 +4,9 @@ import 'package:waypay_mobile/features/investors/data/models/investor_payout_mod
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_request.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_response.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
 import '../models/investors_response_model.dart';
+import '../models/investor_pool_response_model.dart';
 
 class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   final Dio dio;
@@ -33,7 +35,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       }
 
       final response = await dio.get(
-        '/api/Investor',
+        'Investor',
         queryParameters: queryParams,
       );
 
@@ -54,9 +56,50 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   }
 
   @override
+  Future<InvestorPoolResponseModel> getInvestorPools({
+    int? page,
+    int? pageSize,
+    String? sortBy,
+    String? sortDirection,
+    String? search,
+  }) async {
+    try {
+      // ignore: avoid_print
+      print(
+        '🔍 Запрос списка пулов: page=${page ?? 1}, pageSize=${pageSize ?? 20}, '
+        'sortBy=${sortBy ?? 'name'}, sortDirection=${sortDirection ?? 'asc'}, search=$search',
+      );
+      final queryParams = <String, dynamic>{
+        'page': page ?? 1,
+        'pageSize': pageSize ?? 20,
+        'sortBy': sortBy ?? 'name',
+        'sortDirection': sortDirection ?? 'asc',
+      };
+      if (search != null && search.isNotEmpty) {
+        queryParams['name'] = search;
+      }
+      final response = await dio.get(
+        'InvestorPool',
+        queryParameters: queryParams,
+      );
+      // ignore: avoid_print
+      print(
+        '✅ Ответ списка пулов: status=${response.statusCode}, items=${(response.data['items'] as List?)?.length ?? 0}',
+      );
+      // ignore: avoid_print
+      print('📦 Данные списка пулов: ${response.data}');
+      return InvestorPoolResponseModel.fromJson(response.data);
+    } on DioException catch (e) {
+      // ignore: avoid_print
+      print('❌ Ошибка списка пулов: ${e.response?.data ?? e.message}');
+      throw Exception('Ошибка загрузки пула инвесторов: ${e.response?.data ?? e.message}');
+    }
+  }
+
+  @override
   Future<InvestorsModel> getInvestorById(int id) async {
     try {
-      final response = await dio.get('/api/Investor/$id');
+      final response = await dio.get('Investor/$id');
 
       print('✅ Загружен инвестор по ID: ${response.data}');
 
@@ -84,7 +127,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
         'investmentAmount': investmentAmount,
       };
 
-      final response = await dio.post('/api/Investor', data: payload);
+      final response = await dio.post('Investor', data: payload);
 
       print('✅ Инвестор создан: ${response.statusCode}');
     } on DioException catch (e) {
@@ -96,7 +139,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   @override
   Future<void> deleteInvestor(int id) async {
     try {
-      final response = await dio.delete('/api/Investor/$id');
+      final response = await dio.delete('Investor/$id');
       print('✅ Инвестор удалён: ${response.statusCode}');
     } on DioException catch (e) {
       print('❌ Ошибка удаления инвестора: ${e.response?.data}');
@@ -120,7 +163,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
         'investorPie': investorPie,
       };
 
-      final response = await dio.put('/api/Investor/$id', data: payload);
+      final response = await dio.put('Investor/$id', data: payload);
 
       print('✅ Инвестор обновлён: ${response.statusCode}');
     } on DioException catch (e) {
@@ -135,7 +178,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       final payload = {'amount': amount};
 
       final response = await dio.put(
-        '/api/Investor/$id/add-investment',
+        'Investor/$id/add-investment',
         data: payload,
       );
 
@@ -149,7 +192,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   @override
   Future<void> toggleBlockInvestor(int id) async {
     try {
-      final response = await dio.patch('/api/Investor/toggle-block/$id');
+      final response = await dio.patch('Investor/toggle-block/$id');
       print('✅ Статус блокировки изменён: ${response.statusCode}');
     } on DioException catch (e) {
       print('❌ Ошибка смены блокировки: ${e.response?.data}');
@@ -160,7 +203,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   @override
   Future<void> clearInvestor(int id) async {
     try {
-      await dio.patch('/api/Investor/clear/$id');
+      await dio.patch('Investor/clear/$id');
     } on DioException catch (e) {
       throw Exception(
         'Не удалось аннулировать инвестора.\n${e.response?.data}',
@@ -171,11 +214,30 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   @override
   Future<Map<String, dynamic>> getInvestorReport(int id) async {
     try {
-      final response = await dio.get('/api/Investor/report/$id');
+      final response = await dio.get('Investor/report/$id');
 
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
       throw Exception('Ошибка получения отчета инвестора: ${e.message}');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getInvestorPoolReport(int id) async {
+    try {
+      // Log id to help diagnose server-side errors
+      // ignore: avoid_print
+      print('🔍 Запрос отчета пула для ID: $id');
+      final response = await dio.get('InvestorPool/report/$id');
+      // ignore: avoid_print
+      print('✅ Ответ отчета пула $id: ${response.statusCode}');
+      // ignore: avoid_print
+      print('📦 Данные отчета пула $id: ${response.data}');
+      return response.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      // ignore: avoid_print
+      print('❌ Ошибка отчета пула $id: ${e.response?.data ?? e.message}');
+      throw Exception('Ошибка получения отчета пула инвесторов: ${e.message}');
     }
   }
 
@@ -186,7 +248,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   }) async {
     try {
       final response = await dio.post(
-        '/api/InvestorPayouts',
+        'InvestorPayouts',
         data: InvestorPayoutRequest(
           investorId: investorId,
           amount: amount,
@@ -205,7 +267,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   ) async {
     try {
       final response = await dio.get(
-        '/api/InvestorPayouts/investor/$investorId',
+        'InvestorPayouts/investor/$investorId',
       );
 
       if (response.data is List) {

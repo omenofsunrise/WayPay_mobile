@@ -31,7 +31,7 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
       }
 
       final response = await dio.get(
-        '/api/BudgetIncome',
+        'BudgetIncome',
         queryParameters: queryParams,
       );
 
@@ -64,7 +64,7 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
       }
 
       final response = await dio.get(
-        '/api/BudgetOutcome',
+        'BudgetOutcome',
         queryParameters: queryParams,
       );
 
@@ -79,7 +79,7 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
   @override
   Future<void> createBudgetIncome(CreateBudgetIncomeDto dto) async {
     try {
-      final response = await dio.post('/api/BudgetIncome', data: dto.toJson());
+      final response = await dio.post('BudgetIncome', data: dto.toJson());
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception('Ошибка создания прихода: ${response.statusCode}');
@@ -93,7 +93,7 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
 
   @override
   Future<void> deleteBudgetIncome(int id) async {
-    final response = await dio.delete('/api/BudgetIncome/$id');
+    final response = await dio.delete('BudgetIncome/$id');
     if (response.statusCode != 200) {
       throw Exception('Не удалось удалить приход');
     }
@@ -102,7 +102,7 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
   @override
   Future<void> createBudgetOutcome(CreateBudgetOutcomeDto dto) async {
     try {
-      final response = await dio.post('/api/BudgetOutcome', data: dto.toJson());
+      final response = await dio.post('BudgetOutcome', data: dto.toJson());
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception('Ошибка создания прихода: ${response.statusCode}');
@@ -117,7 +117,7 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
   @override
   Future<void> deleteBudgetOutcome(int id) async {
     try {
-      final response = await dio.delete('/api/BudgetOutcome/$id');
+      final response = await dio.delete('BudgetOutcome/$id');
 
       if (response.statusCode != 200) {
         throw Exception('Не удалось удалить расход');

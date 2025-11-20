@@ -33,7 +33,7 @@ class ProductsRemoteDataSourceImpl implements ProductsRemoteDataSource {
       }
 
       final response = await dio.get(
-        '/api/Product',
+        'Product',
         queryParameters: queryParams,
       );
 
@@ -48,7 +48,7 @@ class ProductsRemoteDataSourceImpl implements ProductsRemoteDataSource {
     try {
       final payload = {"name": name};
 
-      final response = await dio.post('/api/Product', data: payload);
+      final response = await dio.post('Product', data: payload);
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception('Ошибка создания продукта: ${response.statusCode}');
@@ -63,7 +63,7 @@ class ProductsRemoteDataSourceImpl implements ProductsRemoteDataSource {
   @override
   Future<ProductModel> getProductById(int id) async {
     try {
-      final response = await dio.get('/api/Product/$id');
+      final response = await dio.get('Product/$id');
 
       return ProductModel.fromJson(response.data);
     } on DioException catch (e) {
@@ -78,7 +78,7 @@ class ProductsRemoteDataSourceImpl implements ProductsRemoteDataSource {
     try {
       final payload = {"name": name};
 
-      final response = await dio.put('/api/Product/$id', data: payload);
+      final response = await dio.put('Product/$id', data: payload);
 
       if (response.statusCode != 200) {
         throw Exception('Ошибка обновления продукта: ${response.statusCode}');
@@ -93,7 +93,7 @@ class ProductsRemoteDataSourceImpl implements ProductsRemoteDataSource {
   @override
   Future<void> deleteProduct(int id) async {
     try {
-      final response = await dio.delete('/api/Product/$id');
+      final response = await dio.delete('Product/$id');
 
       if (response.statusCode != 200) {
         throw Exception('Ошибка удаления продукта: ${response.statusCode}');

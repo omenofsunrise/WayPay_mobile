@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:waypay_mobile/core/config/api_config.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
@@ -75,8 +75,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
     if (url == null || url.isEmpty) return '';
     if (url.startsWith('/')) {
       return isAvatar
-          ? 'https://web.waypay.one:5001$url'
-          : 'https://web.waypay.one:5002$url';
+          ? '${ApiConfig.apiBaseUrl}$url'
+          : '${ApiConfig.filesBaseUrl}$url';
     }
     return url;
   }

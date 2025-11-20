@@ -13,6 +13,7 @@ class SvgIcons {
   static const String book = 'assets/icons/book.svg';
   static const String calcLogo = 'assets/icons/calcLogo.svg';
   static const String calculator = 'assets/icons/calculator.svg';
+  static const String calendar = 'assets/icons/calendar.svg';
   static const String cash = 'assets/icons/cash.svg';
   static const String chartIcon = 'assets/icons/chart_icon.svg';
   static const String chat = 'assets/icons/chat.svg';
@@ -25,7 +26,6 @@ class SvgIcons {
   static const String credits = 'assets/icons/credits.svg';
   static const String currencyDollar = 'assets/icons/currency-dollar.svg';
   static const String debt = 'assets/icons/debt.svg';
-  static const String debtCredits = 'assets/icons/debt_credits.svg';
   static const String debtSelf = 'assets/icons/debt_self.svg';
   static const String delay = 'assets/icons/delay.svg';
   static const String docIcon = 'assets/icons/doc_icon.svg';
@@ -46,6 +46,7 @@ class SvgIcons {
   static const String notebook = 'assets/icons/notebook.svg';
   static const String search = 'assets/icons/search.svg';
   static const String shieldPerson = 'assets/icons/shield_person.svg';
+  static const String sort = 'assets/icons/sort.svg';
   static const String todoCopy = 'assets/icons/todo copy.svg';
   static const String todo = 'assets/icons/todo.svg';
   static const String users = 'assets/icons/users.svg';
