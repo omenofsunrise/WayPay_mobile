@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
+import 'package:waypay_mobile/core/utils/error_utils.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/header.dart';
 import 'package:waypay_mobile/core/widgets/search_field.dart';
@@ -15,6 +16,7 @@ import 'package:waypay_mobile/features/clients/data/models/queue/queue_model.dar
 import 'package:waypay_mobile/features/clients/presentation/widgets/client_picker_modal.dart';
 import 'package:waypay_mobile/features/home/presentation/widgets/queue_client_card.dart';
 import 'package:waypay_mobile/features/clients/data/models/queue/queue_request_model.dart';
+import 'package:waypay_mobile/features/clients/presentation/widgets/client_selector_modal.dart';
 
 class QueueListScreen extends StatelessWidget {
   const QueueListScreen({super.key});
@@ -104,6 +106,13 @@ class _QueueListViewState extends State<_QueueListView> {
     }
     context.read<QueueBloc>().add(
       SearchQueue(_lastSubmittedQuery, pageSize: 20),
+    );
+  }
+
+  String _friendlyQueueError(String message) {
+    return ErrorUtils.friendlyMessage(
+      message,
+      fallback: 'Не удалось загрузить очередь. Попробуйте ещё раз.',
     );
   }
 
@@ -214,9 +223,12 @@ class _QueueListViewState extends State<_QueueListView> {
           child: Column(
             children: [
               Text(
-                state.message,
+                _friendlyQueueError(state.message),
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.red),
+                style: const TextStyle(
+                  color: Color(AppColors.darkGrey),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               const SizedBox(height: 12),
               ElevatedButton(

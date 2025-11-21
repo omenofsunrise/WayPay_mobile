@@ -50,6 +50,7 @@ import 'package:waypay_mobile/features/payment/presentation/screen/payment_histo
 import 'package:waypay_mobile/features/payment/presentation/screen/payment_screen.dart';
 import 'package:waypay_mobile/features/payment/presentation/screen/schedule_screen.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
+import 'package:waypay_mobile/features/analytics/presentation/screens/analytic_screen.dart';
 
 import 'package:waypay_mobile/routes/routes.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
@@ -348,15 +349,20 @@ class AppRouter {
                       );
                     },
                   ),
-                  GoRoute(
-                    path: Routes.paymentAnalyticsScreen.toPath,
-                    name: Routes.paymentAnalyticsScreen.toName,
-                    builder: (context, state) => BlocProvider(
-                      create: (_) => PaymentScheduleCubit()
-                        ..load(year: DateTime.now().year),
-                      child: const PaymentAnalyticsScreen(),
-                    ),
-                  ),
+      GoRoute(
+        path: Routes.paymentAnalyticsScreen.toPath,
+        name: Routes.paymentAnalyticsScreen.toName,
+        builder: (context, state) => BlocProvider(
+          create: (_) => PaymentScheduleCubit()
+            ..load(year: DateTime.now().year),
+          child: const PaymentAnalyticsScreen(),
+        ),
+      ),
+      GoRoute(
+        path: Routes.analyticsScreen.toPath,
+        name: Routes.analyticsScreen.toName,
+        builder: (context, state) => const AnalyticsScreen(),
+      ),
                   GoRoute(
                     path: Routes.investorsHubScreen.toPath,
                     name: Routes.investorsHubScreen.toName,

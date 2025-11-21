@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/core/widgets/header.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
@@ -145,7 +146,7 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     if (_previousRoute != null) {
       _navigateBack();
     } else {
-      context.go(Routes.creditsScreen.toPath);
+      Navigator.pop(context);
     }
   }
 
@@ -154,12 +155,12 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     context.pushReplacement(_previousRoute!, extra: page);
   }
 
-  void _handleContinue() {
+  Future<void> _handleContinue() async {
     if (_formKey.currentState!.validate()) {
       if (_nextRoute != null) {
         context.go(_nextRoute!);
       } else {
-        _finishCreditCreation();
+        await context.read<CreditCreationCubit>().submitCredit();
       }
     }
   }
@@ -167,19 +168,7 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(AppColors.background),
-        title: const Text(
-          'Новый договор',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-        centerTitle: false,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: Color(AppColors.grey),
-          onPressed: _handleBackButton,
-        ),
-      ),
+      backgroundColor: Color(AppColors.background),
       body: BlocListener<CreditCreationCubit, CreditCreationState>(
         listener: (context, state) {
           final creditRequest = state.creditRequest;
@@ -207,21 +196,41 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
             creditRequest.firstPayment,
             state.totalAmountWithSurcharge,
           );
+
+          if (state.submitError != null) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: Text(state.submitError!),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            context.read<CreditCreationCubit>().resetSubmissionStatus();
+          }
+
+          if (state.creditCreationSuccess) {
+            context.read<CreditCreationCubit>().resetSubmissionStatus();
+            context.go(Routes.creditsScreen.toPath);
+          }
         },
-        child: Container(
-          color: Color(AppColors.background),
-          child: Column(
-            children: [
-              _buildStepperWidget(_currentStep, 3),
-              Expanded(
-                child: Form(
-                  key: _formKey,
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 16.0,
-                      right: 16.0,
-                      bottom: 16.0,
-                    ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Header(
+                  title: 'Новый договор',
+                  showBackButton: true,
+                  showNotifications: false,
+                  onBackPressed: _handleBackButton,
+                ),
+                const SizedBox(height: 12),
+                _buildStepperWidget(_currentStep, 3),
+                Expanded(
+                  child: Form(
+                    key: _formKey,
                     child: Column(
                       children: [
                         Expanded(
@@ -235,8 +244,8 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -309,18 +318,30 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
   }
 
   Widget _buildBottomButtons() {
-    return Container(
-      child: Row(
-        children: [
-          if (_previousRoute != null) ...[
+    return BlocBuilder<CreditCreationCubit, CreditCreationState>(
+      builder: (context, state) {
+        final isSubmitting = state.isSubmitting;
+        return Row(
+          children: [
+            if (_previousRoute != null) ...[
+              Expanded(
+                child: DefaultButton(
+                  text: 'Назад',
+                  onPressed: isSubmitting ? null : _navigateBack,
+                  isGreen: false,
+                ),
+              ),
+              const SizedBox(width: 12),
+            ],
             Expanded(
               child: DefaultButton(
-                text: 'Назад',
-                onPressed: _navigateBack,
-                isGreen: false,
+                text: _currentStep == 3
+                    ? (isSubmitting ? 'Создаем...' : 'Завершить')
+                    : 'Далее',
+                onPressed: isSubmitting ? null : () => _handleContinue(),
+                isGreen: true,
               ),
             ),
-            const SizedBox(width: 12),
           ],
           Expanded(
             child: DefaultButton(

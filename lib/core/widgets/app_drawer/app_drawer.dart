@@ -4,7 +4,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/features/analytics/presentation/screens/analytic_screen.dart';
 import 'package:waypay_mobile/features/blog/presentation/screens/blog_screen.dart';
 import 'package:waypay_mobile/features/calc/calculator_page.dart';
 import 'package:waypay_mobile/features/chat/presentation/screens/all_chat_screen.dart';
@@ -99,12 +98,8 @@ class _AppDrawerState extends State<AppDrawer> {
                           width: 24,
                         ),
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const AnalyticsScreen(),
-                            ),
-                          );
+                          Navigator.pop(context);
+                          context.pushNamed(Routes.analyticsScreen.toName);
                         },
                         title: Text(
                           'Аналитика',

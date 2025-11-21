@@ -12,6 +12,12 @@ class ModalTextField extends StatefulWidget {
     this.onTap,
     this.suffixIcon,
     this.suffixIconConstraints,
+    this.onChanged,
+    this.maxLines = 1,
+    this.minLines,
+    this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
+    this.contentPadding,
   });
 
   final TextEditingController controller;
@@ -22,6 +28,12 @@ class ModalTextField extends StatefulWidget {
   final VoidCallback? onTap;
   final Widget? suffixIcon;
   final BoxConstraints? suffixIconConstraints;
+  final ValueChanged<String>? onChanged;
+  final int maxLines;
+  final int? minLines;
+  final TextInputAction? textInputAction;
+  final TextCapitalization textCapitalization;
+  final EdgeInsetsGeometry? contentPadding;
 
   @override
   State<ModalTextField> createState() => _ModalTextFieldState();
@@ -76,6 +88,11 @@ class _ModalTextFieldState extends State<ModalTextField> {
       keyboardType: widget.keyboardType,
       readOnly: widget.readOnly,
       onTap: widget.onTap,
+      onChanged: widget.onChanged,
+      maxLines: widget.maxLines,
+      minLines: widget.minLines,
+      textInputAction: widget.textInputAction,
+      textCapitalization: widget.textCapitalization,
       decoration: InputDecoration(
         labelText: widget.label,
         hintText: widget.hintText,
@@ -89,10 +106,11 @@ class _ModalTextFieldState extends State<ModalTextField> {
             ),
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 14,
-        ),
+        contentPadding: widget.contentPadding ??
+            const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 14,
+            ),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
         labelStyle: TextStyle(
           fontSize: 13,

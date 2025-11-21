@@ -60,7 +60,7 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateControllers();
-      _loadSchedulePreview();
+      _requestSchedulePreview();
     });
   }
 
@@ -189,15 +189,8 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     widget.onCurrentMonthStartChanged(false);
   }
 
-  void _loadSchedulePreviewDebounced() {
-    _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-      _loadSchedulePreview();
-    });
-  }
-
-  void _loadSchedulePreview() {
-    context.read<CreditCreationCubit>().loadSchedulePreview();
+  void _requestSchedulePreview() {
+    context.read<CreditCreationCubit>().refreshSchedulePreview();
   }
 
   @override
