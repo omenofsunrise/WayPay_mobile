@@ -10,11 +10,10 @@ import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/pagination_widget.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
 import 'package:waypay_mobile/core/widgets/app_modal.dart';
-import 'package:waypay_mobile/core/utils/error_utils.dart';
-import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
 import 'package:waypay_mobile/features/clients/presentation/widgets/blacklist_client_card.dart';
 import 'package:waypay_mobile/features/clients/presentation/widgets/client_selector_modal.dart';
+import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
 class BlacklistScreen extends StatefulWidget {
@@ -28,13 +27,6 @@ class _BlacklistScreenState extends State<BlacklistScreen> {
   final _searchController = TextEditingController();
   final _tokenStorage = TokenStorage();
   Timer? _debounce;
-
-  String _friendlyError(String message) {
-    return ErrorUtils.friendlyMessage(
-      message,
-      fallback: 'Не удалось загрузить чёрный список. Попробуйте позже.',
-    );
-  }
 
   @override
   void initState() {
@@ -144,18 +136,22 @@ class _BlacklistScreenState extends State<BlacklistScreen> {
   }
 
   void _openAddToBlacklistModal() {
-    showModalBottomSheet<ClientModel>(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => ClientSelectorModal(
-        onSave: (selectedClient) {
-          Navigator.of(context).pop();
-          context.read<BlacklistBloc>().add(
+      builder: (dialogContext) {
+        return BlocProvider(
+          create: (_) =>
+              ClientsBloc()
+                ..add(LoadClients(refresh: true, page: 1, pageSize: 10)),
+          child: ClientSelectorModalContent(
+            onSave: (selectedClient) {
+              context.read<BlacklistBloc>().add(
                 AddClientToBlacklist(selectedClient),
               );
-        },
-      ),
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -215,12 +211,9 @@ class _BlacklistScreenState extends State<BlacklistScreen> {
                               color: Colors.red,
                             ),
                             Text(
-                              _friendlyError(state.message),
+                              state.message,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Color(AppColors.darkGrey),
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: const TextStyle(color: Colors.red),
                             ),
                             ElevatedButton(
                               onPressed: () {

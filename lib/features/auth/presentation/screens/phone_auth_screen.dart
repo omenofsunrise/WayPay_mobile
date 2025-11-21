@@ -142,18 +142,6 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                             return null;
                           },
                         ),
-                        if (state is AuthError)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              state.message,
-                              style: AppStyle.manrope(
-                                size: 13,
-                                weight: FontWeight.w400,
-                                color: Colors.red,
-                              ),
-                            ),
-                          ),
 
                         const SizedBox(height: 18),
                         isLoading

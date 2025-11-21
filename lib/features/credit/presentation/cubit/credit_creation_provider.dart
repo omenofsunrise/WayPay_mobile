@@ -44,9 +44,6 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
           schedulePreview: [],
           schedulePreviewLoading: false,
           schedulePreviewError: null,
-          isSubmitting: false,
-          creditCreationSuccess: false,
-          submitError: null,
         ),
       );
 
@@ -66,8 +63,6 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     InvestorsModel? selectedInvestor,
     ObjectTypeModel? selectedCatalog,
     ObjectTypeModel? selectedCategory,
-    bool clearSelectedClient = false,
-    bool clearSelectedInvestor = false,
   }) {
     final updatedRequest = state.creditRequest.copyWith(
       clientId: clientId,
@@ -83,18 +78,11 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
       debtComment: debtComment,
     );
 
-    final client = clearSelectedClient
-        ? null
-        : (selectedClient ?? state.selectedClient);
-    final investor = clearSelectedInvestor
-        ? null
-        : (selectedInvestor ?? state.selectedInvestor);
-
     emit(
       state.copyWith(
         creditRequest: updatedRequest,
-        selectedClient: client,
-        selectedInvestor: investor,
+        selectedClient: selectedClient ?? state.selectedClient,
+        selectedInvestor: selectedInvestor ?? state.selectedInvestor,
         selectedCatalog: selectedCatalog ?? state.selectedCatalog,
         selectedCategory: selectedCategory ?? state.selectedCategory,
       ),
@@ -102,21 +90,11 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
   }
 
   void updateCatalog(ObjectTypeModel? catalog) {
-    emit(
-      state.copyWith(
-        selectedCatalog: catalog,
-        clearSelectedCatalog: catalog == null,
-      ),
-    );
+    emit(state.copyWith(selectedCatalog: catalog, keepCategory: true));
   }
 
   void updateCategory(ObjectTypeModel? category) {
-    emit(
-      state.copyWith(
-        selectedCategory: category,
-        clearSelectedCategory: category == null,
-      ),
-    );
+    emit(state.copyWith(selectedCategory: category, keepCatalog: true));
   }
 
   void updatePaymentInfo({
@@ -334,7 +312,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     emit(
       currentState.copyWith(
         schedulePreviewLoading: true,
-        clearSchedulePreviewError: true,
+        schedulePreviewError: null,
       ),
     );
 
@@ -352,7 +330,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
         state.copyWith(
           schedulePreview: preview,
           schedulePreviewLoading: false,
-          clearSchedulePreviewError: true,
+          schedulePreviewError: null,
         ),
       );
     } catch (e) {
@@ -499,14 +477,6 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
         schedulePreviewError: null,
       ),
     );
-  }
-
-  String _mapError(Object error) {
-    final text = error.toString();
-    if (text.startsWith('Exception: ')) {
-      return text.substring('Exception: '.length);
-    }
-    return text;
   }
 
   double _calculateTotalAmountWithSurcharge(List<CreditProduct> products) {

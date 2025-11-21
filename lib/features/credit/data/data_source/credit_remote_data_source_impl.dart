@@ -104,7 +104,6 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
   }
 
   @override
-<<<<<<< Updated upstream
   Future createCredit(CreateCreditRequest request) async {
     try {
       await dio.post('Credit', data: request.toJson());
@@ -116,21 +115,6 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
               errorData['title'] ?? errorData['message'] ?? 'Ошибка валидации';
           throw Exception(errorMessage);
         }
-=======
-  Future<void> createCredit(CreateCreditRequest request) async {
-    try {
-      final response = await dio.post(
-        'Credit',
-        data: request.toJson(),
-      );
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception('Не удалось создать договор');
-      }
-    } on DioException catch (e) {
-      final details = e.response?.data;
-      if (details is String && details.isNotEmpty) {
-        throw Exception(details);
->>>>>>> Stashed changes
       }
       throw Exception('Ошибка создания договора: ${e.message}');
     }

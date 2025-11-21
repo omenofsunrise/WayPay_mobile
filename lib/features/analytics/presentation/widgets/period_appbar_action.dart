@@ -7,13 +7,11 @@ import 'package:waypay_mobile/features/analytics/presentation/widgets/dropdown.d
 class PeriodAppBarAction extends StatelessWidget {
   final PeriodOption selected;
   final void Function(PeriodOption? option, DateTimeRange? range) onChanged;
-  final Color iconColor;
 
   const PeriodAppBarAction({
     super.key,
     required this.selected,
     required this.onChanged,
-    this.iconColor = Colors.white,
   });
 
   @override
@@ -25,7 +23,7 @@ class PeriodAppBarAction extends StatelessWidget {
 
     return PopupMenuButton<String>(
       tooltip: 'Выбрать период',
-      icon: Icon(Icons.date_range, color: iconColor),
+      icon: const Icon(Icons.date_range, color: Colors.white),
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (value) async {

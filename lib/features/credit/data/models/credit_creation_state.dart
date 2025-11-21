@@ -15,9 +15,6 @@ class CreditCreationState {
   final List<SchedulePreviewModel> schedulePreview;
   final bool schedulePreviewLoading;
   final String? schedulePreviewError;
-  final bool isSubmitting;
-  final bool creditCreationSuccess;
-  final String? submitError;
 
   CreditCreationState({
     required this.creditRequest,
@@ -30,9 +27,6 @@ class CreditCreationState {
     this.schedulePreview = const [],
     this.schedulePreviewLoading = false,
     this.schedulePreviewError,
-    this.isSubmitting = false,
-    this.creditCreationSuccess = false,
-    this.submitError,
   });
 
   CreditCreationState copyWith({
@@ -46,44 +40,24 @@ class CreditCreationState {
     List<SchedulePreviewModel>? schedulePreview,
     bool? schedulePreviewLoading,
     String? schedulePreviewError,
-    bool clearSelectedClient = false,
-    bool clearSelectedInvestor = false,
-    bool clearSelectedCatalog = false,
-    bool clearSelectedCategory = false,
-    bool clearSchedulePreviewError = false,
-    bool? isSubmitting,
-    bool? creditCreationSuccess,
-    String? submitError,
-    bool clearSubmitError = false,
+    bool keepCatalog = false,
+    bool keepCategory = false,
   }) {
     return CreditCreationState(
       creditRequest: creditRequest ?? this.creditRequest,
       markupType: markupType ?? this.markupType,
       totalAmountWithSurcharge:
           totalAmountWithSurcharge ?? this.totalAmountWithSurcharge,
-      selectedClient: clearSelectedClient
-          ? null
-          : (selectedClient ?? this.selectedClient),
-      selectedInvestor: clearSelectedInvestor
-          ? null
-          : (selectedInvestor ?? this.selectedInvestor),
-      selectedCatalog: clearSelectedCatalog
-          ? null
-          : (selectedCatalog ?? this.selectedCatalog),
-      selectedCategory: clearSelectedCategory
-          ? null
-          : (selectedCategory ?? this.selectedCategory),
+      selectedClient: selectedClient ?? this.selectedClient,
+      selectedInvestor: selectedInvestor ?? this.selectedInvestor,
+      selectedCatalog: keepCatalog ? this.selectedCatalog : (selectedCatalog),
+      selectedCategory: keepCategory
+          ? this.selectedCategory
+          : (selectedCategory),
       schedulePreview: schedulePreview ?? this.schedulePreview,
       schedulePreviewLoading:
           schedulePreviewLoading ?? this.schedulePreviewLoading,
-      schedulePreviewError: clearSchedulePreviewError
-          ? null
-          : (schedulePreviewError ?? this.schedulePreviewError),
-      isSubmitting: isSubmitting ?? this.isSubmitting,
-      creditCreationSuccess:
-          creditCreationSuccess ?? this.creditCreationSuccess,
-      submitError:
-          clearSubmitError ? null : (submitError ?? this.submitError),
+      schedulePreviewError: schedulePreviewError ?? this.schedulePreviewError,
     );
   }
 }

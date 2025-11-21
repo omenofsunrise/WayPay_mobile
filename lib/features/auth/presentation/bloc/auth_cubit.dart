@@ -27,7 +27,7 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } catch (e) {
-      emit(AuthError(_mapErrorMessage(e)));
+      emit(AuthError('Не удалось начать авторизацию'));
     }
   }
 
@@ -53,18 +53,7 @@ class AuthCubit extends Cubit<AuthState> {
 
       emit(AuthSuccess());
     } catch (e) {
-      emit(AuthError(_mapErrorMessage(e)));
+      emit(AuthError('Ошибка авторизации'));
     }
-  }
-
-  String _mapErrorMessage(dynamic error) {
-    final message = error.toString();
-    if (message.contains('connectTimeout') || message.contains('took longer')) {
-      return 'Сервер не отвечает, попробуйте позже';
-    }
-    if (message.startsWith('Exception: ')) {
-      return message.substring('Exception: '.length);
-    }
-    return message;
   }
 }

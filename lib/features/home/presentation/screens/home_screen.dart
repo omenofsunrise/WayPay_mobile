@@ -15,9 +15,6 @@ import 'package:waypay_mobile/features/home/data/models/employee_model.dart';
 import 'package:waypay_mobile/features/home/domain/usecases/get_employee_data_usecase.dart';
 import 'package:waypay_mobile/features/home/data/data_source/home_remote_data_source_impl.dart';
 import 'package:waypay_mobile/routes/routes.dart';
-import 'package:waypay_mobile/core/widgets/error_view.dart';
-import 'package:waypay_mobile/features/analytics/presentation/screens/analytic_screen.dart';
-import 'package:waypay_mobile/core/utils/error_utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -103,13 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
         );
   }
 
-  String _friendlyErrorMessage(Object? error) {
-    return ErrorUtils.friendlyMessage(
-      error,
-      fallback: 'Не удалось загрузить данные. Попробуйте позже.',
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final userRole = UserStorage().getRoleSync();
@@ -128,9 +118,27 @@ class _HomeScreenState extends State<HomeScreen> {
               }
 
               if (snapshot.hasError) {
-                return ErrorView(
-                  message: _friendlyErrorMessage(snapshot.error),
-                  onRetry: _loadEmployeeData,
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Ошибка загрузки данных',
+                        style: TextStyle(fontSize: 16, color: Colors.red),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        snapshot.error.toString(),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                      ),
+                      SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _loadEmployeeData,
+                        child: Text('Повторить'),
+                      ),
+                    ],
+                  ),
                 );
               }
 
@@ -449,7 +457,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Spacer(),
               MoreDetailsButton(
                 onPressed: () {
-                  context.pushNamed(Routes.analyticsScreen.toName);
+                  // Навигация к аналитике
                 },
               ),
             ],

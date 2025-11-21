@@ -27,7 +27,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return StartAuthResponseModel.fromJson(response.data);
     } on DioException catch (e) {
       print('❌ Ошибка startAuth: ${e.response?.data}');
-      throw Exception(_extractBackendMessage(e));
+      throw Exception('Ошибка старта авторизации: ${e.message}');
     }
   }
 
@@ -61,7 +61,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
     } on DioException catch (e) {
       print('❌ Ошибка confirmCall: ${e.response?.data}');
-      throw Exception(_extractBackendMessage(e));
+      throw Exception('Ошибка подтверждения звонка: ${e.message}');
     }
   }
 
@@ -304,28 +304,5 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'Ошибка при отзыве сессии: code=$code, body=${e.response?.data}',
       );
     }
-  }
-
-  String _extractBackendMessage(DioException e) {
-    final data = e.response?.data;
-    if (data is String && data.trim().isNotEmpty) {
-      return data.trim();
-    }
-    if (data is Map<String, dynamic>) {
-      final candidates = [
-        data['message'],
-        data['Message'],
-        data['error'],
-        data['Error'],
-        data['detail'],
-        data['Detail'],
-      ];
-      for (final candidate in candidates) {
-        if (candidate is String && candidate.trim().isNotEmpty) {
-          return candidate.trim();
-        }
-      }
-    }
-    return e.message ?? 'Неизвестная ошибка авторизации';
   }
 }
