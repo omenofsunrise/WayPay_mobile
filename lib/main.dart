@@ -14,7 +14,10 @@ import 'package:waypay_mobile/features/blog/presentation/bloc/blog_bloc.dart';
 import 'package:waypay_mobile/features/blog/presentation/bloc/comment_bloc.dart';
 import 'package:waypay_mobile/features/blog/presentation/cubit/profile_blog_cubit.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
+import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
+import 'package:waypay_mobile/features/clients/presentation/widgets/client_picker_modal.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
+import 'package:waypay_mobile/features/credit/presentation/screens/create_credit/new_credit_creation_screen.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
 import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
@@ -121,6 +124,10 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (_) => getIt<ChatListBloc>()),
         BlocProvider(create: (context) => ObjectTypeBloc()),
         BlocProvider(create: (_) => CreditCreationCubit()),
+        BlocProvider<ClientsBloc>(
+          create: (context) => getIt<ClientsBloc>(),
+          child: NewCreditCreationScreen(),
+        ),
       ],
       child: app,
     );

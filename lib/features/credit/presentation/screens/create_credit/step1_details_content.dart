@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
 import 'package:waypay_mobile/core/widgets/custom_checkbox.dart';
 import 'package:waypay_mobile/core/widgets/inputs/custom_input.dart';
 import 'package:waypay_mobile/core/widgets/inputs/date_input.dart';
+import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
+import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/investors/presentation/widgets/investor_picker_modal.dart';
 import 'package:waypay_mobile/features/objectType/presentation/modal/object_type_selection_modal.dart';
+import 'package:waypay_mobile/features/clients/presentation/widgets/client_picker_modal.dart';
 
 class Step1DetailsContent extends StatefulWidget {
   final TextEditingController firstPaymentController;
@@ -67,10 +71,24 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
   }
 
   Future<void> _showInvestorPicker() async {
-    final investor = await showDialog<InvestorsModel>(
+    BottomNavController.instance.hide();
+
+    final investor = await showModalBottomSheet<InvestorsModel>(
       context: context,
-      builder: (context) => const InvestorPickerModal(),
+      isScrollControlled: true,
+      useRootNavigator: true,
+      clipBehavior: Clip.antiAlias,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => BlocProvider(
+        create: (_) => InvestorsBloc(),
+        child: const InvestorPickerModal(),
+      ),
     );
+
+    BottomNavController.instance.show();
 
     if (investor != null) {
       context.read<CreditCreationCubit>().updateBasicInfo(
@@ -80,7 +98,33 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
     }
   }
 
-  Future<void> _showClientPicker() async {}
+  Future<void> _showClientPicker() async {
+    BottomNavController.instance.hide();
+
+    final client = await showModalBottomSheet<ClientModel>(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      clipBehavior: Clip.antiAlias,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => BlocProvider(
+        create: (_) => ClientsBloc(),
+        child: const ClientPickerModal(),
+      ),
+    );
+
+    BottomNavController.instance.show();
+
+    if (client != null) {
+      context.read<CreditCreationCubit>().updateBasicInfo(
+        clientId: client.id,
+        selectedClient: client,
+      );
+    }
+  }
 
   Future<void> _showCatalogPicker() async {
     final state = context.read<CreditCreationCubit>().state;
@@ -141,7 +185,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
     if (client == null) {
       return 'Выберите покупателя';
     }
-    return client.fullName;
+    return '${client.fullName} (${client.phone})';
   }
 
   String _getObjectTypeDisplayText(ObjectTypeModel? objectType) {
@@ -156,6 +200,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
     required String displayText,
     required VoidCallback onTap,
     bool isSelected = false,
+    bool showBottomSheetIcon = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,7 +237,13 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
                     ),
                   ),
                 ),
-                const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                Icon(
+                  showBottomSheetIcon
+                      ? Icons.arrow_drop_down
+                      : Icons.arrow_forward_ios,
+                  color: Colors.grey,
+                  size: showBottomSheetIcon ? 24 : 16,
+                ),
               ],
             ),
           ),
@@ -307,6 +358,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
               label: 'Выберите дату',
               initialDate: creditRequest.creditDate,
               onDateSelected: (date) {
+                _updateDateController(date);
                 context.read<CreditCreationCubit>().updateBasicInfo(
                   creditDate: date,
                 );
@@ -336,6 +388,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
                 displayText: _getInvestorDisplayText(selectedInvestor),
                 onTap: _showInvestorPicker,
                 isSelected: selectedInvestor != null,
+                showBottomSheetIcon: true,
               ),
 
             const SizedBox(height: 24),
@@ -355,6 +408,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
               displayText: _getClientDisplayText(selectedClient),
               onTap: _showClientPicker,
               isSelected: selectedClient != null,
+              showBottomSheetIcon: true,
             ),
 
             const SizedBox(height: 24),

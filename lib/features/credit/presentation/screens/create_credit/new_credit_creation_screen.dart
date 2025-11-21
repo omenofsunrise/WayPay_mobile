@@ -5,6 +5,8 @@ import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
+import 'package:waypay_mobile/features/credit/presentation/bloc/credit_event.dart';
 import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/create_credit/custom_page_transitions.dart';
 import 'package:waypay_mobile/routes/routes.dart';
@@ -322,7 +324,7 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
           ],
           Expanded(
             child: DefaultButton(
-              text: _currentStep == 3 ? 'Завершить' : 'Далее',
+              text: _currentStep == 3 ? 'Создать' : 'Далее',
               onPressed: _handleContinue,
               isGreen: true,
             ),
@@ -332,9 +334,32 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     );
   }
 
-  void _finishCreditCreation() {
-    print('Завершение создания кредита');
-    context.go(Routes.creditsScreen.toPath);
+  void _finishCreditCreation() async {
+    final cubit = context.read<CreditCreationCubit>();
+    final creditBloc = context.read<CreditBloc>();
+
+    final currentContext = context;
+    final scaffoldMessenger = ScaffoldMessenger.of(currentContext);
+    final navigator = Navigator.of(currentContext);
+
+    try {
+      await cubit.createCredit();
+
+      GoRouter.of(currentContext).go(Routes.creditsScreen.toPath);
+
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('Договор успешно создан'),
+          backgroundColor: Color(AppColors.primary),
+        ),
+      );
+    } catch (e) {
+      navigator.pop();
+
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('Ошибка: $e'), backgroundColor: Colors.red),
+      );
+    }
   }
 
   @override

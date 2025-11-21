@@ -1,177 +1,234 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/app_modal.dart';
-import 'package:waypay_mobile/core/widgets/pagination_widget.dart';
-import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/core/widgets/search_field.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 
 class ClientPickerModal extends StatefulWidget {
-  const ClientPickerModal({
-    super.key,
-    this.initialSelected,
-    required this.onSelect,
-  });
-
-  final ClientModel? initialSelected;
-  final ValueChanged<ClientModel> onSelect;
+  const ClientPickerModal({super.key});
 
   @override
   State<ClientPickerModal> createState() => _ClientPickerModalState();
 }
 
 class _ClientPickerModalState extends State<ClientPickerModal> {
-  late final TextEditingController _searchController;
-  ClientModel? _selectedClient;
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+  bool _showSearchHint = false;
+  bool _hasValidSearch = false;
+  String _lastSubmittedQuery = '';
+
+  static const _searchDelay = Duration(milliseconds: 400);
 
   @override
   void initState() {
     super.initState();
-    _selectedClient = widget.initialSelected;
-    _searchController = TextEditingController();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.read<ClientsBloc>().add(
-            LoadClients(refresh: true, page: 1, pageSize: 10),
-          );
-    });
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _debounce?.cancel();
+    _searchController
+      ..removeListener(_onSearchChanged)
+      ..dispose();
     super.dispose();
   }
 
-  void _onSearchChanged(String value) {
-    final query = value.trim();
-    final bloc = context.read<ClientsBloc>();
-    if (query.isNotEmpty) {
-      bloc.add(SearchClients(query, pageSize: 10));
+  void _onSearchChanged() {
+    final raw = _searchController.text;
+    _debounce?.cancel();
+
+    final query = raw.trim();
+    final digits = query.replaceAll(RegExp(r'\D'), '');
+
+    if (query.isEmpty) {
+      setState(() {
+        _showSearchHint = false;
+        _hasValidSearch = false;
+      });
+      context.read<ClientsBloc>().add(
+        LoadClients(refresh: true, page: 1, pageSize: 10),
+      );
+      return;
+    }
+
+    final meetsPhoneRequirement = digits.length >= 11;
+    final meetsNameRequirement = query.length >= 4;
+
+    if (meetsPhoneRequirement || meetsNameRequirement) {
+      setState(() {
+        _showSearchHint = false;
+        _hasValidSearch = true;
+      });
+      _debounce = Timer(_searchDelay, () {
+        if (!mounted) return;
+        _lastSubmittedQuery = query;
+        context.read<ClientsBloc>().add(SearchClients(query, pageSize: 10));
+      });
     } else {
-      bloc.add(LoadClients(refresh: true, page: 1, pageSize: 10));
+      setState(() {
+        _showSearchHint = true;
+        _hasValidSearch = false;
+      });
     }
   }
 
-  void _selectClient(ClientModel client) {
-    setState(() => _selectedClient = client);
-    widget.onSelect(client);
-    Navigator.of(context).pop();
+  void _retryLastSearch() {
+    if (_lastSubmittedQuery.isEmpty) return;
+    context.read<ClientsBloc>().add(
+      SearchClients(_lastSubmittedQuery, pageSize: 10),
+    );
+  }
+
+  String _formatDate(DateTime date) => DateFormat('dd.MM.yyyy').format(date);
+
+  Widget _buildResults(ClientsState state) {
+    if (!_hasValidSearch) {
+      if (_searchController.text.trim().isEmpty) {
+        return const Center(
+          child: Text(
+            'Введите ФИО или номер телефона, чтобы найти клиента.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Color(AppColors.darkGrey)),
+          ),
+        );
+      }
+      if (_showSearchHint) {
+        return const Center(
+          child: Text(
+            'Введите минимум 4 символа ФИО или полный номер телефона',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Color(AppColors.darkGrey)),
+          ),
+        );
+      }
+      return const SizedBox.shrink();
+    }
+
+    if (state is ClientsLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state is ClientsError) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            state.message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.red),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: _retryLastSearch,
+            child: const Text('Повторить'),
+          ),
+        ],
+      );
+    }
+    if (state is ClientsLoaded) {
+      if (state.clients.isEmpty) {
+        return const Center(
+          child: Text(
+            'Клиенты не найдены',
+            style: TextStyle(color: Color(AppColors.darkGrey)),
+          ),
+        );
+      }
+      return ListView.separated(
+        itemCount: state.clients.length,
+        separatorBuilder: (_, __) =>
+            const Divider(height: 16, color: Color(0xFFE5E5EA)),
+        itemBuilder: (_, index) {
+          final client = state.clients[index];
+          return ListTile(
+            contentPadding: EdgeInsets.zero,
+            onTap: () => Navigator.of(context).pop(client),
+            title: Text(
+              client.fullName,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Color(AppColors.black),
+              ),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(_formatDate(client.birthdate)),
+                Text(client.phone),
+              ],
+            ),
+            trailing: Text(
+              'ID ${client.id}',
+              style: const TextStyle(color: Color(AppColors.darkGrey)),
+            ),
+          );
+        },
+      );
+    }
+    return const SizedBox.shrink();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AppModal(
-      title: 'Выберите клиента',
-      backgroundColor: Color(AppColors.background),
-      content: Column(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextField(
-            controller: _searchController,
-            style: const TextStyle(color: Colors.black87),
-            decoration: InputDecoration(
-              hintText: 'Поиск по имени...',
-              prefixIcon: const Icon(Icons.search, color: Colors.black54),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(AppColors.primary)),
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Покупатели',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(AppColors.primary)),
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.close),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(AppColors.primary)),
-              ),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-            onChanged: _onSearchChanged,
+            ],
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.4,
-            child: BlocBuilder<ClientsBloc, ClientsState>(
-              builder: (context, state) {
-                if (state is ClientsLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (state is ClientsError) {
-                  return Center(
-                    child: Text(
-                      'Ошибка: ${state.message}',
-                      style: const TextStyle(color: Colors.black),
-                    ),
-                  );
-                }
-                if (state is ClientsLoaded) {
-                  if (state.clients.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        'Клиенты не найдены',
-                        style: TextStyle(color: Colors.black),
-                      ),
-                    );
-                  }
-                  return Column(
-                    children: [
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: state.clients.length,
-                          itemBuilder: (context, index) {
-                            final client = state.clients[index];
-                            final isSelected = client == _selectedClient;
-                            return GestureDetector(
-                              onTap: () => _selectClient(client),
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(vertical: 4),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? Colors.grey.shade200
-                                      : Colors.white,
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? const Color(AppColors.primary)
-                                        : Colors.grey.shade300,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  client.fullName,
-                                  style: const TextStyle(color: Colors.black),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      PaginationWidget(
-                        isCompact: true,
-                        currentPage: state.currentPage,
-                        totalPages: state.totalPages,
-                        onPageSelected: (page) {
-                          context.read<ClientsBloc>().add(
-                                LoadClients(
-                                  refresh: true,
-                                  page: page,
-                                  pageSize: 10,
-                                  search: _searchController.text.isEmpty
-                                      ? null
-                                      : _searchController.text,
-                                ),
-                              );
-                        },
-                      ),
-                    ],
-                  );
-                }
-                return const SizedBox();
-              },
+          SearchField(
+            controller: _searchController,
+            hintText: 'Поиск',
+            onChanged: (_) => _onSearchChanged(),
+          ),
+          if (_showSearchHint)
+            const Padding(
+              padding: EdgeInsets.only(top: 12),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Введите минимум 4 символа ФИО или полный номер телефона',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Color(AppColors.darkGrey),
+                  ),
+                ),
+              ),
             ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 320,
+            child: BlocBuilder<ClientsBloc, ClientsState>(
+              builder: (context, state) => _buildResults(state),
+            ),
+          ),
+          const SizedBox(height: 16),
+          DefaultButton(
+            text: 'Создать нового покупателя',
+            isGreen: true,
+            showIcon: true,
+            icon: Icons.add,
+            onPressed: () {},
           ),
         ],
       ),

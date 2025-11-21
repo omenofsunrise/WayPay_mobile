@@ -1,16 +1,17 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_response_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
+import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/schedule_preview_model.dart';
 
 class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
   final Dio dio;
 
   CreditRemoteDataSourceImpl(this.dio);
-
   @override
   Future<CreditResponseModel> getCredits(GetCreditsQuery query) async {
     try {
@@ -99,6 +100,23 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
       return CreditResponseModel.fromJson(response.data);
     } on DioException catch (e) {
       throw Exception('Ошибка загрузки кредитов инвестора: ${e.message}');
+    }
+  }
+
+  @override
+  Future createCredit(CreateCreditRequest request) async {
+    try {
+      await dio.post('Credit', data: request.toJson());
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        final errorData = e.response?.data;
+        if (errorData is Map<String, dynamic>) {
+          final errorMessage =
+              errorData['title'] ?? errorData['message'] ?? 'Ошибка валидации';
+          throw Exception(errorMessage);
+        }
+      }
+      throw Exception('Ошибка создания договора: ${e.message}');
     }
   }
 

@@ -1,4 +1,6 @@
+import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
+import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 
 abstract class CreditEvent {}
 
@@ -61,6 +63,18 @@ class LoadInvestorCreditsEvent extends CreditEvent {
     required this.query,
     required this.refresh,
   });
+}
+
+class CreateCreditEvent extends CreditEvent {
+  final CreateCreditRequest request;
+
+  CreateCreditEvent({required this.request});
+}
+
+class CreateCreditSuccessEvent extends CreditEvent {
+  final CreditModel createdCredit;
+
+  CreateCreditSuccessEvent({required this.createdCredit});
 }
 
 class LoadSchedulePreviewEvent extends CreditEvent {

@@ -1,10 +1,10 @@
 class CreateCreditRequest {
   int? clientId;
   String name;
-  int creditTypeId;
-  int creditTabTypeId;
+  int? creditTypeId;
+  int? creditTabTypeId;
 
-  int guarantorClientId;
+  int? guarantorClientId;
   Guarantor? guarantor;
 
   int? investorId;
@@ -22,9 +22,9 @@ class CreateCreditRequest {
   CreateCreditRequest({
     this.clientId,
     required this.name,
-    required this.creditTypeId,
-    required this.creditTabTypeId,
-    required this.guarantorClientId,
+    this.creditTypeId,
+    this.creditTabTypeId,
+    this.guarantorClientId,
     this.guarantor,
     this.investorId,
     this.poolId,

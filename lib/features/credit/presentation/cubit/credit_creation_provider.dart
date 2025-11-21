@@ -4,6 +4,7 @@ import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
@@ -121,6 +122,43 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     emit(state.copyWith(creditRequest: updatedRequest));
 
     _loadSchedulePreviewDebounced();
+  }
+
+  Future<void> loadSchedulePreview() async {
+    if (state.totalAmountWithSurcharge <= 0 ||
+        state.creditRequest.termMonths <= 0) {
+      return;
+    }
+
+    emit(
+      state.copyWith(schedulePreviewLoading: true, schedulePreviewError: null),
+    );
+
+    try {
+      final preview = await _dataSource.getSchedulePreview(
+        totalAmount: state.totalAmountWithSurcharge,
+        firstPayment: state.creditRequest.firstPayment,
+        termMonths: state.creditRequest.termMonths,
+        paymentDay: state.creditRequest.paymentDay,
+        currentMonthStart: state.creditRequest.currentMonthStart,
+        nextMonthStart: state.creditRequest.nextMonthStart,
+      );
+
+      emit(
+        state.copyWith(
+          schedulePreview: preview,
+          schedulePreviewLoading: false,
+          schedulePreviewError: null,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          schedulePreviewLoading: false,
+          schedulePreviewError: 'Ошибка загрузки графика платежей: $e',
+        ),
+      );
+    }
   }
 
   void updateProducts(List<CreditProduct> products) {
@@ -313,6 +351,132 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
   Future<void> close() {
     _debounceTimer?.cancel();
     return super.close();
+  }
+
+  Future createCredit() async {
+    try {
+      if (state.creditRequest.clientId == null) {
+        throw Exception('Не выбран клиент');
+      }
+
+      if (state.creditRequest.products.isEmpty) {
+        throw Exception('Не добавлены товары');
+      }
+
+      for (final product in state.creditRequest.products) {
+        if (product.name.isEmpty) {
+          throw Exception('Название товара не может быть пустым');
+        }
+        if (product.price <= 0) {
+          throw Exception('Цена товара должна быть больше 0');
+        }
+        if (product.quantity <= 0) {
+          throw Exception('Количество товара должно быть больше 0');
+        }
+      }
+
+      if (state.totalAmountWithSurcharge <= 0) {
+        throw Exception('Общая сумма должна быть больше 0');
+      }
+
+      if (state.creditRequest.firstPayment < 0) {
+        throw Exception('Первоначальный платеж не может быть отрицательным');
+      }
+
+      if (state.creditRequest.firstPayment > state.totalAmountWithSurcharge) {
+        throw Exception('Первоначальный платеж не может превышать общую сумму');
+      }
+
+      if (state.creditRequest.termMonths <= 0) {
+        throw Exception('Срок договора должен быть больше 0 месяцев');
+      }
+
+      if (state.creditRequest.paymentDay < 1 ||
+          state.creditRequest.paymentDay > 31) {
+        throw Exception('День платежа должен быть от 1 до 31');
+      }
+
+      Guarantor? guarantor;
+      if (state.creditRequest.guarantor != null) {
+        final guar = state.creditRequest.guarantor!;
+        if (guar.fullName.isEmpty || guar.phone.isEmpty) {
+          throw Exception('Заполните ФИО и телефон гаранта');
+        }
+        guarantor = guar;
+      }
+
+      final createRequest = CreateCreditRequest(
+        clientId: state.creditRequest.clientId,
+        name: state.creditRequest.name.trim(),
+        creditTypeId: null,
+        creditTabTypeId: null,
+        guarantorClientId: null,
+        guarantor: guarantor,
+        investorId: state.creditRequest.investorId,
+        poolId: state.creditRequest.poolId,
+        creditDate: state.creditRequest.creditDate,
+        firstPayment: state.creditRequest.firstPayment,
+        termMonths: state.creditRequest.termMonths,
+        paymentDay: state.creditRequest.paymentDay,
+        nextMonthStart: state.creditRequest.nextMonthStart,
+        currentMonthStart: state.creditRequest.currentMonthStart,
+        inDebt: state.creditRequest.inDebt,
+        debtComment: state.creditRequest.debtComment?.trim(),
+        products: state.creditRequest.products.map((product) {
+          return CreditProduct(
+            name: product.name.trim(),
+            price: product.price,
+            quantity: product.quantity,
+            surcharge: product.surcharge,
+            surchargeAmount: product.surchargeAmount,
+          );
+        }).toList(),
+      );
+
+      await _dataSource.createCredit(createRequest);
+
+      _resetState();
+
+      return;
+    } catch (e) {
+      print('Ошибка создания договора: $e');
+      rethrow;
+    }
+  }
+
+  void _resetState() {
+    emit(
+      CreditCreationState(
+        creditRequest: CreateCreditRequest(
+          clientId: null,
+          name: '',
+          creditTypeId: 0,
+          creditTabTypeId: 0,
+          guarantorClientId: 0,
+          guarantor: null,
+          investorId: null,
+          poolId: null,
+          creditDate: DateTime.now(),
+          firstPayment: 0,
+          termMonths: 12,
+          paymentDay: 1,
+          nextMonthStart: false,
+          currentMonthStart: false,
+          inDebt: false,
+          debtComment: null,
+          products: [CreditProduct(name: '', price: 0, quantity: 1)],
+        ),
+        markupType: 0,
+        totalAmountWithSurcharge: 0,
+        selectedClient: null,
+        selectedInvestor: null,
+        selectedCatalog: null,
+        selectedCategory: null,
+        schedulePreview: [],
+        schedulePreviewLoading: false,
+        schedulePreviewError: null,
+      ),
+    );
   }
 
   double _calculateTotalAmountWithSurcharge(List<CreditProduct> products) {

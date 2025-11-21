@@ -23,6 +23,41 @@ class CreditBloc extends Bloc<CreditEvent, CreditState> {
     on<ToggleFavouriteEvent>(_onToggleFavourite);
     on<DeleteCreditEvent>(_onDeleteCredit);
     on<LoadInvestorCreditsEvent>(_onLoadInvestorCredits);
+    on<CreateCreditEvent>(_onCreateCredit);
+  }
+
+  Future<void> _onCreateCredit(
+    CreateCreditEvent event,
+    Emitter<CreditState> emit,
+  ) async {
+    emit(CreditCreating());
+
+    try {
+      final createdCredit = await _dataSource.createCredit(event.request);
+
+      _credits.insert(0, createdCredit);
+
+      emit(CreditCreated(createdCredit: createdCredit));
+
+      final prevState = state is CreditLoaded ? state as CreditLoaded : null;
+      emit(
+        CreditLoaded(
+          credits: List.from(_credits),
+          hasMoreData: _hasMore,
+          currentPage: _currentPage,
+          totalPages: prevState?.totalPages ?? 1,
+          totalCount: (prevState?.totalCount ?? 0) + 1,
+        ),
+      );
+    } catch (e) {
+      emit(CreditCreationError('Ошибка создания договора: $e'));
+
+      if (state is CreditLoaded) {
+        emit(state);
+      } else {
+        emit(CreditError('Не удалось создать договор'));
+      }
+    }
   }
 
   Future<void> _onLoadCredits(

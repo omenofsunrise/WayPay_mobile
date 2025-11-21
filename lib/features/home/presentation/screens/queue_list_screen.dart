@@ -12,6 +12,7 @@ import 'package:waypay_mobile/features/clients/data/models/clients/client_model.
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/queue/queue_bloc.dart';
 import 'package:waypay_mobile/features/clients/data/models/queue/queue_model.dart';
+import 'package:waypay_mobile/features/clients/presentation/widgets/client_picker_modal.dart';
 import 'package:waypay_mobile/features/home/presentation/widgets/queue_client_card.dart';
 import 'package:waypay_mobile/features/clients/data/models/queue/queue_request_model.dart';
 
@@ -36,8 +37,10 @@ class _QueueListView extends StatefulWidget {
 
 class _QueueListViewState extends State<_QueueListView> {
   final TextEditingController _searchController = TextEditingController();
-  final NumberFormat _currencyFormat =
-      NumberFormat.currency(locale: 'ru_RU', symbol: '₽');
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'ru_RU',
+    symbol: '₽',
+  );
   Timer? _debounce;
   bool _showSearchHint = false;
   String _lastSubmittedQuery = '';
@@ -48,9 +51,9 @@ class _QueueListViewState extends State<_QueueListView> {
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
-    context
-        .read<ClientsBloc>()
-        .add(LoadClients(refresh: true, page: 1, pageSize: 10));
+    context.read<ClientsBloc>().add(
+      LoadClients(refresh: true, page: 1, pageSize: 10),
+    );
   }
 
   @override
@@ -99,9 +102,9 @@ class _QueueListViewState extends State<_QueueListView> {
       context.read<QueueBloc>().add(LoadQueue(refresh: true));
       return;
     }
-    context
-        .read<QueueBloc>()
-        .add(SearchQueue(_lastSubmittedQuery, pageSize: 20));
+    context.read<QueueBloc>().add(
+      SearchQueue(_lastSubmittedQuery, pageSize: 20),
+    );
   }
 
   void _showCreateQueueDialog() {
@@ -118,8 +121,9 @@ class _QueueListViewState extends State<_QueueListView> {
       builder: (_) => BlocProvider.value(
         value: context.read<QueueBloc>(),
         child: BlocProvider(
-          create: (_) => ClientsBloc()
-            ..add(LoadClients(refresh: true, page: 1, pageSize: 10)),
+          create: (_) =>
+              ClientsBloc()
+                ..add(LoadClients(refresh: true, page: 1, pageSize: 10)),
           child: const _CreateQueueModal(),
         ),
       ),
@@ -233,10 +237,7 @@ class _QueueListViewState extends State<_QueueListView> {
             child: Text(
               'Очередь пуста',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(AppColors.darkGrey),
-              ),
+              style: TextStyle(fontSize: 16, color: Color(AppColors.darkGrey)),
             ),
           ),
         );
@@ -249,32 +250,28 @@ class _QueueListViewState extends State<_QueueListView> {
 
   SliverList _buildQueueList(List<QueueItemModel> queue) {
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final item = queue[index];
-          final client = item.client;
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final item = queue[index];
+        final client = item.client;
 
-          final number = '№ ${item.positionInQueue}';
-          final date =
-              'от ${DateFormat('dd.MM.yyyy').format(item.createdAt)}';
-          final amount = _currencyFormat.format(item.sum);
-          final phone = client?.phone ?? '-';
-          final fullName = client?.fullName ?? 'Клиент ${item.clientId}';
+        final number = '№ ${item.positionInQueue}';
+        final date = 'от ${DateFormat('dd.MM.yyyy').format(item.createdAt)}';
+        final amount = _currencyFormat.format(item.sum);
+        final phone = client?.phone ?? '-';
+        final fullName = client?.fullName ?? 'Клиент ${item.clientId}';
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: QueueClientCard(
-              number: number,
-              date: date,
-              fullName: fullName,
-              amount: amount,
-              phone: phone,
-              onTap: () {},
-            ),
-          );
-        },
-        childCount: queue.length,
-      ),
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: QueueClientCard(
+            number: number,
+            date: date,
+            fullName: fullName,
+            amount: amount,
+            phone: phone,
+            onTap: () {},
+          ),
+        );
+      }, childCount: queue.length),
     );
   }
 }
@@ -311,8 +308,7 @@ class _CreateQueueModalState extends State<_CreateQueueModal> {
 
   void _handleChange() {
     final hasClient = _selectedClient != null;
-    final digits =
-        _amountController.text.replaceAll(RegExp(r'\D'), '');
+    final digits = _amountController.text.replaceAll(RegExp(r'\D'), '');
     final hasAmount = digits.isNotEmpty;
     final filled = hasClient && hasAmount;
     if (_canSubmit != filled) {
@@ -333,7 +329,7 @@ class _CreateQueueModalState extends State<_CreateQueueModal> {
       ),
       builder: (_) => BlocProvider(
         create: (_) => ClientsBloc(),
-        child: const _ClientPickerModal(),
+        child: const ClientPickerModal(), // Используем новый компонент
       ),
     );
     BottomNavController.instance.show();
@@ -348,8 +344,7 @@ class _CreateQueueModalState extends State<_CreateQueueModal> {
   }
 
   double? _parseAmount() {
-    final digits =
-        _amountController.text.replaceAll(RegExp(r'\D'), '');
+    final digits = _amountController.text.replaceAll(RegExp(r'\D'), '');
     if (digits.isEmpty) return null;
     return double.tryParse(digits);
   }
@@ -358,9 +353,9 @@ class _CreateQueueModalState extends State<_CreateQueueModal> {
     if (!_canSubmit || _selectedClient == null) return;
     final amount = _parseAmount();
     if (amount == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Введите корректную сумму')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Введите корректную сумму')));
       return;
     }
     final request = QueueRequestModel(
@@ -523,9 +518,9 @@ class _ModalTextFieldState extends State<_ModalTextField> {
     const activeColor = Color(AppColors.primary);
 
     OutlineInputBorder border(Color color) => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: color, width: 1.5),
-        );
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: color, width: 1.5),
+    );
 
     return TextField(
       controller: widget.controller,
@@ -597,7 +592,9 @@ class _ClientPickerModalState extends State<_ClientPickerModal> {
         _showSearchHint = false;
         _hasValidSearch = false;
       });
-      context.read<ClientsBloc>().add(LoadClients(refresh: true, page: 1, pageSize: 10));
+      context.read<ClientsBloc>().add(
+        LoadClients(refresh: true, page: 1, pageSize: 10),
+      );
       return;
     }
 
@@ -624,9 +621,9 @@ class _ClientPickerModalState extends State<_ClientPickerModal> {
 
   void _retryLastSearch() {
     if (_lastSubmittedQuery.isEmpty) return;
-    context
-        .read<ClientsBloc>()
-        .add(SearchClients(_lastSubmittedQuery, pageSize: 10));
+    context.read<ClientsBloc>().add(
+      SearchClients(_lastSubmittedQuery, pageSize: 10),
+    );
   }
 
   @override

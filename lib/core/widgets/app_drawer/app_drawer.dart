@@ -427,7 +427,6 @@ class _AppDrawerState extends State<AppDrawer> {
                   builder: (context) => BlocProvider(
                     create: (_) => QueueBloc()
                       ..add(LoadQueue(refresh: true, page: 1, pageSize: 10)),
-                    child: const QueueScreen(),
                   ),
                 ),
               );
@@ -485,9 +484,7 @@ class _AppDrawerState extends State<AppDrawer> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const InvestorsHubScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const InvestorsHubScreen()),
               );
             },
           ),

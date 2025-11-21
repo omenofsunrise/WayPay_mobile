@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
@@ -6,8 +8,6 @@ import 'package:waypay_mobile/core/widgets/inputs/custom_input.dart';
 import 'package:waypay_mobile/core/widgets/inputs/custom_select.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
 import 'package:waypay_mobile/features/credit/data/models/schedule_preview_model.dart';
-import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
-import 'package:waypay_mobile/features/credit/presentation/bloc/credit_event.dart';
 import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
 
 class Step3SchedulesContent extends StatefulWidget {
@@ -48,6 +48,7 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
   late TextEditingController _firstPaymentPercentController;
   late TextEditingController _firstPaymentAmountController;
   late TextEditingController _termMonthsController;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -84,7 +85,7 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
         oldWidget.paymentDay != widget.paymentDay ||
         oldWidget.currentMonthStart != widget.currentMonthStart ||
         oldWidget.nextMonthStart != widget.nextMonthStart) {
-      _loadSchedulePreview();
+      _loadSchedulePreviewDebounced();
     }
   }
 
@@ -188,17 +189,15 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     widget.onCurrentMonthStartChanged(false);
   }
 
+  void _loadSchedulePreviewDebounced() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      _loadSchedulePreview();
+    });
+  }
+
   void _loadSchedulePreview() {
-    context.read<CreditBloc>().add(
-      LoadSchedulePreviewEvent(
-        totalAmount: widget.totalAmount,
-        firstPayment: widget.firstPayment,
-        termMonths: widget.termMonths,
-        paymentDay: widget.paymentDay ?? 1,
-        currentMonthStart: widget.currentMonthStart,
-        nextMonthStart: widget.nextMonthStart,
-      ),
-    );
+    context.read<CreditCreationCubit>().loadSchedulePreview();
   }
 
   @override
@@ -414,6 +413,7 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _firstPaymentPercentController.dispose();
     _firstPaymentAmountController.dispose();
     _termMonthsController.dispose();

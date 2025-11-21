@@ -58,3 +58,17 @@ final class SchedulePreviewError extends CreditState {
 
   SchedulePreviewError(this.message);
 }
+
+final class CreditCreating extends CreditState {}
+
+final class CreditCreated extends CreditState {
+  final CreditModel createdCredit;
+
+  CreditCreated({required this.createdCredit});
+}
+
+final class CreditCreationError extends CreditState {
+  final String message;
+
+  CreditCreationError(this.message);
+}
