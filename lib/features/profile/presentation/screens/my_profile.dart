@@ -51,18 +51,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Center(
-                        child: Text(
-                          'Личные данные и статистика',
-                          textAlign: TextAlign.center,
-                          style: AppStyle.manrope(
-                            size: 20,
-                            weight: FontWeight.w500,
-                            color: Color(0xff007D88),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 25),
-                      Center(
                         child: buildAvatar(
                           photoPath: employee.photoPath,
                           fullName: employee.fullName,
@@ -146,16 +134,41 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                           ),
                         ],
                       ),
-                      if (employee.role.toLabel() !=
-                          EmployeeRole.accountant.toLabel()) ...[
-                        const SizedBox(height: 30),
-                        PaymentStatsProfileTable(employeeId: widget.employeeId),
-                      ],
-                      if (employee.role.toLabel() !=
-                          EmployeeRole.accountant.toLabel()) ...[
-                        const SizedBox(height: 20),
-                        CreditCount(employeeId: widget.employeeId),
-                      ],
+
+                      // Кнопки вместо вкладок
+                      const SizedBox(height: 30),
+                      _buildActionButton(
+                        icon: Icons.payment,
+                        title: 'Статистика платежей',
+                        onTap: () {
+                          // Добавьте навигацию к статистике платежей
+                        },
+                      ),
+                      const SizedBox(height: 15),
+                      _buildActionButton(
+                        icon: Icons.credit_card,
+                        title: 'Кредиты',
+                        onTap: () {
+                          // Добавьте навигацию к кредитам
+                        },
+                      ),
+                      const SizedBox(height: 15),
+                      _buildActionButton(
+                        icon: Icons.settings,
+                        title: 'Настройки',
+                        onTap: () {
+                          // Добавьте навигацию к настройкам
+                        },
+                      ),
+                      const SizedBox(height: 15),
+                      _buildActionButton(
+                        icon: Icons.help_outline,
+                        title: 'Помощь',
+                        onTap: () {
+                          // Добавьте навигацию к помощи
+                        },
+                      ),
+
                       const SizedBox(height: 30),
                       if (employee.role != EmployeeRole.superAdmin &&
                           employee.role != EmployeeRole.admin &&
@@ -196,6 +209,57 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             return const Center(child: Text('Нет данных о пользователе'));
           }
         },
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            child: Row(
+              children: [
+                Icon(icon, color: Color(AppColors.darkGrey), size: 24),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: AppStyle.manrope(
+                      size: 16,
+                      weight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: Color(AppColors.darkGrey),
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

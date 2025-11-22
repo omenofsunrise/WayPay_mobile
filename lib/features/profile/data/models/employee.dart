@@ -155,15 +155,24 @@ class Employee {
       address: json['address'] as String? ?? '',
       phone: json['phone'] as String? ?? '',
       role: EmployeeRoleMapper.fromApi(json['role'] as String? ?? ''),
-      permissions: rawPermissions.map((p) {
-        if (p is String) {
-          return PermissionMapper.fromApi(p);
-        } else if (p is Map<String, dynamic> && p.containsKey('code')) {
-          return PermissionMapper.fromApi(p['code'] as String);
-        } else {
-          throw Exception('Неверный формат permission: $p');
-        }
-      }).toList(),
+      permissions: rawPermissions
+          .map((p) {
+            try {
+              if (p is String) {
+                return PermissionMapper.fromApi(p);
+              } else if (p is Map<String, dynamic> && p.containsKey('code')) {
+                return PermissionMapper.fromApi(p['code'] as String);
+              } else {
+                print('⚠️ Неверный формат permission: $p');
+                return null;
+              }
+            } catch (e) {
+              print('⚠️ Неизвестное разрешение: $p, ошибка: $e');
+              return null;
+            }
+          })
+          .whereType<Permission>()
+          .toList(),
       minSurcharge: (json['minSurcharge'] is int)
           ? json['minSurcharge'] as int
           : (json['minSurcharge'] is double)
