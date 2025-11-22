@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
@@ -34,6 +33,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   double total = 0;
   DateTime lastPaymentDate = DateTime.now();
 
+  CalculationMode _calculationMode = CalculationMode.standard;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +44,107 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _initialController.addListener(_calculate);
     _percentController.addListener(_calculate);
     _roundController.addListener(_calculate);
+  }
+
+  void _showCalculationModeMenu(BuildContext context) {
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(Offset.zero, ancestor: overlay),
+        button.localToGlobal(
+          button.size.bottomRight(Offset.zero),
+          ancestor: overlay,
+        ),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    showMenu<CalculationMode>(
+      context: context,
+      position: position,
+      color: Color(AppColors.white),
+      items: [
+        _buildPopupMenuItem(
+          CalculationMode.standard,
+          'Стандартный (на всю сумму)',
+          _calculationMode == CalculationMode.standard,
+        ),
+        _buildPopupMenuItem(
+          CalculationMode.afterInitial,
+          'Надбавка после вычета взноса',
+          _calculationMode == CalculationMode.afterInitial,
+        ),
+        _buildPopupMenuItem(
+          CalculationMode.monthlyPercent,
+          'Процент за 1 месяц',
+          _calculationMode == CalculationMode.monthlyPercent,
+        ),
+      ],
+    ).then((CalculationMode? selectedMode) {
+      if (selectedMode != null && selectedMode != _calculationMode) {
+        setState(() {
+          _calculationMode = selectedMode;
+          _calculate();
+        });
+      }
+    });
+  }
+
+  PopupMenuItem<CalculationMode> _buildPopupMenuItem(
+    CalculationMode mode,
+    String title,
+    bool isSelected,
+  ) {
+    return PopupMenuItem<CalculationMode>(
+      value: mode,
+      child: Row(
+        children: [
+          Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isSelected
+                    ? const Color(AppColors.primary)
+                    : const Color(AppColors.grey),
+                width: 2,
+              ),
+            ),
+            child: isSelected
+                ? Center(
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(AppColors.primary),
+                      ),
+                    ),
+                  )
+                : null,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppStyle.manrope(
+                    size: 14,
+                    weight: FontWeight.w500,
+                    color: const Color(AppColors.black),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _generateAndSharePdf() async {
@@ -65,7 +167,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Future<Uint8List> _buildPdfBytes() async {
-    // Шрифты с кириллицей
     final fontRegular = pw.Font.ttf(
       await rootBundle.load('assets/fonts/Roboto-Regular.ttf'),
     );
@@ -75,16 +176,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     final doc = pw.Document();
 
-    // Цвета из макета
     const primary = PdfColor.fromInt(0xFF007D88);
     const accent = PdfColor.fromInt(0xFF25CBA1);
-    const bg = PdfColor.fromInt(0xFFF9FAFA);
     const white = PdfColors.white;
     const textDark = PdfColor.fromInt(0xFF111827);
     const textGrey = PdfColor.fromInt(0xFF6B7280);
     const rowBorder = PdfColor.fromInt(0xFFE5E7EB);
-    const barDebt = PdfColor.fromInt(0xFF007D88); // зелёно-синий
-    const barOver = PdfColor.fromInt(0xFF25CBA1); // бирюзовый
+    const barDebt = PdfColor.fromInt(0xFF007D88);
+    const barOver = PdfColor.fromInt(0xFF25CBA1);
 
     final theme = pw.ThemeData.withFont(base: fontRegular, bold: fontBold);
 
@@ -182,7 +281,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
           ),
 
-          // Входные данные
           card(
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -319,7 +417,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
           ),
 
-          // Результаты
           card(
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -393,7 +490,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
           ),
 
-          // Футер
           card(
             pw.Center(
               child: pw.Text(
@@ -409,7 +505,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return doc.save();
   }
 
-  // Вспомогательная строка с разделителем
   pw.Widget _pdfRow(
     String left,
     String right,
@@ -460,9 +555,28 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     if (months < 1 || months > 360) return;
 
-    final totalAmount = amount * (1 + percent / 100);
+    double totalAmount;
+    double overpaymentValue;
+
+    switch (_calculationMode) {
+      case CalculationMode.standard:
+        totalAmount = amount * (1 + percent / 100);
+        overpaymentValue = totalAmount - amount;
+        break;
+
+      case CalculationMode.afterInitial:
+        final amountAfterInitial = amount - initial;
+        totalAmount = initial + (amountAfterInitial * (1 + percent / 100));
+        overpaymentValue = totalAmount - amount;
+        break;
+
+      case CalculationMode.monthlyPercent:
+        totalAmount = amount * (1 + (percent * 12) / 100);
+        overpaymentValue = totalAmount - amount;
+        break;
+    }
+
     final roundedTotalAmount = roundUp(totalAmount, round);
-    final overpaymentValue = roundedTotalAmount - amount;
     final roundedOverpayment = roundUp(overpaymentValue, round);
 
     final validInitial = initial > roundedTotalAmount
@@ -471,8 +585,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     final debtValue = roundedTotalAmount - validInitial;
     final roundedDebt = roundUp(debtValue, round);
+
     final monthlyRaw = roundedDebt / months;
-    final roundedMonthly = roundUp(monthlyRaw, round);
+    monthlyPayment = roundUp(monthlyRaw, round);
 
     final lastPayment = DateTime(
       _startDate.year,
@@ -484,7 +599,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       total = roundedTotalAmount;
       overpayment = roundedOverpayment;
       debt = roundedDebt;
-      monthlyPayment = roundedMonthly;
       lastPaymentDate = lastPayment;
     });
   }
@@ -509,13 +623,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.ios_share, color: Colors.black),
-            tooltip: 'Поделиться расчётом (PDF)',
-            onPressed: _generateAndSharePdf,
+            icon: const Icon(
+              Icons.calculate_rounded,
+              color: Color(AppColors.grey),
+            ),
+            tooltip: 'Переключить режим',
+            onPressed: () => _showCalculationModeMenu(context),
           ),
-
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.black),
+            icon: const Icon(Icons.refresh, color: Color(AppColors.grey)),
             tooltip: 'Сбросить',
             onPressed: () {
               setState(() {
@@ -543,7 +659,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 child: Column(
                   children: [
                     _buildInputSection(),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     _buildResultSection(),
                   ],
                 ),
@@ -877,3 +993,5 @@ class PaymentLineBar extends StatelessWidget {
     );
   }
 }
+
+enum CalculationMode { standard, afterInitial, monthlyPercent }
