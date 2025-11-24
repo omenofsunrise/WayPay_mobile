@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/search_field.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
@@ -14,6 +14,71 @@ class InvestorPickerModal extends StatefulWidget {
 
   @override
   State<InvestorPickerModal> createState() => _InvestorPickerModalState();
+}
+
+class _InvestorTile extends StatelessWidget {
+  const _InvestorTile({
+    required this.investor,
+    required this.cashText,
+    required this.contractText,
+    required this.onTap,
+  });
+
+  final InvestorsModel investor;
+  final String cashText;
+  final String contractText;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 4,
+              child: Text(
+                investor.nickname,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: Text(
+                cashText,
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(AppColors.black),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              flex: 2,
+              child: Text(
+                contractText,
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(AppColors.darkGrey),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _InvestorPickerModalState extends State<InvestorPickerModal> {
@@ -92,9 +157,18 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
     );
   }
 
-  String _getInvestorDisplayInfo(InvestorsModel investor) {
-    final phone = investor.phoneNumber ?? 'Телефон не указан';
-    return '$phone';
+  String _formatCash(double? value) {
+    if (value == null) return '—';
+    final formatter = NumberFormat.decimalPattern('ru');
+    return '${formatter.format(value.round())}₽';
+  }
+
+  String _formatDateShort(DateTime? date) {
+    if (date == null) return '—';
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year.toString();
+    return '$day.$month.$year';
   }
 
   Widget _buildResults(InvestorsState state) {
@@ -116,21 +190,11 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
                 const Divider(height: 16, color: Color(0xFFE5E5EA)),
             itemBuilder: (_, index) {
               final investor = state.investors[index];
-              return ListTile(
-                contentPadding: EdgeInsets.zero,
+              return _InvestorTile(
+                investor: investor,
+                cashText: _formatCash(investor.cashbox),
+                contractText: _formatDateShort(investor.contractEndDate),
                 onTap: () => Navigator.of(context).pop(investor),
-                title: Text(
-                  investor.nickname,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: Color(AppColors.black),
-                  ),
-                ),
-                subtitle: Text(_getInvestorDisplayInfo(investor)),
-                trailing: Text(
-                  'ID ${investor.id}',
-                  style: const TextStyle(color: Color(AppColors.darkGrey)),
-                ),
               );
             },
           );
@@ -184,21 +248,11 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
             const Divider(height: 16, color: Color(0xFFE5E5EA)),
         itemBuilder: (_, index) {
           final investor = state.investors[index];
-          return ListTile(
-            contentPadding: EdgeInsets.zero,
+          return _InvestorTile(
+            investor: investor,
+            cashText: _formatCash(investor.cashbox),
+            contractText: _formatDateShort(investor.contractEndDate),
             onTap: () => Navigator.of(context).pop(investor),
-            title: Text(
-              investor.nickname,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Color(AppColors.black),
-              ),
-            ),
-            subtitle: Text(_getInvestorDisplayInfo(investor)),
-            trailing: Text(
-              'ID ${investor.id}',
-              style: const TextStyle(color: Color(AppColors.darkGrey)),
-            ),
           );
         },
       );
@@ -218,7 +272,7 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
             children: [
               const Expanded(
                 child: Text(
-                  'Инвесторы',
+                  'Выбор инвестора/пула',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               ),

@@ -153,10 +153,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 
   void _openPaymentDetail(ScheduleModel schedule) {
-    context.pushNamed(
-      Routes.paymentDetailScreen.toName,
-      extra: schedule,
-    );
+    context.pushNamed(Routes.paymentDetailScreen.toName, extra: schedule);
   }
 
   @override
@@ -263,10 +260,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           iconAsset: SvgIcons.sort,
         ),
         const SizedBox(width: 12),
-        FilterButton(
-          onTap: _openFilters,
-          isActive: _appliedFilters != null,
-        ),
+        FilterButton(onTap: _openFilters, isActive: _appliedFilters != null),
       ],
     );
   }
@@ -319,10 +313,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 }
 
 class _ScheduleSortSheet extends StatelessWidget {
-  const _ScheduleSortSheet({
-    required this.options,
-    required this.selected,
-  });
+  const _ScheduleSortSheet({required this.options, required this.selected});
 
   final List<PaymentSortOption> options;
   final PaymentSortOption selected;
@@ -351,8 +342,9 @@ class _ScheduleSortSheet extends StatelessWidget {
                         option.title,
                         style: TextStyle(
                           fontSize: 16,
-                          fontWeight:
-                              isActive ? FontWeight.w600 : FontWeight.w400,
+                          fontWeight: isActive
+                              ? FontWeight.w600
+                              : FontWeight.w400,
                           color: isActive
                               ? const Color(AppColors.primary)
                               : const Color(AppColors.black),

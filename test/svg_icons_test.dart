@@ -8,6 +8,7 @@ void main() {
     expect(File(SvgIcons.add).existsSync(), isTrue);
     expect(File(SvgIcons.allCredits).existsSync(), isTrue);
     expect(File(SvgIcons.analyticsLogo).existsSync(), isTrue);
+    expect(File(SvgIcons.archive).existsSync(), isTrue);
     expect(File(SvgIcons.arrowBack).existsSync(), isTrue);
     expect(File(SvgIcons.bell).existsSync(), isTrue);
     expect(File(SvgIcons.blog).existsSync(), isTrue);
@@ -22,6 +23,7 @@ void main() {
     expect(File(SvgIcons.chat2).existsSync(), isTrue);
     expect(File(SvgIcons.chatLogo).existsSync(), isTrue);
     expect(File(SvgIcons.chevronLeft).existsSync(), isTrue);
+    expect(File(SvgIcons.clockTwo).existsSync(), isTrue);
     expect(File(SvgIcons.clockIcon).existsSync(), isTrue);
     expect(File(SvgIcons.companyAmount).existsSync(), isTrue);
     expect(File(SvgIcons.coolicon).existsSync(), isTrue);
@@ -30,7 +32,9 @@ void main() {
     expect(File(SvgIcons.debt).existsSync(), isTrue);
     expect(File(SvgIcons.debtSelf).existsSync(), isTrue);
     expect(File(SvgIcons.delay).existsSync(), isTrue);
+    expect(File(SvgIcons.doc).existsSync(), isTrue);
     expect(File(SvgIcons.docIcon).existsSync(), isTrue);
+    expect(File(SvgIcons.favourite).existsSync(), isTrue);
     expect(File(SvgIcons.fileDigit).existsSync(), isTrue);
     expect(File(SvgIcons.filter).existsSync(), isTrue);
     expect(File(SvgIcons.home).existsSync(), isTrue);
@@ -48,6 +52,7 @@ void main() {
     expect(File(SvgIcons.notebook).existsSync(), isTrue);
     expect(File(SvgIcons.search).existsSync(), isTrue);
     expect(File(SvgIcons.shieldPerson).existsSync(), isTrue);
+    expect(File(SvgIcons.sort).existsSync(), isTrue);
     expect(File(SvgIcons.todoCopy).existsSync(), isTrue);
     expect(File(SvgIcons.todo).existsSync(), isTrue);
     expect(File(SvgIcons.users).existsSync(), isTrue);

@@ -6,6 +6,7 @@ class SvgIcons {
   static const String add = 'assets/icons/add.svg';
   static const String allCredits = 'assets/icons/all_credits.svg';
   static const String analyticsLogo = 'assets/icons/analyticsLogo.svg';
+  static const String archive = 'assets/icons/archive.svg';
   static const String arrowBack = 'assets/icons/arrowBack.svg';
   static const String bell = 'assets/icons/bell.svg';
   static const String blog = 'assets/icons/blog.svg';
@@ -20,6 +21,7 @@ class SvgIcons {
   static const String chat2 = 'assets/icons/chat2.svg';
   static const String chatLogo = 'assets/icons/chatLogo.svg';
   static const String chevronLeft = 'assets/icons/chevron-left.svg';
+  static const String clockTwo = 'assets/icons/clock-two.svg';
   static const String clockIcon = 'assets/icons/clock_icon.svg';
   static const String companyAmount = 'assets/icons/company_amount.svg';
   static const String coolicon = 'assets/icons/coolicon.svg';
@@ -28,7 +30,9 @@ class SvgIcons {
   static const String debt = 'assets/icons/debt.svg';
   static const String debtSelf = 'assets/icons/debt_self.svg';
   static const String delay = 'assets/icons/delay.svg';
+  static const String doc = 'assets/icons/doc.svg';
   static const String docIcon = 'assets/icons/doc_icon.svg';
+  static const String favourite = 'assets/icons/favourite.svg';
   static const String fileDigit = 'assets/icons/file-digit.svg';
   static const String filter = 'assets/icons/filter.svg';
   static const String home = 'assets/icons/home.svg';

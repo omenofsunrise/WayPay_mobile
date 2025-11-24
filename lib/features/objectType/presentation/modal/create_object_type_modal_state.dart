@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/inputs/custom_input.dart';
+import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_event.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_state.dart';
@@ -65,82 +65,86 @@ class _CreateObjectTypeModalState extends State<CreateObjectTypeModal> {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 8),
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
+                const Expanded(
                   child: Text(
                     'Новый каталог',
-                    textAlign: TextAlign.left,
-                    style: AppStyle.manrope(size: 20, weight: FontWeight.w500),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             Form(
               key: _formKey,
-              child: CustomInput(
+              child: ModalTextField(
                 controller: _nameController,
                 label: 'Название каталога',
+                hintText: 'Введите название',
               ),
             ),
             const SizedBox(height: 24),
-            BlocConsumer<ObjectTypeBloc, ObjectTypeState>(
-              listener: (context, state) {
-                if (state is ObjectTypeLoaded && _isCreating) {
-                  // Ищем созданный объект в списке
-                  final createdObjectType = state.objectTypes.firstWhere(
-                    (ot) =>
-                        ot.name == _nameController.text.trim() &&
-                        ot.entityType == widget.entityType,
-                    orElse: () => ObjectTypeModel(
-                      id: -1,
-                      name: _nameController.text.trim(),
-                      entityType: widget.entityType,
-                    ),
-                  );
-
-                  // Вызываем колбэк с правильным типом
-                  widget.onObjectTypeCreated(createdObjectType);
-                  Navigator.of(context).pop();
-                }
-
-                if (state is ObjectTypeError && _isCreating) {
-                  setState(() {
-                    _isCreating = false;
-                  });
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(state.message)));
-                }
-              },
-              builder: (context, state) {
-                return DefaultButton(
-                  text: _isCreating ? 'Создание...' : 'Создать',
-                  isGreen: true,
-                  onPressed: _isCreating ? () {} : _createObjectType,
-                );
-              },
+            Row(
+              children: [
+                Expanded(
+                  child: DefaultButton(
+                    text: 'Отменить',
+                    onPressed: () => Navigator.of(context).pop(),
+                    isGreen: false,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: BlocConsumer<ObjectTypeBloc, ObjectTypeState>(
+                    listener: (context, state) {
+                      if (state is ObjectTypeLoaded && _isCreating) {
+                        final createdObjectType = state.objectTypes.firstWhere(
+                          (ot) =>
+                              ot.name == _nameController.text.trim() &&
+                              ot.entityType == widget.entityType,
+                          orElse: () => ObjectTypeModel(
+                            id: -1,
+                            name: _nameController.text.trim(),
+                            entityType: widget.entityType,
+                          ),
+                        );
+                        widget.onObjectTypeCreated(createdObjectType);
+                        Navigator.of(context).pop();
+                      }
+                      if (state is ObjectTypeError && _isCreating) {
+                        setState(() {
+                          _isCreating = false;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(state.message)),
+                        );
+                      }
+                    },
+                    builder: (context, state) {
+                      return DefaultButton(
+                        text: _isCreating ? 'Создание...' : 'Создать',
+                        isGreen: true,
+                        onPressed: _isCreating ? null : _createObjectType,
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
           ],
         ),
       ),

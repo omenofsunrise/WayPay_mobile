@@ -71,7 +71,7 @@ class _DefaultButtonState extends State<DefaultButton> {
               Text(
                 widget.text,
                 style: AppStyle.manrope16.copyWith(
-                  color: fg.withOpacity(enabled ? 1 : 0.5),
+                  color: enabled ? fg : Colors.white,
                 ),
               ),
             ],

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/header.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
-import 'package:waypay_mobile/features/credit/presentation/bloc/credit_event.dart';
 import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/create_credit/custom_page_transitions.dart';
 import 'package:waypay_mobile/routes/routes.dart';
@@ -155,6 +155,8 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
   }
 
   void _handleContinue() {
+    final state = context.read<CreditCreationCubit>().state;
+    if (!_isStepValid(state)) return;
     if (_formKey.currentState!.validate()) {
       if (_nextRoute != null) {
         context.go(_nextRoute!);
@@ -167,61 +169,55 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(AppColors.background),
-        title: const Text(
-          'Новый договор',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-        centerTitle: false,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: Color(AppColors.grey),
-          onPressed: _handleBackButton,
-        ),
-      ),
-      body: BlocListener<CreditCreationCubit, CreditCreationState>(
-        listener: (context, state) {
-          final creditRequest = state.creditRequest;
+      backgroundColor: const Color(AppColors.background),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: BlocListener<CreditCreationCubit, CreditCreationState>(
+            listener: (context, state) {
+              final creditRequest = state.creditRequest;
 
-          if (_firstPaymentController.text.isEmpty ||
-              double.parse(_firstPaymentController.text) !=
-                  creditRequest.firstPayment) {
-            _firstPaymentController.text = creditRequest.firstPayment
-                .toString();
-          }
+              if (_firstPaymentController.text.isEmpty ||
+                  double.parse(_firstPaymentController.text) !=
+                      creditRequest.firstPayment) {
+                _firstPaymentController.text = creditRequest.firstPayment
+                    .toString();
+              }
 
-          if (_termMonthsController.text.isEmpty ||
-              int.parse(_termMonthsController.text) !=
-                  creditRequest.termMonths) {
-            _termMonthsController.text = creditRequest.termMonths.toString();
-          }
+              if (_termMonthsController.text.isEmpty ||
+                  int.parse(_termMonthsController.text) !=
+                      creditRequest.termMonths) {
+                _termMonthsController.text = creditRequest.termMonths
+                    .toString();
+              }
 
-          if (_paymentDayController.text.isEmpty ||
-              int.parse(_paymentDayController.text) !=
-                  creditRequest.paymentDay) {
-            _paymentDayController.text = creditRequest.paymentDay.toString();
-          }
+              if (_paymentDayController.text.isEmpty ||
+                  int.parse(_paymentDayController.text) !=
+                      creditRequest.paymentDay) {
+                _paymentDayController.text = creditRequest.paymentDay
+                    .toString();
+              }
 
-          _updateFirstPaymentFields(
-            creditRequest.firstPayment,
-            state.totalAmountWithSurcharge,
-          );
-        },
-        child: Container(
-          color: Color(AppColors.background),
-          child: Column(
-            children: [
-              _buildStepperWidget(_currentStep, 3),
-              Expanded(
-                child: Form(
-                  key: _formKey,
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 16.0,
-                      right: 16.0,
-                      bottom: 16.0,
-                    ),
+              _updateFirstPaymentFields(
+                creditRequest.firstPayment,
+                state.totalAmountWithSurcharge,
+              );
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Header(
+                  title: 'Новый договор',
+                  showBackButton: true,
+                  showNotifications: false,
+                  onBackPressed: _handleBackButton,
+                ),
+                const SizedBox(height: 12),
+                _buildStepperWidget(_currentStep, 3),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: Form(
+                    key: _formKey,
                     child: Column(
                       children: [
                         Expanded(
@@ -235,8 +231,8 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -290,48 +286,95 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
   }
 
   Widget _buildStepperWidget(int currentStep, int totalSteps) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Шаг $currentStep из $totalSteps',
-            style: TextStyle(
-              color: Color(AppColors.primary),
-              fontSize: 16,
-              fontWeight: FontWeight.normal,
-            ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Center(
+        child: Text(
+          'Шаг $currentStep из $totalSteps',
+          style: const TextStyle(
+            color: Color(AppColors.primary),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildBottomButtons() {
-    return Container(
-      child: Row(
-        children: [
-          if (_previousRoute != null) ...[
+    final bool hasPrevious = _previousRoute != null;
+    final String leftButtonText = hasPrevious ? 'Назад' : 'Отменить';
+    final VoidCallback leftAction = hasPrevious
+        ? _navigateBack
+        : () => context.go(Routes.creditsScreen.toPath);
+
+    return BlocBuilder<CreditCreationCubit, CreditCreationState>(
+      builder: (context, state) {
+        final canProceed = _isStepValid(state);
+        return Row(
+          children: [
             Expanded(
               child: DefaultButton(
-                text: 'Назад',
-                onPressed: _navigateBack,
+                text: leftButtonText,
+                onPressed: leftAction,
                 isGreen: false,
               ),
             ),
             const SizedBox(width: 12),
-          ],
-          Expanded(
-            child: DefaultButton(
-              text: _currentStep == 3 ? 'Создать' : 'Далее',
-              onPressed: _handleContinue,
-              isGreen: true,
+            Expanded(
+              child: DefaultButton(
+                text: _currentStep == 3 ? 'Создать' : 'Далее',
+                onPressed: canProceed ? _handleContinue : null,
+                isGreen: true,
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
+  }
+
+  bool _isStepValid(CreditCreationState state) {
+    switch (_currentStep) {
+      case 1:
+        return _isStep1Valid(state);
+      case 2:
+        return _isStep2Valid(state);
+      case 3:
+        return _isStep3Valid(state);
+      default:
+        return false;
+    }
+  }
+
+  bool _isStep1Valid(CreditCreationState state) {
+    final request = state.creditRequest;
+    final hasClient =
+        state.selectedClient != null || request.clientId != null;
+    final hasInvestorOrDebt = request.inDebt ||
+        state.selectedInvestor != null ||
+        request.investorId != null ||
+        request.poolId != null;
+    return hasClient && hasInvestorOrDebt;
+  }
+
+  bool _isStep2Valid(CreditCreationState state) {
+    final products = state.creditRequest.products;
+    if (products.isEmpty) return false;
+    return products.every(
+      (product) =>
+          product.name.trim().isNotEmpty &&
+          product.price > 0 &&
+          product.quantity > 0,
+    );
+  }
+
+  bool _isStep3Valid(CreditCreationState state) {
+    final request = state.creditRequest;
+    final hasTerm = request.termMonths > 0;
+    final hasPaymentDay = request.paymentDay > 0;
+    final hasAmount = state.totalAmountWithSurcharge > 0;
+    return hasTerm && hasPaymentDay && hasAmount;
   }
 
   void _finishCreditCreation() async {

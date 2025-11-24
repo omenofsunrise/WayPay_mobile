@@ -9,11 +9,13 @@ class FilterButton extends StatefulWidget {
     required this.onTap,
     required this.isActive,
     this.iconAsset = SvgIcons.filter,
+    this.activeIconColor,
   });
 
   final Future<void> Function() onTap;
   final bool isActive;
   final String iconAsset;
+  final Color? activeIconColor;
 
   @override
   State<FilterButton> createState() => _FilterButtonState();
@@ -35,8 +37,9 @@ class _FilterButtonState extends State<FilterButton> {
     final highlight = _isOpen || widget.isActive;
     final background =
         highlight ? const Color(AppColors.primary) : Colors.white;
-    final iconColor =
-        highlight ? const Color(0xFFB8BEC8) : const Color(0xFF6B717C);
+    final iconColor = highlight
+        ? widget.activeIconColor ?? const Color(0xFFB8BEC8)
+        : const Color(0xFF6B717C);
 
     return SizedBox(
       width: 48,

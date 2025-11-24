@@ -4,10 +4,10 @@ import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 
 enum CreditTab {
-  all('Все договоры', SvgIcons.allCredits),
-  favourite('Важные', SvgIcons.importantCredits),
-  debtors('Должники', SvgIcons.debt),
-  archived('В архиве', SvgIcons.inactiveCredits);
+  all('Все договоры', SvgIcons.doc),
+  favourite('Избранные', SvgIcons.favourite),
+  debtors('Должники', SvgIcons.clockTwo),
+  archived('В архиве', SvgIcons.archive);
 
   final String label;
   final String iconPath;

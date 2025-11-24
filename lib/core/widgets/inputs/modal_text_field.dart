@@ -12,6 +12,10 @@ class ModalTextField extends StatefulWidget {
     this.onTap,
     this.suffixIcon,
     this.suffixIconConstraints,
+    this.minLines,
+    this.maxLines,
+    this.onChanged,
+    this.alignLabelWithHint,
   });
 
   final TextEditingController controller;
@@ -22,6 +26,10 @@ class ModalTextField extends StatefulWidget {
   final VoidCallback? onTap;
   final Widget? suffixIcon;
   final BoxConstraints? suffixIconConstraints;
+  final int? minLines;
+  final int? maxLines;
+  final ValueChanged<String>? onChanged;
+  final bool? alignLabelWithHint;
 
   @override
   State<ModalTextField> createState() => _ModalTextFieldState();
@@ -76,9 +84,14 @@ class _ModalTextFieldState extends State<ModalTextField> {
       keyboardType: widget.keyboardType,
       readOnly: widget.readOnly,
       onTap: widget.onTap,
+      onChanged: widget.onChanged,
+      minLines: widget.minLines,
+      maxLines: widget.maxLines ?? (widget.minLines ?? 1),
       decoration: InputDecoration(
         labelText: widget.label,
         hintText: widget.hintText,
+        alignLabelWithHint:
+            widget.alignLabelWithHint ?? (widget.minLines != null),
         suffixIcon: widget.suffixIcon,
         suffixIconConstraints: widget.suffixIconConstraints ??
             const BoxConstraints(

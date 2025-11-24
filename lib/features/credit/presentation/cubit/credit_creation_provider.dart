@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
@@ -213,6 +214,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     );
 
     _loadSchedulePreviewDebounced();
+    _saveMarkupType(markupType);
   }
 
   void updateStartMonthOption(bool isCurrentMonth) {
@@ -232,10 +234,10 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
       double surchargeAmount = 0;
 
       if (markupType == 0) {
-        surchargeAmount = product.surcharge ?? 0;
-      } else {
         final surchargePercent = product.surcharge ?? 0;
         surchargeAmount = (product.price * surchargePercent) / 100;
+      } else {
+        surchargeAmount = product.surcharge ?? 0;
       }
 
       return product.copyWith(surchargeAmount: surchargeAmount);
@@ -444,7 +446,8 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     }
   }
 
-  void _resetState() {
+  Future<void> _resetState() async {
+    final savedMarkupType = await _loadMarkupType();
     emit(
       CreditCreationState(
         creditRequest: CreateCreditRequest(
@@ -466,7 +469,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
           debtComment: null,
           products: [CreditProduct(name: '', price: 0, quantity: 1)],
         ),
-        markupType: 0,
+        markupType: savedMarkupType,
         totalAmountWithSurcharge: 0,
         selectedClient: null,
         selectedInvestor: null,
@@ -492,4 +495,15 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
   double _roundUpToFifty(double amount) {
     return (amount / 50).ceil() * 50.0;
   }
+
+  Future<void> _saveMarkupType(int markupType) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('credit_markup_type', markupType);
+  }
+
+  Future<int> _loadMarkupType() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('credit_markup_type') ?? 0;
+  }
 }
+import 'package:shared_preferences/shared_preferences.dart';

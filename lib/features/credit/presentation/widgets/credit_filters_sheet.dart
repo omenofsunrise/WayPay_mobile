@@ -1,0 +1,442 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
+import 'package:waypay_mobile/assets/resources.dart';
+import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_mobile/core/widgets/filters/filter_components.dart';
+import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
+import 'package:waypay_mobile/features/objectType/data/models/get_object_types_query.dart';
+import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
+import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
+import 'package:waypay_mobile/features/objectType/presentation/block/object_type_event.dart';
+import 'package:waypay_mobile/features/objectType/presentation/block/object_type_state.dart';
+
+class CreditFiltersSheet extends StatelessWidget {
+  const CreditFiltersSheet({super.key, this.initialFilters});
+
+  final GetCreditsQuery? initialFilters;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilterSheet(
+      child: _CreditFiltersForm(initialFilters: initialFilters),
+    );
+  }
+}
+
+class _CreditFiltersForm extends StatefulWidget {
+  const _CreditFiltersForm({this.initialFilters});
+
+  final GetCreditsQuery? initialFilters;
+
+  @override
+  State<_CreditFiltersForm> createState() => _CreditFiltersFormState();
+}
+
+class _CreditFiltersFormState extends State<_CreditFiltersForm> {
+  final _contractController = TextEditingController();
+  final _clientController = TextEditingController();
+  final _investorController = TextEditingController();
+  final _dateFromController = TextEditingController();
+  final _dateToController = TextEditingController();
+  final _catalogController = TextEditingController();
+
+  DateTime? _dateFrom;
+  DateTime? _dateTo;
+  ObjectTypeModel? _selectedCatalog;
+  bool _showCatalogOptions = false;
+  int? _initialCatalogId;
+
+  final _dateFormat = DateFormat('dd.MM.yyyy');
+
+  List<TextEditingController> get _controllers => [
+        _contractController,
+        _clientController,
+        _investorController,
+        _dateFromController,
+        _dateToController,
+        _catalogController,
+      ];
+
+  @override
+  void initState() {
+    super.initState();
+    _initialCatalogId = widget.initialFilters?.creditTypeId;
+    _applyInitialValues();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadObjectTypes();
+    });
+    for (final controller in _controllers) {
+      controller.addListener(_onFieldsChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final controller in _controllers) {
+      controller
+        ..removeListener(_onFieldsChanged)
+        ..dispose();
+    }
+    super.dispose();
+  }
+
+  void _onFieldsChanged() => setState(() {});
+
+  bool get _hasAnyValue =>
+      _controllers.any((c) => c.text.trim().isNotEmpty) ||
+      _selectedCatalog != null;
+
+  void _applyInitialValues() {
+    final filters = widget.initialFilters;
+    if (filters == null) return;
+
+    if (filters.creditId != null) {
+      _contractController.text = filters.creditId.toString();
+    }
+    if ((filters.clientFullname ?? '').isNotEmpty) {
+      _clientController.text = filters.clientFullname!;
+    }
+    if ((filters.investorNickname ?? '').isNotEmpty) {
+      _investorController.text = filters.investorNickname!;
+    }
+
+    _dateFrom = filters.dateFrom;
+    _dateTo = filters.dateTo;
+    _dateFromController.text = _formatDate(_dateFrom);
+    _dateToController.text = _formatDate(_dateTo);
+  }
+
+  void _loadObjectTypes() {
+    final bloc = context.read<ObjectTypeBloc>();
+    final state = bloc.state;
+    if (state is ObjectTypeLoaded && state.objectTypes.isNotEmpty) {
+      _applyCatalogFromState(state.objectTypes);
+      return;
+    }
+    bloc.add(
+      LoadObjectTypesEvent(
+        refresh: true,
+        query: GetObjectTypesQuery(
+          page: 1,
+          pageSize: 100,
+          entityType: 'Credit',
+        ),
+      ),
+    );
+  }
+
+  void _applyCatalogFromState(List<ObjectTypeModel> types) {
+    if (_initialCatalogId == null || _selectedCatalog != null) return;
+    for (final type in types) {
+      if (type.id == _initialCatalogId) {
+        setState(() {
+          _selectedCatalog = type;
+          _catalogController.text = type.name;
+          _initialCatalogId = null;
+        });
+        break;
+      }
+    }
+  }
+
+  Future<void> _pickDate({required bool isFrom}) async {
+    final initialDate = isFrom
+        ? _dateFrom ?? DateTime.now()
+        : _dateTo ?? _dateFrom ?? DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isFrom) {
+          _dateFrom = picked;
+          _dateFromController.text = _formatDate(picked);
+        } else {
+          _dateTo = picked;
+          _dateToController.text = _formatDate(picked);
+        }
+      });
+    }
+  }
+
+  GetCreditsQuery _buildFilters() {
+    return GetCreditsQuery(
+      creditId: _parseContract(_contractController.text),
+      clientFullname: _clientController.text.trim().isEmpty
+          ? null
+          : _clientController.text.trim(),
+      investorNickname: _investorController.text.trim().isEmpty
+          ? null
+          : _investorController.text.trim(),
+      dateFrom: _dateFrom,
+      dateTo: _dateTo,
+      creditTypeId: _selectedCatalog?.id,
+    );
+  }
+
+  int? _parseContract(String value) {
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) return null;
+    return int.tryParse(digits);
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return '';
+    return _dateFormat.format(date);
+  }
+
+  Widget _buildDateField({
+    required TextEditingController controller,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return ModalTextField(
+      controller: controller,
+      label: label,
+      hintText: 'Выберите дату',
+      readOnly: true,
+      onTap: onTap,
+      suffixIcon: Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: SvgPicture.asset(
+          SvgIcons.calendar,
+          width: 20,
+          height: 20,
+          color: const Color(0xFF6B717C),
+        ),
+      ),
+    );
+  }
+
+  void _toggleCatalogOptions() {
+    FocusScope.of(context).unfocus();
+    setState(() => _showCatalogOptions = !_showCatalogOptions);
+  }
+
+  void _selectCatalog(ObjectTypeModel? type) {
+    setState(() {
+      _selectedCatalog = type;
+      _catalogController.text = type?.name ?? '';
+      _showCatalogOptions = false;
+    });
+  }
+
+  Widget _buildCatalogField() {
+    return BlocBuilder<ObjectTypeBloc, ObjectTypeState>(
+      builder: (context, state) {
+        if (state is ObjectTypeLoaded) {
+          _applyCatalogFromState(state.objectTypes);
+        }
+        final types =
+            state is ObjectTypeLoaded ? state.objectTypes : <ObjectTypeModel>[];
+        final isLoading = state is ObjectTypeLoading && types.isEmpty;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ModalTextField(
+              controller: _catalogController,
+              label: 'Каталог',
+              hintText: 'Выберите каталог',
+              readOnly: true,
+              onTap: () {
+                if (types.isEmpty && !isLoading) {
+                  _loadObjectTypes();
+                }
+                _toggleCatalogOptions();
+              },
+              suffixIcon: Transform.rotate(
+                angle: _showCatalogOptions ? 3.1415 : 0,
+                child: const Icon(Icons.keyboard_arrow_down),
+              ),
+              suffixIconConstraints: const BoxConstraints(
+                minHeight: 24,
+                minWidth: 24,
+              ),
+            ),
+            if (_showCatalogOptions)
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFFD9DDE5),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                constraints: const BoxConstraints(maxHeight: 220),
+                child: isLoading
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : _buildCatalogOptions(types),
+              ),
+            if (state is ObjectTypeError)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  state.message,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildCatalogOptions(List<ObjectTypeModel> types) {
+    if (types.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        child: Text(
+          'Каталоги не найдены',
+          style: TextStyle(color: Color(AppColors.darkGrey)),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      itemCount: types.length + 1,
+      separatorBuilder: (_, __) => const Divider(height: 1, indent: 16, endIndent: 16),
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          final isSelected = _selectedCatalog == null;
+          return ListTile(
+            title: const Text('Без каталога'),
+            onTap: () => _selectCatalog(null),
+            trailing: isSelected
+                ? const Icon(Icons.check, color: Color(AppColors.primary))
+                : null,
+          );
+        }
+        final type = types[index - 1];
+        final isSelected = _selectedCatalog?.id == type.id;
+        return ListTile(
+          title: Text(type.name),
+          onTap: () => _selectCatalog(type),
+          trailing: isSelected
+              ? const Icon(Icons.check, color: Color(AppColors.primary))
+              : null,
+        );
+      },
+    );
+  }
+
+  void _clearAll() {
+    for (final controller in _controllers) {
+      controller.clear();
+    }
+    setState(() {
+      _dateFrom = null;
+      _dateTo = null;
+      _selectedCatalog = null;
+      _showCatalogOptions = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<ObjectTypeBloc, ObjectTypeState>(
+      listener: (context, state) {
+        if (state is ObjectTypeLoaded) {
+          _applyCatalogFromState(state.objectTypes);
+        }
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ModalTextField(
+            controller: _contractController,
+            label: '№ договора',
+            hintText: 'Введите номер',
+            keyboardType: TextInputType.number,
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildDateField(
+                  controller: _dateFromController,
+                  label: 'От',
+                  onTap: () => _pickDate(isFrom: true),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildDateField(
+                  controller: _dateToController,
+                  label: 'До',
+                  onTap: () => _pickDate(isFrom: false),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ModalTextField(
+            controller: _clientController,
+            label: 'ФИО клиента',
+            hintText: 'Введите ФИО',
+          ),
+          const SizedBox(height: 12),
+          ModalTextField(
+            controller: _investorController,
+            label: 'Инвестор',
+            hintText: 'Введите имя',
+          ),
+          const SizedBox(height: 12),
+          _buildCatalogField(),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: DefaultButton(
+                  text: 'Отменить',
+                  color: const Color(0xFFB8BEC8),
+                  textColor: const Color(AppColors.black),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: DefaultButton(
+                  text: 'Применить',
+                  color: _hasAnyValue
+                      ? const Color(AppColors.primary)
+                      : const Color(0xFFA8DADB),
+                  textColor: Colors.white,
+                  onPressed: () {
+                    if (!_hasAnyValue) return;
+                    Navigator.of(context).pop(_buildFilters());
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

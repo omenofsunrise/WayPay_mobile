@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
 import 'package:waypay_mobile/core/widgets/custom_checkbox.dart';
-import 'package:waypay_mobile/core/widgets/inputs/custom_input.dart';
-import 'package:waypay_mobile/core/widgets/inputs/date_input.dart';
+import 'package:waypay_mobile/core/widgets/inputs/custom_calendar.dart';
+import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
+import 'package:waypay_mobile/features/clients/presentation/widgets/client_picker_modal.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
-import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
-import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
+import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
-import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
+import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/widgets/investor_picker_modal.dart';
-import 'package:waypay_mobile/features/objectType/presentation/modal/object_type_selection_modal.dart';
-import 'package:waypay_mobile/features/clients/presentation/widgets/client_picker_modal.dart';
+import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
+import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
+import 'package:waypay_mobile/features/credit/presentation/widgets/catalog_picker_modal.dart';
 
 class Step1DetailsContent extends StatefulWidget {
   final TextEditingController firstPaymentController;
@@ -37,27 +41,33 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
   final _creditNameController = TextEditingController();
   final _debtCommentController = TextEditingController();
   final _creditDateController = TextEditingController();
+  final _investorDisplayController = TextEditingController();
+  final _clientDisplayController = TextEditingController();
+  final _guarantorDisplayController = TextEditingController();
+  final _catalogDisplayController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _initializeFromState();
+    _creditNameController.addListener(_handleNameChanged);
   }
 
   void _initializeFromState() {
     final state = context.read<CreditCreationCubit>().state;
     final creditRequest = state.creditRequest;
 
-    if (state.creditRequest.name.isNotEmpty) {
-      _creditNameController.text = state.creditRequest.name;
+    if (creditRequest.name.isNotEmpty) {
+      _creditNameController.text = creditRequest.name;
     }
 
-    if (state.creditRequest.debtComment != null &&
-        state.creditRequest.debtComment!.isNotEmpty) {
-      _debtCommentController.text = state.creditRequest.debtComment!;
+    if (creditRequest.debtComment != null &&
+        creditRequest.debtComment!.isNotEmpty) {
+      _debtCommentController.text = creditRequest.debtComment!;
     }
 
-    _updateDateController(state.creditRequest.creditDate);
+    _updateDateController(creditRequest.creditDate);
+    _syncDisplayControllers(state);
   }
 
   void _updateDateController(DateTime date) {
@@ -68,6 +78,28 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
 
   String _formatTwoDigits(int number) {
     return number.toString().padLeft(2, '0');
+  }
+
+  Future<void> _pickCreditDate(DateTime initialDate) async {
+    await showDialog(
+      context: context,
+      builder: (context) => CustomCalendar(
+        initialDate: initialDate,
+        prefix: 'Дата:',
+        onDateSelected: (date) {
+          _updateDateController(date);
+          context.read<CreditCreationCubit>().updateBasicInfo(creditDate: date);
+        },
+      ),
+    );
+  }
+
+  void _syncDisplayControllers(CreditCreationState state) {
+    _investorDisplayController.text = state.selectedInvestor?.nickname ?? '';
+    _clientDisplayController.text = state.selectedClient?.fullName ?? '';
+    _catalogDisplayController.text = state.selectedCatalog?.name ?? '';
+    _guarantorDisplayController.text =
+        state.creditRequest.guarantor?.fullName ?? '';
   }
 
   Future<void> _showInvestorPicker() async {
@@ -126,195 +158,155 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
     }
   }
 
-  Future<void> _showCatalogPicker() async {
-    final state = context.read<CreditCreationCubit>().state;
-    final objectType = await showModalBottomSheet<ObjectTypeModel?>(
+  Future<void> _showGuarantorPicker() async {
+    BottomNavController.instance.hide();
+
+    final client = await showModalBottomSheet<ClientModel>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => ObjectTypeSelectionModal(
-        selectedObjectType: state.selectedCatalog,
-        entityType: 'Credit',
-        onObjectTypeSelected: (objectType) {
-          Navigator.of(context).pop(objectType);
-        },
+      useRootNavigator: true,
+      clipBehavior: Clip.antiAlias,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => BlocProvider(
+        create: (_) => ClientsBloc(),
+        child: const ClientPickerModal(),
       ),
     );
 
-    if (objectType != null) {
-      context.read<CreditCreationCubit>().updateCatalog(objectType);
+    BottomNavController.instance.show();
+
+    if (client != null) {
+      context.read<CreditCreationCubit>().updateBasicInfo(
+        guarantorClientId: client.id,
+        guarantor: Guarantor(
+          fullName: client.fullName,
+          phone: client.phone,
+          birthdate: client.birthdate,
+          address: client.registrationAddress,
+          doc: client.doc,
+        ),
+      );
     }
   }
 
-  Future<void> _showCategoryPicker() async {
-    final state = context.read<CreditCreationCubit>().state;
-    final objectType = await showModalBottomSheet<ObjectTypeModel?>(
+  Future<void> _showCatalogPicker() async {
+    final catalogBloc = context.read<ObjectTypeBloc>();
+    final selectedCatalog =
+        context.read<CreditCreationCubit>().state.selectedCatalog;
+    final result = await showModalBottomSheet<ObjectTypeModel?>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => ObjectTypeSelectionModal(
-        selectedObjectType: state.selectedCategory,
-        entityType: 'CreditTab',
-        onObjectTypeSelected: (objectType) {
-          Navigator.of(context).pop(objectType);
-        },
+      clipBehavior: Clip.antiAlias,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => BlocProvider.value(
+        value: catalogBloc,
+        child: CatalogPickerModal(selectedCatalog: selectedCatalog),
       ),
     );
 
-    if (objectType != null) {
-      context.read<CreditCreationCubit>().updateCategory(objectType);
+    if (!mounted) return;
+
+    if (result == null) {
+      context.read<CreditCreationCubit>().updateCatalog(null);
+    } else {
+      context.read<CreditCreationCubit>().updateCatalog(result);
     }
   }
 
   void _removeCatalog() {
     context.read<CreditCreationCubit>().updateCatalog(null);
+    _catalogDisplayController.clear();
   }
 
-  void _removeCategory() {
-    context.read<CreditCreationCubit>().updateCategory(null);
+
+  void _removeGuarantor() {
+    context.read<CreditCreationCubit>().updateBasicInfo(
+      guarantorClientId: null,
+      guarantor: null,
+    );
+    _guarantorDisplayController.clear();
   }
 
-  String _getInvestorDisplayText(InvestorsModel? investor) {
-    if (investor == null) {
-      return 'Выберите инвестора';
-    }
-    return '${investor.nickname} (${investor.phoneNumber ?? 'Телефон не указан'})';
-  }
-
-  String _getClientDisplayText(ClientModel? client) {
-    if (client == null) {
-      return 'Выберите покупателя';
-    }
-    return '${client.fullName} (${client.phone})';
-  }
-
-  String _getObjectTypeDisplayText(ObjectTypeModel? objectType) {
-    if (objectType == null) {
-      return 'Не выбрано';
-    }
-    return objectType.name;
-  }
-
-  Widget _buildSelectableField({
-    required String label,
-    required String displayText,
-    required VoidCallback onTap,
-    bool isSelected = false,
-    bool showBottomSheetIcon = false,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: const Color(AppColors.lightGreyBackground),
-                width: 2,
-              ),
-              borderRadius: BorderRadius.circular(8),
-              color: isSelected ? Colors.grey[50] : Colors.white,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    displayText,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: isSelected ? Colors.black87 : Colors.grey,
-                      fontWeight: isSelected
-                          ? FontWeight.w500
-                          : FontWeight.normal,
-                    ),
-                  ),
-                ),
-                Icon(
-                  showBottomSheetIcon
-                      ? Icons.arrow_drop_down
-                      : Icons.arrow_forward_ios,
-                  color: Colors.grey,
-                  size: showBottomSheetIcon ? 24 : 16,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+  void _handleNameChanged() {
+    final value = _creditNameController.text.trim();
+    context.read<CreditCreationCubit>().updateBasicInfo(
+      name: value.isEmpty ? null : value,
     );
   }
 
-  Widget _buildObjectTypeInput({
-    required String label,
-    required String displayText,
-    required VoidCallback onTap,
-    required VoidCallback onRemove,
-    required bool hasSelection,
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: AppStyle.manrope(
+        size: 18,
+        weight: FontWeight.w600,
+        color: const Color(AppColors.black),
+      ),
+    );
+  }
+
+  Widget _buildDropdownSuffix({
+    bool showClear = false,
+    VoidCallback? onClear,
+    Widget? customIcon,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: AppStyle.manrope(size: 14, weight: FontWeight.w400)),
-        const SizedBox(height: 8),
-        Stack(
-          children: [
+    const arrow = Icon(
+      Icons.keyboard_arrow_down_rounded,
+      color: Color(AppColors.darkGrey),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (showClear)
             GestureDetector(
-              onTap: onTap,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFD1D5DB), width: 1),
-                  borderRadius: BorderRadius.circular(5),
-                  color: Colors.white,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        displayText,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: hasSelection ? Colors.black87 : Colors.grey,
-                        ),
-                      ),
-                    ),
-                    const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                  ],
+              onTap: onClear,
+              child: const Padding(
+                padding: EdgeInsets.only(right: 4),
+                child: Icon(
+                  Icons.close,
+                  size: 18,
+                  color: Color(AppColors.darkGrey),
                 ),
               ),
             ),
-            if (hasSelection)
-              Positioned(
-                right: 32,
-                top: 0,
-                bottom: 0,
-                child: GestureDetector(
-                  onTap: onRemove,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    child: const Icon(
-                      Icons.close,
-                      color: Colors.grey,
-                      size: 18,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ],
+          customIcon ?? arrow,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPickerField({
+    required TextEditingController controller,
+    required String label,
+    required VoidCallback onTap,
+    bool showClear = false,
+    VoidCallback? onClear,
+    Widget? customSuffixIcon,
+  }) {
+    return ModalTextField(
+      controller: controller,
+      label: label,
+      hintText: label,
+      readOnly: true,
+      onTap: onTap,
+      suffixIcon: _buildDropdownSuffix(
+        showClear: showClear,
+        onClear: onClear,
+        customIcon: customSuffixIcon,
+      ),
+      suffixIconConstraints: const BoxConstraints(
+        minHeight: 24,
+        minWidth: 32,
+        maxWidth: 60,
+      ),
     );
   }
 
@@ -323,135 +315,129 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
     return BlocBuilder<CreditCreationCubit, CreditCreationState>(
       builder: (context, state) {
         final creditRequest = state.creditRequest;
-        final selectedClient = state.selectedClient;
-        final selectedInvestor = state.selectedInvestor;
         final selectedCatalog = state.selectedCatalog;
-        final selectedCategory = state.selectedCategory;
+        _syncDisplayControllers(state);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Основная информация',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-              ),
-            ),
-
+            // --- Основная информация ---
+            _buildSectionTitle('Основная информация'),
             const SizedBox(height: 16),
 
             CustomCheckbox(
               value: creditRequest.inDebt,
               onChanged: (value) {
-                context.read<CreditCreationCubit>().updateBasicInfo(
-                  inDebt: value ?? false,
+                final cubit = context.read<CreditCreationCubit>();
+                final newValue = value ?? false;
+                if (newValue) {
+                  _debtCommentController.clear();
+                }
+                cubit.updateBasicInfo(
+                  inDebt: newValue,
+                  debtComment: newValue
+                      ? null
+                      : cubit.state.creditRequest.debtComment,
+                  investorId: newValue
+                      ? null
+                      : cubit.state.creditRequest.investorId,
+                  poolId: newValue ? null : cubit.state.creditRequest.poolId,
+                  selectedInvestor: newValue
+                      ? null
+                      : cubit.state.selectedInvestor,
                 );
               },
               label: 'Договор в долг',
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
-            DateInput(
+            _buildPickerField(
               controller: _creditDateController,
               label: 'Выберите дату',
-              initialDate: creditRequest.creditDate,
-              onDateSelected: (date) {
-                _updateDateController(date);
-                context.read<CreditCreationCubit>().updateBasicInfo(
-                  creditDate: date,
-                );
-              },
+              onTap: () => _pickCreditDate(creditRequest.creditDate),
+              customSuffixIcon: SvgPicture.asset(
+                SvgIcons.calendar,
+                width: 20,
+                height: 20,
+                color: const Color(0xFF6B717C),
+              ),
             ),
 
             const SizedBox(height: 12),
 
-            if (creditRequest.inDebt)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomInput(
-                    controller: _debtCommentController,
-                    onChanged: (value) {
-                      context.read<CreditCreationCubit>().updateBasicInfo(
-                        debtComment: value.isEmpty ? null : value,
-                      );
-                    },
-                    label: 'Комментарий к долгу',
-                  ),
-                ],
-              )
-            else
-              _buildSelectableField(
-                label: 'Инвестор',
-                displayText: _getInvestorDisplayText(selectedInvestor),
+            if (!creditRequest.inDebt)
+              _buildPickerField(
+                controller: _investorDisplayController,
+                label: 'Выберите инвестора или пул',
                 onTap: _showInvestorPicker,
-                isSelected: selectedInvestor != null,
-                showBottomSheetIcon: true,
               ),
-
-            const SizedBox(height: 24),
-
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Сведения о покупателе',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-              ),
-            ),
 
             const SizedBox(height: 12),
 
-            _buildSelectableField(
-              label: 'Покупатель',
-              displayText: _getClientDisplayText(selectedClient),
-              onTap: _showClientPicker,
-              isSelected: selectedClient != null,
-              showBottomSheetIcon: true,
-            ),
-
-            const SizedBox(height: 24),
-
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Дополнительно',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            CustomInput(
+            ModalTextField(
               controller: _creditNameController,
               label: 'Название договора (необязательно)',
-              onChanged: (value) {
-                context.read<CreditCreationCubit>().updateBasicInfo(
-                  name: value.isEmpty ? null : value,
-                );
-              },
+              hintText: 'Название договора (необязательно)',
             ),
 
             const SizedBox(height: 12),
 
-            _buildObjectTypeInput(
-              label: 'Каталог (не обязательно)',
-              displayText: _getObjectTypeDisplayText(selectedCatalog),
+            _buildPickerField(
+              controller: _catalogDisplayController,
+              label: 'Каталог (необязательно)',
               onTap: _showCatalogPicker,
-              onRemove: _removeCatalog,
-              hasSelection: selectedCatalog != null,
+              showClear: selectedCatalog != null,
+              onClear: selectedCatalog != null ? _removeCatalog : null,
+            ),
+
+            if (creditRequest.inDebt) ...[
+              const SizedBox(height: 12),
+              ModalTextField(
+                controller: _debtCommentController,
+                label: 'Комментарий',
+                hintText: 'Комментарий',
+                keyboardType: TextInputType.multiline,
+                minLines: 5,
+                maxLines: 6,
+                alignLabelWithHint: true,
+                suffixIcon: const SizedBox.shrink(),
+                suffixIconConstraints: const BoxConstraints(
+                  minWidth: 0,
+                  minHeight: 0,
+                ),
+                onChanged: (value) {
+                  context.read<CreditCreationCubit>().updateBasicInfo(
+                    debtComment: value.isEmpty ? null : value,
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+            ] else
+              const SizedBox(height: 24),
+
+            // --- Покупатель ---
+            _buildSectionTitle('Сведения о покупателе'),
+            const SizedBox(height: 16),
+
+            _buildPickerField(
+              controller: _clientDisplayController,
+              label: 'Выберите покупателя',
+              onTap: _showClientPicker,
             ),
 
             const SizedBox(height: 12),
 
-            _buildObjectTypeInput(
-              label: 'Категория (не обязательно)',
-              displayText: _getObjectTypeDisplayText(selectedCategory),
-              onTap: _showCategoryPicker,
-              onRemove: _removeCategory,
-              hasSelection: selectedCategory != null,
+            _buildPickerField(
+              controller: _guarantorDisplayController,
+              label: 'Выберите поручителя (необязательно)',
+              onTap: _showGuarantorPicker,
+              showClear: creditRequest.guarantor != null,
+              onClear: creditRequest.guarantor != null
+                  ? _removeGuarantor
+                  : null,
             ),
+
             const SizedBox(height: 16),
           ],
         );
@@ -461,9 +447,14 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
 
   @override
   void dispose() {
+    _creditNameController.removeListener(_handleNameChanged);
     _creditNameController.dispose();
     _debtCommentController.dispose();
     _creditDateController.dispose();
+    _investorDisplayController.dispose();
+    _clientDisplayController.dispose();
+    _guarantorDisplayController.dispose();
+    _catalogDisplayController.dispose();
     super.dispose();
   }
 }

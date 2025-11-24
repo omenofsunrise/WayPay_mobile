@@ -3,9 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/CustomRadioButton';
-import 'package:waypay_mobile/core/widgets/inputs/custom_input.dart';
-import 'package:waypay_mobile/core/widgets/inputs/custom_select.dart';
+import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
 import 'package:waypay_mobile/features/credit/data/models/schedule_preview_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
@@ -48,6 +46,7 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
   late TextEditingController _firstPaymentPercentController;
   late TextEditingController _firstPaymentAmountController;
   late TextEditingController _termMonthsController;
+  late TextEditingController _paymentDayController;
   Timer? _debounceTimer;
 
   @override
@@ -57,19 +56,12 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     _firstPaymentPercentController = TextEditingController();
     _firstPaymentAmountController = TextEditingController();
     _termMonthsController = TextEditingController();
+    _paymentDayController = TextEditingController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateControllers();
       _loadSchedulePreview();
     });
-  }
-
-  bool get _isNearestMonthSelected {
-    return !widget.nextMonthStart && !widget.currentMonthStart;
-  }
-
-  bool get _isCurrentMonthSelected {
-    return widget.currentMonthStart;
   }
 
   bool get _isNextMonthSelected {
@@ -116,6 +108,13 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
 
     if (currentTermText != newTermText) {
       _termMonthsController.text = newTermText;
+    }
+
+    final currentPaymentDay = _paymentDayController.text;
+    final newPaymentDayText =
+        widget.paymentDay != null ? '${widget.paymentDay} число' : '';
+    if (currentPaymentDay != newPaymentDayText) {
+      _paymentDayController.text = newPaymentDayText;
     }
   }
 
@@ -175,10 +174,6 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     }
   }
 
-  void _handleNearestMonthSelection() {
-    widget.onNearestMonthStartChanged();
-  }
-
   void _handleCurrentMonthSelection() {
     widget.onCurrentMonthStartChanged(true);
     widget.onNextMonthStartChanged(false);
@@ -200,6 +195,54 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     context.read<CreditCreationCubit>().loadSchedulePreview();
   }
 
+  Future<void> _showPaymentDayPicker() async {
+    final selectedDay = await showModalBottomSheet<int>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Выберите день платежа',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 320,
+                  child: ListView.separated(
+                    itemCount: 31,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final day = index + 1;
+                      return ListTile(
+                        title: Text('$day число'),
+                        trailing: widget.paymentDay == day
+                            ? const Icon(Icons.check,
+                                color: Color(AppColors.primary))
+                            : null,
+                        onTap: () => Navigator.of(context).pop(day),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (selectedDay != null) {
+      widget.onPaymentDayChanged(selectedDay);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CreditCreationCubit, CreditCreationState>(
@@ -207,60 +250,41 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Основная информация',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-              ),
+            const Text(
+              'График выплат',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 8),
-            CustomRadioButton(
-              value: true,
-              groupValue: _isNearestMonthSelected,
-              onChanged: (_) => _handleNearestMonthSelection(),
-              label: 'Начинать с ближайшего месяца',
+            const SizedBox(height: 12),
+            _StartNextMonthCheckbox(
+              value: _isNextMonthSelected,
+              onChanged: (value) {
+                if (value) {
+                  _handleNextMonthSelection();
+                } else {
+                  _handleCurrentMonthSelection();
+                }
+              },
             ),
-
-            const SizedBox(height: 8),
-
-            CustomRadioButton(
-              value: true,
-              groupValue: _isCurrentMonthSelected,
-              onChanged: (_) => _handleCurrentMonthSelection(),
-              label: 'Начинать с текущего месяца',
-            ),
-
-            const SizedBox(height: 8),
-
-            CustomRadioButton(
-              value: true,
-              groupValue: _isNextMonthSelected,
-              onChanged: (_) => _handleNextMonthSelection(),
-              label: 'Начинать со следующего месяца',
-            ),
-
-            const SizedBox(height: 24),
-
-            CustomInput(
+            const SizedBox(height: 16),
+            ModalTextField(
               controller: _firstPaymentPercentController,
-              label: 'Первоначальный взнос %',
+              label: 'Первоначальный взнос, %',
               keyboardType: TextInputType.number,
-              onUserInput: _handlePercentInput,
+              onChanged: _handlePercentInput,
             ),
 
             const SizedBox(height: 16),
 
-            CustomInput(
+            ModalTextField(
               controller: _firstPaymentAmountController,
-              label: 'Рублей',
+              label: 'Сумма',
               keyboardType: TextInputType.number,
               onChanged: _handleAmountInput,
             ),
 
             const SizedBox(height: 16),
 
-            CustomInput(
+            ModalTextField(
               controller: _termMonthsController,
               label: 'Количество месяцев',
               keyboardType: TextInputType.number,
@@ -269,14 +293,12 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
 
             const SizedBox(height: 16),
 
-            CustomSelect<int>(
-              customPlaceholder: 'Уплата до',
-              value: widget.paymentDay,
-              onChange: widget.onPaymentDayChanged,
-              options: List.generate(31, (index) {
-                final day = index + 1;
-                return CustomSelectOption<int>(value: day, label: '$day число');
-              }),
+            ModalTextField(
+              controller: _paymentDayController,
+              label: 'Уплата до',
+              readOnly: true,
+              onTap: _showPaymentDayPicker,
+              suffixIcon: const Icon(Icons.keyboard_arrow_down),
             ),
 
             const SizedBox(height: 24),
@@ -316,36 +338,24 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            border: Border(
-              bottom: BorderSide(color: Colors.grey.shade300, width: 1.0),
-            ),
+            color: const Color(0xFFF5F7FB),
+            borderRadius: BorderRadius.circular(16),
           ),
-          child: const Padding(
-            padding: EdgeInsets.only(left: 8.0, right: 8.0),
-            child: _TableHeader(),
-          ),
-        ),
-
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(12),
-            ),
-          ),
-          child: ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: state.schedulePreview.length,
-            itemBuilder: (context, index) {
-              final payment = state.schedulePreview[index];
-              return _buildPaymentItem(payment, index);
-            },
+          child: Column(
+            children: [
+              const _TableHeader(),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: state.schedulePreview.length,
+                itemBuilder: (context, index) {
+                  final payment = state.schedulePreview[index];
+                  return _buildPaymentItem(payment, index);
+                },
+              ),
+            ],
           ),
         ),
       ],
@@ -354,12 +364,13 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
 
   Widget _buildPaymentItem(SchedulePreviewModel payment, int index) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
+        color: Colors.white,
         border: Border(
-          bottom: BorderSide(color: Color(AppColors.greyLight)),
-          left: BorderSide(color: Colors.transparent),
-          right: BorderSide(color: Colors.transparent),
+          top: BorderSide(
+            color: index == 0 ? Colors.transparent : const Color(0xFFE5E7EB),
+          ),
         ),
       ),
       child: Row(
@@ -373,7 +384,7 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
                   '${payment.paymentDate.day.toString().padLeft(2, '0')}.'
                   '${payment.paymentDate.month.toString().padLeft(2, '0')}.'
                   '${payment.paymentDate.year}',
-                  style: const TextStyle(fontWeight: FontWeight.w500),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 if (payment.comment != null && payment.comment!.isNotEmpty) ...[
                   const SizedBox(height: 4),
@@ -388,21 +399,22 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
               ],
             ),
           ),
-
           Expanded(
             flex: 2,
             child: Text(
               '${payment.rest.toStringAsFixed(0)} ₽',
-              style: TextStyle(color: Color(AppColors.grey), fontSize: 14),
+              style: const TextStyle(
+                color: Color(AppColors.darkGrey),
+                fontSize: 14,
+              ),
               textAlign: TextAlign.right,
             ),
           ),
-
           Expanded(
             flex: 2,
             child: Text(
               '${payment.paymentAmount.toStringAsFixed(0)} ₽',
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
               textAlign: TextAlign.right,
             ),
           ),
@@ -417,7 +429,44 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     _firstPaymentPercentController.dispose();
     _firstPaymentAmountController.dispose();
     _termMonthsController.dispose();
+    _paymentDayController.dispose();
     super.dispose();
+  }
+}
+
+class _StartNextMonthCheckbox extends StatelessWidget {
+  const _StartNextMonthCheckbox({
+    required this.value,
+    required this.onChanged,
+  });
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => onChanged(!value),
+      child: Row(
+        children: [
+          Checkbox(
+            value: value,
+            onChanged: (val) => onChanged(val ?? false),
+            activeColor: const Color(AppColors.primary),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Text(
+              'Начинать выплаты со следующего месяца',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -427,9 +476,13 @@ class _TableHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.transparent)),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.shade300),
+        ),
       ),
       child: const Row(
         children: [

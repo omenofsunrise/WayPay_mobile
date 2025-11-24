@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/inputs/custom_input.dart';
+import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 
 class Step2ProductsContent extends StatefulWidget {
@@ -45,8 +45,8 @@ class _Step2ProductsContentState extends State<Step2ProductsContent> {
           name: '',
           price: 0,
           quantity: 1,
-          surcharge: 0,
-          surchargeAmount: 0,
+          surcharge: null,
+          surchargeAmount: null,
         ),
       );
     widget.onProductsChanged(newProducts);
@@ -74,15 +74,11 @@ class _Step2ProductsContentState extends State<Step2ProductsContent> {
         Row(
           children: [
             const Expanded(
-              child: const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Основная информация',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-                ),
+              child: Text(
+                'Список товаров',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
             ),
-            const SizedBox(width: 16),
             _buildMarkupTypeToggle(),
           ],
         ),
@@ -103,45 +99,33 @@ class _Step2ProductsContentState extends State<Step2ProductsContent> {
         }).toList(),
 
         const SizedBox(height: 16),
-        if (widget.products.length > 1)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Итого товаров на сумму:',
-                      style: AppStyle.manrope(
-                        size: 19,
-                        weight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      '${widget.totalAmount.toStringAsFixed(2)} ₽',
-                      style: AppStyle.manrope(
-                        size: 18,
-                        weight: FontWeight.w700,
-                        color: Color(AppColors.primary),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              'Итого товаров на сумму:',
+              textAlign: TextAlign.right,
+              style: AppStyle.manrope(size: 18, weight: FontWeight.w600),
             ),
-          ),
-
-        Padding(
-          padding: const EdgeInsets.only(top: 16, bottom: 8),
-          child: DefaultButton(
-            onPressed: _addProduct,
-            isGreen: true,
-            text: '+ Добавить товар',
-          ),
+            const SizedBox(width: 8),
+            Text(
+              '${widget.totalAmount.toStringAsFixed(0)} ₽',
+              style: AppStyle.manrope(
+                size: 18,
+                weight: FontWeight.w700,
+                color: Color(AppColors.primary),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        DefaultButton(
+          onPressed: _addProduct,
+          isGreen: true,
+          showIcon: true,
+          icon: Icons.add,
+          text: 'Добавить товар',
         ),
       ],
     );
@@ -152,14 +136,25 @@ class _Step2ProductsContentState extends State<Step2ProductsContent> {
       valueListenable: _selectedTypeNotifier,
       builder: (context, selectedIndex, child) {
         return Container(
+          height: 40,
+          width: 100,
+          padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(color: const Color(0xFFE2E8F0)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
           child: Row(
             children: [
-              _buildToggleButton('₽', 0, selectedIndex),
-              _buildToggleButton('%', 1, selectedIndex),
+              _buildToggleSegment('%', 0, selectedIndex, true),
+              _buildToggleSegment('₽', 1, selectedIndex, false),
             ],
           ),
         );
@@ -167,25 +162,42 @@ class _Step2ProductsContentState extends State<Step2ProductsContent> {
     );
   }
 
-  Widget _buildToggleButton(String text, int index, int selectedIndex) {
+  Widget _buildToggleSegment(
+    String text,
+    int index,
+    int selectedIndex,
+    bool isLeft,
+  ) {
     final isActive = index == selectedIndex;
-    final backgroundColor = isActive ? const Color(0xFF007D88) : Colors.white;
-    final textColor = isActive ? Colors.white : const Color(0xFF333333);
-
-    return GestureDetector(
-      onTap: () {
-        _selectedTypeNotifier.value = index;
-        widget.onMarkupTypeChanged(index);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          border: index == 0
-              ? const Border(right: BorderSide(color: Color(0xFFE2E8F0)))
-              : null,
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          _selectedTypeNotifier.value = index;
+          widget.onMarkupTypeChanged(index);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          decoration: BoxDecoration(
+            color: isActive
+                ? const Color(AppColors.primary)
+                : Colors.transparent,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(isLeft ? 8 : 0),
+              bottomLeft: Radius.circular(isLeft ? 8 : 0),
+              topRight: Radius.circular(isLeft ? 0 : 8),
+              bottomRight: Radius.circular(isLeft ? 0 : 8),
+            ),
+          ),
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: isActive ? Colors.white : const Color(0xFF4B5563),
+              ),
+            ),
+          ),
         ),
-        child: Text(text, style: TextStyle(fontSize: 12, color: textColor)),
       ),
     );
   }
@@ -213,79 +225,37 @@ class _ProductItem extends StatefulWidget {
 }
 
 class __ProductItemState extends State<_ProductItem> {
-  late TextEditingController _nameController;
-  late TextEditingController _priceController;
-  late TextEditingController _quantityController;
-  late TextEditingController _surchargeController;
+  late final TextEditingController _nameController;
+  late final TextEditingController _priceController;
+  late final TextEditingController _quantityController;
+  late final TextEditingController _surchargeController;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.product.name);
-    _priceController = TextEditingController(
-      text: _formatNumber(widget.product.price),
-    );
-    _quantityController = TextEditingController(
-      text: widget.product.quantity.toString(),
-    );
-    _surchargeController = TextEditingController(
-      text: _formatNumber(widget.product.surcharge ?? 0),
-    );
-
-    _setupControllers();
-  }
-
-  void _setupControllers() {
-    _nameController.addListener(_updateProduct);
-    _priceController.addListener(_updateProduct);
-    _quantityController.addListener(_updateProduct);
-    _surchargeController.addListener(_updateProduct);
-  }
-
-  String _formatNumber(double value) {
-    return value == value.truncateToDouble()
-        ? value.toStringAsFixed(0)
-        : value.toString();
-  }
-
-  void _updateProduct() {
-    final name = _nameController.text;
-    final price =
-        double.tryParse(_priceController.text.replaceAll(',', '.')) ?? 0;
-    final quantity = int.tryParse(_quantityController.text) ?? 1;
-    final surcharge =
-        double.tryParse(_surchargeController.text.replaceAll(',', '.')) ?? 0;
-
-    double surchargeAmount = 0;
-    if (widget.markupType == 0) {
-      surchargeAmount = surcharge;
-    } else {
-      surchargeAmount = (price * surcharge) / 100;
-    }
-
-    final totalPrice = (price * quantity) + surchargeAmount;
-
-    final updatedProduct = CreditProduct(
-      name: name,
-      price: price,
-      quantity: quantity,
-      surcharge: surcharge,
-      surchargeAmount: surchargeAmount,
-    );
-
-    widget.onChanged(updatedProduct);
+    _nameController = TextEditingController();
+    _priceController = TextEditingController();
+    _quantityController = TextEditingController();
+    _surchargeController = TextEditingController();
+    _applyProductToControllers(widget.product);
   }
 
   @override
   void didUpdateWidget(_ProductItem oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.product != widget.product) {
-      _nameController.text = widget.product.name;
-      _priceController.text = _formatNumber(widget.product.price);
-      _quantityController.text = widget.product.quantity.toString();
-      _surchargeController.text = _formatNumber(widget.product.surcharge ?? 0);
+    if (widget.product != _buildProductFromControllers()) {
+      _applyProductToControllers(widget.product);
     }
+
+    if (oldWidget.markupType != widget.markupType) {
+      _updateProduct();
+    }
+  }
+
+  void _updateProduct() {
+    final updatedProduct = _buildProductFromControllers();
+    widget.onChanged(updatedProduct);
   }
 
   @override
@@ -299,10 +269,6 @@ class __ProductItemState extends State<_ProductItem> {
 
   @override
   Widget build(BuildContext context) {
-    final totalPrice =
-        (widget.product.price * widget.product.quantity) +
-        (widget.product.surchargeAmount ?? 0);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -310,89 +276,66 @@ class __ProductItemState extends State<_ProductItem> {
           children: [
             Text(
               'Товар № ${widget.index + 1}',
-              style: AppStyle.manrope(size: 16, weight: FontWeight.w400),
+              style: AppStyle.manrope(size: 16, weight: FontWeight.w600),
             ),
             const Spacer(),
             if (widget.canRemove)
-              IconButton(
+              TextButton.icon(
                 onPressed: widget.onRemove,
-                icon: Icon(
+                icon: const Icon(
                   Icons.delete_outline,
+                  size: 18,
                   color: Color(AppColors.primary),
                 ),
-                iconSize: 20,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+                label: const Text(
+                  'Удалить товар',
+                  style: TextStyle(color: Color(AppColors.primary)),
+                ),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
               ),
           ],
         ),
 
         const SizedBox(height: 12),
 
-        CustomInput(
+        ModalTextField(
           controller: _nameController,
           label: 'Название товара',
-          onChanged: (value) => _updateProduct(),
+          hintText: 'Название товара',
+          onChanged: (_) => _updateProduct(),
         ),
 
         const SizedBox(height: 12),
 
-        Row(
-          children: [
-            Expanded(
-              child: CustomInput(
-                controller: _priceController,
-                label: 'Стоимость, ₽',
-                keyboardType: TextInputType.number,
-                onChanged: (value) => _updateProduct(),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: CustomInput(
-                controller: _quantityController,
-                label: 'Кол-во',
-                keyboardType: TextInputType.number,
-                onChanged: (value) => _updateProduct(),
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 12),
-
-        CustomInput(
-          controller: _surchargeController,
-          label: widget.markupType == 0 ? 'Надбавка, ₽' : 'Надбавка, %',
+        ModalTextField(
+          controller: _priceController,
+          label: 'Стоимость',
+          hintText: 'Стоимость',
           keyboardType: TextInputType.number,
-          onChanged: (value) => _updateProduct(),
+          onChanged: (_) => _updateProduct(),
         ),
 
         const SizedBox(height: 12),
 
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Color(AppColors.lightGreyBackground),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Цена товара:',
-                style: AppStyle.manrope(size: 14, weight: FontWeight.w500),
-              ),
-              Text(
-                '${totalPrice.toStringAsFixed(0)} ₽',
-                style: AppStyle.manrope(
-                  size: 14,
-                  weight: FontWeight.w700,
-                  color: Color(AppColors.primary),
-                ),
-              ),
-            ],
-          ),
+        ModalTextField(
+          controller: _quantityController,
+          label: 'Количество',
+          hintText: 'Количество',
+          keyboardType: TextInputType.number,
+          onChanged: (_) => _updateProduct(),
+        ),
+
+        const SizedBox(height: 12),
+
+        ModalTextField(
+          controller: _surchargeController,
+          label: widget.markupType == 0 ? 'Надбавка %' : 'Надбавка ₽',
+          hintText: widget.markupType == 0 ? 'Надбавка %' : 'Надбавка ₽',
+          keyboardType: TextInputType.number,
+          onChanged: (_) => _updateProduct(),
         ),
 
         const SizedBox(height: 16),
@@ -400,5 +343,73 @@ class __ProductItemState extends State<_ProductItem> {
         const SizedBox(height: 16),
       ],
     );
+  }
+
+  void _applyProductToControllers(CreditProduct product) {
+    if (_isProductEmpty(product)) {
+      _clearControllers();
+      return;
+    }
+
+    _nameController.text = product.name;
+    _priceController.text = _formatNumber(product.price);
+    _quantityController.text = product.quantity.toString();
+    if (product.surcharge == null) {
+      _surchargeController.clear();
+    } else {
+      _surchargeController.text = _formatNumber(product.surcharge!);
+    }
+  }
+
+  CreditProduct _buildProductFromControllers() {
+    final name = _nameController.text.trim();
+    final priceText = _priceController.text.replaceAll(',', '.').trim();
+    final price = double.tryParse(priceText) ?? 0;
+    final quantity = int.tryParse(_quantityController.text.trim()) ?? 1;
+    final surchargeText = _surchargeController.text.replaceAll(',', '.').trim();
+    final double? surcharge = surchargeText.isEmpty
+        ? null
+        : double.tryParse(surchargeText);
+    final surchargeValue = surcharge ?? 0;
+
+    double? surchargeAmount;
+    if (surcharge == null) {
+      surchargeAmount = null;
+    } else if (widget.markupType == 0) {
+      surchargeAmount = (price * surchargeValue) / 100;
+    } else {
+      surchargeAmount = surchargeValue;
+    }
+
+    return CreditProduct(
+      name: name,
+      price: price,
+      quantity: quantity,
+      surcharge: surcharge,
+      surchargeAmount: surchargeAmount,
+    );
+  }
+
+  bool _isProductEmpty(CreditProduct product) {
+    final surchargeValue = product.surcharge ?? 0;
+    final surchargeAmount = product.surchargeAmount ?? 0;
+    return product.name.isEmpty &&
+        product.price == 0 &&
+        product.quantity == 1 &&
+        surchargeValue == 0 &&
+        surchargeAmount == 0;
+  }
+
+  void _clearControllers() {
+    _nameController.clear();
+    _priceController.clear();
+    _quantityController.clear();
+    _surchargeController.clear();
+  }
+
+  String _formatNumber(double value) {
+    return value == value.truncateToDouble()
+        ? value.toStringAsFixed(0)
+        : value.toString();
   }
 }

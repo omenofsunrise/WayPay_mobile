@@ -13,6 +13,8 @@ class InvestorsModel {
   final double? investorIncome;
   final double? selfIncome;
   final bool? isCompany;
+  final double? cashbox;
+  final DateTime? contractEndDate;
 
   InvestorsModel({
     required this.id,
@@ -29,6 +31,8 @@ class InvestorsModel {
     this.investorIncome,
     this.selfIncome,
     this.isCompany,
+    this.cashbox,
+    this.contractEndDate,
   });
 
   factory InvestorsModel.fromJson(Map<String, dynamic> json) {
@@ -56,6 +60,12 @@ class InvestorsModel {
           ? (json['selfIncome'] as num).toDouble()
           : null,
       isCompany: json['isCompany'] as bool?,
+      cashbox: json['cashbox'] != null
+          ? (json['cashbox'] as num).toDouble()
+          : null,
+      contractEndDate: json['contractEndDate'] != null
+          ? DateTime.tryParse(json['contractEndDate'])
+          : null,
     );
   }
 
@@ -74,6 +84,8 @@ class InvestorsModel {
     double? investorIncome,
     double? selfIncome,
     bool? isCompany,
+    double? cashbox,
+    DateTime? contractEndDate,
   }) {
     return InvestorsModel(
       id: id ?? this.id,
@@ -90,6 +102,8 @@ class InvestorsModel {
       investorIncome: investorIncome ?? this.investorIncome,
       selfIncome: selfIncome ?? this.selfIncome,
       isCompany: isCompany ?? this.isCompany,
+      cashbox: cashbox ?? this.cashbox,
+      contractEndDate: contractEndDate ?? this.contractEndDate,
     );
   }
 }
