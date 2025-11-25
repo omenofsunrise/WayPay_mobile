@@ -13,6 +13,7 @@ class SvgIcons {
   static const String blogLogo = 'assets/icons/blogLogo.svg';
   static const String book = 'assets/icons/book.svg';
   static const String calcLogo = 'assets/icons/calcLogo.svg';
+  static const String calcMode = 'assets/icons/calcMode.svg';
   static const String calculator = 'assets/icons/calculator.svg';
   static const String calendar = 'assets/icons/calendar.svg';
   static const String cash = 'assets/icons/cash.svg';
@@ -48,7 +49,9 @@ class SvgIcons {
   static const String moneybag = 'assets/icons/moneybag.svg';
   static const String newCredit = 'assets/icons/newCredit.svg';
   static const String notebook = 'assets/icons/notebook.svg';
+  static const String refresh = 'assets/icons/refresh.svg';
   static const String search = 'assets/icons/search.svg';
+  static const String share = 'assets/icons/share.svg';
   static const String shieldPerson = 'assets/icons/shield_person.svg';
   static const String sort = 'assets/icons/sort.svg';
   static const String todoCopy = 'assets/icons/todo copy.svg';

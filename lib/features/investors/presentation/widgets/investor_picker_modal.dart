@@ -54,7 +54,7 @@ class _InvestorTile extends StatelessWidget {
               flex: 3,
               child: Text(
                 cashText,
-                textAlign: TextAlign.right,
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -62,9 +62,8 @@ class _InvestorTile extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 16),
             Expanded(
-              flex: 2,
+              flex: 3,
               child: Text(
                 contractText,
                 textAlign: TextAlign.right,

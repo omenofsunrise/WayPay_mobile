@@ -45,6 +45,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
   final _clientDisplayController = TextEditingController();
   final _guarantorDisplayController = TextEditingController();
   final _catalogDisplayController = TextEditingController();
+  final _categoryDisplayController = TextEditingController();
 
   @override
   void initState() {
@@ -100,6 +101,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
     _catalogDisplayController.text = state.selectedCatalog?.name ?? '';
     _guarantorDisplayController.text =
         state.creditRequest.guarantor?.fullName ?? '';
+    _categoryDisplayController.text = state.selectedCategory?.name ?? '';
   }
 
   Future<void> _showInvestorPicker() async {
@@ -218,9 +220,40 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
     }
   }
 
+  Future<void> _showCategoryPicker() async {
+    final catalogBloc = context.read<ObjectTypeBloc>();
+    final selectedCategory =
+        context.read<CreditCreationCubit>().state.selectedCategory;
+    final result = await showModalBottomSheet<ObjectTypeModel?>(
+      context: context,
+      clipBehavior: Clip.antiAlias,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => BlocProvider.value(
+        value: catalogBloc,
+        child: CatalogPickerModal(
+          selectedCatalog: selectedCategory,
+          entityType: 'CreditType',
+          title: 'Выбор категории',
+          createButtonLabel: 'Создать категорию',
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+    context.read<CreditCreationCubit>().updateCategory(result);
+  }
+
   void _removeCatalog() {
     context.read<CreditCreationCubit>().updateCatalog(null);
     _catalogDisplayController.clear();
+  }
+
+  void _removeCategory() {
+    context.read<CreditCreationCubit>().updateCategory(null);
+    _categoryDisplayController.clear();
   }
 
 
@@ -265,18 +298,6 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (showClear)
-            GestureDetector(
-              onTap: onClear,
-              child: const Padding(
-                padding: EdgeInsets.only(right: 4),
-                child: Icon(
-                  Icons.close,
-                  size: 18,
-                  color: Color(AppColors.darkGrey),
-                ),
-              ),
-            ),
           customIcon ?? arrow,
         ],
       ),
@@ -391,6 +412,17 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
               onClear: selectedCatalog != null ? _removeCatalog : null,
             ),
 
+            const SizedBox(height: 12),
+
+            _buildPickerField(
+              controller: _categoryDisplayController,
+              label: 'Категория (необязательно)',
+              onTap: _showCategoryPicker,
+              showClear: state.selectedCategory != null,
+              onClear:
+                  state.selectedCategory != null ? _removeCategory : null,
+            ),
+
             if (creditRequest.inDebt) ...[
               const SizedBox(height: 12),
               ModalTextField(
@@ -455,6 +487,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
     _clientDisplayController.dispose();
     _guarantorDisplayController.dispose();
     _catalogDisplayController.dispose();
+    _categoryDisplayController.dispose();
     super.dispose();
   }
 }

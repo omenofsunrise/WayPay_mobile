@@ -15,6 +15,7 @@ void main() {
     expect(File(SvgIcons.blogLogo).existsSync(), isTrue);
     expect(File(SvgIcons.book).existsSync(), isTrue);
     expect(File(SvgIcons.calcLogo).existsSync(), isTrue);
+    expect(File(SvgIcons.calcMode).existsSync(), isTrue);
     expect(File(SvgIcons.calculator).existsSync(), isTrue);
     expect(File(SvgIcons.calendar).existsSync(), isTrue);
     expect(File(SvgIcons.cash).existsSync(), isTrue);
@@ -50,7 +51,9 @@ void main() {
     expect(File(SvgIcons.moneybag).existsSync(), isTrue);
     expect(File(SvgIcons.newCredit).existsSync(), isTrue);
     expect(File(SvgIcons.notebook).existsSync(), isTrue);
+    expect(File(SvgIcons.refresh).existsSync(), isTrue);
     expect(File(SvgIcons.search).existsSync(), isTrue);
+    expect(File(SvgIcons.share).existsSync(), isTrue);
     expect(File(SvgIcons.shieldPerson).existsSync(), isTrue);
     expect(File(SvgIcons.sort).existsSync(), isTrue);
     expect(File(SvgIcons.todoCopy).existsSync(), isTrue);

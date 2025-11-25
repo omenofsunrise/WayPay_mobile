@@ -28,7 +28,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
             poolId: null,
             creditDate: DateTime.now(),
             firstPayment: 0,
-            termMonths: 12,
+            termMonths: 0,
             paymentDay: 1,
             nextMonthStart: false,
             currentMonthStart: false,
@@ -46,7 +46,9 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
           schedulePreviewLoading: false,
           schedulePreviewError: null,
         ),
-      );
+      ) {
+    _initMarkupType();
+  }
 
   void updateBasicInfo({
     int? clientId,
@@ -65,7 +67,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     ObjectTypeModel? selectedCatalog,
     ObjectTypeModel? selectedCategory,
   }) {
-    final updatedRequest = state.creditRequest.copyWith(
+    CreateCreditRequest updatedRequest = state.creditRequest.copyWith(
       clientId: clientId,
       name: name,
       creditTypeId: creditTypeId,
@@ -79,6 +81,11 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
       debtComment: debtComment,
     );
 
+    if (creditDate != null) {
+      final nextDay = (creditDate.day % 31) + 1;
+      updatedRequest = updatedRequest.copyWith(paymentDay: nextDay);
+    }
+
     emit(
       state.copyWith(
         creditRequest: updatedRequest,
@@ -91,11 +98,29 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
   }
 
   void updateCatalog(ObjectTypeModel? catalog) {
-    emit(state.copyWith(selectedCatalog: catalog, keepCategory: true));
+    final updatedRequest = state.creditRequest.copyWith(
+      creditTabTypeId: catalog?.id,
+    );
+    emit(
+      state.copyWith(
+        creditRequest: updatedRequest,
+        selectedCatalog: catalog,
+        keepCategory: true,
+      ),
+    );
   }
 
   void updateCategory(ObjectTypeModel? category) {
-    emit(state.copyWith(selectedCategory: category, keepCatalog: true));
+    final updatedRequest = state.creditRequest.copyWith(
+      creditTypeId: category?.id,
+    );
+    emit(
+      state.copyWith(
+        creditRequest: updatedRequest,
+        selectedCategory: category,
+        keepCatalog: true,
+      ),
+    );
   }
 
   void updatePaymentInfo({
@@ -410,9 +435,9 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
       final createRequest = CreateCreditRequest(
         clientId: state.creditRequest.clientId,
         name: state.creditRequest.name.trim(),
-        creditTypeId: null,
-        creditTabTypeId: null,
-        guarantorClientId: null,
+        creditTypeId: state.creditRequest.creditTypeId,
+        creditTabTypeId: state.creditRequest.creditTabTypeId,
+        guarantorClientId: state.creditRequest.guarantorClientId,
         guarantor: guarantor,
         investorId: state.creditRequest.investorId,
         poolId: state.creditRequest.poolId,
@@ -437,7 +462,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
 
       await _dataSource.createCredit(createRequest);
 
-      _resetState();
+      await _resetState();
 
       return;
     } catch (e) {
@@ -461,7 +486,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
           poolId: null,
           creditDate: DateTime.now(),
           firstPayment: 0,
-          termMonths: 12,
+          termMonths: 0,
           paymentDay: 1,
           nextMonthStart: false,
           currentMonthStart: false,
@@ -505,5 +530,13 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt('credit_markup_type') ?? 0;
   }
+
+  void _initMarkupType() {
+    Future.microtask(() async {
+      final saved = await _loadMarkupType();
+      if (!isClosed && saved != state.markupType) {
+        emit(state.copyWith(markupType: saved));
+      }
+    });
+  }
 }
-import 'package:shared_preferences/shared_preferences.dart';

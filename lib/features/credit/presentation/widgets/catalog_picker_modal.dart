@@ -9,11 +9,27 @@ import 'package:waypay_mobile/features/objectType/presentation/block/object_type
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_event.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_state.dart';
 import 'package:waypay_mobile/features/objectType/presentation/modal/create_object_type_modal_state.dart';
+import 'package:waypay_mobile/features/objectType/presentation/modal/edit_object_type_modal.dart';
 
 class CatalogPickerModal extends StatefulWidget {
-  const CatalogPickerModal({super.key, this.selectedCatalog});
+  const CatalogPickerModal({
+    super.key,
+    this.selectedCatalog,
+    this.entityType = 'Credit',
+    this.title,
+    this.createButtonLabel,
+    this.allowCreate = true,
+    this.allowEdit = true,
+    this.allowDelete = true,
+  });
 
   final ObjectTypeModel? selectedCatalog;
+  final String entityType;
+  final String? title;
+  final String? createButtonLabel;
+  final bool allowCreate;
+  final bool allowEdit;
+  final bool allowDelete;
 
   @override
   State<CatalogPickerModal> createState() => _CatalogPickerModalState();
@@ -22,6 +38,20 @@ class CatalogPickerModal extends StatefulWidget {
 class _CatalogPickerModalState extends State<CatalogPickerModal> {
   final TextEditingController _searchController = TextEditingController();
   String _query = '';
+
+  bool get _isCategory => widget.entityType.toLowerCase() == 'credittype';
+
+  String get _modalTitle =>
+      widget.title ?? (_isCategory ? 'Выбор категории' : 'Выбор каталога');
+
+  String get _createText => widget.createButtonLabel ??
+      (_isCategory ? 'Создать категорию' : 'Создать новый каталог');
+
+  String get _emptyText => _isCategory
+      ? 'Категории не найдены'
+      : 'Каталоги не найдены';
+
+  String get _noneText => _isCategory ? 'Без категории' : 'Без каталога';
 
   @override
   void initState() {
@@ -44,7 +74,7 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
         query: GetObjectTypesQuery(
           page: 1,
           pageSize: 200,
-          entityType: 'Credit',
+          entityType: widget.entityType,
         ),
       ),
     );
@@ -74,10 +104,10 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
             children: [
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Выбор каталога',
-                      style: TextStyle(
+                      _modalTitle,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -113,10 +143,12 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
                     if (state is ObjectTypeLoaded) {
                       final filtered = _applyFilter(state.objectTypes);
                       if (filtered.isEmpty) {
-                        return const Center(
+                        return Center(
                           child: Text(
-                            'Каталоги не найдены',
-                            style: TextStyle(color: Color(AppColors.darkGrey)),
+                            _emptyText,
+                            style: const TextStyle(
+                              color: Color(AppColors.darkGrey),
+                            ),
                           ),
                         );
                       }
@@ -129,9 +161,9 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
                             return ListTile(
                               contentPadding: EdgeInsets.zero,
                               onTap: () => Navigator.of(context).pop(null),
-                              title: const Text(
-                                'Без каталога',
-                                style: TextStyle(
+                              title: Text(
+                                _noneText,
+                                style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   color: Color(AppColors.black),
                                 ),
@@ -139,14 +171,45 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
                             );
                           }
                           final catalog = filtered[index - 1];
-                          return ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            onTap: () => Navigator.of(context).pop(catalog),
-                            title: Text(
-                              catalog.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Color(AppColors.black),
+                          final isSelected =
+                              widget.selectedCatalog?.id == catalog.id;
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xFFE4F2F4)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ListTile(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              onTap: () => Navigator.of(context).pop(catalog),
+                              title: Text(
+                                catalog.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(AppColors.black),
+                                ),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (widget.allowEdit)
+                                    IconButton(
+                                      icon: const Icon(Icons.edit,
+                                          color: Color(AppColors.darkGrey)),
+                                      onPressed: () => _editCatalog(catalog),
+                                    ),
+                                  if (widget.allowDelete)
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline,
+                                          color: Color(0xFFE53935)),
+                                      onPressed: () => _confirmDelete(catalog),
+                                    ),
+                                ],
                               ),
                             ),
                           );
@@ -158,13 +221,14 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
                 ),
               ),
               const SizedBox(height: 16),
-              DefaultButton(
-                text: 'Создать новый каталог',
-                showIcon: true,
-                icon: Icons.add,
-                isGreen: true,
-                onPressed: _openCreateCatalog,
-              ),
+              if (widget.allowCreate)
+                DefaultButton(
+                  text: _createText,
+                  showIcon: true,
+                  icon: Icons.add,
+                  isGreen: true,
+                  onPressed: _openCreateCatalog,
+                ),
             ],
           ),
         ),
@@ -181,7 +245,7 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
       builder: (_) => BlocProvider.value(
         value: bloc,
         child: CreateObjectTypeModal(
-          entityType: 'Credit',
+          entityType: widget.entityType,
           onObjectTypeCreated: (catalog) {
             Navigator.of(context).pop(catalog);
           },
@@ -194,5 +258,41 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
     } else {
       _loadCatalogs();
     }
+  }
+
+  Future<void> _editCatalog(ObjectTypeModel catalog) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => BlocProvider.value(
+        value: context.read<ObjectTypeBloc>(),
+        child: EditObjectTypeModal(objectType: catalog),
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete(ObjectTypeModel catalog) async {
+    final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Удалить запись?'),
+            content: Text('"${catalog.name}" будет удалён без возврата.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Отмена'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Удалить'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+
+    if (!confirmed || !mounted) return;
+    context.read<ObjectTypeBloc>().add(DeleteObjectTypeEvent(catalog.id));
   }
 }

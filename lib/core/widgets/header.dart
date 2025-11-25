@@ -14,6 +14,8 @@ class Header extends StatelessWidget {
   final bool showBackButton;
   final VoidCallback? onBackPressed;
   final bool showNotifications;
+  final Widget? trailing;
+  final GlobalKey? titleKey;
 
   const Header({
     super.key,
@@ -23,6 +25,8 @@ class Header extends StatelessWidget {
     this.showBackButton = false,
     this.onBackPressed,
     this.showNotifications = true,
+    this.trailing,
+    this.titleKey,
   });
 
   @override
@@ -69,11 +73,14 @@ class Header extends StatelessWidget {
 
           // Приветствие
           Expanded(
-            child: Text(
-              title,
-              style: AppStyle.semiBold23.copyWith(fontWeight: FontWeight.w500),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            child: KeyedSubtree(
+              key: titleKey,
+              child: Text(
+                title,
+                style: AppStyle.semiBold23.copyWith(fontWeight: FontWeight.w500),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
 
@@ -81,6 +88,11 @@ class Header extends StatelessWidget {
             const SizedBox(width: 12),
             NotificationsBellButton(iconSize: 26),
             const SizedBox(width: 3),
+          ],
+
+          if (trailing != null) ...[
+            const SizedBox(width: 12),
+            trailing!,
           ],
         ],
       ),

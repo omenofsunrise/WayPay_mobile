@@ -2,10 +2,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
+import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
+import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_mobile/core/widgets/inputs/custom_calendar.dart';
+import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:pdf/pdf.dart';
@@ -19,11 +24,13 @@ class CalculatorScreen extends StatefulWidget {
 }
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
+  final GlobalKey _headerTitleKey = GlobalKey();
   final _sumController = TextEditingController();
   final _monthsController = TextEditingController();
   final _initialController = TextEditingController();
   final _percentController = TextEditingController();
   final _roundController = TextEditingController();
+  final FocusNode _monthsFocusNode = FocusNode();
 
   DateTime _startDate = DateTime.now().add(const Duration(days: 31));
 
@@ -34,92 +41,180 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   DateTime lastPaymentDate = DateTime.now();
 
   CalculationMode _calculationMode = CalculationMode.standard;
+  static const int _minMonths = 2;
+  static const int _maxMonths = 10;
+  double _monthsSlider = _minMonths.toDouble();
+  bool _isUpdatingMonthsField = false;
 
   @override
   void initState() {
     super.initState();
-    _roundController.text = '50';
+    _monthsController.text = _minMonths.toString();
     _sumController.addListener(_calculate);
-    _monthsController.addListener(_calculate);
+    _monthsController.addListener(_handleMonthsInput);
     _initialController.addListener(_calculate);
     _percentController.addListener(_calculate);
     _roundController.addListener(_calculate);
+    _monthsFocusNode.addListener(_handleMonthsFocusChange);
   }
 
   void _showCalculationModeMenu(BuildContext context) {
-    final RenderBox button = context.findRenderObject() as RenderBox;
     final RenderBox overlay =
         Overlay.of(context).context.findRenderObject() as RenderBox;
-    final RelativeRect position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(
-          button.size.bottomRight(Offset.zero),
-          ancestor: overlay,
-        ),
-      ),
-      Offset.zero & overlay.size,
+    const double popupWidth = 220;
+
+    Offset? anchor;
+    Size? anchorSize;
+    final RenderBox? titleBox =
+        _headerTitleKey.currentContext?.findRenderObject() as RenderBox?;
+    if (titleBox != null) {
+      anchor = titleBox.localToGlobal(Offset.zero, ancestor: overlay);
+      anchorSize = titleBox.size;
+    } else {
+      final RenderBox button = context.findRenderObject() as RenderBox;
+      anchor = button.localToGlobal(
+        Offset(button.size.width / 2, button.size.height),
+        ancestor: overlay,
+      );
+      anchorSize = Size.zero;
+    }
+
+    final double desiredLeft = anchor!.dx +
+        (anchorSize!.width.isFinite ? (anchorSize.width - popupWidth) / 2 : 0);
+    final double clampedLeft = desiredLeft.clamp(
+      16.0,
+      overlay.size.width - popupWidth - 16.0,
+    );
+    final double top = anchor.dy + anchorSize.height + 8;
+    final double right = overlay.size.width - clampedLeft - popupWidth;
+    final double bottom = overlay.size.height - top;
+    final RelativeRect position = RelativeRect.fromLTRB(
+      clampedLeft,
+      top,
+      right,
+      bottom,
     );
 
     showMenu<CalculationMode>(
       context: context,
       position: position,
       color: Color(AppColors.white),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       items: [
-        _buildPopupMenuItem(
+        _buildCalculationModeItem(
           CalculationMode.standard,
           'Стандартный (на всю сумму)',
-          _calculationMode == CalculationMode.standard,
         ),
-        _buildPopupMenuItem(
+        _buildCalculationModeItem(
           CalculationMode.afterInitial,
           'Надбавка после вычета взноса',
-          _calculationMode == CalculationMode.afterInitial,
         ),
-        _buildPopupMenuItem(
+        _buildCalculationModeItem(
           CalculationMode.monthlyPercent,
-          'Процент за 1 месяц',
-          _calculationMode == CalculationMode.monthlyPercent,
+          'Процент за 1 месяц (x месяцев)',
         ),
       ],
-    ).then((CalculationMode? selectedMode) {
-      if (selectedMode != null && selectedMode != _calculationMode) {
-        setState(() {
-          _calculationMode = selectedMode;
-          _calculate();
-        });
+    );
+  }
+
+  void _handleMonthsInput() {
+    if (_isUpdatingMonthsField) return;
+    final raw = _monthsController.text;
+    if (raw.isEmpty) {
+      _updateMonths(_minMonths);
+      return;
+    }
+
+    final parsed = int.tryParse(raw);
+    if (parsed == null) {
+      _updateMonths(_minMonths);
+      return;
+    }
+
+    if (parsed < _minMonths) {
+      _updateMonths(_minMonths);
+      return;
+    }
+
+    if (parsed > _maxMonths) {
+      _updateMonths(_maxMonths);
+      return;
+    }
+
+    _updateMonths(parsed);
+  }
+
+  void _handleMonthsFocusChange() {
+    if (!_monthsFocusNode.hasFocus) {
+      final parsed = int.tryParse(_monthsController.text) ?? _minMonths;
+      if (parsed < _minMonths || parsed > _maxMonths) {
+        _updateMonths(_minMonths);
       }
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final text = _monthsController.text;
+      _monthsController.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: text.length,
+      );
     });
   }
 
-  PopupMenuItem<CalculationMode> _buildPopupMenuItem(
+  void _updateMonths(int months) {
+    final clamped = months.clamp(_minMonths, _maxMonths);
+    final text = clamped.toString();
+    _isUpdatingMonthsField = true;
+    _monthsController.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+    _isUpdatingMonthsField = false;
+    if (_monthsSlider != clamped.toDouble()) {
+      setState(() {
+        _monthsSlider = clamped.toDouble();
+      });
+    }
+    _calculate();
+  }
+
+  PopupMenuItem<CalculationMode> _buildCalculationModeItem(
     CalculationMode mode,
     String title,
-    bool isSelected,
   ) {
+    final isSelected = _calculationMode == mode;
     return PopupMenuItem<CalculationMode>(
       value: mode,
+      onTap: () {
+        if (mode != _calculationMode) {
+          setState(() {
+            _calculationMode = mode;
+            _calculate();
+          });
+        }
+      },
       child: Row(
         children: [
           Container(
-            width: 20,
-            height: 20,
+            width: 16,
+            height: 16,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: isSelected
                     ? const Color(AppColors.primary)
-                    : const Color(AppColors.grey),
+                    : const Color(AppColors.borderColor),
                 width: 2,
               ),
             ),
             child: isSelected
                 ? Center(
                     child: Container(
-                      width: 10,
-                      height: 10,
+                      width: 6,
+                      height: 6,
                       decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.all(Radius.circular(3)),
                         color: Color(AppColors.primary),
                       ),
                     ),
@@ -128,23 +223,34 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppStyle.manrope(
-                    size: 14,
-                    weight: FontWeight.w500,
-                    color: const Color(AppColors.black),
-                  ),
-                ),
-              ],
+            child: Text(
+              title,
+              style: AppStyle.manrope(
+                size: 14,
+                weight: FontWeight.w400,
+                height: 24 / 14,
+                color: isSelected
+                    ? const Color(AppColors.black)
+                    : const Color(0xFF6B7280),
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _monthsController.removeListener(_handleMonthsInput);
+    _sumController.dispose();
+    _monthsController.dispose();
+    _initialController.dispose();
+    _percentController.dispose();
+    _roundController.dispose();
+    _monthsFocusNode.removeListener(_handleMonthsFocusChange);
+    _monthsFocusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _generateAndSharePdf() async {
@@ -608,46 +714,64 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return Scaffold(
       drawer: const AppDrawer(),
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        surfaceTintColor: Colors.white,
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Color(AppColors.black)),
-        elevation: 0,
-        title: Text(
-          'Калькулятор',
-          style: AppStyle.manrope(
-            size: 18,
-            weight: FontWeight.w600,
-            color: const Color(AppColors.black),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Header(
+              title: 'Калькулятор',
+              showBackButton: true,
+              showNotifications: false,
+              onBackPressed: () => Navigator.of(context).maybePop(),
+              titleKey: _headerTitleKey,
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: SvgPicture.asset(
+                      SvgIcons.calcMode,
+                      width: 24,
+                      height: 24,
+                    ),
+                    tooltip: 'Переключить режим',
+                    onPressed: () => _showCalculationModeMenu(context),
+                  ),
+                  IconButton(
+                    icon: SvgPicture.asset(
+                      SvgIcons.share,
+                      width: 24,
+                      height: 24,
+                    ),
+                    tooltip: 'Экспорт в PDF',
+                    onPressed: _generateAndSharePdf,
+                  ),
+                  IconButton(
+                    icon: SvgPicture.asset(
+                      SvgIcons.refresh,
+                      width: 24,
+                      height: 24,
+                    ),
+                    tooltip: 'Сбросить',
+                    onPressed: () {
+                      _sumController.clear();
+                      _initialController.clear();
+                      _percentController.clear();
+                      _roundController.clear();
+                      _updateMonths(_minMonths);
+                      setState(() {
+                        monthlyPayment = 0;
+                        debt = 0;
+                        overpayment = 0;
+                        total = 0;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.calculate_rounded,
-              color: Color(AppColors.grey),
-            ),
-            tooltip: 'Переключить режим',
-            onPressed: () => _showCalculationModeMenu(context),
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Color(AppColors.grey)),
-            tooltip: 'Сбросить',
-            onPressed: () {
-              setState(() {
-                _sumController.clear();
-                _monthsController.clear();
-                _initialController.clear();
-                _percentController.clear();
-                _roundController.clear();
-                monthlyPayment = 0;
-                debt = 0;
-                overpayment = 0;
-                total = 0;
-              });
-            },
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -706,6 +830,46 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           hint: 'Количество месяцев',
           keyboardType: const TextInputType.numberWithOptions(),
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          focusNode: _monthsFocusNode,
+          onTap: () {
+            final text = _monthsController.text;
+            _monthsController.selection = TextSelection(
+              baseOffset: 0,
+              extentOffset: text.length,
+            );
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              Text(
+                '2 месяца',
+                style: TextStyle(color: Color(AppColors.darkGrey)),
+              ),
+              Text(
+                '10 месяцев',
+                style: TextStyle(color: Color(AppColors.darkGrey)),
+              ),
+            ],
+          ),
+        ),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: 3,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
+            overlayShape: SliderComponentShape.noOverlay,
+            inactiveTrackColor: const Color(0xFFD1D5DB),
+          ),
+          child: Slider(
+            min: _minMonths.toDouble(),
+            max: _maxMonths.toDouble(),
+            divisions: _maxMonths - _minMonths,
+            value: _monthsSlider,
+            activeColor: const Color(AppColors.primary),
+            onChanged: (value) => _updateMonths(value.round()),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -735,35 +899,85 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  final border = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(10),
-    borderSide: BorderSide(color: Color(AppColors.primary)),
-  );
-
   Widget _buildFloatingTextField({
     required TextEditingController controller,
     required String hint,
     TextInputType keyboardType = TextInputType.text,
     List<TextInputFormatter>? inputFormatters,
+    FocusNode? focusNode,
+    VoidCallback? onTap,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: TextField(
+      child: ModalTextField(
         controller: controller,
+        label: hint,
         keyboardType: keyboardType,
+        onTap: onTap,
         inputFormatters: inputFormatters,
-        decoration: InputDecoration(
-          labelText: hint,
-          floatingLabelBehavior: FloatingLabelBehavior.auto,
-          border: border,
-          enabledBorder: border,
-          focusedBorder: border,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
+        readOnly: false,
+      ),
+    );
+  }
+
+  Widget _buildPickerField({
+    required TextEditingController controller,
+    required String label,
+    required VoidCallback onTap,
+    bool showClear = false,
+    VoidCallback? onClear,
+    Widget? customSuffixIcon,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: ModalTextField(
+        controller: controller,
+        label: label,
+        hintText: label,
+        readOnly: true,
+        onTap: onTap,
+        suffixIcon: _buildDropdownSuffix(
+          showClear: showClear,
+          onClear: onClear,
+          customIcon: customSuffixIcon,
+        ),
+        suffixIconConstraints: const BoxConstraints(
+          minHeight: 24,
+          minWidth: 32,
+          maxWidth: 60,
         ),
       ),
+    );
+  }
+
+  Widget _buildDropdownSuffix({
+    bool showClear = false,
+    VoidCallback? onClear,
+    Widget? customIcon,
+  }) {
+    const arrow = Icon(
+      Icons.keyboard_arrow_down_rounded,
+      color: Color(AppColors.darkGrey),
+    );
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (showClear)
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onClear,
+            child: const Padding(
+              padding: EdgeInsets.only(right: 4),
+              child: Icon(
+                Icons.close,
+                size: 16,
+                color: Color(AppColors.darkGrey),
+              ),
+            ),
+          ),
+        customIcon ?? arrow,
+      ],
     );
   }
 
@@ -772,160 +986,132 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       text: DateFormat('dd.MM.yyyy').format(_startDate),
     );
 
-    final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: Color(AppColors.primary)),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: GestureDetector(
-        onTap: () async {
-          final picked = await showDatePicker(
-            context: context,
+    return _buildPickerField(
+      controller: controller,
+      label: 'Начало выплат',
+      onTap: () async {
+        final picked = await showDialog<DateTime>(
+          context: context,
+          builder: (_) => CustomCalendar(
             initialDate: _startDate,
-            firstDate: DateTime(2000),
-            lastDate: DateTime(2100),
-          );
-          if (picked != null) {
-            setState(() => _startDate = picked);
-            controller.text = DateFormat('dd.MM.yyyy').format(_startDate);
-          }
-        },
-        child: AbsorbPointer(
-          child: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              labelText: 'Начало выплат',
-              floatingLabelBehavior: FloatingLabelBehavior.auto,
-              border: border,
-              enabledBorder: border,
-              focusedBorder: border,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
-              suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
-            ),
+            prefix: 'Начало выплат:',
+            onDateSelected: (date) {
+              Navigator.of(context).pop(date);
+            },
           ),
+        );
+
+        if (picked != null) {
+          setState(() => _startDate = picked);
+          controller.text = DateFormat('dd.MM.yyyy').format(_startDate);
+          _calculate();
+        }
+      },
+      customSuffixIcon: Transform.translate(
+        offset: const Offset(-8, 0),
+        child: SvgPicture.asset(
+          SvgIcons.calendar,
+          width: 20,
+          height: 20,
+          color: const Color(0xFF6B717C),
         ),
       ),
     );
   }
 
   Widget _buildResultSection() {
-    return SizedBox(
-      width: double.infinity,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Color(AppColors.borderColor)),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x40000000),
-              offset: Offset(5, 5),
-              blurRadius: 25,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Результаты',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              _buildResultItem('Ежемесячный платёж', monthlyPayment),
-              Row(
-                children: [
-                  Container(
-                    width: 11,
-                    height: 11,
-                    margin: const EdgeInsets.only(right: 4),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(3),
-                      color: Color(AppColors.comfPayment),
-                    ),
-                  ),
-                  Flexible(child: _buildResultItem('Сумма долга', debt)),
-                ],
-              ),
-              Row(
-                children: [
-                  Container(
-                    width: 11,
-                    height: 11,
-                    margin: const EdgeInsets.only(right: 4),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(3),
-                      color: Color(AppColors.creditsCount),
-                    ),
-                  ),
-                  Flexible(child: _buildResultItem('Переплата', overpayment)),
-                ],
-              ),
-              _buildResultItem('Общая сумма', total),
-              Row(
-                children: [
-                  Text(
-                    'Последний платёж',
-                    style: AppStyle.manrope(
-                      size: 15,
-                      weight: FontWeight.w400,
-                      color: Color(AppColors.darkGrey),
-                    ),
-                    textAlign: TextAlign.start,
-                  ),
-                  Spacer(),
-                  Text(
-                    DateFormat('LLLL yyyy', 'ru').format(lastPaymentDate),
-                    style: AppStyle.manrope(size: 15, weight: FontWeight.w500),
-                  ),
-                ],
-              ),
-              SizedBox(height: 10),
-              PaymentLineBar(
-                debt: debt,
-                overpayment: overpayment,
-                total: total,
-              ),
-              SizedBox(height: 10),
-            ],
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Результаты расчёта',
+              style: AppStyle.manrope(size: 22, weight: FontWeight.w700),
+            ),
+            const SizedBox(height: 16),
+            _buildResultRow(
+              'Ежемесячный платеж',
+              '${_formatCurrency(monthlyPayment)} ₽',
+            ),
+            _buildResultRow('Надбавка %', '${_formatPercentValue()}%'),
+            const SizedBox(height: 8),
+            _buildResultRow(
+              'Сумма долга',
+              '${_formatCurrency(debt)} ₽',
+              leadingDot: const Color(AppColors.primary),
+            ),
+            _buildResultRow(
+              'Переплата',
+              '${_formatCurrency(overpayment)} ₽',
+              leadingDot: const Color(0xFF6CD5C6),
+            ),
+            _buildResultRow('Общая сумма', '${_formatCurrency(total)} ₽'),
+            _buildResultRow(
+              'Последний месяц оплаты',
+              DateFormat('LLLL yyyy', 'ru').format(lastPaymentDate),
+            ),
+            const SizedBox(height: 12),
+            PaymentLineBar(debt: debt, overpayment: overpayment, total: total),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildResultItem(String label, double value) {
+  Widget _buildResultRow(String label, String value, {Color? leadingDot}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: AppStyle.manrope(
-              size: 15,
-              weight: FontWeight.w400,
-              color: Color(AppColors.darkGrey),
+          if (leadingDot != null) ...[
+            Container(
+              width: 10,
+              height: 10,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: leadingDot,
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+          ],
+          Expanded(
+            child: Text(
+              label,
+              style: AppStyle.manrope(
+                size: 15,
+                weight: FontWeight.w400,
+                color: const Color(AppColors.darkGrey),
+              ),
             ),
           ),
-          Flexible(
-            child: Text(
-              '${_formatCurrency(value)} ₽',
-              textAlign: TextAlign.end,
-              style: AppStyle.manrope(size: 15, weight: FontWeight.w500),
-            ),
+          Text(
+            value,
+            style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
           ),
         ],
       ),
     );
+  }
+
+  String _formatPercentValue() {
+    final text = _percentController.text.trim();
+    if (text.isEmpty) return '0';
+    final sanitized = text.replaceAll(',', '.');
+    final value = double.tryParse(sanitized) ?? 0;
+    return NumberFormat('0.#', 'ru').format(value);
   }
 
   String _formatCurrency(double value) {
@@ -958,36 +1144,41 @@ class PaymentLineBar extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
       child: SizedBox(
         height: 10,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final double totalWidth = constraints.maxWidth;
-            final double debtWidth = totalWidth * debtFraction;
-            final double overpaymentWidth = totalWidth * overpaymentFraction;
-
-            return Stack(
-              children: [
-                Container(
-                  width: overpaymentWidth + debtWidth,
-                  height: 10,
-                  color: const Color(AppColors.creditsCount),
-                ),
-                Positioned(
-                  left: 0,
-                  child: Container(
-                    width: debtWidth,
-                    height: 10,
-                    decoration: const BoxDecoration(
-                      color: Color(AppColors.comfPayment),
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(10),
-                        bottomRight: Radius.circular(10),
+        child: Stack(
+          children: [
+            Container(
+              height: 10,
+              width: double.infinity,
+              color: const Color(0xFFD7DBE2),
+            ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final totalWidth = constraints.maxWidth;
+                final debtWidth = totalWidth * debtFraction;
+                final overWidth = totalWidth * overpaymentFraction;
+                return Stack(
+                  children: [
+                    Positioned(
+                      left: 0,
+                      child: Container(
+                        width: debtWidth,
+                        height: 10,
+                        color: const Color(AppColors.primary),
                       ),
                     ),
-                  ),
-                ),
-              ],
-            );
-          },
+                    Positioned(
+                      left: debtWidth,
+                      child: Container(
+                        width: overWidth,
+                        height: 10,
+                        color: const Color(0xFF6CD5C6),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

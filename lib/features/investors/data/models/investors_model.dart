@@ -62,10 +62,12 @@ class InvestorsModel {
       isCompany: json['isCompany'] as bool?,
       cashbox: json['cashbox'] != null
           ? (json['cashbox'] as num).toDouble()
-          : null,
+          : (json['balance'] as num?)?.toDouble(),
       contractEndDate: json['contractEndDate'] != null
           ? DateTime.tryParse(json['contractEndDate'])
-          : null,
+          : (json['activeUntil'] != null
+              ? DateTime.tryParse(json['activeUntil'])
+              : null),
     );
   }
 

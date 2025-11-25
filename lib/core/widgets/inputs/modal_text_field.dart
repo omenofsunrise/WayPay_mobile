@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 
 class ModalTextField extends StatefulWidget {
@@ -16,6 +17,8 @@ class ModalTextField extends StatefulWidget {
     this.maxLines,
     this.onChanged,
     this.alignLabelWithHint,
+    this.inputFormatters,
+    this.focusNode,
   });
 
   final TextEditingController controller;
@@ -30,18 +33,23 @@ class ModalTextField extends StatefulWidget {
   final int? maxLines;
   final ValueChanged<String>? onChanged;
   final bool? alignLabelWithHint;
+  final List<TextInputFormatter>? inputFormatters;
+  final FocusNode? focusNode;
 
   @override
   State<ModalTextField> createState() => _ModalTextFieldState();
 }
 
 class _ModalTextFieldState extends State<ModalTextField> {
-  late final FocusNode _focusNode;
+  late FocusNode _focusNode;
+  late bool _ownsFocusNode;
 
   @override
   void initState() {
     super.initState();
-    _focusNode = FocusNode()..addListener(_handleFocusChange);
+    _ownsFocusNode = widget.focusNode == null;
+    _focusNode = widget.focusNode ?? FocusNode();
+    _focusNode.addListener(_handleFocusChange);
     widget.controller.addListener(_handleControllerChange);
   }
 
@@ -52,6 +60,16 @@ class _ModalTextFieldState extends State<ModalTextField> {
       oldWidget.controller.removeListener(_handleControllerChange);
       widget.controller.addListener(_handleControllerChange);
     }
+    if (oldWidget.focusNode != widget.focusNode) {
+      if (_ownsFocusNode && oldWidget.focusNode == null) {
+        _focusNode.dispose();
+      } else if (oldWidget.focusNode != null) {
+        oldWidget.focusNode?.removeListener(_handleFocusChange);
+      }
+      _ownsFocusNode = widget.focusNode == null;
+      _focusNode = widget.focusNode ?? FocusNode();
+      _focusNode.addListener(_handleFocusChange);
+    }
   }
 
   void _handleFocusChange() => setState(() {});
@@ -60,9 +78,10 @@ class _ModalTextFieldState extends State<ModalTextField> {
   @override
   void dispose() {
     widget.controller.removeListener(_handleControllerChange);
-    _focusNode
-      ..removeListener(_handleFocusChange)
-      ..dispose();
+    _focusNode.removeListener(_handleFocusChange);
+    if (_ownsFocusNode) {
+      _focusNode.dispose();
+    }
     super.dispose();
   }
 
@@ -87,6 +106,7 @@ class _ModalTextFieldState extends State<ModalTextField> {
       onChanged: widget.onChanged,
       minLines: widget.minLines,
       maxLines: widget.maxLines ?? (widget.minLines ?? 1),
+      inputFormatters: widget.inputFormatters,
       decoration: InputDecoration(
         labelText: widget.label,
         hintText: widget.hintText,
