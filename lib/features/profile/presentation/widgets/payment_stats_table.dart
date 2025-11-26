@@ -16,7 +16,7 @@ class PaymentStatsProfileTable extends StatefulWidget {
 }
 
 class _PaymentStatsProfileTableState extends State<PaymentStatsProfileTable> {
-  bool _isExpanded = false;
+  bool _isExpanded = true;
 
   @override
   void initState() {
@@ -25,13 +25,10 @@ class _PaymentStatsProfileTableState extends State<PaymentStatsProfileTable> {
   }
 
   void _loadData() {
-    final cubit = context.read<PaymentStatsCubit>();
     const months = 12;
+    final cubit = context.read<PaymentStatsCubit>();
     if (widget.employeeId != null) {
-      cubit.loadStatsByEmployeeId(
-        employeeId: widget.employeeId!,
-        months: months,
-      );
+      cubit.loadStatsByEmployeeId(employeeId: widget.employeeId!, months: months);
     } else {
       cubit.loadStats(months: months);
     }
@@ -40,196 +37,196 @@ class _PaymentStatsProfileTableState extends State<PaymentStatsProfileTable> {
   String _monthName(int month) {
     const names = [
       '',
-      'Янв',
-      'Фев',
+      'Январь',
+      'Февраль',
       'Март',
-      'Апр',
+      'Апрель',
       'Май',
       'Июнь',
       'Июль',
-      'Авг',
-      'Сент',
-      'Окт',
-      'Нояб',
-      'Дек',
+      'Август',
+      'Сентябрь',
+      'Октябрь',
+      'Ноябрь',
+      'Декабрь',
     ];
-    return (month >= 1 && month <= 12) ? names[month] : '';
+    return month >= 1 && month <= 12 ? names[month] : '';
+  }
+
+  String _formatCurrency(double value) {
+    final formatter = NumberFormat.currency(
+      locale: 'ru_RU',
+      symbol: '₽',
+      decimalDigits: 0,
+    );
+    return formatter.format(value).replaceAll('\u00A0', ' ');
   }
 
   @override
   Widget build(BuildContext context) {
-    final NumberFormat currencyFormatter = NumberFormat.currency(
-      locale: 'ru_RU',
-      symbol: '',
-      decimalDigits: 0,
-    );
-
     return BlocBuilder<PaymentStatsCubit, PaymentStatsState>(
       builder: (context, state) {
         if (state is PaymentStatsLoading) {
-          return const SizedBox(
-            height: 487,
-            child: Center(child: CircularProgressIndicator()),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
 
         if (state is PaymentStatsError) {
-          return SizedBox(
-            height: 487,
-            child: Center(child: Text('Ошибка: ${state.message}')),
-          );
+          return Center(child: Text(state.message));
         }
 
         if (state is PaymentStatsLoaded) {
-          final statsDesc = List.of(state.stats.reversed); // новые сверху
-          final rowCount = statsDesc.length;
+          final stats = List.of(state.stats.reversed);
 
-          return SizedBox(
-            width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                InkWell(
-                  onTap: () => setState(() => _isExpanded = !_isExpanded),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () => setState(() => _isExpanded = !_isExpanded),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x14000809),
+                        offset: Offset(2, 2),
+                        blurRadius: 4,
+                      ),
+                      BoxShadow(
+                        color: Color(0x05000809),
+                        blurRadius: 6,
+                      ),
+                    ],
+                  ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Статистика платежей',
-                        style: AppStyle.manrope(
-                          size: 15,
-                          weight: FontWeight.w400,
+                      Expanded(
+                        child: Text(
+                          'Статистика платежей',
+                          style: AppStyle.manrope(
+                            size: 16,
+                            weight: FontWeight.w400,
+                          ),
                         ),
                       ),
                       Icon(
                         _isExpanded
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
-                        color: Colors.black54,
+                            ? Icons.keyboard_arrow_up_rounded
+                            : Icons.keyboard_arrow_down_rounded,
+                        color: const Color(AppColors.darkGrey),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
-                if (_isExpanded)
-                  Table(
-                    columnWidths: const {
-                      0: IntrinsicColumnWidth(),
-                      1: FlexColumnWidth(1),
-                      2: FlexColumnWidth(1),
-                    },
-                    border: TableBorder.all(
-                      color: Color(AppColors.borderColor),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    children: [
-                      TableRow(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 17,
-                              horizontal: 4,
-                            ),
-                            child: Center(
-                              child: Text(
-                                'Месяц',
-                                style: AppStyle.manrope(
-                                  size: 15,
-                                  weight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
+              ),
+              if (_isExpanded) ...[
+                const SizedBox(height: 16),
+                ...stats.map(
+                  (stat) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x14000809),
+                            offset: Offset(2, 2),
+                            blurRadius: 4,
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Center(
-                              child: Text(
-                                'Подтвержденные, руб',
-                                style: AppStyle.manrope(
-                                  size: 15,
-                                  weight: FontWeight.w600,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Center(
-                              child: Text(
-                                'Неподтвержденные, руб',
-                                style: AppStyle.manrope(
-                                  size: 15,
-                                  weight: FontWeight.w600,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
+                          BoxShadow(
+                            color: Color(0x05000809),
+                            blurRadius: 6,
                           ),
                         ],
                       ),
-                      ...List.generate(rowCount, (index) {
-                        final item = statsDesc[index];
-                        final date = _monthName(item.month);
-                        final confirmed = item.assumed.toInt();
-                        final unconfirmed = item.notAssumed.toInt();
-
-                        return TableRow(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(
-                                child: Text(
-                                  date,
-                                  style: AppStyle.manrope(
-                                    size: 15,
-                                    weight: FontWeight.w400,
-                                    color: Color(AppColors.darkGrey),
-                                  ),
-                                ),
+                            Text(
+                              _monthName(stat.month),
+                              style: AppStyle.manrope(
+                                size: 14,
+                                weight: FontWeight.w400,
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(
-                                child: Text(
-                                  currencyFormatter.format(confirmed),
-                                  style: AppStyle.manrope(
-                                    size: 15,
-                                    weight: FontWeight.w400,
-                                    color: Color(AppColors.comfPayment),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _PaymentStatValue(
+                                    label: 'Подтверждённые',
+                                    value: _formatCurrency(stat.assumed),
+                                    valueColor:
+                                        const Color(AppColors.darkGrey),
                                   ),
                                 ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(
-                                child: Text(
-                                  currencyFormatter.format(unconfirmed),
-                                  style: AppStyle.manrope(
-                                    size: 15,
-                                    weight: FontWeight.w400,
-                                    color: Color(AppColors.comfPayment),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _PaymentStatValue(
+                                    label: 'Неподтверждённые',
+                                    value: _formatCurrency(stat.notAssumed),
+                                    valueColor:
+                                        const Color(AppColors.primary),
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
                           ],
-                        );
-                      }),
-                    ],
+                        ),
+                      ),
+                    ),
                   ),
+                ),
               ],
-            ),
+            ],
           );
         }
 
-        return const SizedBox(
-          height: 100,
-          child: Center(child: Text('Нет данных')),
-        );
+        return const SizedBox.shrink();
       },
+    );
+  }
+}
+
+class _PaymentStatValue extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color valueColor;
+
+  const _PaymentStatValue({
+    required this.label,
+    required this.value,
+    required this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppStyle.manrope(
+            size: 14,
+            weight: FontWeight.w400,
+            color: const Color(0xFF6B7280),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: AppStyle.manrope(
+            size: 22,
+            weight: FontWeight.w500,
+            color: valueColor,
+          ),
+        ),
+      ],
     );
   }
 }

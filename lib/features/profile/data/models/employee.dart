@@ -27,7 +27,7 @@ extension EmployeeRoleMapper on EmployeeRole {
       case EmployeeRole.admin:
         return 'Администратор';
       case EmployeeRole.superAdmin:
-        return 'Суперадминистратор';
+        return 'Супер админ';
       case EmployeeRole.director:
         return 'Директор';
     }
@@ -42,6 +42,7 @@ extension EmployeeRoleMapper on EmployeeRole {
       case 'администратор':
         return EmployeeRole.admin;
       case 'суперадминистратор':
+      case 'супер админ':
         return EmployeeRole.superAdmin;
       case 'директор':
         return EmployeeRole.director;

@@ -11,7 +11,6 @@ import 'package:waypay_mobile/features/chat/presentation/widgets/photo_tab_conte
 import 'package:waypay_mobile/features/chat/presentation/widgets/video_tab_content.dart';
 import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
-import 'package:waypay_mobile/features/profile/presentation/screens/profile_screen.dart';
 
 class ChatInfoScreen extends StatefulWidget {
   final bool isGroup;
@@ -35,7 +34,7 @@ class ChatInfoScreen extends StatefulWidget {
 }
 
 class _ChatInfoScreenState extends State<ChatInfoScreen> {
-  final List<ProfileTabItem> _tabItems = [];
+  final List<_ChatTabItem> _tabItems = [];
   Employee? _currentEmployee;
   Employee? _employee;
 
@@ -53,36 +52,30 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
     // Инициализация вкладок
     if (widget.isGroup) {
       _tabItems.add(
-        ProfileTabItem(
+        _ChatTabItem(
           title: 'Участники',
           content: EmployesTabContent(chatId: widget.id),
         ),
       );
     }
-    _tabItems.add(
-      ProfileTabItem(
+    _tabItems.addAll([
+      _ChatTabItem(
         title: 'Фотографии',
         content: PhotosTabContent(chatId: widget.id),
       ),
-    );
-    _tabItems.add(
-      ProfileTabItem(
+      _ChatTabItem(
         title: 'Файлы',
         content: FilesTabContent(chatId: widget.id),
       ),
-    );
-    _tabItems.add(
-      ProfileTabItem(
+      _ChatTabItem(
         title: 'Видео',
         content: VideosTabContent(chatId: widget.id),
       ),
-    );
-    _tabItems.add(
-      ProfileTabItem(
+      _ChatTabItem(
         title: 'Ссылки',
         content: LinksTabContent(chatId: widget.id),
       ),
-    );
+    ]);
   }
 
   Future<void> _loadEmployee() async {
@@ -225,4 +218,11 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
       ),
     );
   }
+}
+
+class _ChatTabItem {
+  final String title;
+  final Widget content;
+
+  _ChatTabItem({required this.title, required this.content});
 }

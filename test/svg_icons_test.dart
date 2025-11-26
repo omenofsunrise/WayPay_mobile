@@ -35,6 +35,7 @@ void main() {
     expect(File(SvgIcons.delay).existsSync(), isTrue);
     expect(File(SvgIcons.doc).existsSync(), isTrue);
     expect(File(SvgIcons.docIcon).existsSync(), isTrue);
+    expect(File(SvgIcons.edit).existsSync(), isTrue);
     expect(File(SvgIcons.favourite).existsSync(), isTrue);
     expect(File(SvgIcons.fileDigit).existsSync(), isTrue);
     expect(File(SvgIcons.filter).existsSync(), isTrue);

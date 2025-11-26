@@ -35,6 +35,11 @@ import 'package:waypay_mobile/features/investors/presentation/screens/investors_
 import 'package:waypay_mobile/features/investors/presentation/screens/investors_screen.dart';
 import 'package:waypay_mobile/features/product/presentation/screens/product_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/profile_screen.dart';
+import 'package:waypay_mobile/features/profile/presentation/screens/profile_statistics_screen.dart';
+import 'package:waypay_mobile/features/profile/presentation/screens/active_sessions_screen.dart';
+import 'package:waypay_mobile/features/profile/presentation/screens/employees_screen.dart';
+import 'package:waypay_mobile/features/profile/presentation/screens/add_employee_screen.dart';
+import 'package:waypay_mobile/features/profile/presentation/bloc/employees_bloc.dart';
 import 'package:waypay_mobile/features/todo/presentation/screen/todo_screen.dart';
 import 'package:waypay_mobile/features/chat/presentation/screens/all_chat_screen.dart';
 import 'package:waypay_mobile/features/calc/calculator_page.dart';
@@ -188,6 +193,37 @@ class AppRouter {
         builder: (context, state) {
           final employeeId = state.extra as int?;
           return ProfileScreen(employeeId: employeeId);
+        },
+      ),
+      GoRoute(
+        path: Routes.profileActiveSessionsScreen.toPath,
+        name: Routes.profileActiveSessionsScreen.toName,
+        builder: (context, state) => const ActiveSessionsScreen(),
+      ),
+      GoRoute(
+        path: Routes.profileEmployeesScreen.toPath,
+        name: Routes.profileEmployeesScreen.toName,
+        builder: (context, state) => const EmployeesScreen(),
+      ),
+      GoRoute(
+        path: Routes.profileAddEmployeeScreen.toPath,
+        name: Routes.profileAddEmployeeScreen.toName,
+        builder: (context, state) {
+          final bloc = state.extra as EmployeesBloc?;
+          if (bloc == null) {
+            return const Scaffold(
+              body: Center(child: Text('Нет данных для создания')),
+            );
+          }
+          return AddEmployeeScreen(employeesBloc: bloc);
+        },
+      ),
+      GoRoute(
+        path: Routes.profileStatsScreen.toPath,
+        name: Routes.profileStatsScreen.toName,
+        builder: (context, state) {
+          final employeeId = state.extra as int?;
+          return ProfileStatisticsScreen(employeeId: employeeId);
         },
       ),
 

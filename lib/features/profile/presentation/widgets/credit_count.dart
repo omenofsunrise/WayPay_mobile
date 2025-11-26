@@ -15,8 +15,7 @@ class CreditCount extends StatefulWidget {
 }
 
 class _CreditCountState extends State<CreditCount> {
-  String selectedPeriod = 'за текущий год';
-  bool _isExpanded = false;
+  bool _isExpanded = true;
 
   @override
   void initState() {
@@ -25,14 +24,10 @@ class _CreditCountState extends State<CreditCount> {
   }
 
   void _loadData() {
+    const months = 12;
     final cubit = context.read<CreditStatsCubit>();
-    final months = selectedPeriod == 'за текущий год' ? 12 : 12;
-
     if (widget.employeeId != null) {
-      cubit.loadStatsByEmployeeId(
-        employeeId: widget.employeeId!,
-        months: months,
-      );
+      cubit.loadStatsByEmployeeId(employeeId: widget.employeeId!, months: months);
     } else {
       cubit.loadStats(months: months);
     }
@@ -41,134 +36,138 @@ class _CreditCountState extends State<CreditCount> {
   String _monthName(int month) {
     const names = [
       '',
-      'Янв',
-      'Фев',
+      'Январь',
+      'Февраль',
       'Март',
-      'Апр',
+      'Апрель',
       'Май',
       'Июнь',
       'Июль',
-      'Авг',
-      'Сент',
-      'Окт',
-      'Нояб',
-      'Дек',
+      'Август',
+      'Сентябрь',
+      'Октябрь',
+      'Ноябрь',
+      'Декабрь',
     ];
-    return (month >= 1 && month <= 12) ? names[month] : '';
+    return month >= 1 && month <= 12 ? names[month] : '';
   }
 
   @override
   Widget build(BuildContext context) {
     final NumberFormat numberFormatter = NumberFormat.decimalPattern('ru_RU');
+
     return BlocBuilder<CreditStatsCubit, CreditStatsState>(
       builder: (context, state) {
         if (state is CreditStatsLoading) {
-          return const SizedBox(
-            height: 200,
-            child: Center(child: CircularProgressIndicator()),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
         if (state is CreditStatsError) {
-          return SizedBox(
-            height: 200,
-            child: Center(child: Text('Ошибка: ${state.message}')),
-          );
+          return Center(child: Text(state.message));
         }
         if (state is CreditStatsLoaded) {
-          final statsDesc = List.of(state.stats.reversed); // новые сверху
-          final rowCount = statsDesc.length;
+          final stats = List.of(state.stats.reversed);
 
-          return SizedBox(
-            width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                InkWell(
-                  onTap: () => setState(() => _isExpanded = !_isExpanded),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () => setState(() => _isExpanded = !_isExpanded),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x14000809),
+                        offset: Offset(2, 2),
+                        blurRadius: 4,
+                      ),
+                      BoxShadow(
+                        color: Color(0x05000809),
+                        blurRadius: 6,
+                      ),
+                    ],
+                  ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Количество договоров',
-                        style: AppStyle.manrope(
-                          size: 15,
-                          weight: FontWeight.w400,
+                      Expanded(
+                        child: Text(
+                          'Количество договоров',
+                          style: AppStyle.manrope(
+                            size: 16,
+                            weight: FontWeight.w400,
+                          ),
                         ),
                       ),
                       Icon(
                         _isExpanded
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
-                        color: Color(AppColors.grey),
+                            ? Icons.keyboard_arrow_up_rounded
+                            : Icons.keyboard_arrow_down_rounded,
+                        color: const Color(AppColors.darkGrey),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                if (_isExpanded)
-                  Table(
-                    columnWidths: const {
-                      0: FlexColumnWidth(1),
-                      1: FlexColumnWidth(1),
-                    },
-                    border: TableBorder.all(
-                      color: Color(AppColors.borderColor),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    children: [
-                      TableRow(
-                        children: [
-                          _buildHeaderCell('Месяц'),
-                          _buildHeaderCell('Количество'),
+              ),
+              if (_isExpanded) ...[
+                const SizedBox(height: 16),
+                ...stats.map(
+                  (stat) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x14000809),
+                            offset: Offset(2, 2),
+                            blurRadius: 4,
+                          ),
+                          BoxShadow(
+                            color: Color(0x05000809),
+                            blurRadius: 6,
+                          ),
                         ],
                       ),
-                      ...List.generate(rowCount, (index) {
-                        final e = statsDesc[index];
-                        return TableRow(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 18,
+                        ),
+                        child: Row(
                           children: [
-                            _buildDataCell(_monthName(e.month), isMonth: true),
-                            _buildDataCell(numberFormatter.format(e.count)),
+                            Expanded(
+                              child: Text(
+                                _monthName(stat.month),
+                                style: AppStyle.manrope(
+                                  size: 14,
+                                  weight: FontWeight.w400,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              numberFormatter.format(stat.count),
+                              style: AppStyle.manrope(
+                                size: 22,
+                                weight: FontWeight.w500,
+                                color: const Color(AppColors.black),
+                              ),
+                            ),
                           ],
-                        );
-                      }),
-                    ],
+                        ),
+                      ),
+                    ),
                   ),
+                ),
               ],
-            ),
+            ],
           );
         }
         return const SizedBox.shrink();
       },
-    );
-  }
-
-  Widget _buildHeaderCell(String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Center(
-        child: Text(
-          text,
-          style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDataCell(String text, {bool isMonth = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Center(
-        child: Text(
-          text,
-          style: AppStyle.manrope(
-            size: 15,
-            weight: FontWeight.w400,
-            color: isMonth
-                ? Color(AppColors.darkGrey)
-                : Color(AppColors.comfPayment),
-          ),
-        ),
-      ),
     );
   }
 }

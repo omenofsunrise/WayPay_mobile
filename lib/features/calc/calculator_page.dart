@@ -42,20 +42,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   CalculationMode _calculationMode = CalculationMode.standard;
   static const int _minMonths = 2;
-  static const int _maxMonths = 10;
-  double _monthsSlider = _minMonths.toDouble();
-  bool _isUpdatingMonthsField = false;
+  static const int _maxMonths = 999999;
 
   @override
   void initState() {
     super.initState();
     _monthsController.text = _minMonths.toString();
+    _monthsController.addListener(_handleMonthsChanged);
     _sumController.addListener(_calculate);
-    _monthsController.addListener(_handleMonthsInput);
     _initialController.addListener(_calculate);
     _percentController.addListener(_calculate);
     _roundController.addListener(_calculate);
-    _monthsFocusNode.addListener(_handleMonthsFocusChange);
   }
 
   void _showCalculationModeMenu(BuildContext context) {
@@ -79,7 +76,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       anchorSize = Size.zero;
     }
 
-    final double desiredLeft = anchor!.dx +
+    final double desiredLeft =
+        anchor!.dx +
         (anchorSize!.width.isFinite ? (anchorSize.width - popupWidth) / 2 : 0);
     final double clampedLeft = desiredLeft.clamp(
       16.0,
@@ -117,65 +115,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  void _handleMonthsInput() {
-    if (_isUpdatingMonthsField) return;
-    final raw = _monthsController.text;
-    if (raw.isEmpty) {
-      _updateMonths(_minMonths);
-      return;
-    }
-
+  void _handleMonthsChanged() {
+    final raw = _monthsController.text.trim();
+    if (raw.isEmpty) return;
     final parsed = int.tryParse(raw);
-    if (parsed == null) {
-      _updateMonths(_minMonths);
-      return;
-    }
-
-    if (parsed < _minMonths) {
-      _updateMonths(_minMonths);
-      return;
-    }
-
-    if (parsed > _maxMonths) {
-      _updateMonths(_maxMonths);
-      return;
-    }
-
-    _updateMonths(parsed);
-  }
-
-  void _handleMonthsFocusChange() {
-    if (!_monthsFocusNode.hasFocus) {
-      final parsed = int.tryParse(_monthsController.text) ?? _minMonths;
-      if (parsed < _minMonths || parsed > _maxMonths) {
-        _updateMonths(_minMonths);
-      }
-      return;
-    }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final text = _monthsController.text;
-      _monthsController.selection = TextSelection(
-        baseOffset: 0,
-        extentOffset: text.length,
-      );
-    });
+    if (parsed == null) return;
+    if (parsed < _minMonths || parsed > _maxMonths) return;
+    _calculate();
   }
 
   void _updateMonths(int months) {
     final clamped = months.clamp(_minMonths, _maxMonths);
     final text = clamped.toString();
-    _isUpdatingMonthsField = true;
     _monthsController.value = TextEditingValue(
       text: text,
       selection: TextSelection.collapsed(offset: text.length),
     );
-    _isUpdatingMonthsField = false;
-    if (_monthsSlider != clamped.toDouble()) {
-      setState(() {
-        _monthsSlider = clamped.toDouble();
-      });
-    }
     _calculate();
   }
 
@@ -242,13 +197,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   void dispose() {
-    _monthsController.removeListener(_handleMonthsInput);
+    _monthsController.removeListener(_handleMonthsChanged);
     _sumController.dispose();
     _monthsController.dispose();
     _initialController.dispose();
     _percentController.dispose();
     _roundController.dispose();
-    _monthsFocusNode.removeListener(_handleMonthsFocusChange);
     _monthsFocusNode.dispose();
     super.dispose();
   }
@@ -838,38 +792,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               extentOffset: text.length,
             );
           },
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text(
-                '2 месяца',
-                style: TextStyle(color: Color(AppColors.darkGrey)),
-              ),
-              Text(
-                '10 месяцев',
-                style: TextStyle(color: Color(AppColors.darkGrey)),
-              ),
-            ],
-          ),
-        ),
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight: 3,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
-            overlayShape: SliderComponentShape.noOverlay,
-            inactiveTrackColor: const Color(0xFFD1D5DB),
-          ),
-          child: Slider(
-            min: _minMonths.toDouble(),
-            max: _maxMonths.toDouble(),
-            divisions: _maxMonths - _minMonths,
-            value: _monthsSlider,
-            activeColor: const Color(AppColors.primary),
-            onChanged: (value) => _updateMonths(value.round()),
-          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),

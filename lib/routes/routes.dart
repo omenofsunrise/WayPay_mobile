@@ -8,6 +8,10 @@ enum Routes {
   investorPoolScreen,
   investorPoolDetailScreen,
   profileScreen,
+  profileStatsScreen,
+  profileActiveSessionsScreen,
+  profileEmployeesScreen,
+  profileAddEmployeeScreen,
   productScreen,
   budgetScreen,
   creditsScreen,
@@ -56,6 +60,14 @@ extension RoutesExtension on Routes {
         return '/investor_pool_detail_screen';
       case Routes.profileScreen:
         return '/profile_screen';
+      case Routes.profileStatsScreen:
+        return '/profile_stats_screen';
+      case Routes.profileActiveSessionsScreen:
+        return '/profile_active_sessions_screen';
+      case Routes.profileEmployeesScreen:
+        return '/profile_employees_screen';
+      case Routes.profileAddEmployeeScreen:
+        return '/profile_add_employee_screen';
       case Routes.productScreen:
         return '/product_screen';
       case Routes.budgetScreen:
@@ -129,6 +141,14 @@ extension RoutesExtension on Routes {
         return 'INVESTOR_POOL_DETAIL_SCREEN';
       case Routes.profileScreen:
         return 'PROFILE_SCREEN';
+      case Routes.profileStatsScreen:
+        return 'PROFILE_STATS_SCREEN';
+      case Routes.profileActiveSessionsScreen:
+        return 'PROFILE_ACTIVE_SESSIONS_SCREEN';
+      case Routes.profileEmployeesScreen:
+        return 'PROFILE_EMPLOYEES_SCREEN';
+      case Routes.profileAddEmployeeScreen:
+        return 'PROFILE_ADD_EMPLOYEE_SCREEN';
       case Routes.productScreen:
         return 'PRODUCT_SCREEN';
       case Routes.budgetScreen:

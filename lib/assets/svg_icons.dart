@@ -33,6 +33,7 @@ class SvgIcons {
   static const String delay = 'assets/icons/delay.svg';
   static const String doc = 'assets/icons/doc.svg';
   static const String docIcon = 'assets/icons/doc_icon.svg';
+  static const String edit = 'assets/icons/edit.svg';
   static const String favourite = 'assets/icons/favourite.svg';
   static const String fileDigit = 'assets/icons/file-digit.svg';
   static const String filter = 'assets/icons/filter.svg';
