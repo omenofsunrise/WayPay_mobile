@@ -93,7 +93,6 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
-    // Загружаем инвесторов сразу при открытии
     context.read<InvestorsBloc>().add(
       LoadInvestorsEvent(refresh: true, page: 1, pageSize: 10),
     );
@@ -123,7 +122,6 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
       return;
     }
 
-    // Для инвесторов поиск работает сразу при любом количестве символов
     final meetsRequirement = query.isNotEmpty;
 
     if (meetsRequirement) {
@@ -173,7 +171,6 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
   Widget _buildResults(InvestorsState state) {
     if (!_hasValidSearch) {
       if (_searchController.text.trim().isEmpty) {
-        // Показываем список всех инвесторов при загрузке
         if (state is InvestorsLoaded) {
           if (state.investors.isEmpty) {
             return const Center(
