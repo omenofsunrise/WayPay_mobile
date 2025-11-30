@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
+import 'package:waypay_mobile/routes/routes.dart';
 
 class MainLayout extends StatelessWidget {
   const MainLayout({super.key, required this.navigationShell});
@@ -18,9 +19,18 @@ class MainLayout extends StatelessWidget {
     _NavItemConfig(icon: SvgIcons.blog),
     _NavItemConfig(icon: SvgIcons.calculator),
   ];
+  static const _newCreditPaths = {
+    '/new_credit_details_screen',
+    '/new_credit_products_screen',
+    '/new_credit_schedules_screen',
+  };
 
   @override
   Widget build(BuildContext context) {
+    final locationPath = GoRouterState.of(context).uri.path;
+    final highlightedIndex =
+        _newCreditPaths.contains(locationPath) ? 3 : navigationShell.currentIndex;
+
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: ValueListenableBuilder<bool>(
@@ -28,12 +38,18 @@ class MainLayout extends StatelessWidget {
         builder: (context, visible, _) {
           if (!visible) return const SizedBox.shrink();
           return _AppBottomNavBar(
-            currentIndex: navigationShell.currentIndex,
+            currentIndex: highlightedIndex,
             items: _navConfigs,
-            onTap: (index) => navigationShell.goBranch(
-              index,
-              initialLocation: index == navigationShell.currentIndex,
-            ),
+            onTap: (index) {
+              if (index == 3) {
+                context.pushNamed(Routes.newCreditDetailsScreen.toName);
+                return;
+              }
+              navigationShell.goBranch(
+                index,
+                initialLocation: index == navigationShell.currentIndex,
+              );
+            },
           );
         },
       ),

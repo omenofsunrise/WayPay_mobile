@@ -106,13 +106,6 @@ class AppRouter {
         builder: (context, state) =>
             const PhoneAuthScreen(userType: 'employee'),
       ),
-
-      GoRoute(
-        path: Routes.newCreditDetailsScreen.toPath,
-        name: Routes.newCreditDetailsScreen.toName,
-        pageBuilder: (context, state) =>
-            SlideLeftTransition(child: NewCreditCreationScreen()),
-      ),
       GoRoute(
         path: Routes.newCreditProductsScreen.toPath,
         name: Routes.newCreditProductsScreen.toName,
@@ -177,11 +170,7 @@ class AppRouter {
         builder: (context, state) {
           final pool = state.extra as InvestorPoolModel?;
           if (pool == null) {
-            return const Scaffold(
-              body: Center(
-                child: Text('Нет данных пула'),
-              ),
-            );
+            return const Scaffold(body: Center(child: Text('Нет данных пула')));
           }
           return InvestorPoolDetailScreen(pool: pool);
         },
@@ -292,8 +281,7 @@ class AppRouter {
                     path: Routes.clientApplicationDetailScreen.toPath,
                     name: Routes.clientApplicationDetailScreen.toName,
                     builder: (context, state) {
-                      final application =
-                          state.extra as CreditApplicationModel;
+                      final application = state.extra as CreditApplicationModel;
                       return ClientApplicationDetailScreen(
                         application: application,
                       );
@@ -323,6 +311,7 @@ class AppRouter {
                       child: const ClientBlackCatalogScreen(),
                     ),
                   ),
+
                   GoRoute(
                     path: Routes.paymentScreen.toPath,
                     name: Routes.paymentScreen.toName,
@@ -335,12 +324,11 @@ class AppRouter {
                             ),
                         ),
                         BlocProvider(
-                          create: (_) => PaymentScheduleCubit()
-                            ..load(year: DateTime.now().year),
+                          create: (_) =>
+                              PaymentScheduleCubit()
+                                ..load(year: DateTime.now().year),
                         ),
-                        BlocProvider(
-                          create: (_) => SchedulePreviewCubit(),
-                        ),
+                        BlocProvider(create: (_) => SchedulePreviewCubit()),
                         BlocProvider(
                           create: (_) => PaymentHistoryCubit()..load(limit: 2),
                         ),
@@ -378,9 +366,7 @@ class AppRouter {
                         return PaymentDetailScreen(payment: extra);
                       }
                       return const Scaffold(
-                        body: Center(
-                          child: Text('Нет данных для платежа'),
-                        ),
+                        body: Center(child: Text('Нет данных для платежа')),
                       );
                     },
                   ),
@@ -388,8 +374,9 @@ class AppRouter {
                     path: Routes.paymentAnalyticsScreen.toPath,
                     name: Routes.paymentAnalyticsScreen.toName,
                     builder: (context, state) => BlocProvider(
-                      create: (_) => PaymentScheduleCubit()
-                        ..load(year: DateTime.now().year),
+                      create: (_) =>
+                          PaymentScheduleCubit()
+                            ..load(year: DateTime.now().year),
                       child: const PaymentAnalyticsScreen(),
                     ),
                   ),
@@ -397,6 +384,11 @@ class AppRouter {
                     path: Routes.investorsHubScreen.toPath,
                     name: Routes.investorsHubScreen.toName,
                     builder: (context, state) => const InvestorsHubScreen(),
+                  ),
+                  GoRoute(
+                    path: Routes.creditsScreen.toPath,
+                    name: Routes.creditsScreen.toName,
+                    builder: (context, state) => const CreditsScreen(),
                   ),
                 ],
               ),
@@ -423,9 +415,9 @@ class AppRouter {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: Routes.creditsScreen.toPath,
-                name: Routes.creditsScreen.toName,
-                builder: (context, state) => const CreditsScreen(),
+                path: Routes.newCreditDetailsScreen.toPath,
+                name: Routes.newCreditDetailsScreen.toName,
+                builder: (context, state) => const NewCreditCreationScreen(),
               ),
             ],
           ),
