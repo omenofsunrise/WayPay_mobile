@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
+
+final NumberFormat _ruNumberFormatter = NumberFormat.decimalPattern('ru_RU')
+  ..minimumFractionDigits = 0
+  ..maximumFractionDigits = 2;
+
+String _formatCurrencyValue(num value) {
+  return _ruNumberFormatter.format(value).replaceAll('\u00A0', ' ');
+}
 
 class Step2ProductsContent extends StatefulWidget {
   final List<CreditProduct> products;
@@ -110,7 +119,7 @@ class _Step2ProductsContentState extends State<Step2ProductsContent> {
             ),
             const SizedBox(width: 8),
             Text(
-              '${widget.totalAmount.toStringAsFixed(0)} ₽',
+              '${_formatCurrencyValue(widget.totalAmount)} ₽',
               style: AppStyle.manrope(
                 size: 18,
                 weight: FontWeight.w700,
@@ -127,6 +136,7 @@ class _Step2ProductsContentState extends State<Step2ProductsContent> {
           icon: Icons.add,
           text: 'Добавить товар',
         ),
+        const SizedBox(height: 16),
       ],
     );
   }
@@ -249,6 +259,7 @@ class __ProductItemState extends State<_ProductItem> {
     }
 
     if (oldWidget.markupType != widget.markupType) {
+      _applyProductToControllers(widget.product);
       _updateProduct();
     }
   }
@@ -315,7 +326,7 @@ class __ProductItemState extends State<_ProductItem> {
           label: 'Стоимость',
           hintText: 'Стоимость',
           keyboardType: TextInputType.number,
-          onChanged: (_) => _updateProduct(),
+          onChanged: _handlePriceChanged,
         ),
 
         const SizedBox(height: 12),
@@ -335,7 +346,7 @@ class __ProductItemState extends State<_ProductItem> {
           label: widget.markupType == 0 ? 'Надбавка %' : 'Надбавка ₽',
           hintText: widget.markupType == 0 ? 'Надбавка %' : 'Надбавка ₽',
           keyboardType: TextInputType.number,
-          onChanged: (_) => _updateProduct(),
+          onChanged: _handleSurchargeChanged,
         ),
 
         const SizedBox(height: 16),
@@ -352,21 +363,24 @@ class __ProductItemState extends State<_ProductItem> {
     }
 
     _nameController.text = product.name;
-    _priceController.text = _formatNumber(product.price);
+    _priceController.text =
+        product.price == 0 ? '' : _formatCurrencyValue(product.price);
     _quantityController.text = product.quantity.toString();
     if (product.surcharge == null) {
       _surchargeController.clear();
     } else {
-      _surchargeController.text = _formatNumber(product.surcharge!);
+      _surchargeController.text = widget.markupType == 0
+          ? _formatPlainNumber(product.surcharge!)
+          : _formatCurrencyValue(product.surcharge!);
     }
   }
 
   CreditProduct _buildProductFromControllers() {
     final name = _nameController.text.trim();
-    final priceText = _priceController.text.replaceAll(',', '.').trim();
+    final priceText = _normalizeNumberInput(_priceController.text);
     final price = double.tryParse(priceText) ?? 0;
     final quantity = int.tryParse(_quantityController.text.trim()) ?? 1;
-    final surchargeText = _surchargeController.text.replaceAll(',', '.').trim();
+    final surchargeText = _normalizeNumberInput(_surchargeController.text);
     final double? surcharge = surchargeText.isEmpty
         ? null
         : double.tryParse(surchargeText);
@@ -407,7 +421,66 @@ class __ProductItemState extends State<_ProductItem> {
     _surchargeController.clear();
   }
 
-  String _formatNumber(double value) {
+  void _handlePriceChanged(String value) {
+    final formatted = _formatCurrencyInput(value);
+    if (formatted != null && formatted != value) {
+      _priceController.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
+    _updateProduct();
+  }
+
+  void _handleSurchargeChanged(String value) {
+    if (widget.markupType == 1) {
+      final formatted = _formatCurrencyInput(value);
+      if (formatted != null && formatted != value) {
+        _surchargeController.value = TextEditingValue(
+          text: formatted,
+          selection: TextSelection.collapsed(offset: formatted.length),
+        );
+      }
+    }
+    _updateProduct();
+  }
+
+  String? _formatCurrencyInput(String value) {
+    var sanitized =
+        value.replaceAll('\u00A0', '').replaceAll(' ', '');
+    sanitized = sanitized.replaceAll(RegExp(r'[^0-9.,]'), '');
+    if (sanitized.isEmpty) return '';
+
+    final endsWithSeparator =
+        sanitized.endsWith(',') || sanitized.endsWith('.');
+    final normalized = sanitized.replaceAll(',', '.');
+    final parseTarget = endsWithSeparator && normalized.length > 1
+        ? normalized.substring(0, normalized.length - 1)
+        : normalized;
+
+    if (parseTarget.isEmpty) {
+      return '';
+    }
+
+    final number = double.tryParse(parseTarget);
+    if (number == null) return null;
+
+    var formatted = _formatCurrencyValue(number);
+    if (endsWithSeparator) {
+      formatted = '$formatted,';
+    }
+    return formatted;
+  }
+
+  String _normalizeNumberInput(String value) {
+    var cleaned =
+        value.replaceAll('\u00A0', '').replaceAll(' ', '');
+    cleaned = cleaned.replaceAll(RegExp(r'[^0-9.,]'), '');
+    cleaned = cleaned.replaceAll(',', '.');
+    return cleaned.trim();
+  }
+
+  String _formatPlainNumber(double value) {
     return value == value.truncateToDouble()
         ? value.toStringAsFixed(0)
         : value.toString();
