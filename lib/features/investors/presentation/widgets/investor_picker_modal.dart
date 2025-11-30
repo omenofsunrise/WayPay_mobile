@@ -10,7 +10,15 @@ import 'package:waypay_mobile/features/investors/data/models/investors_model.dar
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 
 class InvestorPickerModal extends StatefulWidget {
-  const InvestorPickerModal({super.key});
+  const InvestorPickerModal({
+    super.key,
+    this.includeInvestor = true,
+    this.includePool = true,
+  }) : assert(includeInvestor || includePool,
+            'Хотя бы один тип должен быть доступен');
+
+  final bool includeInvestor;
+  final bool includePool;
 
   @override
   State<InvestorPickerModal> createState() => _InvestorPickerModalState();
@@ -168,11 +176,21 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
     return '$day.$month.$year';
   }
 
+  List<InvestorsModel> _filterByType(List<InvestorsModel> investors) {
+    return investors.where((investor) {
+      final isPool = investor.isCompany == true;
+      if (isPool && !widget.includePool) return false;
+      if (!isPool && !widget.includeInvestor) return false;
+      return true;
+    }).toList();
+  }
+
   Widget _buildResults(InvestorsState state) {
     if (!_hasValidSearch) {
       if (_searchController.text.trim().isEmpty) {
         if (state is InvestorsLoaded) {
-          if (state.investors.isEmpty) {
+          final filtered = _filterByType(state.investors);
+          if (filtered.isEmpty) {
             return const Center(
               child: Text(
                 'Инвесторы не найдены',
@@ -181,11 +199,11 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
             );
           }
           return ListView.separated(
-            itemCount: state.investors.length,
+            itemCount: filtered.length,
             separatorBuilder: (_, __) =>
                 const Divider(height: 16, color: Color(0xFFE5E5EA)),
             itemBuilder: (_, index) {
-              final investor = state.investors[index];
+              final investor = filtered[index];
               return _InvestorTile(
                 investor: investor,
                 cashText: _formatCash(investor.cashbox),
@@ -230,7 +248,8 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
       );
     }
     if (state is InvestorsLoaded) {
-      if (state.investors.isEmpty) {
+      final filtered = _filterByType(state.investors);
+      if (filtered.isEmpty) {
         return const Center(
           child: Text(
             'Инвесторы не найдены',
@@ -239,11 +258,11 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
         );
       }
       return ListView.separated(
-        itemCount: state.investors.length,
+        itemCount: filtered.length,
         separatorBuilder: (_, __) =>
             const Divider(height: 16, color: Color(0xFFE5E5EA)),
         itemBuilder: (_, index) {
-          final investor = state.investors[index];
+          final investor = filtered[index];
           return _InvestorTile(
             investor: investor,
             cashText: _formatCash(investor.cashbox),
