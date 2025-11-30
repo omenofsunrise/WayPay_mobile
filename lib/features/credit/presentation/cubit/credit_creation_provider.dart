@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
@@ -13,29 +14,10 @@ import 'package:waypay_mobile/features/objectType/data/models/object_type_model.
 class CreditCreationCubit extends Cubit<CreditCreationState> {
   final CreditRemoteDataSource _dataSource = getIt<CreditRemoteDataSource>();
   Timer? _debounceTimer;
-
   CreditCreationCubit()
     : super(
         CreditCreationState(
-          creditRequest: CreateCreditRequest(
-            clientId: null,
-            name: '',
-            creditTypeId: 0,
-            creditTabTypeId: 0,
-            guarantorClientId: 0,
-            guarantor: null,
-            investorId: null,
-            poolId: null,
-            creditDate: DateTime.now(),
-            firstPayment: 0,
-            termMonths: 0,
-            paymentDay: 1,
-            nextMonthStart: false,
-            currentMonthStart: false,
-            inDebt: false,
-            debtComment: null,
-            products: [CreditProduct(name: '', price: 0, quantity: 1)],
-          ),
+          creditRequest: _initialRequest(),
           markupType: 0,
           totalAmountWithSurcharge: 0,
           selectedClient: null,
@@ -48,6 +30,33 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
         ),
       ) {
     _initMarkupType();
+  }
+
+  static CreateCreditRequest _initialRequest() {
+    final now = DateTime.now();
+    return CreateCreditRequest(
+      clientId: null,
+      name: '',
+      creditTypeId: 0,
+      creditTabTypeId: 0,
+      guarantorClientId: 0,
+      guarantor: null,
+      investorId: null,
+      poolId: null,
+      creditDate: now,
+      firstPayment: 0,
+      termMonths: 0,
+      paymentDay: now.add(const Duration(days: 1)).day,
+      nextMonthStart: false,
+      currentMonthStart: false,
+      inDebt: false,
+      debtComment: null,
+      products: [CreditProduct(name: '', price: 0, quantity: 1)],
+    );
+  }
+
+  int _getNextPaymentDay(DateTime date) {
+    return date.add(const Duration(days: 1)).day;
   }
 
   void updateBasicInfo({
@@ -82,7 +91,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     );
 
     if (creditDate != null) {
-      final nextDay = (creditDate.day % 31) + 1;
+      final nextDay = _getNextPaymentDay(creditDate);
       updatedRequest = updatedRequest.copyWith(paymentDay: nextDay);
     }
 
@@ -459,6 +468,9 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
           );
         }).toList(),
       );
+
+      final requestJson = jsonEncode(createRequest.toJson());
+      print('Create credit payload: $requestJson');
 
       await _dataSource.createCredit(createRequest);
 
