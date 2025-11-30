@@ -398,8 +398,6 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
         ),
       );
     } catch (e) {
-      navigator.pop();
-
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text('Ошибка: $e'), backgroundColor: Colors.red),
       );
