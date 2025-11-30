@@ -118,7 +118,10 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
       ),
       builder: (_) => BlocProvider(
         create: (_) => InvestorsBloc(),
-        child: const InvestorPickerModal(),
+        child: const InvestorPickerModal(
+          includeInvestor: true,
+          includePool: true,
+        ),
       ),
     );
 
@@ -235,7 +238,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
         value: catalogBloc,
         child: CatalogPickerModal(
           selectedCatalog: selectedCategory,
-          entityType: 'CreditType',
+          entityType: 'CreditTab',
           title: 'Выбор категории',
           createButtonLabel: 'Создать категорию',
         ),
