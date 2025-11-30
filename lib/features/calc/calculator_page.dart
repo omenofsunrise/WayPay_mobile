@@ -48,6 +48,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   void initState() {
     super.initState();
     _monthsController.text = _minMonths.toString();
+    _roundController.text = '50';
     _monthsController.addListener(_handleMonthsChanged);
     _sumController.addListener(_calculate);
     _initialController.addListener(_calculate);
@@ -675,8 +676,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Header(
               title: 'Калькулятор',
-              showBackButton: true,
+              showBackButton: false,
               showNotifications: false,
+              showAvatar: false,
               onBackPressed: () => Navigator.of(context).maybePop(),
               titleKey: _headerTitleKey,
               trailing: Row(
