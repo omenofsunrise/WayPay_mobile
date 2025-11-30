@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/search_field.dart';
@@ -39,7 +42,10 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
   final TextEditingController _searchController = TextEditingController();
   String _query = '';
 
-  bool get _isCategory => widget.entityType.toLowerCase() == 'credittype';
+  bool get _isCategory {
+    final type = widget.entityType.toLowerCase();
+    return type == 'credittab' || type == 'credittype';
+  }
 
   String get _modalTitle =>
       widget.title ?? (_isCategory ? 'Выбор категории' : 'Выбор каталога');
@@ -173,45 +179,14 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
                           final catalog = filtered[index - 1];
                           final isSelected =
                               widget.selectedCatalog?.id == catalog.id;
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? const Color(0xFFE4F2F4)
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: ListTile(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              contentPadding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                              onTap: () => Navigator.of(context).pop(catalog),
-                              title: Text(
-                                catalog.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(AppColors.black),
-                                ),
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (widget.allowEdit)
-                                    IconButton(
-                                      icon: const Icon(Icons.edit,
-                                          color: Color(AppColors.darkGrey)),
-                                      onPressed: () => _editCatalog(catalog),
-                                    ),
-                                  if (widget.allowDelete)
-                                    IconButton(
-                                      icon: const Icon(Icons.delete_outline,
-                                          color: Color(0xFFE53935)),
-                                      onPressed: () => _confirmDelete(catalog),
-                                    ),
-                                ],
-                              ),
-                            ),
+                          return _CatalogListItem(
+                            catalog: catalog,
+                            isSelected: isSelected,
+                            allowEdit: widget.allowEdit,
+                            allowDelete: widget.allowDelete,
+                            onTap: () => Navigator.of(context).pop(catalog),
+                            onEdit: () => _editCatalog(catalog),
+                            onDelete: () => _confirmDelete(catalog),
                           );
                         },
                       );
@@ -246,18 +221,16 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
         value: bloc,
         child: CreateObjectTypeModal(
           entityType: widget.entityType,
-          onObjectTypeCreated: (catalog) {
-            Navigator.of(context).pop(catalog);
-          },
         ),
       ),
     );
 
-    if (created != null && mounted) {
+    if (!mounted) return;
+    if (created != null) {
       Navigator.of(context).pop(created);
-    } else {
-      _loadCatalogs();
+      return;
     }
+    _loadCatalogs();
   }
 
   Future<void> _editCatalog(ObjectTypeModel catalog) async {
@@ -273,26 +246,136 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
   }
 
   Future<void> _confirmDelete(ObjectTypeModel catalog) async {
-    final confirmed = await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Удалить запись?'),
-            content: Text('"${catalog.name}" будет удалён без возврата.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Отмена'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Удалить'),
-              ),
-            ],
-          ),
-        ) ??
-        false;
-
-    if (!confirmed || !mounted) return;
+    if (!mounted) return;
     context.read<ObjectTypeBloc>().add(DeleteObjectTypeEvent(catalog.id));
+  }
+}
+
+class _CatalogListItem extends StatelessWidget {
+  const _CatalogListItem({
+    required this.catalog,
+    required this.isSelected,
+    required this.allowEdit,
+    required this.allowDelete,
+    required this.onTap,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final ObjectTypeModel catalog;
+  final bool isSelected;
+  final bool allowEdit;
+  final bool allowDelete;
+  final VoidCallback onTap;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final item = Container(
+      decoration: BoxDecoration(
+        color: isSelected ? const Color(0xFFE4F2F4) : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+        onTap: onTap,
+        title: Text(
+          catalog.name,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Color(AppColors.black),
+          ),
+        ),
+      ),
+    );
+
+    final actions = <Widget>[];
+    if (allowEdit) {
+      actions.add(
+        CustomSlidableAction(
+          onPressed: (_) => onEdit(),
+          backgroundColor: const Color(AppColors.primary),
+          padding: EdgeInsets.zero,
+          child: const _SlidableActionContent(
+            iconPath: SvgIcons.edit,
+            label: 'Изменить',
+          ),
+        ),
+      );
+    }
+    if (allowDelete) {
+      actions.add(
+        CustomSlidableAction(
+          onPressed: (_) => onDelete(),
+          backgroundColor: const Color(0xFFE53935),
+          padding: EdgeInsets.zero,
+          child: const _SlidableActionContent(
+            iconPath: SvgIcons.delete,
+            label: 'Удалить',
+          ),
+        ),
+      );
+    }
+
+    if (actions.isEmpty) {
+      return item;
+    }
+
+    final ratio = (0.28 * actions.length).clamp(0.28, 0.84).toDouble();
+
+    return Slidable(
+      key: ValueKey('catalog_${catalog.id}'),
+      endActionPane: ActionPane(
+        motion: const StretchMotion(),
+        extentRatio: ratio,
+        children: actions,
+      ),
+      child: item,
+    );
+  }
+}
+
+class _SlidableActionContent extends StatelessWidget {
+  const _SlidableActionContent({
+    required this.iconPath,
+    required this.label,
+  });
+
+  final String iconPath;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SvgPicture.asset(
+          iconPath,
+          width: 22,
+          height: 22,
+          colorFilter: const ColorFilter.mode(
+            Colors.white,
+            BlendMode.srcIn,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
   }
 }
