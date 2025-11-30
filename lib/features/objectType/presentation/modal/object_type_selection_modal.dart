@@ -66,18 +66,17 @@ class _ObjectTypeSelectionModalState extends State<ObjectTypeSelectionModal> {
   }
 
   void _openCreateObjectTypeModal() {
-    showModalBottomSheet(
+    showModalBottomSheet<ObjectTypeModel>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => CreateObjectTypeModal(
         entityType: widget.entityType,
-        onObjectTypeCreated: (newObjectType) {
-          Navigator.of(context, rootNavigator: false).pop();
-          widget.onObjectTypeSelected(newObjectType);
-        },
       ),
-    ).then((_) {
+    ).then((created) {
+      if (created != null) {
+        widget.onObjectTypeSelected(created);
+      }
       _loadObjectTypes();
     });
   }

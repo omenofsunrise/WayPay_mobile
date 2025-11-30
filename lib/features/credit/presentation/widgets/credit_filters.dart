@@ -107,7 +107,7 @@ class _CreditFiltersState extends State<CreditFilters> {
         query: GetObjectTypesQuery(
           page: 1,
           pageSize: 100,
-          entityType: 'Credit',
+          entityType: 'CreditTab',
         ),
       ),
     );
@@ -336,7 +336,7 @@ class _CreditFiltersState extends State<CreditFilters> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Каталог',
+                'Категория',
                 style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
               ),
               const SizedBox(height: 8),
@@ -359,7 +359,7 @@ class _CreditFiltersState extends State<CreditFilters> {
         }
 
         return CustomSelect<ObjectTypeModel?>(
-          placeholder: 'Выберите каталог',
+          placeholder: 'Выберите категорию',
           options: options,
           value: _selectedObjectType,
           onChange: (ObjectTypeModel? value) {

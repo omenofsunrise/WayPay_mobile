@@ -123,7 +123,7 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
         query: GetObjectTypesQuery(
           page: 1,
           pageSize: 100,
-          entityType: 'Credit',
+          entityType: 'CreditTab',
         ),
       ),
     );
@@ -243,8 +243,8 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
           children: [
             ModalTextField(
               controller: _catalogController,
-              label: 'Каталог',
-              hintText: 'Выберите каталог',
+                label: 'Категория',
+              hintText: 'Выберите категорию',
               readOnly: true,
               onTap: () {
                 if (types.isEmpty && !isLoading) {
@@ -308,7 +308,7 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
       return const Padding(
         padding: EdgeInsets.symmetric(horizontal: 16),
         child: Text(
-          'Каталоги не найдены',
+          'Категории не найдены',
           style: TextStyle(color: Color(AppColors.darkGrey)),
         ),
       );
@@ -322,7 +322,7 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
         if (index == 0) {
           final isSelected = _selectedCatalog == null;
           return ListTile(
-            title: const Text('Без каталога'),
+            title: const Text('Без категории'),
             onTap: () => _selectCatalog(null),
             trailing: isSelected
                 ? const Icon(Icons.check, color: Color(AppColors.primary))
