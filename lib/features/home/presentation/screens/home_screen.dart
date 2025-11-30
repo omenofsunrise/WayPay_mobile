@@ -353,7 +353,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Spacer(),
               MoreDetailsButton(
                 onPressed: () {
-                  // Навигация к договорам
+                  context.pushNamed(Routes.creditsScreen.toName);
                 },
               ),
             ],
