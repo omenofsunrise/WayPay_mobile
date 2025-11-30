@@ -208,8 +208,9 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
               children: [
                 Header(
                   title: 'Новый договор',
-                  showBackButton: true,
+                  showBackButton: false,
                   showNotifications: false,
+                  showAvatar: false,
                   onBackPressed: _handleBackButton,
                 ),
                 const SizedBox(height: 12),
@@ -349,9 +350,9 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
 
   bool _isStep1Valid(CreditCreationState state) {
     final request = state.creditRequest;
-    final hasClient =
-        state.selectedClient != null || request.clientId != null;
-    final hasInvestorOrDebt = request.inDebt ||
+    final hasClient = state.selectedClient != null || request.clientId != null;
+    final hasInvestorOrDebt =
+        request.inDebt ||
         state.selectedInvestor != null ||
         request.investorId != null ||
         request.poolId != null;

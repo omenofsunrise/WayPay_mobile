@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
@@ -10,12 +9,10 @@ import 'package:waypay_mobile/features/objectType/data/models/object_type_model.
 
 class CreateObjectTypeModal extends StatefulWidget {
   final String entityType;
-  final ValueChanged<ObjectTypeModel> onObjectTypeCreated; // Исправлен тип
 
   const CreateObjectTypeModal({
     super.key,
     required this.entityType,
-    required this.onObjectTypeCreated,
   });
 
   @override
@@ -26,7 +23,6 @@ class _CreateObjectTypeModalState extends State<CreateObjectTypeModal> {
   final _nameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isCreating = false;
-  ObjectTypeModel? _createdObjectType; // Сохраняем созданный объект
 
   void _createObjectType() {
     if (!_formKey.currentState!.validate()) return;
@@ -122,8 +118,7 @@ class _CreateObjectTypeModalState extends State<CreateObjectTypeModal> {
                             entityType: widget.entityType,
                           ),
                         );
-                        widget.onObjectTypeCreated(createdObjectType);
-                        Navigator.of(context).pop();
+                        Navigator.of(context).pop(createdObjectType);
                       }
                       if (state is ObjectTypeError && _isCreating) {
                         setState(() {
