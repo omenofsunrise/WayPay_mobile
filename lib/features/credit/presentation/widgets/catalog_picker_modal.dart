@@ -99,10 +99,10 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
 
   @override
   Widget build(BuildContext context) {
-    final maxHeight = MediaQuery.of(context).size.height * 0.8;
+    final maxHeight = MediaQuery.of(context).size.height * 0.75;
     return SafeArea(
-      child: SizedBox(
-        height: maxHeight,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxHeight),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
           child: Column(
