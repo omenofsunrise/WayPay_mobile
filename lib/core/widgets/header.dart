@@ -16,6 +16,7 @@ class Header extends StatelessWidget {
   final bool showNotifications;
   final Widget? trailing;
   final GlobalKey? titleKey;
+  final bool showAvatar;
 
   const Header({
     super.key,
@@ -27,6 +28,7 @@ class Header extends StatelessWidget {
     this.showNotifications = true,
     this.trailing,
     this.titleKey,
+    this.showAvatar = true,
   });
 
   @override
@@ -35,49 +37,51 @@ class Header extends StatelessWidget {
       padding: const EdgeInsets.only(top: 0.0, bottom: 5.0),
       child: Row(
         children: [
-          if (showBackButton)
-            Material(
-              shape: CircleBorder(),
-              clipBehavior: Clip.antiAlias,
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  if (onBackPressed != null) {
-                    onBackPressed!();
-                    return;
-                  }
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go(Routes.homeScreen.toPath);
-                  }
-                },
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(shape: BoxShape.circle),
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: SvgPicture.asset(SvgIcons.chevronLeft),
+          showBackButton
+              ? Material(
+                  shape: CircleBorder(),
+                  clipBehavior: Clip.antiAlias,
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      if (onBackPressed != null) {
+                        onBackPressed!();
+                        return;
+                      }
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go(Routes.homeScreen.toPath);
+                      }
+                    },
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(shape: BoxShape.circle),
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: SvgPicture.asset(SvgIcons.chevronLeft),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            )
-          else
-            GestureDetector(
-              onTap: () => context.pushNamed(Routes.profileScreen.toName),
-              child: _buildAvatar(),
-            ),
+                )
+              : showAvatar
+              ? GestureDetector(
+                  onTap: () => context.pushNamed(Routes.profileScreen.toName),
+                  child: _buildAvatar(),
+                )
+              : const SizedBox(width: 10),
 
           const SizedBox(width: 12),
 
-          // Приветствие
           Expanded(
             child: KeyedSubtree(
               key: titleKey,
               child: Text(
                 title,
-                style: AppStyle.semiBold23.copyWith(fontWeight: FontWeight.w500),
+                style: AppStyle.semiBold23.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -90,10 +94,7 @@ class Header extends StatelessWidget {
             const SizedBox(width: 3),
           ],
 
-          if (trailing != null) ...[
-            const SizedBox(width: 12),
-            trailing!,
-          ],
+          if (trailing != null) ...[const SizedBox(width: 12), trailing!],
         ],
       ),
     );
