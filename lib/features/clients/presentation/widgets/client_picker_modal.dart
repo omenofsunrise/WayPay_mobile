@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/search_field.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
+import 'package:waypay_mobile/routes/routes.dart';
 
 class ClientPickerModal extends StatefulWidget {
   const ClientPickerModal({super.key});
@@ -228,7 +230,11 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
             isGreen: true,
             showIcon: true,
             icon: Icons.add,
-            onPressed: () {},
+            onPressed: () {
+              final router = GoRouter.of(context);
+              Navigator.of(context, rootNavigator: true).pop();
+              router.pushNamed(Routes.clientCreateScreen.toName);
+            },
           ),
         ],
       ),

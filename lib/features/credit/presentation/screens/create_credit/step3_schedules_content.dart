@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
@@ -42,6 +43,8 @@ class Step3SchedulesContent extends StatefulWidget {
   State<Step3SchedulesContent> createState() => _Step3SchedulesContentState();
 }
 
+enum _PaymentStartOption { current, next, later }
+
 class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
   late TextEditingController _firstPaymentPercentController;
   late TextEditingController _firstPaymentAmountController;
@@ -64,8 +67,10 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     });
   }
 
-  bool get _isNextMonthSelected {
-    return widget.nextMonthStart;
+  _PaymentStartOption get _startOption {
+    if (widget.currentMonthStart) return _PaymentStartOption.current;
+    if (widget.nextMonthStart) return _PaymentStartOption.next;
+    return _PaymentStartOption.later;
   }
 
   @override
@@ -86,7 +91,7 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     final newPercent = widget.firstPayment > 0 && widget.totalAmount > 0
         ? (widget.firstPayment / widget.totalAmount * 100).round()
         : 0;
-    final newPercentText = newPercent.toString();
+    final newPercentText = newPercent > 0 ? newPercent.toString() : '';
 
     if (currentPercentText != newPercentText) {
       _firstPaymentPercentController.text = newPercentText;
@@ -95,7 +100,7 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     final currentAmountText = _firstPaymentAmountController.text;
     final newAmountText = widget.firstPayment > 0
         ? widget.firstPayment.toInt().toString()
-        : '0';
+        : '';
 
     if (currentAmountText != newAmountText) {
       _firstPaymentAmountController.text = newAmountText;
@@ -184,6 +189,24 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     widget.onCurrentMonthStartChanged(false);
   }
 
+  void _handleLaterSelection() {
+    widget.onNearestMonthStartChanged();
+  }
+
+  void _handleStartOptionChanged(_PaymentStartOption option) {
+    switch (option) {
+      case _PaymentStartOption.current:
+        _handleCurrentMonthSelection();
+        break;
+      case _PaymentStartOption.next:
+        _handleNextMonthSelection();
+        break;
+      case _PaymentStartOption.later:
+        _handleLaterSelection();
+        break;
+    }
+  }
+
   void _loadSchedulePreviewDebounced() {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
@@ -255,15 +278,23 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
-            _StartNextMonthCheckbox(
-              value: _isNextMonthSelected,
-              onChanged: (value) {
-                if (value) {
-                  _handleNextMonthSelection();
-                } else {
-                  _handleCurrentMonthSelection();
-                }
-              },
+            _StartOptionRadio(
+              title: 'Начинать выплаты с текущего месяца',
+              value: _PaymentStartOption.current,
+              groupValue: _startOption,
+              onChanged: _handleStartOptionChanged,
+            ),
+            _StartOptionRadio(
+              title: 'Начинать выплаты со следующего месяца',
+              value: _PaymentStartOption.next,
+              groupValue: _startOption,
+              onChanged: _handleStartOptionChanged,
+            ),
+            _StartOptionRadio(
+              title: 'Начинать выплаты через месяц',
+              value: _PaymentStartOption.later,
+              groupValue: _startOption,
+              onChanged: _handleStartOptionChanged,
             ),
             const SizedBox(height: 16),
             ModalTextField(
@@ -378,22 +409,24 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
           Expanded(
             flex: 2,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   '${payment.paymentDate.day.toString().padLeft(2, '0')}.'
                   '${payment.paymentDate.month.toString().padLeft(2, '0')}.'
                   '${payment.paymentDate.year}',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: _tableCellStyle,
+                  textAlign: TextAlign.center,
                 ),
                 if (payment.comment != null && payment.comment!.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
                     payment.comment!,
                     style: TextStyle(
-                      color: Color(AppColors.grey),
+                      color: const Color(AppColors.grey),
                       fontSize: 12,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ],
@@ -402,25 +435,27 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
           Expanded(
             flex: 2,
             child: Text(
-              '${payment.rest.toStringAsFixed(0)} ₽',
-              style: const TextStyle(
-                color: Color(AppColors.darkGrey),
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.right,
+              '${_formatAmount(payment.rest)} ₽',
+              style: _tableCellStyle,
+              textAlign: TextAlign.center,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
-              '${payment.paymentAmount.toStringAsFixed(0)} ₽',
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-              textAlign: TextAlign.right,
+              '${_formatAmount(payment.paymentAmount)} ₽',
+              style: _tableCellStyle,
+              textAlign: TextAlign.center,
             ),
           ),
         ],
       ),
     );
+  }
+
+  String _formatAmount(double value) {
+    final formatter = NumberFormat.decimalPattern('ru_RU');
+    return formatter.format(value).replaceAll('\u00A0', ' ');
   }
 
   @override
@@ -434,38 +469,33 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
   }
 }
 
-class _StartNextMonthCheckbox extends StatelessWidget {
-  const _StartNextMonthCheckbox({
+class _StartOptionRadio extends StatelessWidget {
+  const _StartOptionRadio({
+    required this.title,
     required this.value,
+    required this.groupValue,
     required this.onChanged,
   });
 
-  final bool value;
-  final ValueChanged<bool> onChanged;
+  final String title;
+  final _PaymentStartOption value;
+  final _PaymentStartOption groupValue;
+  final ValueChanged<_PaymentStartOption> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => onChanged(!value),
-      child: Row(
-        children: [
-          Checkbox(
-            value: value,
-            onChanged: (val) => onChanged(val ?? false),
-            activeColor: const Color(AppColors.primary),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
-            ),
-          ),
-          const SizedBox(width: 8),
-          const Expanded(
-            child: Text(
-              'Начинать выплаты со следующего месяца',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-          ),
-        ],
+    return RadioListTile<_PaymentStartOption>(
+      value: value,
+      groupValue: groupValue,
+      onChanged: (option) {
+        if (option != null) onChanged(option);
+      },
+      activeColor: const Color(AppColors.primary),
+      title: Text(
+        title,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
       ),
+      contentPadding: EdgeInsets.zero,
     );
   }
 }
@@ -477,12 +507,9 @@ class _TableHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        border: Border(
-          bottom: BorderSide(color: Colors.grey.shade300),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: const Row(
         children: [
@@ -490,23 +517,24 @@ class _TableHeader extends StatelessWidget {
             flex: 2,
             child: Text(
               'Дата',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              style: _tableHeaderStyle,
+              textAlign: TextAlign.center,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'Остаток',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-              textAlign: TextAlign.right,
+              style: _tableHeaderStyle,
+              textAlign: TextAlign.center,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'Платёж',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-              textAlign: TextAlign.right,
+              style: _tableHeaderStyle,
+              textAlign: TextAlign.center,
             ),
           ),
         ],
@@ -514,3 +542,17 @@ class _TableHeader extends StatelessWidget {
     );
   }
 }
+
+const TextStyle _tableHeaderStyle = TextStyle(
+  fontFamily: 'Manrope',
+  fontWeight: FontWeight.w500,
+  fontSize: 16,
+  height: 24 / 16,
+);
+
+const TextStyle _tableCellStyle = TextStyle(
+  fontFamily: 'Manrope',
+  fontWeight: FontWeight.w500,
+  fontSize: 16,
+  height: 24 / 16,
+);
