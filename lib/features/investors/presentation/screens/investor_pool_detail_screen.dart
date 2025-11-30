@@ -235,6 +235,7 @@ class _AnalyticsGrid extends StatelessWidget {
   const _AnalyticsGrid({required this.metrics});
 
   final List<_MetricData> metrics;
+  static const double _cardHeight = 170;
 
   @override
   Widget build(BuildContext context) {
@@ -248,6 +249,7 @@ class _AnalyticsGrid extends StatelessWidget {
               .map(
                 (metric) => SizedBox(
                   width: itemWidth,
+                  height: _cardHeight,
                   child: _MetricCard(metric: metric),
                 ),
               )

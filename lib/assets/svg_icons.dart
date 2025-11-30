@@ -31,10 +31,10 @@ class SvgIcons {
   static const String debt = 'assets/icons/debt.svg';
   static const String debtSelf = 'assets/icons/debt_self.svg';
   static const String delay = 'assets/icons/delay.svg';
+  static const String delete = 'assets/icons/delete.svg';
   static const String doc = 'assets/icons/doc.svg';
   static const String docIcon = 'assets/icons/doc_icon.svg';
   static const String edit = 'assets/icons/edit.svg';
-  static const String delete = 'assets/icons/delete.svg';
   static const String favourite = 'assets/icons/favourite.svg';
   static const String fileDigit = 'assets/icons/file-digit.svg';
   static const String filter = 'assets/icons/filter.svg';

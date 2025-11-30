@@ -133,30 +133,30 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
                 child: isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : reportData == null
-                        ? Center(
-                            child: Text(
-                              error ?? 'Нет данных',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Color(AppColors.darkGrey),
-                              ),
-                            ),
-                          )
-                        : RefreshIndicator(
-                            onRefresh: () =>
-                                _loadInvestorAndReport(selectedInvestor.id),
-                            child: SingleChildScrollView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _NicknameCard(name: selectedInvestor.fullName),
-                                  const SizedBox(height: 16),
-                                  _AnalyticsGrid(metrics: _buildMetrics()),
-                                ],
-                              ),
-                            ),
+                    ? Center(
+                        child: Text(
+                          error ?? 'Нет данных',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Color(AppColors.darkGrey),
                           ),
+                        ),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: () =>
+                            _loadInvestorAndReport(selectedInvestor.id),
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _NicknameCard(name: selectedInvestor.fullName),
+                              const SizedBox(height: 16),
+                              _AnalyticsGrid(metrics: _buildMetrics()),
+                            ],
+                          ),
+                        ),
+                      ),
               ),
             ],
           ),
@@ -170,7 +170,8 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
     final metrics = <_MetricData>[
       _MetricData(
         title: 'Касса',
-        value: '${formatNumber(reportData?['balance'] ?? selectedInvestor.balance)} ₽',
+        value:
+            '${formatNumber(reportData?['balance'] ?? selectedInvestor.balance)} ₽',
         icon: SvgIcons.cash,
       ),
       _MetricData(
@@ -180,7 +181,8 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
       ),
       _MetricData(
         title: 'Инвестиции',
-        value: '${formatNumber(reportData?['investment'] ?? selectedInvestor.investmentAmount)} ₽',
+        value:
+            '${formatNumber(reportData?['investment'] ?? selectedInvestor.investmentAmount)} ₽',
         icon: SvgIcons.investition,
       ),
       _MetricData(

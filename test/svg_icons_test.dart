@@ -33,6 +33,7 @@ void main() {
     expect(File(SvgIcons.debt).existsSync(), isTrue);
     expect(File(SvgIcons.debtSelf).existsSync(), isTrue);
     expect(File(SvgIcons.delay).existsSync(), isTrue);
+    expect(File(SvgIcons.delete).existsSync(), isTrue);
     expect(File(SvgIcons.doc).existsSync(), isTrue);
     expect(File(SvgIcons.docIcon).existsSync(), isTrue);
     expect(File(SvgIcons.edit).existsSync(), isTrue);
