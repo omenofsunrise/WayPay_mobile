@@ -155,9 +155,17 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
   }
 
   void _handleContinue() {
-    final state = context.read<CreditCreationCubit>().state;
+    final cubit = context.read<CreditCreationCubit>();
+    final state = cubit.state;
     if (!_isStepValid(state)) return;
     if (_formKey.currentState!.validate()) {
+      cubit.logCurrentState('STEP_${_currentStep}');
+      if (_currentStep == 3) {
+        final productsJson = cubit.state.creditRequest.products
+            .map((p) => p.toJson())
+            .toList();
+        debugPrint('[STEP_3_PRODUCTS] $productsJson');
+      }
       if (_nextRoute != null) {
         context.go(_nextRoute!);
       } else {
@@ -387,6 +395,11 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     final navigator = Navigator.of(currentContext);
 
     try {
+      cubit.logCurrentState('CREATE_ATTEMPT');
+      final productsJson = cubit.state.creditRequest.products
+          .map((p) => p.toJson())
+          .toList();
+      debugPrint('[CREATE_ATTEMPT_PRODUCTS] $productsJson');
       await cubit.createCredit();
 
       GoRouter.of(currentContext).go(Routes.creditsScreen.toPath);

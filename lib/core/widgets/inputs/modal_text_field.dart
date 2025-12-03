@@ -19,6 +19,7 @@ class ModalTextField extends StatefulWidget {
     this.alignLabelWithHint,
     this.inputFormatters,
     this.focusNode,
+    this.errorText,
   });
 
   final TextEditingController controller;
@@ -35,6 +36,7 @@ class ModalTextField extends StatefulWidget {
   final bool? alignLabelWithHint;
   final List<TextInputFormatter>? inputFormatters;
   final FocusNode? focusNode;
+  final String? errorText;
 
   @override
   State<ModalTextField> createState() => _ModalTextFieldState();
@@ -110,6 +112,7 @@ class _ModalTextFieldState extends State<ModalTextField> {
       decoration: InputDecoration(
         labelText: widget.label,
         hintText: widget.hintText,
+        errorText: widget.errorText,
         alignLabelWithHint:
             widget.alignLabelWithHint ?? (widget.minLines != null),
         suffixIcon: widget.suffixIcon,

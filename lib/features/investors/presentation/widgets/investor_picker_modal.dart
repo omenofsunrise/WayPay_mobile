@@ -14,11 +14,13 @@ class InvestorPickerModal extends StatefulWidget {
     super.key,
     this.includeInvestor = true,
     this.includePool = true,
+    this.title = 'Выбор инвестора/пула',
   }) : assert(includeInvestor || includePool,
             'Хотя бы один тип должен быть доступен');
 
   final bool includeInvestor;
   final bool includePool;
+  final String title;
 
   @override
   State<InvestorPickerModal> createState() => _InvestorPickerModalState();
@@ -285,9 +287,9 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Выбор инвестора/пула',
+                  widget.title,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               ),

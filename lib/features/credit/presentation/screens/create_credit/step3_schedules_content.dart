@@ -353,13 +353,33 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     }
 
     if (state.schedulePreviewError != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            state.schedulePreviewError!,
-            style: TextStyle(color: Colors.red),
-            textAlign: TextAlign.center,
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        child: Text(
+          state.schedulePreviewError!,
+          style: const TextStyle(
+            color: Colors.red,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    if (state.schedulePreview.isEmpty) {
+      final hasFirstPayment = state.creditRequest.firstPayment > 0;
+      final message = hasFirstPayment
+          ? 'График станет доступен сразу после расчёта.'
+          : 'Введите первоначальный взнос, чтобы рассчитать график платежей.';
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Color(AppColors.darkGrey),
+            fontSize: 14,
           ),
         ),
       );

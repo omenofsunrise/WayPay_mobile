@@ -37,9 +37,9 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     return CreateCreditRequest(
       clientId: null,
       name: '',
-      creditTypeId: 0,
-      creditTabTypeId: 0,
-      guarantorClientId: 0,
+      creditTypeId: null,
+      creditTabTypeId: null,
+      guarantorClientId: null,
       guarantor: null,
       investorId: null,
       poolId: null,
@@ -190,7 +190,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
       emit(
         state.copyWith(
           schedulePreviewLoading: false,
-          schedulePreviewError: 'Ошибка загрузки графика платежей: $e',
+          schedulePreviewError: _mapSchedulePreviewError(e),
         ),
       );
     }
@@ -343,6 +343,29 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
       return;
     }
 
+    if (state.creditRequest.firstPayment <= 0) {
+      emit(
+        state.copyWith(
+          schedulePreview: [],
+          schedulePreviewLoading: false,
+          schedulePreviewError: null,
+        ),
+      );
+      return;
+    }
+
+    if (state.creditRequest.firstPayment >= state.totalAmountWithSurcharge) {
+      emit(
+        state.copyWith(
+          schedulePreview: [],
+          schedulePreviewLoading: false,
+          schedulePreviewError:
+              'Первоначальный платеж должен быть меньше суммы договора',
+        ),
+      );
+      return;
+    }
+
     final currentState = state;
 
     emit(
@@ -353,6 +376,16 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     );
 
     try {
+      final requestData = {
+        'totalAmount': state.totalAmountWithSurcharge,
+        'firstPayment': state.creditRequest.firstPayment,
+        'termMonths': state.creditRequest.termMonths,
+        'paymentDay': state.creditRequest.paymentDay,
+        'currentMonthStart': state.creditRequest.currentMonthStart,
+        'nextMonthStart': state.creditRequest.nextMonthStart,
+      };
+      print('Schedule preview payload: ${jsonEncode(requestData)}');
+
       final preview = await _dataSource.getSchedulePreview(
         totalAmount: state.totalAmountWithSurcharge,
         firstPayment: state.creditRequest.firstPayment,
@@ -373,7 +406,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
       emit(
         state.copyWith(
           schedulePreviewLoading: false,
-          schedulePreviewError: 'Ошибка загрузки графика платежей: $e',
+          schedulePreviewError: _mapSchedulePreviewError(e),
         ),
       );
     }
@@ -387,6 +420,14 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
   Future<void> close() {
     _debounceTimer?.cancel();
     return super.close();
+  }
+
+  void logCurrentState(String stage) {
+    final payload = state.creditRequest.toJson()
+      ..['totalAmountWithSurcharge'] = state.totalAmountWithSurcharge
+      ..['selectedClient'] = state.selectedClient?.id
+      ..['selectedInvestor'] = state.selectedInvestor?.id;
+    print('[$stage] ${jsonEncode(payload)}');
   }
 
   Future createCredit() async {
@@ -444,9 +485,9 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
       final createRequest = CreateCreditRequest(
         clientId: state.creditRequest.clientId,
         name: state.creditRequest.name.trim(),
-        creditTypeId: state.creditRequest.creditTypeId,
-        creditTabTypeId: state.creditRequest.creditTabTypeId,
-        guarantorClientId: state.creditRequest.guarantorClientId,
+        creditTypeId: _normalizeId(state.creditRequest.creditTypeId),
+        creditTabTypeId: _normalizeId(state.creditRequest.creditTabTypeId),
+        guarantorClientId: _normalizeId(state.creditRequest.guarantorClientId),
         guarantor: guarantor,
         investorId: state.creditRequest.investorId,
         poolId: state.creditRequest.poolId,
@@ -459,12 +500,13 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
         inDebt: state.creditRequest.inDebt,
         debtComment: state.creditRequest.debtComment?.trim(),
         products: state.creditRequest.products.map((product) {
+          final isPercentMode = state.markupType == 0;
           return CreditProduct(
             name: product.name.trim(),
             price: product.price,
             quantity: product.quantity,
-            surcharge: product.surcharge,
-            surchargeAmount: product.surchargeAmount,
+            surcharge: isPercentMode ? product.surcharge : null,
+            surchargeAmount: isPercentMode ? null : product.surchargeAmount,
           );
         }).toList(),
       );
@@ -487,25 +529,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     final savedMarkupType = await _loadMarkupType();
     emit(
       CreditCreationState(
-        creditRequest: CreateCreditRequest(
-          clientId: null,
-          name: '',
-          creditTypeId: 0,
-          creditTabTypeId: 0,
-          guarantorClientId: 0,
-          guarantor: null,
-          investorId: null,
-          poolId: null,
-          creditDate: DateTime.now(),
-          firstPayment: 0,
-          termMonths: 0,
-          paymentDay: 1,
-          nextMonthStart: false,
-          currentMonthStart: false,
-          inDebt: false,
-          debtComment: null,
-          products: [CreditProduct(name: '', price: 0, quantity: 1)],
-        ),
+        creditRequest: _initialRequest(),
         markupType: savedMarkupType,
         totalAmountWithSurcharge: 0,
         selectedClient: null,
@@ -529,6 +553,11 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     return _roundUpToFifty(total);
   }
 
+  int? _normalizeId(int? value) {
+    if (value == null || value <= 0) return null;
+    return value;
+  }
+
   double _roundUpToFifty(double amount) {
     return (amount / 50).ceil() * 50.0;
   }
@@ -550,5 +579,13 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
         emit(state.copyWith(markupType: saved));
       }
     });
+  }
+
+  String _mapSchedulePreviewError(Object error) {
+    final message = error.toString().toLowerCase();
+    if (message.contains('400')) {
+      return 'Не удалось построить график. Проверьте корректность параметров договора и попробуйте снова.';
+    }
+    return 'Не удалось построить график. Повторите попытку позже.';
   }
 }

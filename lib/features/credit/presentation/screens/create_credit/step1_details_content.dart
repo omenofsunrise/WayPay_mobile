@@ -128,6 +128,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
     BottomNavController.instance.show();
 
     if (investor != null) {
+      debugPrint('[STEP1] Готово: инвестор ${investor.id} ${investor.nickname}');
       context.read<CreditCreationCubit>().updateBasicInfo(
         investorId: investor.id,
         selectedInvestor: investor,
@@ -156,6 +157,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
     BottomNavController.instance.show();
 
     if (client != null) {
+      debugPrint('[STEP1] Готово: клиент ${client.id} ${client.fullName}');
       context.read<CreditCreationCubit>().updateBasicInfo(
         clientId: client.id,
         selectedClient: client,

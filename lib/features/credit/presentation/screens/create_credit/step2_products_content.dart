@@ -47,6 +47,14 @@ class _Step2ProductsContentState extends State<Step2ProductsContent> {
     }
   }
 
+  @override
+  void didUpdateWidget(Step2ProductsContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.markupType != widget.markupType) {
+      _selectedTypeNotifier.value = widget.markupType;
+    }
+  }
+
   void _addProduct() {
     final newProducts = List<CreditProduct>.from(widget.products)
       ..add(
@@ -366,12 +374,15 @@ class __ProductItemState extends State<_ProductItem> {
     _priceController.text =
         product.price == 0 ? '' : _formatCurrencyValue(product.price);
     _quantityController.text = product.quantity.toString();
-    if (product.surcharge == null) {
+    final displayValue = widget.markupType == 0
+        ? product.surcharge
+        : product.surchargeAmount;
+    if (displayValue == null) {
       _surchargeController.clear();
     } else {
       _surchargeController.text = widget.markupType == 0
-          ? _formatPlainNumber(product.surcharge!)
-          : _formatCurrencyValue(product.surcharge!);
+          ? _formatPlainNumber(displayValue)
+          : _formatCurrencyValue(displayValue);
     }
   }
 
@@ -381,25 +392,22 @@ class __ProductItemState extends State<_ProductItem> {
     final price = double.tryParse(priceText) ?? 0;
     final quantity = int.tryParse(_quantityController.text.trim()) ?? 1;
     final surchargeText = _normalizeNumberInput(_surchargeController.text);
-    final double? surcharge = surchargeText.isEmpty
+    final double? rawValue = surchargeText.isEmpty
         ? null
         : double.tryParse(surchargeText);
-    final surchargeValue = surcharge ?? 0;
-
-    double? surchargeAmount;
-    if (surcharge == null) {
-      surchargeAmount = null;
-    } else if (widget.markupType == 0) {
-      surchargeAmount = (price * surchargeValue) / 100;
-    } else {
-      surchargeAmount = surchargeValue;
-    }
+    final surchargePercent =
+        widget.markupType == 0 ? rawValue : null;
+    final surchargeAmount = rawValue == null
+        ? null
+        : (widget.markupType == 0
+            ? (price * rawValue) / 100
+            : rawValue);
 
     return CreditProduct(
       name: name,
       price: price,
       quantity: quantity,
-      surcharge: surcharge,
+      surcharge: surchargePercent,
       surchargeAmount: surchargeAmount,
     );
   }
