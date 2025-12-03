@@ -12,9 +12,9 @@ import 'package:waypay_mobile/core/widgets/buttons/add_button.dart';
 import 'package:waypay_mobile/core/widgets/cards/credit_card.dart';
 import 'package:waypay_mobile/core/widgets/filters/filter_components.dart';
 import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/pagination_widget.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
 import 'package:waypay_mobile/core/widgets/search_field.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_event.dart';
@@ -103,6 +103,10 @@ class _CreditsScreenState extends State<CreditsScreen> {
     setState(() => _appliedFilters = null);
     _selectedCategory = null;
     _loadCredits();
+  }
+
+  void _toggleFavourite(int creditId) {
+    context.read<CreditBloc>().add(ToggleFavouriteEvent(creditId: creditId));
   }
 
   @override
@@ -285,48 +289,13 @@ class _CreditsScreenState extends State<CreditsScreen> {
                               child: Text('Договоры не найдены'),
                             );
                           }
-                          return Column(
-                            children: [
-                              Expanded(
-                                child: Refresher(
-                                  onRefresh: () async => _loadCredits(),
-                                  content: ListView.builder(
-                                    padding: const EdgeInsets.only(bottom: 16),
-                                    itemCount: state.credits.length,
-                                    itemBuilder: (context, index) {
-                                      final credit = state.credits[index];
-                                      return Padding(
-                                        padding: const EdgeInsets.only(
-                                          bottom: 12,
-                                        ),
-                                        child: CreditCardWidget(
-                                          credit: credit,
-                                          onFavouriteToggle: () {
-                                            context.read<CreditBloc>().add(
-                                              ToggleFavouriteEvent(
-                                                creditId: credit.id,
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
-                                child: PaginationWidget(
-                                  currentPage: state.currentPage,
-                                  totalPages: state.totalPages,
-                                  onPageSelected: (page) {
-                                    _loadCredits(page: page);
-                                  },
-                                ),
-                              ),
-                            ],
+                          return _CreditList(
+                            credits: state.credits,
+                            currentPage: state.currentPage,
+                            totalPages: state.totalPages,
+                            onRefresh: () async => _loadCredits(),
+                            onLoadMore: (page) => _loadCredits(page: page),
+                            onFavouriteToggle: _toggleFavourite,
                           );
                         }
                         return const SizedBox();
@@ -536,6 +505,82 @@ class _CreditTabSheet extends StatelessWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CreditList extends StatefulWidget {
+  final List<CreditModel> credits;
+  final int currentPage;
+  final int totalPages;
+  final Future<void> Function() onRefresh;
+  final ValueChanged<int> onLoadMore;
+  final ValueChanged<int> onFavouriteToggle;
+
+  const _CreditList({
+    required this.credits,
+    required this.currentPage,
+    required this.totalPages,
+    required this.onRefresh,
+    required this.onLoadMore,
+    required this.onFavouriteToggle,
+  });
+
+  @override
+  State<_CreditList> createState() => _CreditListState();
+}
+
+class _CreditListState extends State<_CreditList> {
+  bool _isRequestingMore = false;
+
+  bool get _canLoadMore =>
+      !_isRequestingMore && widget.currentPage < widget.totalPages;
+
+  bool _handleScroll(ScrollNotification notification) {
+    if (notification.metrics.pixels >=
+            notification.metrics.maxScrollExtent - 100 &&
+        _canLoadMore) {
+      _isRequestingMore = true;
+      widget.onLoadMore(widget.currentPage + 1);
+    }
+    return false;
+  }
+
+  @override
+  void didUpdateWidget(covariant _CreditList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentPage != widget.currentPage) {
+      _isRequestingMore = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: _handleScroll,
+      child: Refresher(
+        onRefresh: widget.onRefresh,
+        content: ListView.builder(
+          padding: const EdgeInsets.only(bottom: 16),
+          itemCount: widget.credits.length + (_isRequestingMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index >= widget.credits.length) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final credit = widget.credits[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: CreditCardWidget(
+                credit: credit,
+                onFavouriteToggle: () => widget.onFavouriteToggle(credit.id),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

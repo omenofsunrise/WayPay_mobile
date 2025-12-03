@@ -108,13 +108,9 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
     try {
       await dio.post('Credit', data: request.toJson());
     } on DioException catch (e) {
-      if (e.response?.statusCode == 400) {
-        final errorData = e.response?.data;
-        if (errorData is Map<String, dynamic>) {
-          final errorMessage =
-              errorData['title'] ?? errorData['message'] ?? 'Ошибка валидации';
-          throw Exception(errorMessage);
-        }
+      final serverMessage = _extractServerError(e);
+      if (serverMessage != null) {
+        throw Exception(serverMessage);
       }
       throw Exception('Ошибка создания договора: ${e.message}');
     }
@@ -149,7 +145,38 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
         throw Exception('Неожиданный формат ответа для preview платежей');
       }
     } on DioException catch (e) {
+      final serverMessage = _extractServerError(e);
+      if (serverMessage != null) {
+        throw Exception(serverMessage);
+      }
       throw Exception('Ошибка загрузки preview платежей: ${e.message}');
     }
+  }
+
+  String? _extractServerError(DioException e) {
+    final data = e.response?.data;
+    if (data is String && data.trim().isNotEmpty) {
+      return data;
+    }
+    if (data is Map<String, dynamic>) {
+      final title = data['title']?.toString();
+      final detail = data['message']?.toString() ?? data['detail']?.toString();
+      final errors = data['errors'];
+      String formattedErrors = '';
+      if (errors is Map<String, dynamic>) {
+        formattedErrors = errors.entries
+            .map(
+              (entry) =>
+                  '${entry.key}: ${(entry.value as List<dynamic>).join(', ')}',
+            )
+            .join('\n');
+      }
+      return [
+        title,
+        detail,
+        formattedErrors.isNotEmpty ? formattedErrors : null,
+      ].whereType<String>().join('\n');
+    }
+    return null;
   }
 }

@@ -104,6 +104,31 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     context.read<CreditCreationCubit>().updateProducts(products);
   }
 
+  void _showInlineMessage({
+    required String message,
+    required bool isError,
+  }) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: Color(AppColors.background),
+        title: Text(isError ? 'Ошибка' : 'Успех'),
+        content: Text(
+          message,
+          style: TextStyle(
+            color: isError ? Colors.red : const Color(AppColors.black),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Ок'),
+          ),
+        ],
+      ),
+    );
+  }
+
   int get _currentStep {
     final location = GoRouterState.of(context).uri.toString();
 
@@ -145,7 +170,7 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     if (_previousRoute != null) {
       _navigateBack();
     } else {
-      context.go(Routes.creditsScreen.toPath);
+      context.goNamed(Routes.creditsScreen.toName);
     }
   }
 
@@ -315,7 +340,7 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     final String leftButtonText = hasPrevious ? 'Назад' : 'Отменить';
     final VoidCallback leftAction = hasPrevious
         ? _navigateBack
-        : () => context.go(Routes.creditsScreen.toPath);
+        : () => context.goNamed(Routes.creditsScreen.toName);
 
     return BlocBuilder<CreditCreationCubit, CreditCreationState>(
       builder: (context, state) {
@@ -388,11 +413,6 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
 
   void _finishCreditCreation() async {
     final cubit = context.read<CreditCreationCubit>();
-    final creditBloc = context.read<CreditBloc>();
-
-    final currentContext = context;
-    final scaffoldMessenger = ScaffoldMessenger.of(currentContext);
-    final navigator = Navigator.of(currentContext);
 
     try {
       cubit.logCurrentState('CREATE_ATTEMPT');
@@ -402,17 +422,18 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
       debugPrint('[CREATE_ATTEMPT_PRODUCTS] $productsJson');
       await cubit.createCredit();
 
-      GoRouter.of(currentContext).go(Routes.creditsScreen.toPath);
+      if (!mounted) return;
+      GoRouter.of(context).goNamed(Routes.creditsScreen.toName);
 
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: Text('Договор успешно создан'),
-          backgroundColor: Color(AppColors.primary),
-        ),
+      _showInlineMessage(
+        message: 'Договор успешно создан',
+        isError: false,
       );
     } catch (e) {
-      scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('Ошибка: $e'), backgroundColor: Colors.red),
+      if (!mounted) return;
+      _showInlineMessage(
+        message: e.toString(),
+        isError: true,
       );
     }
   }

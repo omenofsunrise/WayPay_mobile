@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/utils/price_formatter.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/widgets/credit_modal.dart';
@@ -31,41 +32,58 @@ class CreditCardWidget extends StatelessWidget {
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
+        constraints: const BoxConstraints(minHeight: 168),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x14000809),
+              blurRadius: 4,
+              offset: Offset(2, 2),
+            ),
+            BoxShadow(
+              color: Color(0x05000809),
+              blurRadius: 6,
+              offset: Offset(0, 0),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
               children: [
                 Text(
                   'Договор №${credit.id}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w400,
-                    color: Color(AppColors.uiBorder),
+                  style: AppStyle.manrope(
+                    size: 14,
+                    weight: FontWeight.w400,
+                    color: const Color(AppColors.uiBorder),
                   ),
                 ),
                 const Spacer(),
-                const SizedBox(width: 4),
                 Text(
-                  "от ${_formatDate(credit.creditDate)}",
-                  style: const TextStyle(color: Color(AppColors.uiBorder)),
+                  'от ${_formatDate(credit.creditDate)}',
+                  style: AppStyle.manrope(
+                    size: 14,
+                    weight: FontWeight.w400,
+                    color: const Color(AppColors.uiBorder),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
                   child: Text(
                     credit.clientFullName,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(AppColors.black),
+                    style: AppStyle.manrope(
+                      size: 16,
+                      weight: FontWeight.w500,
+                      color: const Color(AppColors.black),
                     ),
                   ),
                 ),
@@ -79,55 +97,23 @@ class CreditCardWidget extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Уплачено',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Color(AppColors.grey),
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        PriceFormatter.formatPrice(credit.payed),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Color(AppColors.primary),
-                        ),
-                      ),
-                    ],
+                  child: _buildValueBlock(
+                    label: 'Уплачено',
+                    value: PriceFormatter.formatPrice(credit.payed),
+                    valueColor: const Color(AppColors.primary),
                   ),
                 ),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Остаток',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Color(AppColors.grey),
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        PriceFormatter.formatPrice(credit.rest),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Color(AppColors.red),
-                        ),
-                      ),
-                    ],
+                  child: _buildValueBlock(
+                    label: 'Остаток',
+                    value: PriceFormatter.formatPrice(credit.rest),
+                    valueColor: const Color(AppColors.red),
+                    alignRight: true,
                   ),
                 ),
               ],
@@ -135,6 +121,37 @@ class CreditCardWidget extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildValueBlock({
+    required String label,
+    required String value,
+    required Color valueColor,
+    bool alignRight = false,
+  }) {
+    return Column(
+      crossAxisAlignment:
+          alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppStyle.manrope(
+            size: 16,
+            weight: FontWeight.w500,
+            color: const Color(AppColors.black),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: AppStyle.manrope(
+            size: 22,
+            weight: FontWeight.w500,
+            color: valueColor,
+          ),
+        ),
+      ],
     );
   }
 }
