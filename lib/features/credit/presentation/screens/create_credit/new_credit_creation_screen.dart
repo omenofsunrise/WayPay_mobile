@@ -29,6 +29,8 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
   final _paymentDayController = TextEditingController();
   final _firstPaymentPercentController = TextEditingController();
   final _firstPaymentAmountController = TextEditingController();
+  String? _inlineMessage;
+  bool _inlineMessageIsError = false;
 
   @override
   void didChangeDependencies() {
@@ -108,25 +110,18 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     required String message,
     required bool isError,
   }) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: Color(AppColors.background),
-        title: Text(isError ? 'Ошибка' : 'Успех'),
-        content: Text(
-          message,
-          style: TextStyle(
-            color: isError ? Colors.red : const Color(AppColors.black),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Ок'),
-          ),
-        ],
-      ),
-    );
+    if (!mounted) return;
+    setState(() {
+      _inlineMessage = message;
+      _inlineMessageIsError = isError;
+    });
+  }
+
+  void _clearInlineMessage() {
+    if (_inlineMessage == null) return;
+    setState(() {
+      _inlineMessage = null;
+    });
   }
 
   int get _currentStep {
@@ -182,6 +177,7 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
   void _handleContinue() {
     final cubit = context.read<CreditCreationCubit>();
     final state = cubit.state;
+    _clearInlineMessage();
     if (!_isStepValid(state)) return;
     if (_formKey.currentState!.validate()) {
       cubit.logCurrentState('STEP_${_currentStep}');
@@ -345,22 +341,50 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     return BlocBuilder<CreditCreationCubit, CreditCreationState>(
       builder: (context, state) {
         final canProceed = _isStepValid(state);
-        return Row(
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              child: DefaultButton(
-                text: leftButtonText,
-                onPressed: leftAction,
-                isPrimary: false,
+            if (_inlineMessage != null) ...[
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: _inlineMessageIsError
+                      ? const Color(0x14FF3B30)
+                      : const Color(0x1420A39F),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  _inlineMessage!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: _inlineMessageIsError
+                        ? const Color(AppColors.red)
+                        : const Color(AppColors.black),
+                    fontSize: 14,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DefaultButton(
-                text: _currentStep == 3 ? 'Создать' : 'Далее',
-                onPressed: canProceed ? _handleContinue : null,
-                isPrimary: true,
-              ),
+            ],
+            Row(
+              children: [
+                Expanded(
+                  child: DefaultButton(
+                    text: leftButtonText,
+                    onPressed: leftAction,
+                    isPrimary: false,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: DefaultButton(
+                    text: _currentStep == 3 ? 'Создать' : 'Далее',
+                    onPressed: canProceed ? _handleContinue : null,
+                    isPrimary: true,
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -432,10 +456,19 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     } catch (e) {
       if (!mounted) return;
       _showInlineMessage(
-        message: e.toString(),
+        message: _extractReadableError(e),
         isError: true,
       );
     }
+  }
+
+  String _extractReadableError(Object error) {
+    final raw = error.toString();
+    const prefix = 'Exception:';
+    if (raw.startsWith(prefix)) {
+      return raw.substring(prefix.length).trim();
+    }
+    return raw;
   }
 
   @override

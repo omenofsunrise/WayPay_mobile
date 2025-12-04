@@ -379,12 +379,18 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     }
 
     if (state.schedulePreviewError != null) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0x14FF3B30),
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Text(
           state.schedulePreviewError!,
           style: const TextStyle(
-            color: Colors.red,
+            color: Color(AppColors.red),
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),

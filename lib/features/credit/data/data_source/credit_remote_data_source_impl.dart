@@ -112,7 +112,7 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
       if (serverMessage != null) {
         throw Exception(serverMessage);
       }
-      throw Exception('Ошибка создания договора: ${e.message}');
+      throw Exception(_mapGenericCreateError(e.response?.statusCode));
     }
   }
 
@@ -178,5 +178,14 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
       ].whereType<String>().join('\n');
     }
     return null;
+  }
+
+  String _mapGenericCreateError(int? statusCode) {
+    final baseText =
+        'Не удалось создать договор. Проверьте данные и попробуйте снова.';
+    if (statusCode == null) {
+      return baseText;
+    }
+    return '$baseText (Код ошибки: $statusCode)';
   }
 }
