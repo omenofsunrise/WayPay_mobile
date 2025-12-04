@@ -65,11 +65,13 @@ class FilterSheet extends StatelessWidget {
     required this.child,
     this.title = 'Фильтры',
     this.padding,
+    this.keepHeaderPinned = false,
   });
 
   final Widget child;
   final String title;
   final EdgeInsets? padding;
+  final bool keepHeaderPinned;
 
   @override
   Widget build(BuildContext context) {
@@ -82,32 +84,59 @@ class FilterSheet extends StatelessWidget {
           bottom: bottomInset + 24,
         );
 
+    final header = Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.close),
+        ),
+      ],
+    );
+
+    if (!keepHeaderPinned) {
+      return Padding(
+        padding: sheetPadding,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              header,
+              const SizedBox(height: 16),
+              child,
+            ],
+          ),
+        ),
+      );
+    }
+
+    final maxHeight = MediaQuery.of(context).size.height * 0.85;
+
     return Padding(
       padding: sheetPadding,
-      child: SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxHeight),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
+            header,
             const SizedBox(height: 16),
-            child,
+            Flexible(
+              fit: FlexFit.loose,
+              child: SingleChildScrollView(
+                child: child,
+              ),
+            ),
           ],
         ),
       ),

@@ -363,7 +363,8 @@ class _CreditTabSheet extends StatelessWidget {
     ];
     return FilterSheet(
       title: 'Сортировка',
-      child: Column(
+      keepHeaderPinned: true,
+     child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -417,7 +418,7 @@ class _CreditTabSheet extends StatelessWidget {
               ),
             );
           }),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
           BlocBuilder<ObjectTypeBloc, ObjectTypeState>(
             builder: (context, state) {
               if (state is ObjectTypeLoading) {
