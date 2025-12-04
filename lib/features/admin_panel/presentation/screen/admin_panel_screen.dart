@@ -283,7 +283,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                           child: DefaultButton(
                             text: 'Добавить компанию',
                             onPressed: () => showCreateCompanyDialog(context),
-                            isGreen: true,
+                            isPrimary: true,
                           ),
                         ),
                         const SizedBox(height: 32),

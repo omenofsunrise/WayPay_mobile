@@ -54,7 +54,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                   const SizedBox(height: 24),
                   DefaultButton(
                     text: 'Продолжить',
-                    isGreen: true,
+                    isPrimary: true,
                     onPressed: () {
                       context.pushReplacementNamed(Routes.pinCodeScreen.toName);
                     },

@@ -98,7 +98,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
           const SizedBox(width: 12),
           DefaultButton(
             text: 'Применить',
-            isGreen: true,
+            isPrimary: true,
             onPressed: () {
               setState(() => _searchController.text = tempController.text);
               final q = _searchController.text.trim();
@@ -161,7 +161,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     Expanded(
                       child: DefaultButton(
                         text: 'Отмена',
-                        isGreen: false,
+                        isPrimary: false,
                         onPressed: () {
                           if (!innerDialogContext.mounted) return;
                           Navigator.pop(innerDialogContext);
@@ -172,7 +172,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     Expanded(
                       child: DefaultButton(
                         text: 'Создать',
-                        isGreen: true,
+                        isPrimary: true,
                         onPressed: () async {
                           if (!validateInput()) {
                             setState(() {});

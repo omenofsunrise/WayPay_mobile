@@ -276,7 +276,7 @@ class _InvestorSelectorModalContentState
                 Expanded(
                   child: DefaultButton(
                     text: 'Отмена',
-                    isGreen: false,
+                    isPrimary: false,
                     onPressed: () => context.pop(),
                   ),
                 ),
@@ -284,7 +284,7 @@ class _InvestorSelectorModalContentState
                 Expanded(
                   child: DefaultButton(
                     text: 'Добавить',
-                    isGreen: true,
+                    isPrimary: true,
                     onPressed: () {
                       investorError.value = null;
                       amountError.value = null;

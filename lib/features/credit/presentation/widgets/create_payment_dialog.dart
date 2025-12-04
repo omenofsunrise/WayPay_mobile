@@ -88,7 +88,7 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
                   child: DefaultButton(
                     text: 'Отмена',
                     onPressed: () => Navigator.pop(context),
-                    isGreen: false,
+                    isPrimary: false,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -96,7 +96,7 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
                   child: DefaultButton(
                     text: 'Создать',
                     onPressed: _isSubmitting ? () {} : _submitPayment,
-                    isGreen: true,
+                    isPrimary: true,
                   ),
                 ),
               ],

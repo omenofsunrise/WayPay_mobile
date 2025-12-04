@@ -187,7 +187,7 @@ class PeriodAppBarAction extends StatelessWidget {
                         Expanded(
                           child: DefaultButton(
                             text: 'Отменить',
-                            isGreen: false,
+                            isPrimary: false,
                             onPressed: () => Navigator.pop(ctx),
                           ),
                         ),

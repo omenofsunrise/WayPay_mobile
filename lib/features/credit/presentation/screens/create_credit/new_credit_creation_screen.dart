@@ -351,7 +351,7 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
               child: DefaultButton(
                 text: leftButtonText,
                 onPressed: leftAction,
-                isGreen: false,
+                isPrimary: false,
               ),
             ),
             const SizedBox(width: 12),
@@ -359,7 +359,7 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
               child: DefaultButton(
                 text: _currentStep == 3 ? 'Создать' : 'Далее',
                 onPressed: canProceed ? _handleContinue : null,
-                isGreen: true,
+                isPrimary: true,
               ),
             ),
           ],

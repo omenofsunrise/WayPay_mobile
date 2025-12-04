@@ -156,7 +156,7 @@ class _AddBudgetExpenseScreenState extends State<AddBudgetExpenseScreen> {
                           child: DefaultButton(
                             text: 'Применить',
                             onPressed: _canSubmit ? _submit : null,
-                            isGreen: true,
+                            isPrimary: true,
                           ),
                         ),
                       ],

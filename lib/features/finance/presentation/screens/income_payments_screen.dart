@@ -224,7 +224,7 @@ class _IncomePaymentsScreenState extends State<IncomePaymentsScreen> {
             const SizedBox(width: 12),
             DefaultButton(
               text: 'Применить',
-              isGreen: true,
+              isPrimary: true,
               onPressed: () {
                 setState(() {
                   _selectedMonth = tempMonth;

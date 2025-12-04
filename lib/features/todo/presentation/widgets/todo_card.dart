@@ -445,7 +445,7 @@ class _TodoCardState extends State<TodoCard> {
                           child: DefaultButton(
                             onPressed: () => Navigator.of(dialogContext).pop(),
                             text: 'Отмена',
-                            isGreen: false,
+                            isPrimary: false,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -467,7 +467,7 @@ class _TodoCardState extends State<TodoCard> {
                               Navigator.of(dialogContext).pop();
                             },
                             text: 'Изменить',
-                            isGreen: true,
+                            isPrimary: true,
                           ),
                         ),
                       ],

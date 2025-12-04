@@ -201,7 +201,7 @@ class _BudgetScreenState extends State<BudgetScreen>
           const SizedBox(width: 12),
           DefaultButton(
             text: 'Применить',
-            isGreen: true,
+            isPrimary: true,
             onPressed: () {
               setState(() {
                 selectedMonth = tempMonth;
@@ -267,7 +267,7 @@ class _BudgetScreenState extends State<BudgetScreen>
                 Expanded(
                   child: DefaultButton(
                     text: 'Отмена',
-                    isGreen: false,
+                    isPrimary: false,
                     onPressed: () => Navigator.pop(dialogContext),
                   ),
                 ),
@@ -275,7 +275,7 @@ class _BudgetScreenState extends State<BudgetScreen>
                 Expanded(
                   child: DefaultButton(
                     text: 'Сохранить',
-                    isGreen: true,
+                    isPrimary: true,
                     onPressed: () async {
                       amountError.value = null;
                       final amountText = amountController.text.trim();

@@ -206,7 +206,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
                 child: DefaultButton(
                   text: 'Сбросить',
                   onPressed: _resetEmptyFields,
-                  isGreen: false,
+                  isPrimary: false,
                 ),
               ),
               const SizedBox(width: 10),

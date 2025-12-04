@@ -329,7 +329,7 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
           const SizedBox(height: 16),
           DefaultButton(
             text: 'Создать нового инвестора',
-            isGreen: true,
+            isPrimary: true,
             showIcon: true,
             icon: Icons.add,
             onPressed: () {

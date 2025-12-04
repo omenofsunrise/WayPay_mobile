@@ -369,7 +369,7 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
                               child: DefaultButton(
                                 text: 'Отменить',
                                 onPressed: () => Navigator.pop(context),
-                                isGreen: false,
+                                isPrimary: false,
                               ),
                             ),
                             const SizedBox(width: 20),

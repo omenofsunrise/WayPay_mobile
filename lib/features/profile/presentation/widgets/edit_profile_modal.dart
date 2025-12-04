@@ -425,7 +425,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
                           child: DefaultButton(
                             text: 'Отменить',
                             onPressed: () => Navigator.pop(context),
-                            isGreen: false,
+                            isPrimary: false,
                           ),
                         ),
                         const SizedBox(width: 10),

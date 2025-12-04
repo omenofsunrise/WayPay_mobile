@@ -148,7 +148,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                             ? const Center(child: CircularProgressIndicator())
                             : DefaultButton(
                                 text: 'Подтвердить',
-                                isGreen: true,
+                                isPrimary: true,
                                 onPressed: () {
                                   if (_formKey.currentState!.validate()) {
                                     final formattedPhone =

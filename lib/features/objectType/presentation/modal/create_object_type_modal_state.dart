@@ -100,7 +100,7 @@ class _CreateObjectTypeModalState extends State<CreateObjectTypeModal> {
                   child: DefaultButton(
                     text: 'Отменить',
                     onPressed: () => Navigator.of(context).pop(),
-                    isGreen: false,
+                    isPrimary: false,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -132,7 +132,7 @@ class _CreateObjectTypeModalState extends State<CreateObjectTypeModal> {
                     builder: (context, state) {
                       return DefaultButton(
                         text: _isCreating ? 'Создание...' : 'Создать',
-                        isGreen: true,
+                        isPrimary: true,
                         onPressed: _isCreating ? null : _createObjectType,
                       );
                     },

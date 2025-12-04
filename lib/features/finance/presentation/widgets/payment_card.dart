@@ -128,7 +128,7 @@ class _PaymentCardState extends State<PaymentCard> {
                 const SizedBox(height: 16),
                 DefaultButton(
                   text: 'Закрыть',
-                  isGreen: true,
+                  isPrimary: true,
                   onPressed: () => context.pop(),
                 ),
               ],

@@ -116,7 +116,7 @@ class _BlacklistScreenState extends State<BlacklistScreen> {
           const SizedBox(width: 12),
           DefaultButton(
             text: 'Применить',
-            isGreen: true,
+            isPrimary: true,
             onPressed: () {
               setState(() => _searchController.text = tempController.text);
               final q = _searchController.text.trim();

@@ -157,7 +157,7 @@ class _TodoScreenState extends State<TodoScreen> {
           const SizedBox(width: 12),
           DefaultButton(
             text: 'Применить',
-            isGreen: true,
+            isPrimary: true,
             onPressed: () {
               _loadTasks();
               Navigator.pop(context);
@@ -667,7 +667,7 @@ void showCreateTodoModal(BuildContext externalContext) async {
                         child: DefaultButton(
                           onPressed: () => Navigator.of(dialogContext).pop(),
                           text: 'Отмена',
-                          isGreen: false,
+                          isPrimary: false,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -693,7 +693,7 @@ void showCreateTodoModal(BuildContext externalContext) async {
                             Navigator.of(dialogContext).pop();
                           },
                           text: 'Создать',
-                          isGreen: true,
+                          isPrimary: true,
                         ),
                       ),
                     ],

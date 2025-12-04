@@ -136,7 +136,7 @@ class _EditObjectTypeModalState extends State<EditObjectTypeModal> {
               const SizedBox(height: 24),
               DefaultButton(
                 text: _isUpdating ? 'Сохранение...' : 'Сохранить',
-                isGreen: true,
+                isPrimary: true,
                 onPressed: _isUpdating ? () {} : _updateObjectType,
               ),
               const SizedBox(height: 24),

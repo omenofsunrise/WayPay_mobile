@@ -177,7 +177,7 @@ class _ClientSelectorModalContentState
                             Expanded(
                               child: DefaultButton(
                                 text: 'Отмена',
-                                isGreen: false,
+                                isPrimary: false,
                                 onPressed: () => context.pop(),
                               ),
                             ),
@@ -185,7 +185,7 @@ class _ClientSelectorModalContentState
                             Expanded(
                               child: DefaultButton(
                                 text: 'Добавить',
-                                isGreen: true,
+                                isPrimary: true,
                                 onPressed: _selectedClient != null
                                     ? () {
                                         widget.onSave(_selectedClient!);

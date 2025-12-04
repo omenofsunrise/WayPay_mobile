@@ -105,7 +105,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
                         Expanded(
                           child: DefaultButton(
                             text: 'Отмена',
-                            isGreen: false,
+                            isPrimary: false,
                             onPressed: () => Navigator.of(ctx).pop(false),
                           ),
                         ),
@@ -113,7 +113,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
                         Expanded(
                           child: DefaultButton(
                             text: 'Удалить',
-                            isGreen: true,
+                            isPrimary: true,
                             onPressed: () => Navigator.of(ctx).pop(true),
                           ),
                         ),
@@ -665,7 +665,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
           onPressed: () {
             _showCreatePaymentModal(context, widget.credit);
           },
-          isGreen: true,
+          isPrimary: true,
         ),
       ),
     );

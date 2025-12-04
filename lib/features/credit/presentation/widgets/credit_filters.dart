@@ -278,7 +278,7 @@ class _CreditFiltersState extends State<CreditFilters> {
                 Expanded(
                   child: DefaultButton(
                     text: 'Очистить',
-                    isGreen: false,
+                    isPrimary: false,
                     onPressed: _clearFilters,
                   ),
                 ),
@@ -286,7 +286,7 @@ class _CreditFiltersState extends State<CreditFilters> {
                 Expanded(
                   child: DefaultButton(
                     text: 'Применить',
-                    isGreen: true,
+                    isPrimary: true,
                     onPressed: _applyFilters,
                   ),
                 ),

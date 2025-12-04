@@ -93,7 +93,7 @@ class _AllChatScreenState extends State<AllChatScreen> {
           const SizedBox(width: 12),
           DefaultButton(
             text: 'Применить',
-            isGreen: true,
+            isPrimary: true,
             onPressed: () {
               _searchController.text = tempController.text;
               context.read<ChatListBloc>().add(

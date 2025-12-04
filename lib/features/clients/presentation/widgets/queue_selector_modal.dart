@@ -196,7 +196,7 @@
 //               Expanded(
 //                 child: DefaultButton(
 //                   text: 'Отмена',
-//                   isGreen: false,
+//                   isPrimary: false,
 //                   onPressed: () => context.pop(),
 //                 ),
 //               ),

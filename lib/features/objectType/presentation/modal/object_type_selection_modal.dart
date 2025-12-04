@@ -301,7 +301,7 @@ class _ObjectTypeSelectionModalState extends State<ObjectTypeSelectionModal> {
                   const SizedBox(height: 8),
                   DefaultButton(
                     text: 'Повторить',
-                    isGreen: true,
+                    isPrimary: true,
                     onPressed: _loadObjectTypes,
                   ),
                 ],
@@ -348,7 +348,7 @@ class _ObjectTypeSelectionModalState extends State<ObjectTypeSelectionModal> {
                 const SizedBox(height: 16),
                 DefaultButton(
                   text: 'Новый каталог',
-                  isGreen: true,
+                  isPrimary: true,
                   onPressed: _openCreateObjectTypeModal,
                 ),
                 const SizedBox(height: 16),

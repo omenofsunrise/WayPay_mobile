@@ -12,7 +12,7 @@ class DefaultButton extends StatefulWidget {
   final IconData? icon;
   final Widget? iconWidget;
 
-  final bool isGreen;
+  final bool isPrimary;
 
   const DefaultButton({
     super.key,
@@ -23,7 +23,7 @@ class DefaultButton extends StatefulWidget {
     this.showIcon = false,
     this.icon,
     this.iconWidget,
-    this.isGreen = false,
+    this.isPrimary = false,
   });
 
   @override
@@ -35,7 +35,7 @@ class _DefaultButtonState extends State<DefaultButton> {
   Widget build(BuildContext context) {
     final Color bg =
         widget.color ??
-        (widget.isGreen
+        (widget.isPrimary
             ? const Color(AppColors.primary)
             : const Color(AppColors.greyLight));
 

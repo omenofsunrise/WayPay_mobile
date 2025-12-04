@@ -139,7 +139,7 @@ class _Step2ProductsContentState extends State<Step2ProductsContent> {
         const SizedBox(height: 24),
         DefaultButton(
           onPressed: _addProduct,
-          isGreen: true,
+          isPrimary: true,
           showIcon: true,
           icon: Icons.add,
           text: 'Добавить товар',

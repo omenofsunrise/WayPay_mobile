@@ -337,7 +337,7 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
                   ? const Center(child: CircularProgressIndicator())
                   : DefaultButton(
                       text: '+ Создать',
-                      isGreen: true,
+                      isPrimary: true,
                       onPressed: _createNote,
                     ),
             ),

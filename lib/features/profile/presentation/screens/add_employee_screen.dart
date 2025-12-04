@@ -286,7 +286,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                   child: DefaultButton(
                     text: 'Отменить',
                     onPressed: _isSaving ? null : () => Navigator.pop(context),
-                    isGreen: false,
+                    isPrimary: false,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -294,7 +294,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                   child: DefaultButton(
                     text: _isSaving ? 'Сохранение...' : 'Сохранить',
                     onPressed: _isSaving || !_canSubmit ? null : _save,
-                    isGreen: true,
+                    isPrimary: true,
                   ),
                 ),
               ],

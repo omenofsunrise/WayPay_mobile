@@ -74,7 +74,7 @@ class _InvestorPayoutDialogState extends State<InvestorPayoutDialog> {
                   Expanded(
                     child: DefaultButton(
                       text: 'Отмена',
-                      isGreen: false,
+                      isPrimary: false,
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -82,7 +82,7 @@ class _InvestorPayoutDialogState extends State<InvestorPayoutDialog> {
                   Expanded(
                     child: DefaultButton(
                       text: 'Выплатить',
-                      isGreen: true,
+                      isPrimary: true,
                       onPressed: () {
                         final value = double.tryParse(_controller.text);
                         if (value == null || value <= 0) {

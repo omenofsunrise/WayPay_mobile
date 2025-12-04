@@ -32,7 +32,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen> {
                   children: [
                     DefaultButton(
                       text: "Я клиент",
-                      isGreen: true,
+                      isPrimary: true,
                       onPressed: () {
                         context.pushNamed(
                           Routes.phoneAuthScreen.toName,
@@ -43,7 +43,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen> {
                     const SizedBox(height: 18),
                     DefaultButton(
                       text: "Я сотрудник",
-                      isGreen: true,
+                      isPrimary: true,
                       onPressed: () {
                         context.pushNamed(
                           Routes.phoneAuthScreen.toName,

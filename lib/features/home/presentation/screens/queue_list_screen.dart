@@ -430,7 +430,7 @@ class _CreateQueueModalState extends State<_CreateQueueModal> {
               Expanded(
                 child: DefaultButton(
                   text: 'Отмена',
-                  isGreen: false,
+                  isPrimary: false,
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ),
@@ -438,7 +438,7 @@ class _CreateQueueModalState extends State<_CreateQueueModal> {
               Expanded(
                 child: DefaultButton(
                   text: 'Добавить',
-                  isGreen: true,
+                  isPrimary: true,
                   color: _canSubmit
                       ? const Color(AppColors.primary)
                       : const Color(0xFFA8DADB),
@@ -678,7 +678,7 @@ class _ClientPickerModalState extends State<_ClientPickerModal> {
           const SizedBox(height: 16),
           DefaultButton(
             text: 'Создать нового покупателя',
-            isGreen: true,
+            isPrimary: true,
             showIcon: true,
             icon: Icons.add,
             onPressed: () {},

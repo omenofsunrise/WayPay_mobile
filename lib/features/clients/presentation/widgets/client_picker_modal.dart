@@ -227,7 +227,7 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
           const SizedBox(height: 16),
           DefaultButton(
             text: 'Создать нового покупателя',
-            isGreen: true,
+            isPrimary: true,
             showIcon: true,
             icon: Icons.add,
             onPressed: () {

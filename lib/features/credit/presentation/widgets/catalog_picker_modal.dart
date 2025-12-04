@@ -201,7 +201,7 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
                   text: _createText,
                   showIcon: true,
                   icon: Icons.add,
-                  isGreen: true,
+                  isPrimary: true,
                   onPressed: _openCreateCatalog,
                 ),
             ],

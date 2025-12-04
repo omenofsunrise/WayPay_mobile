@@ -196,7 +196,7 @@ class _QueueCardState extends State<QueueCard> {
                 children: [
                   Expanded(
                     child: DefaultButton(
-                      isGreen: false,
+                      isPrimary: false,
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
@@ -206,7 +206,7 @@ class _QueueCardState extends State<QueueCard> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: DefaultButton(
-                      isGreen: true,
+                      isPrimary: true,
                       onPressed: getRawAmount() > 0
                           ? () {
                               onSave(getRawAmount(), highPriority);

@@ -387,7 +387,7 @@ class _AddBudgetIncomeScreenState extends State<AddBudgetIncomeScreen> {
                           child: DefaultButton(
                             text: 'Применить',
                             onPressed: _canSubmit ? _submit : null,
-                            isGreen: true,
+                            isPrimary: true,
                           ),
                         ),
                       ],

@@ -329,7 +329,7 @@ class _ClientCardState extends State<ClientCard> {
                   const SizedBox(height: 12),
                   DefaultButton(
                     text: 'Сохранить',
-                    isGreen: true,
+                    isPrimary: true,
                     onPressed: () => onSavePressed(context, setState),
                   ),
                 ],
