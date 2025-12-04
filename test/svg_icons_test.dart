@@ -5,6 +5,7 @@ import 'package:waypay_mobile/assets/resources.dart';
 
 void main() {
   test('svg_icons assets test', () {
+    expect(File(SvgIcons.activeSession).existsSync(), isTrue);
     expect(File(SvgIcons.add).existsSync(), isTrue);
     expect(File(SvgIcons.allCredits).existsSync(), isTrue);
     expect(File(SvgIcons.analyticsLogo).existsSync(), isTrue);
@@ -30,6 +31,7 @@ void main() {
     expect(File(SvgIcons.coolicon).existsSync(), isTrue);
     expect(File(SvgIcons.credits).existsSync(), isTrue);
     expect(File(SvgIcons.currencyDollar).existsSync(), isTrue);
+    expect(File(SvgIcons.dataCompany).existsSync(), isTrue);
     expect(File(SvgIcons.debt).existsSync(), isTrue);
     expect(File(SvgIcons.debtSelf).existsSync(), isTrue);
     expect(File(SvgIcons.delay).existsSync(), isTrue);
@@ -37,6 +39,7 @@ void main() {
     expect(File(SvgIcons.doc).existsSync(), isTrue);
     expect(File(SvgIcons.docIcon).existsSync(), isTrue);
     expect(File(SvgIcons.edit).existsSync(), isTrue);
+    expect(File(SvgIcons.employees).existsSync(), isTrue);
     expect(File(SvgIcons.favourite).existsSync(), isTrue);
     expect(File(SvgIcons.fileDigit).existsSync(), isTrue);
     expect(File(SvgIcons.filter).existsSync(), isTrue);
@@ -49,15 +52,18 @@ void main() {
     expect(File(SvgIcons.investorIcon).existsSync(), isTrue);
     expect(File(SvgIcons.investorPercent).existsSync(), isTrue);
     expect(File(SvgIcons.logo).existsSync(), isTrue);
+    expect(File(SvgIcons.logout).existsSync(), isTrue);
     expect(File(SvgIcons.moneyIcon).existsSync(), isTrue);
     expect(File(SvgIcons.moneybag).existsSync(), isTrue);
     expect(File(SvgIcons.newCredit).existsSync(), isTrue);
     expect(File(SvgIcons.notebook).existsSync(), isTrue);
+    expect(File(SvgIcons.politics).existsSync(), isTrue);
     expect(File(SvgIcons.refresh).existsSync(), isTrue);
     expect(File(SvgIcons.search).existsSync(), isTrue);
     expect(File(SvgIcons.share).existsSync(), isTrue);
     expect(File(SvgIcons.shieldPerson).existsSync(), isTrue);
     expect(File(SvgIcons.sort).existsSync(), isTrue);
+    expect(File(SvgIcons.statistics).existsSync(), isTrue);
     expect(File(SvgIcons.todoCopy).existsSync(), isTrue);
     expect(File(SvgIcons.todo).existsSync(), isTrue);
     expect(File(SvgIcons.users).existsSync(), isTrue);

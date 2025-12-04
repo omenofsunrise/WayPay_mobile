@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
@@ -33,13 +35,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     if (picked == null || !mounted) return;
 
     try {
-      await context
-          .read<ProfileCubit>()
-          .uploadEmployeePhoto(id: employee.id, filePath: picked.path);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Не удалось загрузить фото: $e')),
+      await context.read<ProfileCubit>().uploadEmployeePhoto(
+        id: employee.id,
+        filePath: picked.path,
       );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Не удалось загрузить фото: $e')));
     }
   }
 
@@ -67,9 +70,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         await context.read<ProfileCubit>().deleteEmployeePhoto();
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Не удалось удалить фото: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Не удалось удалить фото: $e')));
       }
     }
   }
@@ -104,7 +107,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                     onEditPhoto: state.myProfile
                         ? () => _pickAndUploadPhoto(employee)
                         : null,
-                    onDeletePhoto: state.myProfile &&
+                    onDeletePhoto:
+                        state.myProfile &&
                             (employee.photoPath != null &&
                                 employee.photoPath!.isNotEmpty)
                         ? _deletePhoto
@@ -128,12 +132,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       child: _ProfileMenuCard(items: section),
                     ),
                   ),
-                  if (employee.role != EmployeeRole.superAdmin &&
-                      employee.role != EmployeeRole.admin &&
-                      employee.role != EmployeeRole.director) ...[
-                    const SizedBox(height: 12),
-                    _PermissionsCard(employee: employee),
-                  ],
                 ],
               ),
             );
@@ -149,7 +147,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     return [
       [
         _ProfileMenuItem(
-          icon: Icons.bar_chart_rounded,
+          icon: SvgPicture.asset(SvgIcons.statistics),
           label: 'Статистика',
           onTap: () => context.pushNamed(
             Routes.profileStatsScreen.toName,
@@ -159,7 +157,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       ],
       [
         _ProfileMenuItem(
-          icon: Icons.computer_outlined,
+          icon: SvgPicture.asset(SvgIcons.activeSession),
           label: 'Активные сессии',
           onTap: () =>
               context.pushNamed(Routes.profileActiveSessionsScreen.toName),
@@ -167,26 +165,26 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       ],
       [
         _ProfileMenuItem(
-          icon: Icons.group_outlined,
+          icon: SvgPicture.asset(SvgIcons.employees),
           label: 'Сотрудники',
           onTap: () => context.pushNamed(Routes.profileEmployeesScreen.toName),
         ),
       ],
       [
         _ProfileMenuItem(
-          icon: Icons.account_balance_outlined,
+          icon: SvgPicture.asset(SvgIcons.dataCompany),
           label: 'Данные компании',
           onTap: () => showMessage('Раздел в разработке', context),
         ),
       ],
       [
         _ProfileMenuItem(
-          icon: Icons.privacy_tip_outlined,
+          icon: SvgPicture.asset(SvgIcons.politics),
           label: 'Политика конфиденциальности',
           onTap: () => showMessage('Раздел в разработке', context),
         ),
         _ProfileMenuItem(
-          icon: Icons.logout,
+          icon: SvgPicture.asset(SvgIcons.logout),
           label: 'Выйти',
           onTap: widget.onLogout,
           isDanger: true,
@@ -318,10 +316,7 @@ class _AvatarContextMenu extends StatelessWidget {
             offset: Offset(2, 2),
             blurRadius: 4,
           ),
-          BoxShadow(
-            color: Color(0x0D000809),
-            blurRadius: 6,
-          ),
+          BoxShadow(color: Color(0x0D000809), blurRadius: 6),
         ],
       ),
       child: Column(
@@ -520,80 +515,88 @@ class _ProfileMenuCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.circular(8);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: const Color(AppColors.white),
-        borderRadius: borderRadius,
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000809),
-            offset: Offset(2, 2),
-            blurRadius: 4,
+    return Align(
+      alignment: Alignment.center,
+      child: SizedBox(
+        width: 358,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: const Color(AppColors.white),
+            borderRadius: borderRadius,
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x14000809),
+                offset: Offset(2, 2),
+                blurRadius: 4,
+              ),
+              BoxShadow(color: Color(0x05000809), blurRadius: 6),
+            ],
           ),
-          BoxShadow(color: Color(0x05000809), blurRadius: 6),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: borderRadius,
-        clipBehavior: Clip.hardEdge,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(items.length, (index) {
-            final item = items[index];
-            final textColor = item.isDanger
-                ? const Color(0xFFB42318)
-                : const Color(AppColors.black);
-            return Column(
-              children: [
-                InkWell(
-                  onTap: item.onTap,
-                  child: Padding(
-                    padding: const EdgeInsets.all(18),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 48,
-                          height: 48,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: const Color(AppColors.lightGreyBackground),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Icon(
-                                item.icon,
-                                size: 28,
-                                color: textColor,
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: borderRadius,
+            clipBehavior: Clip.hardEdge,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(items.length, (index) {
+                final item = items[index];
+                final textColor = item.isDanger
+                    ? const Color(AppColors.black)
+                    : const Color(AppColors.black);
+                return Column(
+                  children: [
+                    SizedBox(
+                      height: 64,
+                      child: InkWell(
+                        onTap: item.onTap,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                    AppColors.lightGreyBackground,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Center(child: item.icon),
                               ),
-                            ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  item.label,
+                                  style: TextStyle(
+                                    fontFamily: 'Manrope',
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 16,
+                                    height: 24 / 16,
+                                    letterSpacing: 0,
+                                    color: textColor,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            item.label,
-                            style: AppStyle.manrope(
-                              size: 16,
-                              weight: FontWeight.w500,
-                              color: textColor,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-                if (index != items.length - 1)
-                  const Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: Color(0xFFE5E7EB),
-                  ),
-              ],
-            );
-          }),
+                    if (index != items.length - 1 &&
+                        !(index == items.length - 2 && items.last.isDanger))
+                      const Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: Color(0xFFE5E7EB),
+                      ),
+                  ],
+                );
+              }),
+            ),
+          ),
         ),
       ),
     );
@@ -601,7 +604,7 @@ class _ProfileMenuCard extends StatelessWidget {
 }
 
 class _ProfileMenuItem {
-  final IconData icon;
+  final Widget icon;
   final String label;
   final VoidCallback onTap;
   final bool isDanger;

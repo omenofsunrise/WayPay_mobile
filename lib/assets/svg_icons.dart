@@ -3,6 +3,7 @@ part of 'resources.dart';
 class SvgIcons {
   SvgIcons._();
 
+  static const String activeSession = 'assets/icons/active_session.svg';
   static const String add = 'assets/icons/add.svg';
   static const String allCredits = 'assets/icons/all_credits.svg';
   static const String analyticsLogo = 'assets/icons/analyticsLogo.svg';
@@ -28,6 +29,7 @@ class SvgIcons {
   static const String coolicon = 'assets/icons/coolicon.svg';
   static const String credits = 'assets/icons/credits.svg';
   static const String currencyDollar = 'assets/icons/currency-dollar.svg';
+  static const String dataCompany = 'assets/icons/data_company.svg';
   static const String debt = 'assets/icons/debt.svg';
   static const String debtSelf = 'assets/icons/debt_self.svg';
   static const String delay = 'assets/icons/delay.svg';
@@ -35,6 +37,7 @@ class SvgIcons {
   static const String doc = 'assets/icons/doc.svg';
   static const String docIcon = 'assets/icons/doc_icon.svg';
   static const String edit = 'assets/icons/edit.svg';
+  static const String employees = 'assets/icons/employees.svg';
   static const String favourite = 'assets/icons/favourite.svg';
   static const String fileDigit = 'assets/icons/file-digit.svg';
   static const String filter = 'assets/icons/filter.svg';
@@ -47,15 +50,18 @@ class SvgIcons {
   static const String investorIcon = 'assets/icons/investor_icon.svg';
   static const String investorPercent = 'assets/icons/investor_percent.svg';
   static const String logo = 'assets/icons/logo.svg';
+  static const String logout = 'assets/icons/logout.svg';
   static const String moneyIcon = 'assets/icons/money_icon.svg';
   static const String moneybag = 'assets/icons/moneybag.svg';
   static const String newCredit = 'assets/icons/newCredit.svg';
   static const String notebook = 'assets/icons/notebook.svg';
+  static const String politics = 'assets/icons/politics.svg';
   static const String refresh = 'assets/icons/refresh.svg';
   static const String search = 'assets/icons/search.svg';
   static const String share = 'assets/icons/share.svg';
   static const String shieldPerson = 'assets/icons/shield_person.svg';
   static const String sort = 'assets/icons/sort.svg';
+  static const String statistics = 'assets/icons/statistics.svg';
   static const String todoCopy = 'assets/icons/todo copy.svg';
   static const String todo = 'assets/icons/todo.svg';
   static const String users = 'assets/icons/users.svg';
