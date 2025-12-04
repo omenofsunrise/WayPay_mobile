@@ -119,7 +119,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       ),
                       const _InfoRowData(label: 'Дата рождения', value: '—'),
                       _InfoRowData(label: 'Телефон', value: employee.phone),
-                      _InfoRowData(label: 'WhatsApp', value: employee.phone),
                     ],
                   ),
                   const SizedBox(height: 24),
