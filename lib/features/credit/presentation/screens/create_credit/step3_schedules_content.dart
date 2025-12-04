@@ -51,6 +51,7 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
   late TextEditingController _termMonthsController;
   late TextEditingController _paymentDayController;
   Timer? _debounceTimer;
+  bool _isFormattingAmount = false;
 
   @override
   void initState() {
@@ -97,13 +98,17 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
       _firstPaymentPercentController.text = newPercentText;
     }
 
-    final currentAmountText = _firstPaymentAmountController.text;
-    final newAmountText = widget.firstPayment > 0
-        ? widget.firstPayment.toInt().toString()
+    final currentAmountDigits = _stripFormatting(
+      _firstPaymentAmountController.text,
+    );
+    final newAmountDigits = widget.firstPayment > 0
+        ? widget.firstPayment.floor().toString()
         : '';
 
-    if (currentAmountText != newAmountText) {
-      _firstPaymentAmountController.text = newAmountText;
+    if (currentAmountDigits != newAmountDigits) {
+      _firstPaymentAmountController.text = newAmountDigits.isEmpty
+          ? ''
+          : _formatAmountValue(widget.firstPayment);
     }
 
     final currentTermText = _termMonthsController.text;
@@ -116,8 +121,9 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     }
 
     final currentPaymentDay = _paymentDayController.text;
-    final newPaymentDayText =
-        widget.paymentDay != null ? '${widget.paymentDay} число' : '';
+    final newPaymentDayText = widget.paymentDay != null
+        ? '${widget.paymentDay} число'
+        : '';
     if (currentPaymentDay != newPaymentDayText) {
       _paymentDayController.text = newPaymentDayText;
     }
@@ -146,20 +152,30 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
   }
 
   void _handleAmountInput(String amountValue) {
-    final filteredValue = amountValue.replaceAll(RegExp(r'[^0-9]'), '');
-
-    if (filteredValue != amountValue) {
+    if (_isFormattingAmount) return;
+    final digits = _stripFormatting(amountValue);
+    if (digits.isEmpty) {
+      _isFormattingAmount = true;
+      _firstPaymentAmountController.value = const TextEditingValue(
+        text: '',
+        selection: TextSelection.collapsed(offset: 0),
+      );
+      _isFormattingAmount = false;
+      widget.onFirstPaymentChanged(0);
       return;
     }
 
-    if (filteredValue.isNotEmpty) {
-      final amount = double.tryParse(filteredValue) ?? 0;
-      double clampedAmount = amount.clamp(0, widget.totalAmount);
+    final amount = double.tryParse(digits) ?? 0;
+    final clampedAmount = amount.clamp(0, widget.totalAmount);
+    widget.onFirstPaymentChanged(clampedAmount.toDouble());
 
-      widget.onFirstPaymentChanged(clampedAmount);
-    } else {
-      widget.onFirstPaymentChanged(0);
-    }
+    final formatted = _formatAmountValue(clampedAmount.toDouble());
+    _isFormattingAmount = true;
+    _firstPaymentAmountController.value = TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+    _isFormattingAmount = false;
   }
 
   void _handleTermMonthsInput(String value) {
@@ -207,6 +223,14 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     }
   }
 
+  String _stripFormatting(String value) =>
+      value.replaceAll(RegExp(r'[^0-9]'), '');
+
+  String _formatAmountValue(double value) {
+    final formatter = NumberFormat.decimalPattern('ru_RU');
+    return formatter.format(value).replaceAll('.', ' ');
+  }
+
   void _loadSchedulePreviewDebounced() {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
@@ -246,8 +270,10 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
                       return ListTile(
                         title: Text('$day число'),
                         trailing: widget.paymentDay == day
-                            ? const Icon(Icons.check,
-                                color: Color(AppColors.primary))
+                            ? const Icon(
+                                Icons.check,
+                                color: Color(AppColors.primary),
+                              )
                             : null,
                         onTap: () => Navigator.of(context).pop(day),
                       );
