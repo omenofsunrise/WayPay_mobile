@@ -233,6 +233,9 @@ class _EditProfileModalState extends State<EditProfileModal> {
           final currentPhotoUrl = _resolvePhotoUrl(employee.photoPath);
           final currentUserRole = widget.currentUser.role;
           final filteredRoles = EmployeeRole.values.where((role) {
+            if (role == EmployeeRole.accountant) {
+              return false;
+            }
             final currentLevel = _roleHierarchy[currentUserRole] ?? 0;
             final roleLevel = _roleHierarchy[role] ?? 0;
             if (currentUserRole == EmployeeRole.director &&

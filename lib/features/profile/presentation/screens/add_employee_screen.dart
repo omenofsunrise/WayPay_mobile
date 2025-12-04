@@ -133,7 +133,8 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
           mainAxisSize: MainAxisSize.min,
           children: EmployeeRole.values.map((role) {
             if (role == EmployeeRole.superAdmin ||
-                role == EmployeeRole.director) {
+                role == EmployeeRole.director ||
+                role == EmployeeRole.accountant) {
               return const SizedBox.shrink();
             }
             return ListTile(
