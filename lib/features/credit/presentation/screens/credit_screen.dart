@@ -214,96 +214,100 @@ class _CreditsScreenState extends State<CreditsScreen> {
     return Scaffold(
       backgroundColor: const Color(AppColors.background),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          child: ValueListenableBuilder<EmployeeRole?>(
-            valueListenable: UserStorage().roleNotifier,
-            builder: (context, role, _) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Expanded(
-                        child: Header(
-                          title: 'Договоры',
-                          showBackButton: true,
-                          showNotifications: false,
+        child: NestedScrollView(
+          headerSliverBuilder: (context, _) => [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                child: ValueListenableBuilder<EmployeeRole?>(
+                  valueListenable: UserStorage().roleNotifier,
+                  builder: (context, role, _) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Expanded(
+                              child: Header(
+                                title: 'Договоры',
+                                showBackButton: true,
+                                showNotifications: false,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            AddButton(
+                              onPressed: () {
+                                context.pushNamed(
+                                  Routes.newCreditDetailsScreen.toName,
+                                );
+                              },
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      AddButton(
-                        onPressed: () {
-                          context.pushNamed(
-                            Routes.newCreditDetailsScreen.toName,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  _buildSearchBar(),
-                  if (_hasFilterValues(_appliedFilters)) ...[
-                    const SizedBox(height: 12),
-                    GestureDetector(
-                      onTap: _clearFilters,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Text(
-                            'Сбросить фильтры',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Color(AppColors.primary),
+                        const SizedBox(height: 16),
+                        _buildSearchBar(),
+                        if (_hasFilterValues(_appliedFilters)) ...[
+                          const SizedBox(height: 12),
+                          GestureDetector(
+                            onTap: _clearFilters,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Text(
+                                  'Сбросить фильтры',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(AppColors.primary),
+                                  ),
+                                ),
+                                SizedBox(width: 4),
+                                Icon(
+                                  Icons.close,
+                                  size: 18,
+                                  color: Color(AppColors.primary),
+                                ),
+                              ],
                             ),
                           ),
-                          SizedBox(width: 4),
-                          Icon(
-                            Icons.close,
-                            size: 18,
-                            color: Color(AppColors.primary),
-                          ),
                         ],
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: BlocBuilder<CreditBloc, CreditState>(
-                      builder: (context, state) {
-                        if (state is CreditLoading) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                        if (state is CreditError) {
-                          return Center(
-                            child: Text('Ошибка: ${state.message}'),
-                          );
-                        }
-                        if (state is CreditLoaded) {
-                          if (state.credits.isEmpty) {
-                            return const Center(
-                              child: Text('Договоры не найдены'),
-                            );
-                          }
-                          return _CreditList(
-                            credits: state.credits,
-                            currentPage: state.currentPage,
-                            totalPages: state.totalPages,
-                            onRefresh: () async => _loadCredits(),
-                            onLoadMore: (page) => _loadCredits(page: page),
-                            onFavouriteToggle: _toggleFavourite,
-                          );
-                        }
-                        return const SizedBox();
-                      },
-                    ),
+          const SizedBox(height: 4),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+          body: BlocBuilder<CreditBloc, CreditState>(
+            builder: (context, state) {
+              if (state is CreditLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (state is CreditError) {
+                return Center(child: Text('Ошибка: ${state.message}'));
+              }
+              if (state is CreditLoaded) {
+                if (state.credits.isEmpty) {
+                  return const Center(child: Text('Договоры не найдены'));
+                }
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _CreditList(
+                    credits: state.credits,
+                    currentPage: state.currentPage,
+                    totalPages: state.totalPages,
+                    onRefresh: () async => _loadCredits(),
+                    onLoadMore: (page) => _loadCredits(page: page),
+                    onFavouriteToggle: _toggleFavourite,
                   ),
-                ],
-              );
+                );
+              }
+              return const SizedBox();
             },
           ),
         ),
@@ -363,50 +367,51 @@ class _CreditTabSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          ...List.generate(tabs.length * 2 - 1, (index) {
-            if (index.isOdd) return const SizedBox(height: 4);
-            final tab = tabs[index ~/ 2];
+          ...tabs.map((tab) {
             final isActive = tab == selectedTab && selectedCategory == null;
             final color = isActive
                 ? const Color(AppColors.primary)
                 : const Color(0xFF6B717C);
-            return Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () => Navigator.of(
-                  context,
-                ).pop(_CreditTabSelectionResult.tab(tab)),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 14,
-                    horizontal: 4,
-                  ),
-                  child: Row(
-                    children: [
-                      SvgPicture.asset(
-                        tab.iconPath,
-                        width: 20,
-                        height: 20,
-                        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          tab.label,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Color(AppColors.black),
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () => Navigator.of(
+                    context,
+                  ).pop(_CreditTabSelectionResult.tab(tab)),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 14,
+                      horizontal: 4,
+                    ),
+                    child: Row(
+                      children: [
+                        SvgPicture.asset(
+                          tab.iconPath,
+                          width: 20,
+                          height: 20,
+                          colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            tab.label,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Color(AppColors.black),
+                            ),
                           ),
                         ),
-                      ),
-                      if (isActive)
-                        const Icon(
-                          Icons.check,
-                          color: Color(AppColors.primary),
-                        ),
-                    ],
+                        if (isActive)
+                          const Icon(
+                            Icons.check,
+                            color: Color(AppColors.primary),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -458,42 +463,45 @@ class _CreditTabSheet extends StatelessWidget {
                 return Column(
                   children: categories.map((category) {
                     final bool isActive = selectedCategory?.id == category.id;
-                    return Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () => Navigator.of(
-                          context,
-                        ).pop(_CreditTabSelectionResult.category(category)),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 14,
-                            horizontal: 4,
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.label_outline,
-                                size: 20,
-                                color: Color(0xFF6B717C),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  category.name,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(AppColors.black),
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () => Navigator.of(
+                            context,
+                          ).pop(_CreditTabSelectionResult.category(category)),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 14,
+                              horizontal: 4,
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.label_outline,
+                                  size: 20,
+                                  color: Color(0xFF6B717C),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    category.name,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(AppColors.black),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              if (isActive)
-                                const Icon(
-                                  Icons.check,
-                                  color: Color(AppColors.primary),
-                                ),
-                            ],
+                                if (isActive)
+                                  const Icon(
+                                    Icons.check,
+                                    color: Color(AppColors.primary),
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
