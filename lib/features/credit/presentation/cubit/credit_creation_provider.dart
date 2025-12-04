@@ -109,6 +109,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
   void updateCatalog(ObjectTypeModel? catalog) {
     final updatedRequest = state.creditRequest.copyWith(
       creditTypeId: catalog?.id,
+      clearCreditTypeId: catalog == null,
     );
     emit(
       state.copyWith(
@@ -122,6 +123,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
   void updateCategory(ObjectTypeModel? category) {
     final updatedRequest = state.creditRequest.copyWith(
       creditTabTypeId: category?.id,
+      clearCreditTabTypeId: category == null,
     );
     emit(
       state.copyWith(

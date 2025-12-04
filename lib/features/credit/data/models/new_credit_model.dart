@@ -57,12 +57,14 @@ class CreateCreditRequest {
     bool? inDebt,
     String? debtComment,
     List<CreditProduct>? products,
+    bool clearCreditTypeId = false,
+    bool clearCreditTabTypeId = false,
   }) {
     return CreateCreditRequest(
       clientId: clientId ?? this.clientId,
       name: name ?? this.name,
-      creditTypeId: creditTypeId ?? this.creditTypeId,
-      creditTabTypeId: creditTabTypeId ?? this.creditTabTypeId,
+      creditTypeId: clearCreditTypeId ? null : (creditTypeId ?? this.creditTypeId),
+      creditTabTypeId: clearCreditTabTypeId ? null : (creditTabTypeId ?? this.creditTabTypeId),
       guarantorClientId: guarantorClientId ?? this.guarantorClientId,
       guarantor: guarantor ?? this.guarantor,
       investorId: investorId ?? this.investorId,
