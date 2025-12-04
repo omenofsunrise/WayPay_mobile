@@ -12,6 +12,8 @@ enum Routes {
   profileActiveSessionsScreen,
   profileEmployeesScreen,
   profileAddEmployeeScreen,
+  financeScreen,
+  budgetApplicationsScreen,
   productScreen,
   budgetScreen,
   creditsScreen,
@@ -68,6 +70,10 @@ extension RoutesExtension on Routes {
         return '/profile_employees_screen';
       case Routes.profileAddEmployeeScreen:
         return '/profile_add_employee_screen';
+      case Routes.financeScreen:
+        return '/finance_screen';
+      case Routes.budgetApplicationsScreen:
+        return '/budget_applications_screen';
       case Routes.productScreen:
         return '/product_screen';
       case Routes.budgetScreen:
@@ -149,6 +155,10 @@ extension RoutesExtension on Routes {
         return 'PROFILE_EMPLOYEES_SCREEN';
       case Routes.profileAddEmployeeScreen:
         return 'PROFILE_ADD_EMPLOYEE_SCREEN';
+      case Routes.financeScreen:
+        return 'FINANCE_SCREEN';
+      case Routes.budgetApplicationsScreen:
+        return 'BUDGET_APPLICATIONS_SCREEN';
       case Routes.productScreen:
         return 'PRODUCT_SCREEN';
       case Routes.budgetScreen:

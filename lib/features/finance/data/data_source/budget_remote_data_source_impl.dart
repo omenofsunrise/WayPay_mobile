@@ -79,12 +79,20 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
   @override
   Future<void> createBudgetIncome(CreateBudgetIncomeDto dto) async {
     try {
+      // ignore: avoid_print
+      print('[BudgetIncome][REQUEST] ${dto.toJson()}');
       final response = await dio.post('BudgetIncome', data: dto.toJson());
 
+      // ignore: avoid_print
+      print(
+        '[BudgetIncome][RESPONSE] status=${response.statusCode} data=${response.data}',
+      );
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception('Ошибка создания прихода: ${response.statusCode}');
       }
     } on DioException catch (e) {
+      // ignore: avoid_print
+      print('[BudgetIncome][ERROR] ${e.response?.data ?? e.message}');
       throw Exception(
         'Ошибка при создании прихода: ${e.response?.data ?? e.message}',
       );

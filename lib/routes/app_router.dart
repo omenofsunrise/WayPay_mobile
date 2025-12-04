@@ -13,6 +13,8 @@ import 'package:waypay_mobile/features/blog/presentation/screens/blog_screen.dar
 import 'package:waypay_mobile/features/credit/presentation/screens/create_credit/custom_page_transitions.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/create_credit/new_credit_creation_screen.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/credit_screen.dart';
+import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
+import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
 import 'package:waypay_mobile/features/finance/presentation/screens/budget_screen.dart';
 import 'package:waypay_mobile/features/home/data/models/credit_applications/credit_application_model.dart';
 import 'package:waypay_mobile/features/home/presentation/cubit/client_applications/client_applications_cubit.dart';
@@ -34,6 +36,8 @@ import 'package:waypay_mobile/features/investors/presentation/screens/investor_p
 import 'package:waypay_mobile/features/investors/presentation/screens/investors_hub_screen.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investors_screen.dart';
 import 'package:waypay_mobile/features/product/presentation/screens/product_screen.dart';
+import 'package:waypay_mobile/features/finance/presentation/screens/finance_main_screen.dart';
+import 'package:waypay_mobile/features/finance/presentation/screens/budget_applications_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/profile_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/profile_statistics_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/active_sessions_screen.dart';
@@ -222,12 +226,6 @@ class AppRouter {
         builder: (context, state) => const ProductsScreen(),
       ),
 
-      GoRoute(
-        path: Routes.budgetScreen.toPath,
-        name: Routes.budgetScreen.toName,
-        builder: (context, state) => const BudgetScreen(),
-      ),
-
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainLayout(navigationShell: navigationShell);
@@ -294,6 +292,29 @@ class AppRouter {
                       create: (_) => ClientsBloc(),
                       child: const QueueListScreen(),
                     ),
+                  ),
+                  GoRoute(
+                    path: Routes.financeScreen.toPath,
+                    name: Routes.financeScreen.toName,
+                    builder: (context, state) => const FinanceMainScreen(),
+                    routes: [
+                      GoRoute(
+                        path: Routes.budgetApplicationsScreen.toPath,
+                        name: Routes.budgetApplicationsScreen.toName,
+                        builder: (context, state) => MultiBlocProvider(
+                          providers: [
+                            BlocProvider(create: (_) => BudgetIncomeBloc()),
+                            BlocProvider(create: (_) => BudgetExpenseBloc()),
+                          ],
+                          child: const BudgetApplicationsScreen(),
+                        ),
+                      ),
+                      GoRoute(
+                        path: Routes.budgetScreen.toPath,
+                        name: Routes.budgetScreen.toName,
+                        builder: (context, state) => const BudgetScreen(),
+                      ),
+                    ],
                   ),
                   GoRoute(
                     path: Routes.blacklistScreen.toPath,

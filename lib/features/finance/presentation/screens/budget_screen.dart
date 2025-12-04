@@ -368,6 +368,7 @@ class _BudgetScreenState extends State<BudgetScreen>
                 amount: amount,
                 comment: comment,
                 investorId: investor.id,
+                companyShare: 100,
               ),
             );
 

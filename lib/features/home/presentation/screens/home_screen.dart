@@ -260,9 +260,8 @@ class _HomeScreenState extends State<HomeScreen> {
               const SectionTitle(text: 'Финансы'),
               const Spacer(),
               MoreDetailsButton(
-                onPressed: () {
-                  // Навигация к финансам
-                },
+                onPressed: () =>
+                    context.pushNamed(Routes.financeScreen.toName),
               ),
             ],
           ),
