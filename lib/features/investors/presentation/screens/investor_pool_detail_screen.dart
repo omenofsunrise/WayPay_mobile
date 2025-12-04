@@ -74,47 +74,57 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
     final data = _reportData ?? {};
     final totalIncome =
         _asDouble(data['investorIncome']) + _asDouble(data['allSelfIncome']);
+    const hintGreen = Color(0x4D32BA8F);
+    const overdueBg = Color(0x4DFF8E42);
     return [
       _MetricData(
         title: 'Касса',
         value: _formatCurrency(data['balance']),
         icon: SvgIcons.cash,
+        highlighted: true,
       ),
       _MetricData(
         title: 'Активные договоры',
         value: _formatNumber(data['activeCreditsAmount']),
-        icon: SvgIcons.docIcon,
+        icon: SvgIcons.credits,
+        highlighted: true,
       ),
       _MetricData(
         title: 'Инвестиции',
         value: _formatCurrency(data['investment']),
         icon: SvgIcons.investition,
+        backgroundColor: hintGreen,
       ),
       _MetricData(
         title: 'Общий доход',
         value: _formatCurrency(totalIncome),
-        icon: SvgIcons.companyAmount,
+        icon: SvgIcons.rub,
+        backgroundColor: hintGreen,
       ),
       _MetricData(
         title: 'Текущий доход',
         value: _formatCurrency(data['paymentIncome']),
-        icon: SvgIcons.investorAmount,
+        icon: SvgIcons.investorCahs,
+        backgroundColor: hintGreen,
       ),
       _MetricData(
         title: 'Текущий доход пула',
         value: _formatCurrency(data['investorPaymentIncome']),
-        icon: SvgIcons.moneyIcon,
+        icon: SvgIcons.companyAmount,
+        backgroundColor: hintGreen,
       ),
       _MetricData(
         title: 'Ожидаемый доход',
         value: _formatCurrency(data['selfPaymentIncome']),
-        icon: SvgIcons.moneyIcon,
+        icon: SvgIcons.schedule,
+        backgroundColor: hintGreen,
       ),
       _MetricData(
         title: 'Просрочка',
         value: _formatCurrency(data['delinquencyAmount']),
         icon: SvgIcons.delay,
         valueColor: const Color(AppColors.red),
+        backgroundColor: overdueBg,
       ),
     ];
   }
@@ -139,33 +149,34 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
                 child: _isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : _reportData == null
-                        ? Center(
-                            child: Text(
-                              _error ?? 'Нет данных',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Color(AppColors.darkGrey),
-                              ),
-                            ),
-                          )
-                        : RefreshIndicator(
-                            onRefresh: _loadReport,
-                            child: SingleChildScrollView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _NicknameCard(
-                                    name: (_reportData?['nickName'] ??
+                    ? Center(
+                        child: Text(
+                          _error ?? 'Нет данных',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Color(AppColors.darkGrey),
+                          ),
+                        ),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _loadReport,
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _NicknameCard(
+                                name:
+                                    (_reportData?['nickName'] ??
                                             widget.pool.name)
                                         .toString(),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _AnalyticsGrid(metrics: _buildMetrics()),
-                                ],
                               ),
-                            ),
+                              const SizedBox(height: 16),
+                              _AnalyticsGrid(metrics: _buildMetrics()),
+                            ],
                           ),
+                        ),
+                      ),
               ),
             ],
           ),
@@ -235,7 +246,6 @@ class _AnalyticsGrid extends StatelessWidget {
   const _AnalyticsGrid({required this.metrics});
 
   final List<_MetricData> metrics;
-  static const double _cardHeight = 170;
 
   @override
   Widget build(BuildContext context) {
@@ -249,7 +259,6 @@ class _AnalyticsGrid extends StatelessWidget {
               .map(
                 (metric) => SizedBox(
                   width: itemWidth,
-                  height: _cardHeight,
                   child: _MetricCard(metric: metric),
                 ),
               )
@@ -266,12 +275,16 @@ class _MetricData {
     required this.value,
     required this.icon,
     this.valueColor = const Color(AppColors.black),
+    this.backgroundColor,
+    this.highlighted = false,
   });
 
   final String title;
   final String value;
   final String icon;
   final Color valueColor;
+  final Color? backgroundColor;
+  final bool highlighted;
 }
 
 class _MetricCard extends StatelessWidget {
@@ -281,66 +294,71 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000809),
-            offset: Offset(2, 2),
-            blurRadius: 4,
-          ),
-          BoxShadow(
-            color: Color(0x05000809),
-            offset: Offset(0, 0),
-            blurRadius: 6,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE4F4F1),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Center(
-                  child: SvgPicture.asset(metric.icon, width: 28, height: 28),
-                ),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 160, maxWidth: 171),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 128),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x14000809),
+              offset: Offset(2, 2),
+              blurRadius: 4,
+            ),
+            BoxShadow(
+              color: Color(0x05000809),
+              offset: Offset(0, 0),
+              blurRadius: 6,
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color:
+                    metric.backgroundColor ??
+                    (metric.highlighted
+                        ? const Color(0x4D14BFDB)
+                        : const Color(0xFFE4F4F1)),
+                borderRadius: BorderRadius.circular(24),
               ),
-              const Spacer(),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            metric.title,
-            style: const TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
-              height: 20 / 14,
-              color: Color(AppColors.darkGrey),
+              child: Center(
+                child: SvgPicture.asset(metric.icon, width: 20, height: 20),
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            metric.value,
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w600,
-              fontSize: 22,
-              height: 1.1,
-              color: metric.valueColor,
+            const SizedBox(height: 12),
+            Text(
+              metric.title,
+              style: const TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
+                height: 20 / 14,
+                letterSpacing: 0,
+                color: Color(AppColors.darkGrey),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 6),
+            Text(
+              metric.value,
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.w600,
+                fontSize: 20,
+                height: 1.2,
+                letterSpacing: 0,
+                color: metric.valueColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

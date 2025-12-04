@@ -7,8 +7,6 @@ import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/widgets/header.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
-import 'package:waypay_mobile/features/investors/presentation/widgets/investor_credit_table.dart';
-import 'package:waypay_mobile/features/investors/presentation/widgets/investor_payout_table.dart';
 
 class InvestorReportScreen extends StatefulWidget {
   const InvestorReportScreen({super.key, required this.initialInvestor});
@@ -167,73 +165,75 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
 
   List<_MetricData> _buildMetrics() {
     final isCompany = reportData?['isCompany'] == true;
+    const hintGreen = Color(0x4D32BA8F);
     final metrics = <_MetricData>[
       _MetricData(
         title: 'Касса',
         value:
             '${formatNumber(reportData?['balance'] ?? selectedInvestor.balance)} ₽',
         icon: SvgIcons.cash,
+        highlighted: true,
       ),
       _MetricData(
         title: 'Активные договоры',
         value: formatNumber(reportData?['activeCreditsAmount']),
         icon: SvgIcons.credits,
+        highlighted: true,
       ),
       _MetricData(
         title: 'Инвестиции',
         value:
             '${formatNumber(reportData?['investment'] ?? selectedInvestor.investmentAmount)} ₽',
         icon: SvgIcons.investition,
+        backgroundColor: hintGreen,
       ),
       _MetricData(
         title: 'Общий доход',
         value:
             '${formatNumber(_asDouble(reportData?['allSelfIncome']) + _asDouble(reportData?['investorIncome']))} ₽',
-        icon: SvgIcons.companyAmount,
+        icon: SvgIcons.rub,
+        backgroundColor: hintGreen,
       ),
       _MetricData(
         title: 'Просрочка',
         value: '${formatNumber(reportData?['delinquencyAmount'])} ₽',
         icon: SvgIcons.delay,
         valueColor: const Color(AppColors.red),
+        backgroundColor: const Color(0x4DFF8E42),
       ),
     ];
 
-    if (!isCompany) {
-      metrics.insert(
-        4,
-        _MetricData(
-          title: 'Доход инвестора',
-          value: '${formatNumber(reportData?['investorIncome'])} ₽',
-          icon: SvgIcons.investorCahs,
-        ),
-      );
-      metrics.insert(
-        5,
-        _MetricData(
-          title: 'Доход компании',
-          value: '${formatNumber(reportData?['allSelfIncome'])} ₽',
-          icon: SvgIcons.companyAmount,
-        ),
-      );
-    } else {
-      metrics.insert(
-        4,
-        _MetricData(
-          title: 'Доход компании',
-          value: '${formatNumber(reportData?['investorIncome'])} ₽',
-          icon: SvgIcons.companyAmount,
-        ),
-      );
-      metrics.insert(
-        5,
-        _MetricData(
-          title: 'Доход от инвестора',
-          value: '${formatNumber(reportData?['allSelfIncome'])} ₽',
-          icon: SvgIcons.investorAmount,
-        ),
-      );
-    }
+    final incomeMetrics = isCompany
+        ? [
+            _MetricData(
+              title: 'Доход компании',
+              value: '${formatNumber(reportData?['investorIncome'])} ₽',
+              icon: SvgIcons.companyAmount,
+              backgroundColor: hintGreen,
+            ),
+            _MetricData(
+              title: 'Доход от инвестора',
+              value: '${formatNumber(reportData?['allSelfIncome'])} ₽',
+              icon: SvgIcons.investorCahs,
+              backgroundColor: hintGreen,
+            ),
+          ]
+        : [
+            _MetricData(
+              title: 'Доход инвестора',
+              value: '${formatNumber(reportData?['investorIncome'])} ₽',
+              icon: SvgIcons.investorCahs,
+              backgroundColor: hintGreen,
+            ),
+            _MetricData(
+              title: 'Доход компании',
+              value: '${formatNumber(reportData?['allSelfIncome'])} ₽',
+              icon: SvgIcons.companyAmount,
+              backgroundColor: hintGreen,
+            ),
+          ];
+
+    metrics.insertAll(4, incomeMetrics);
 
     return metrics;
   }
@@ -328,12 +328,16 @@ class _MetricData {
     required this.value,
     required this.icon,
     this.valueColor = const Color(AppColors.black),
+    this.backgroundColor,
+    this.highlighted = false,
   });
 
   final String title;
   final String value;
   final String icon;
   final Color valueColor;
+  final bool highlighted;
+  final Color? backgroundColor;
 }
 
 class _MetricCard extends StatelessWidget {
@@ -343,66 +347,71 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000809),
-            offset: Offset(2, 2),
-            blurRadius: 4,
-          ),
-          BoxShadow(
-            color: Color(0x05000809),
-            offset: Offset(0, 0),
-            blurRadius: 6,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE4F4F1),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Center(
-                  child: SvgPicture.asset(metric.icon, width: 28, height: 28),
-                ),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 160, maxWidth: 171),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 128),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x14000809),
+              offset: Offset(2, 2),
+              blurRadius: 4,
+            ),
+            BoxShadow(
+              color: Color(0x05000809),
+              offset: Offset(0, 0),
+              blurRadius: 6,
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color:
+                    metric.backgroundColor ??
+                    (metric.highlighted
+                        ? const Color(0x4D14BFDB)
+                        : const Color(0xFFE4F4F1)),
+                borderRadius: BorderRadius.circular(24),
               ),
-              const Spacer(),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            metric.title,
-            style: const TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
-              height: 20 / 14,
-              color: Color(AppColors.darkGrey),
+              child: Center(
+                child: SvgPicture.asset(metric.icon, width: 20, height: 20),
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            metric.value,
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w600,
-              fontSize: 22,
-              height: 1.1,
-              color: metric.valueColor,
+            const SizedBox(height: 12),
+            Text(
+              metric.title,
+              style: const TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
+                height: 20 / 14,
+                letterSpacing: 0,
+                color: Color(AppColors.darkGrey),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 6),
+            Text(
+              metric.value,
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.w600,
+                fontSize: 18,
+                height: 1.2,
+                letterSpacing: 0,
+                color: metric.valueColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

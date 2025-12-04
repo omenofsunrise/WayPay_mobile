@@ -25,7 +25,7 @@ class SvgIcons {
   static const String chevronLeft = 'assets/icons/chevron-left.svg';
   static const String clockTwo = 'assets/icons/clock-two.svg';
   static const String clockIcon = 'assets/icons/clock_icon.svg';
-  static const String companyAmount = 'assets/icons/company_amount.svg';
+  static const String companyAmount = 'assets/icons/companyAmount.svg';
   static const String coolicon = 'assets/icons/coolicon.svg';
   static const String credits = 'assets/icons/credits.svg';
   static const String currencyDollar = 'assets/icons/currency-dollar.svg';
@@ -45,8 +45,8 @@ class SvgIcons {
   static const String importantCredits = 'assets/icons/important_credits.svg';
   static const String inactiveCredits = 'assets/icons/inactive_credits.svg';
   static const String investition = 'assets/icons/investition.svg';
+  static const String investorCahs = 'assets/icons/investorCahs.svg';
   static const String investorAmount = 'assets/icons/investor_amount.svg';
-  static const String investorCahs = 'assets/icons/investor_cahs.svg';
   static const String investorIcon = 'assets/icons/investor_icon.svg';
   static const String investorPercent = 'assets/icons/investor_percent.svg';
   static const String logo = 'assets/icons/logo.svg';
@@ -57,6 +57,8 @@ class SvgIcons {
   static const String notebook = 'assets/icons/notebook.svg';
   static const String politics = 'assets/icons/politics.svg';
   static const String refresh = 'assets/icons/refresh.svg';
+  static const String rub = 'assets/icons/rub.svg';
+  static const String schedule = 'assets/icons/schedule.svg';
   static const String search = 'assets/icons/search.svg';
   static const String share = 'assets/icons/share.svg';
   static const String shieldPerson = 'assets/icons/shield_person.svg';

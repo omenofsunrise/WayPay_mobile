@@ -47,8 +47,8 @@ void main() {
     expect(File(SvgIcons.importantCredits).existsSync(), isTrue);
     expect(File(SvgIcons.inactiveCredits).existsSync(), isTrue);
     expect(File(SvgIcons.investition).existsSync(), isTrue);
-    expect(File(SvgIcons.investorAmount).existsSync(), isTrue);
     expect(File(SvgIcons.investorCahs).existsSync(), isTrue);
+    expect(File(SvgIcons.investorAmount).existsSync(), isTrue);
     expect(File(SvgIcons.investorIcon).existsSync(), isTrue);
     expect(File(SvgIcons.investorPercent).existsSync(), isTrue);
     expect(File(SvgIcons.logo).existsSync(), isTrue);
@@ -59,6 +59,8 @@ void main() {
     expect(File(SvgIcons.notebook).existsSync(), isTrue);
     expect(File(SvgIcons.politics).existsSync(), isTrue);
     expect(File(SvgIcons.refresh).existsSync(), isTrue);
+    expect(File(SvgIcons.rub).existsSync(), isTrue);
+    expect(File(SvgIcons.schedule).existsSync(), isTrue);
     expect(File(SvgIcons.search).existsSync(), isTrue);
     expect(File(SvgIcons.share).existsSync(), isTrue);
     expect(File(SvgIcons.shieldPerson).existsSync(), isTrue);
