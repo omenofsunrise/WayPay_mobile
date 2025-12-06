@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 
@@ -35,13 +34,16 @@ class _CallConfirmationDialogState extends State<CallConfirmationDialog> {
   void _startAutoCheck() {
     _timer = Timer.periodic(const Duration(seconds: 2), (_) async {
       if (_isChecking) return;
-      setState(() => _isChecking = true);
 
       try {
+        setState(() => _isChecking = true);
         await widget.onTryConfirm();
-      } catch (e) {}
-
-      setState(() => _isChecking = false);
+      } catch (e) {
+      } finally {
+        if (mounted) {
+          setState(() => _isChecking = false);
+        }
+      }
     });
   }
 
@@ -49,11 +51,6 @@ class _CallConfirmationDialogState extends State<CallConfirmationDialog> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
-  }
-
-  Future<void> _callNumber(String phone) async {
-    final uri = Uri(scheme: 'tel', path: phone);
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
@@ -80,17 +77,14 @@ class _CallConfirmationDialogState extends State<CallConfirmationDialog> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            InkWell(
-              onTap: () => _callNumber(widget.callPhone),
-              child: Text(
-                widget.callPhone,
-                style: AppStyle.inter(
-                  size: 20,
-                  weight: FontWeight.w700,
-                  color: const Color(AppColors.primary),
-                ).copyWith(decoration: TextDecoration.underline),
-                textAlign: TextAlign.center,
+            Text(
+              widget.callPhone,
+              style: AppStyle.inter(
+                size: 20,
+                weight: FontWeight.w700,
+                color: const Color(AppColors.primary),
               ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             Text(

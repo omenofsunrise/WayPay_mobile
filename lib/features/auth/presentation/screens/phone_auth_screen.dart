@@ -25,52 +25,78 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
     mask: ' (###) ###-##-##',
     filter: {"#": RegExp(r'\d')},
   );
+  bool _isDialogShowing = false;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => AuthCubit(),
       child: BlocConsumer<AuthCubit, AuthState>(
-        listener: (context, state) async {
+        listener: (context, state) {
+          debugPrint('🎯 Состояние AuthCubit изменилось: $state');
+
           if (state is AuthCodeSent) {
+            debugPrint('📞 Показываем диалог подтверждения');
             final formattedPhone = '8${_phoneFormatter.getUnmaskedText()}';
 
-            await showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (_) => CallConfirmationDialog(
-                callPhone: state.callPhone,
-                checkId: state.checkId,
-                phone: formattedPhone,
-                onTryConfirm: () async {
-                  await context.read<AuthCubit>().confirmCall(
-                    state.checkId,
-                    formattedPhone,
-                  );
-                },
-              ),
-            );
+            if (!_isDialogShowing) {
+              _isDialogShowing = true;
+
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) => CallConfirmationDialog(
+                    callPhone: state.callPhone,
+                    checkId: state.checkId,
+                    phone: formattedPhone,
+                    onTryConfirm: () async {
+                      await context.read<AuthCubit>().confirmCall(
+                        state.checkId,
+                        formattedPhone,
+                      );
+                    },
+                  ),
+                ).then((_) {});
+              });
+            }
           }
 
           if (state is AuthSuccess) {
-            final formattedPhone = '8${_phoneFormatter.getUnmaskedText()}';
+            debugPrint('✅ AuthSuccess получен, закрываем диалог и переходим');
 
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
-            } else {}
+            if (_isDialogShowing && Navigator.canPop(context)) {
+              Navigator.of(context, rootNavigator: true).pop();
+              _isDialogShowing = false;
+            }
 
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                context.pushReplacementNamed(
-                  Routes.confirmationScreen.toName,
-                  extra: formattedPhone,
-                );
-              }
+              final formattedPhone = '8${_phoneFormatter.getUnmaskedText()}';
+              debugPrint(
+                '🚀 Переход на confirmationScreen с телефоном: $formattedPhone',
+              );
+              context.pushReplacementNamed(
+                Routes.confirmationScreen.toName,
+                extra: formattedPhone,
+              );
             });
+          }
+
+          if (state is AuthError) {
+            debugPrint('❌ AuthError: ${state.message}');
+
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
         builder: (context, state) {
           final isLoading = state is AuthLoading;
+
+          debugPrint(
+            '🔄 Builder вызван, состояние: $state, isLoading: $isLoading',
+          );
+
           return Scaffold(
             backgroundColor: Color(AppColors.background),
             body: Padding(
@@ -153,6 +179,9 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                                   if (_formKey.currentState!.validate()) {
                                     final formattedPhone =
                                         '8${_phoneFormatter.getUnmaskedText()}';
+                                    debugPrint(
+                                      '🔐 Начинаем авторизацию для: $formattedPhone',
+                                    );
                                     context.read<AuthCubit>().startAuth(
                                       formattedPhone,
                                       widget.userType,

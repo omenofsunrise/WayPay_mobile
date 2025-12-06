@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
@@ -32,7 +34,11 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> confirmCall(String checkId, String phone) async {
-    if (state is AuthSuccess) return;
+    if (state is AuthSuccess) {
+      return;
+    }
+
+    emit(AuthLoading());
 
     try {
       await _authDataSource.confirmCall(
@@ -40,20 +46,28 @@ class AuthCubit extends Cubit<AuthState> {
       );
 
       final userInfo = await _authDataSource.getAuthInfo();
-      final employee = userInfo['employee'] as Map<String, dynamic>;
 
-      final roleStr = employee['role']?.toString() ?? '';
-      final role = EmployeeRoleMapper.fromApi(roleStr);
-      await _userStorage.saveRole(role);
+      if (userInfo['employee'] != null) {
+        final employee = userInfo['employee'] as Map<String, dynamic>;
 
-      final permissions = (employee['permissions'] as List<dynamic>)
-          .map((p) => PermissionMapper.fromApi(p.toString()))
-          .toList();
-      await _userStorage.savePermissions(permissions);
+        try {
+          final roleStr = employee['role']?.toString() ?? '';
+          final role = EmployeeRoleMapper.fromApi(roleStr);
+          await _userStorage.saveRole(role);
+
+          final permissionsList = (employee['permissions'] as List? ?? []);
+          final permissions = permissionsList
+              .map((p) => PermissionMapper.fromApi(p.toString()))
+              .toList();
+          await _userStorage.savePermissions(permissions);
+        } catch (e) {
+          debugPrint('Ошибка парсинга данных пользователя: $e');
+        }
+      } else {
+        debugPrint('Данные employee отсутствуют в ответе');
+      }
 
       emit(AuthSuccess());
-    } catch (e) {
-      emit(AuthError('Ошибка авторизации'));
-    }
+    } catch (e) {}
   }
 }
