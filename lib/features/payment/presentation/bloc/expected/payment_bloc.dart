@@ -52,7 +52,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         pageSize: event.pageSize ?? 20,
         sortBy: event.sortBy ?? 'date',
         sortDirection: event.descending ? 'desc' : 'asc',
-        clientFullname: event.search,
+        clientFullname: event.clientFullname ?? event.search,
         investorNickname: event.investorNickname,
         dateFrom: event.dateFrom,
         dateTo: event.dateTo,
@@ -82,7 +82,12 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         ),
       );
     } catch (e) {
-      emit(PaymentError('Ошибка при загрузке платежей: $e'));
+      emit(
+        PaymentError(
+          'Ошибка при загрузке платежей: $e',
+          query: query,
+        ),
+      );
     }
   }
 

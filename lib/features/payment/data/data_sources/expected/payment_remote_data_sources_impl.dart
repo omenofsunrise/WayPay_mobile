@@ -23,7 +23,10 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
         throw Exception('Не тот формат');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка получения журнала платежей: ${e.message}');
+      final message = _extractServerMessage(e);
+      throw Exception(
+        message ?? 'Ошибка получения журнала платежей: ${e.message}',
+      );
     }
   }
 
@@ -38,7 +41,10 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
         throw Exception('Не тот формат');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка получения журнала платежей по id: ${e.message}');
+      final message = _extractServerMessage(e);
+      throw Exception(
+        message ?? 'Ошибка получения журнала платежей по id: ${e.message}',
+      );
     }
   }
 
@@ -59,7 +65,8 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
 
       await dio.post('Payment', data: payload);
     } on DioException catch (e) {
-      throw Exception('Ошибка при создании платежа: ${e.message}');
+      final message = _extractServerMessage(e);
+      throw Exception(message ?? 'Ошибка при создании платежа: ${e.message}');
     }
   }
 
@@ -68,7 +75,10 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
     try {
       await dio.patch('Payment/$id/confirm');
     } on DioException catch (e) {
-      throw Exception('Ошибка подтверждения платежа: ${e.message}');
+      final message = _extractServerMessage(e);
+      throw Exception(
+        message ?? 'Ошибка подтверждения платежа: ${e.message}',
+      );
     }
   }
 
@@ -77,7 +87,37 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
     try {
       await dio.delete('Payment/$id');
     } on DioException catch (e) {
-      throw Exception('Ошибка при удалении платежа: ${e.message}');
+      final message = _extractServerMessage(e);
+      throw Exception(
+        message ?? 'Ошибка при удалении платежа: ${e.message}',
+      );
     }
+  }
+
+  String? _extractServerMessage(DioException e) {
+    final data = e.response?.data;
+    if (data is String && data.trim().isNotEmpty) {
+      return data;
+    }
+    if (data is Map<String, dynamic>) {
+      final title = data['title']?.toString();
+      final detail = data['detail']?.toString() ?? data['message']?.toString();
+      final errors = data['errors'];
+      String? formattedErrors;
+      if (errors is Map<String, dynamic>) {
+        formattedErrors = errors.entries
+            .map(
+              (entry) =>
+                  '${entry.key}: ${(entry.value as List).join(', ')}',
+            )
+            .join('\n');
+      }
+      return [
+        title,
+        detail,
+        formattedErrors,
+      ].whereType<String>().where((value) => value.trim().isNotEmpty).join('\n');
+    }
+    return e.message;
   }
 }

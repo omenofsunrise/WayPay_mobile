@@ -39,6 +39,7 @@ enum Routes {
   paymentHistoryScreen,
   paymentDetailScreen,
   paymentAnalyticsScreen,
+  paymentIncomeScreen,
 }
 
 extension RoutesExtension on Routes {
@@ -124,6 +125,8 @@ extension RoutesExtension on Routes {
         return '/payment_detail_screen';
       case Routes.paymentAnalyticsScreen:
         return '/payment_analytics_screen';
+      case Routes.paymentIncomeScreen:
+        return '/payment_income_screen';
     }
   }
 
@@ -209,6 +212,8 @@ extension RoutesExtension on Routes {
         return 'PAYMENT_DETAIL_SCREEN';
       case Routes.paymentAnalyticsScreen:
         return 'PAYMENT_ANALYTICS_SCREEN';
+      case Routes.paymentIncomeScreen:
+        return 'PAYMENT_INCOME_SCREEN';
     }
   }
 }

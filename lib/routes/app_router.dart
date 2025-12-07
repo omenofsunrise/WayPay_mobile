@@ -56,6 +56,7 @@ import 'package:waypay_mobile/features/payment/presentation/cubit/schedule_previ
 import 'package:waypay_mobile/features/payment/presentation/screen/payment_analytics_screen.dart';
 import 'package:waypay_mobile/features/payment/presentation/screen/payment_detail_screen.dart';
 import 'package:waypay_mobile/features/payment/presentation/screen/payment_history_screen.dart';
+import 'package:waypay_mobile/features/payment/presentation/screen/payment_income_screen.dart';
 import 'package:waypay_mobile/features/payment/presentation/screen/payment_screen.dart';
 import 'package:waypay_mobile/features/payment/presentation/screen/schedule_screen.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
@@ -399,6 +400,14 @@ class AppRouter {
                           PaymentScheduleCubit()
                             ..load(year: DateTime.now().year),
                       child: const PaymentAnalyticsScreen(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: Routes.paymentIncomeScreen.toPath,
+                    name: Routes.paymentIncomeScreen.toName,
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => PaymentBloc(),
+                      child: const PaymentIncomeScreen(),
                     ),
                   ),
                   GoRoute(

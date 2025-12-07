@@ -10,6 +10,7 @@ class LoadPayment extends PaymentEvent {
   final String? sortBy;
   final bool descending;
   final String? search;
+  final String? clientFullname;
   final String? investorNickname;
   final DateTime? dateFrom;
   final DateTime? dateTo;
@@ -22,6 +23,7 @@ class LoadPayment extends PaymentEvent {
     this.sortBy = 'date',
     this.descending = false,
     this.search,
+    this.clientFullname,
     this.investorNickname,
     this.dateFrom,
     this.dateTo,

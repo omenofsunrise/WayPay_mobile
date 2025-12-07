@@ -36,7 +36,7 @@ class FinanceMainScreen extends StatelessWidget {
                 title: 'Доходы от платежей',
                 value: '',
                 onTap: () =>
-                    context.pushNamed(Routes.paymentAnalyticsScreen.toName),
+                    context.pushNamed(Routes.paymentIncomeScreen.toName),
               ),
             ],
           ),

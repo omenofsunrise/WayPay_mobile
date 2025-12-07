@@ -22,8 +22,6 @@ import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients
 import 'package:waypay_mobile/features/clients/presentation/screens/clients_screen.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/credit_screen.dart';
 import 'package:waypay_mobile/features/finance/presentation/screens/budget_screen.dart';
-import 'package:waypay_mobile/features/finance/presentation/screens/income_payments_screen.dart';
-import 'package:waypay_mobile/features/payment/presentation/bloc/expected/payment_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investors_hub_screen.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investors_screen.dart';
@@ -539,16 +537,8 @@ class _AppDrawerState extends State<AppDrawer> {
             DrawerItem(
               title: 'Доходы по платежам',
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BlocProvider(
-                      create: (_) =>
-                          PaymentBloc()..add(LoadPayment(refresh: true)),
-                      child: const IncomePaymentsScreen(),
-                    ),
-                  ),
-                );
+                Navigator.pop(context);
+                context.pushNamed(Routes.paymentIncomeScreen.toName);
               },
             ),
           ],
