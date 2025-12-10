@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
-import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
 import 'package:waypay_mobile/core/widgets/header.dart';
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/features/profile/presentation/cubit/profile_cubit.dart'
-    show ProfileCubit, ProfileLoaded, ProfileState;
+    show ProfileCubit;
 import 'package:waypay_mobile/features/profile/presentation/screens/my_profile.dart';
 import 'package:waypay_mobile/features/profile/presentation/widgets/edit_profile_modal.dart';
 import 'package:waypay_mobile/routes/routes.dart';
@@ -30,7 +27,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final AuthRemoteDataSource dataSource = getIt<AuthRemoteDataSource>();
   Employee? currentUser;
   final _tokenStorage = TokenStorage();
-  final _userStorage = UserStorage();
   late final ProfileCubit _profileCubit;
 
   final Map<EmployeeRole, int> roleHierarchy = {
@@ -117,10 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 title: 'Профиль',
                 showBackButton: true,
                 showNotifications: false,
-                trailing: IconButton(
-                  icon: SvgPicture.asset(SvgIcons.edit),
-                  onPressed: _openEditProfile,
-                ),
+                trailing: const SizedBox.shrink(),
               ),
               const SizedBox(height: 16),
               Expanded(

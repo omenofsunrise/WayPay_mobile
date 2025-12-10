@@ -86,7 +86,17 @@ extension EmployeeRoleMapper on EmployeeRole {
   }
 }
 
-enum Permission { createCredits, deleteCredits, viewAnalytic, viewAllCredits }
+enum Permission {
+  createCredits,
+  deleteCredits,
+  viewAnalytic,
+  viewAllCredits,
+  forbidCreatingCredits,
+  forbidCreatingPayments,
+  forbidDeletingPayments,
+  forbidCreditApplications,
+  manageAccounting,
+}
 
 extension PermissionMapper on Permission {
   static Permission fromApi(String apiValue) {
@@ -99,6 +109,16 @@ extension PermissionMapper on Permission {
         return Permission.viewAnalytic;
       case 'VIEW_ALL_CREDITS':
         return Permission.viewAllCredits;
+      case 'FORBID_CREATING_CREDITS':
+        return Permission.forbidCreatingCredits;
+      case 'FORBID_CREATING_PAYMENTS':
+        return Permission.forbidCreatingPayments;
+      case 'FORBID_DELETING_PAYMENTS':
+        return Permission.forbidDeletingPayments;
+      case 'FORBID_CREDIT_APPLICATIONS':
+        return Permission.forbidCreditApplications;
+      case 'MANAGE_ACCOUNTING':
+        return Permission.manageAccounting;
       default:
         throw Exception('Неизвестное разрешение: $apiValue');
     }
@@ -114,6 +134,16 @@ extension PermissionMapper on Permission {
         return 'Просмотр аналитики';
       case Permission.viewAllCredits:
         return 'Просмотр чужих договоро';
+      case Permission.forbidCreatingCredits:
+        return 'Запрет на создание договоров';
+      case Permission.forbidCreatingPayments:
+        return 'Запрет на добавление платежей';
+      case Permission.forbidDeletingPayments:
+        return 'Запрет на удаление платежей';
+      case Permission.forbidCreditApplications:
+        return 'Запрет к заявкам';
+      case Permission.manageAccounting:
+        return 'Вести бухгалтерский учет';
     }
   }
 }
