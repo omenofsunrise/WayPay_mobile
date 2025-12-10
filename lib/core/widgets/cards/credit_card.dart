@@ -24,10 +24,14 @@ class CreditCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        showDialog(
-          context: context,
-          builder: (_) =>
-              CreditFullScreen(credit: credit, isControl: isControl),
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CreditFullScreen(
+              credit: credit,
+              isControl: isControl,
+            ),
+          ),
         );
       },
       child: Container(

@@ -50,6 +50,9 @@
   		<key>NSAllowsArbitraryLoads</key>
   		<true/>
 </dict>
-
+	<key>NSCameraUsageDescription</key>
+	<string>Нужен доступ к камере, чтобы добавить фото к заметке.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Нужен доступ к галерее, чтобы прикреплять файлы и фото к заметкам.</string>
 </dict>
 </plist>
