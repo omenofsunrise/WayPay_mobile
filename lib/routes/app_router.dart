@@ -3,6 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:waypay_mobile/core/network/token_storage.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/analytic_items_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/debt_dynamic_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/investment_dynamic_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/cubit/sell_info_cubit.dart';
+import 'package:waypay_mobile/features/analytics/presentation/screens/analytic_screen.dart';
 
 import 'package:waypay_mobile/features/auth/presentation/screens/confirmation_screen.dart';
 import 'package:waypay_mobile/features/auth/presentation/screens/phone_auth_screen.dart';
@@ -363,7 +368,11 @@ class AppRouter {
                     name: Routes.scheduleScreen.toName,
                     builder: (context, state) => BlocProvider(
                       create: (_) => ScheduleBloc(),
-                      child: const ScheduleScreen(),
+                      child: ScheduleScreen(
+                        creditId: state.extra is int
+                            ? state.extra as int
+                            : null,
+                      ),
                     ),
                   ),
                   GoRoute(
@@ -400,6 +409,19 @@ class AppRouter {
                           PaymentScheduleCubit()
                             ..load(year: DateTime.now().year),
                       child: const PaymentAnalyticsScreen(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: Routes.analyticsScreen.toPath,
+                    name: Routes.analyticsScreen.toName,
+                    builder: (context, state) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(create: (_) => AnalyticItemsCubit()),
+                        BlocProvider(create: (_) => InvestmentDynamicCubit()),
+                        BlocProvider(create: (_) => SellInfoCubit()),
+                        BlocProvider(create: (_) => DebtDynamicCubit()),
+                      ],
+                      child: const AnalyticsScreen(),
                     ),
                   ),
                   GoRoute(
