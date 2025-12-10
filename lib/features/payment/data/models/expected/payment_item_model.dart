@@ -47,16 +47,18 @@ class PaymentItemModel {
 
   factory PaymentItemModel.fromJson(Map<String, dynamic> json) {
     return PaymentItemModel(
-      id: json['id'],
-      creditId: json['creditId'],
-      paymentAmount: (json['paymentAmount'] as num).toDouble(),
-      paymentDate: json['paymentDate'],
-      type: paymentTypeFromString(json['type']),
-      accepted: json['accepted'],
-      clientFullName: json['clientFullName'],
+      id: json['id'] ?? 0,
+      creditId: json['creditId'] ?? 0,
+      paymentAmount: (json['paymentAmount'] as num?)?.toDouble() ?? 0,
+      paymentDate: json['paymentDate'] ?? '',
+      type: json['type'] != null
+          ? paymentTypeFromString(json['type'])
+          : PaymentType.cash,
+      accepted: json['accepted'] ?? false,
+      clientFullName: json['clientFullName'] ?? '',
       investorNickname: json['investorNickname'],
       employeeFullName: json['employeeFullName'],
-      income: (json['income'] as num).toDouble(),
+      income: (json['income'] as num?)?.toDouble() ?? 0,
     );
   }
 
@@ -95,14 +97,14 @@ class PaymentListResponseModel {
 
   factory PaymentListResponseModel.fromJson(Map<String, dynamic> json) {
     return PaymentListResponseModel(
-      totalPayments: (json['totalPayments'] as num).toDouble(),
-      totalIncome: json['totalIncome'],
-      page: json['page'],
-      pageSize: json['pageSize'],
-      totalCount: json['totalCount'],
-      totalPages: json['totalPages'],
-      items: (json['items'] as List)
-          .map((item) => PaymentItemModel.fromJson(item))
+      totalPayments: (json['totalPayments'] as num?)?.toDouble() ?? 0,
+      totalIncome: (json['totalIncome'] as num?)?.toInt() ?? 0,
+      page: (json['page'] as num?)?.toInt() ?? 1,
+      pageSize: (json['pageSize'] as num?)?.toInt() ?? 0,
+      totalCount: (json['totalCount'] as num?)?.toInt() ?? 0,
+      totalPages: (json['totalPages'] as num?)?.toInt() ?? 0,
+      items: (json['items'] as List? ?? [])
+          .map((item) => PaymentItemModel.fromJson(item as Map<String, dynamic>))
           .toList(),
     );
   }

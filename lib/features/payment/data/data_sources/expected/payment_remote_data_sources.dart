@@ -3,6 +3,11 @@ import 'package:waypay_mobile/features/payment/data/models/expected/payment_item
 
 abstract class PaymentRemoteDataSources {
   Future<PaymentListResponseModel> getPayment(GetPaymentsQuery query);
+  Future<PaymentListResponseModel> getPaymentsByCredit({
+    required int creditId,
+    int page,
+    int pageSize,
+  });
   Future<PaymentItemModel> getPaymentById(int id);
   Future<void> createPayment({
     required int creditId,

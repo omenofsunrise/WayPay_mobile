@@ -18,6 +18,8 @@ import 'package:waypay_mobile/features/payment/presentation/cubit/payment_histor
 import 'package:waypay_mobile/features/payment/presentation/cubit/schedule_preview_cubit.dart';
 import 'package:waypay_mobile/features/payment/presentation/widgets/payment_preview_card.dart';
 import 'package:waypay_mobile/features/payment/presentation/widgets/payment_schedule_card.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
+import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -32,6 +34,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
   final _tokenStorage = TokenStorage();
   Timer? _debounce;
 
+  bool get _canViewAnalytics =>
+      UserStorage().hasPermissionSync([Permission.viewAnalytic]);
+
   @override
   void initState() {
     super.initState();
@@ -41,7 +46,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
       context.read<PaymentBloc>().add(
         LoadPayment(refresh: true, page: 1, pageSize: 10),
       );
-      context.read<PaymentScheduleCubit>().load(year: DateTime.now().year);
+      if (_canViewAnalytics) {
+        context.read<PaymentScheduleCubit>().load(year: DateTime.now().year);
+      }
       context.read<SchedulePreviewCubit>().load(limit: 2);
       context.read<PaymentHistoryCubit>().load(limit: 2);
     });
@@ -138,6 +145,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheduleState = context.watch<PaymentScheduleCubit>().state;
+    final showAnalyticsSpacing = _canViewAnalytics &&
+        scheduleState is! PaymentScheduleError &&
+        scheduleState is! PaymentScheduleNoAccess &&
+        !(scheduleState is PaymentScheduleLoaded &&
+            scheduleState.summaries.isEmpty);
+
     return Scaffold(
       backgroundColor: const Color(AppColors.background),
       body: SafeArea(
@@ -151,7 +165,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 showBackButton: true,
                 showNotifications: true,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: showAnalyticsSpacing ? 24 : 0),
               Expanded(
                 child: BlocBuilder<PaymentBloc, PaymentState>(
                   builder: (context, state) {
@@ -165,28 +179,30 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       return Refresher(
                         onRefresh: () async {
                           context.read<PaymentBloc>().add(
-                                LoadPayment(
-                                  refresh: true,
-                                  page: 1,
-                                  pageSize: 10,
-                                  search: _searchController.text.isEmpty
-                                      ? null
-                                      : _searchController.text,
-                                ),
-                              );
-                          await context
-                              .read<SchedulePreviewCubit>()
-                              .load(limit: 2);
-                          await context
-                              .read<PaymentHistoryCubit>()
-                              .load(limit: 2);
+                            LoadPayment(
+                              refresh: true,
+                              page: 1,
+                              pageSize: 10,
+                              search: _searchController.text.isEmpty
+                                  ? null
+                                  : _searchController.text,
+                            ),
+                          );
+                          await context.read<SchedulePreviewCubit>().load(
+                            limit: 2,
+                          );
+                          await context.read<PaymentHistoryCubit>().load(
+                            limit: 2,
+                          );
                         },
                         content: SingleChildScrollView(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildAnalyticsSection(),
-                              const SizedBox(height: 24),
+                              if (_canViewAnalytics) ...[
+                                _buildAnalyticsSection(),
+                                const SizedBox(height: 24),
+                              ],
                               _buildExpectedPaymentsSection(),
                               const SizedBox(height: 24),
                               _buildHistorySection(),
@@ -240,68 +256,50 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Widget _buildAnalyticsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _sectionHeader(
-          title: 'Аналитика',
-          actionText: 'Вся аналитика',
-          onPressed: () {
-            context.pushNamed(Routes.paymentAnalyticsScreen.toName);
-          },
-        ),
-        const SizedBox(height: 12),
-        BlocBuilder<PaymentScheduleCubit, PaymentScheduleState>(
-          builder: (context, state) {
-            if (state is PaymentScheduleLoading ||
-                state is PaymentScheduleInitial) {
-              return _analyticsContainer(
-                const Center(child: CircularProgressIndicator()),
-              );
-            }
-            if (state is PaymentScheduleNoAccess) {
-              return _analyticsContainer(
-                const Text(
-                  'У вас нет доступа к аналитике платежей.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.red),
-                ),
-              );
-            }
-            if (state is PaymentScheduleError) {
-              return _analyticsContainer(
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      state.message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: () => context
-                          .read<PaymentScheduleCubit>()
-                          .load(year: DateTime.now().year),
-                      child: const Text('Повторить'),
-                    ),
-                  ],
-                ),
-              );
-            }
-            if (state is PaymentScheduleLoaded && state.summaries.isNotEmpty) {
-              return PaymentScheduleCard(summary: state.summaries.first);
-            }
-            return _analyticsContainer(
-              const Text(
-                'Нет данных об аналитике платежей',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Color(AppColors.darkGrey)),
+    if (!_canViewAnalytics) return const SizedBox.shrink();
+
+    return BlocBuilder<PaymentScheduleCubit, PaymentScheduleState>(
+      builder: (context, state) {
+        if (state is PaymentScheduleLoading ||
+            state is PaymentScheduleInitial) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _sectionHeader(
+                title: 'Аналитика',
+                actionText: 'Вся аналитика',
+                onPressed: () {
+                  context.pushNamed(Routes.paymentAnalyticsScreen.toName);
+                },
               ),
-            );
-          },
-        ),
-      ],
+              const SizedBox(height: 12),
+              _analyticsContainer(
+                const Center(child: CircularProgressIndicator()),
+              ),
+            ],
+          );
+        }
+
+        if (state is PaymentScheduleLoaded && state.summaries.isNotEmpty) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _sectionHeader(
+                title: 'Аналитика',
+                actionText: 'Вся аналитика',
+                onPressed: () {
+                  context.pushNamed(Routes.paymentAnalyticsScreen.toName);
+                },
+              ),
+              const SizedBox(height: 12),
+              PaymentScheduleCard(summary: state.summaries.first),
+            ],
+          );
+        }
+
+        // Hide the entire block if no data or error.
+        return const SizedBox.shrink();
+      },
     );
   }
 
@@ -336,9 +334,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton(
-                    onPressed: () => context
-                        .read<SchedulePreviewCubit>()
-                        .load(limit: 2),
+                    onPressed: () =>
+                        context.read<SchedulePreviewCubit>().load(limit: 2),
                     child: const Text('Повторить'),
                   ),
                 ],
@@ -421,9 +418,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton(
-                    onPressed: () => context
-                        .read<PaymentHistoryCubit>()
-                        .load(limit: 2),
+                    onPressed: () =>
+                        context.read<PaymentHistoryCubit>().load(limit: 2),
                     child: const Text('Повторить'),
                   ),
                 ],

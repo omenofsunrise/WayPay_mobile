@@ -45,19 +45,29 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         return;
       }
 
-      final query = GetScheduleQuery(
-        page: _currentPage,
-        pageSize: event.pageSize ?? 10,
-        sortBy: event.sortBy ?? 'date',
-        sortDirection: event.sortDirection ?? 'asc',
-        clientName: event.search ?? event.clientName,
-        investorNickname: event.investorNickname,
-        creditId: event.creditId,
-        dateFrom: event.dateFrom,
-        dateTo: event.dateTo,
-      );
+      ScheduleResponseModel response;
+      if (event.creditId != null) {
+        response = await _scheduleDataSource.getScheduleByCredit(
+          creditId: event.creditId!,
+          page: _currentPage,
+          pageSize: event.pageSize ?? 10,
+          includePayed: event.includePayed,
+        );
+      } else {
+        final query = GetScheduleQuery(
+          page: _currentPage,
+          pageSize: event.pageSize ?? 10,
+          sortBy: event.sortBy ?? 'date',
+          sortDirection: event.sortDirection ?? 'asc',
+          clientName: event.search ?? event.clientName,
+          investorNickname: event.investorNickname,
+          creditId: event.creditId,
+          dateFrom: event.dateFrom,
+          dateTo: event.dateTo,
+        );
 
-      final response = await _scheduleDataSource.getSchedule(query);
+        response = await _scheduleDataSource.getSchedule(query);
+      }
 
       if (event.refresh) {
         _schedules = response.items;

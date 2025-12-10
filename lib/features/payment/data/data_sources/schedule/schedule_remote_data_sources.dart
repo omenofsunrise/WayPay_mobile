@@ -4,4 +4,10 @@ import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_mod
 abstract class ScheduleRemoteDataSources {
   Future<ScheduleResponseModel> getSchedule(GetScheduleQuery query);
   Future<void> putSchedule(int id);
+  Future<ScheduleResponseModel> getScheduleByCredit({
+    required int creditId,
+    int page = 1,
+    int pageSize = 3,
+    bool includePayed = true,
+  });
 }

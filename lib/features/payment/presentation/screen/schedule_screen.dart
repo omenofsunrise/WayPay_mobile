@@ -3,14 +3,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/filters/filter_components.dart';
 import 'package:waypay_mobile/core/widgets/header.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
 import 'package:waypay_mobile/core/widgets/search_field.dart';
+import 'package:waypay_mobile/core/widgets/custom_tab_switcher.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
+import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
 import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
 import 'package:waypay_mobile/features/payment/presentation/bloc/schedule/schedule_bloc.dart';
 import 'package:waypay_mobile/features/payment/presentation/models/payment_sort_option.dart';
@@ -20,13 +25,16 @@ import 'package:waypay_mobile/features/payment/presentation/widgets/schedule_fil
 import 'package:waypay_mobile/routes/routes.dart';
 
 class ScheduleScreen extends StatefulWidget {
-  const ScheduleScreen({super.key});
+  const ScheduleScreen({super.key, this.creditId});
+
+  final int? creditId;
 
   @override
   State<ScheduleScreen> createState() => _ScheduleScreenState();
 }
 
-class _ScheduleScreenState extends State<ScheduleScreen> {
+class _ScheduleScreenState extends State<ScheduleScreen>
+    with SingleTickerProviderStateMixin {
   final _searchController = TextEditingController();
   final _tokenStorage = TokenStorage();
   final _scrollController = ScrollController();
@@ -35,12 +43,33 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   Timer? _debounce;
   ScheduleFilters? _appliedFilters;
   late PaymentSortOption _currentSort;
+  TabController? _tabController;
+  bool _includePayedForCredit = false;
+  List<PaymentItemModel> _historyPayments = [];
+  bool _historyLoading = false;
+  String? _historyError;
 
   @override
   void initState() {
     super.initState();
     _currentSort = paymentSortOptions.first;
     _scrollController.addListener(_onScroll);
+    if (widget.creditId != null) {
+      _tabController = TabController(length: 2, vsync: this);
+      _tabController!.addListener(() {
+        final index = _tabController!.index;
+        final include = index == 1;
+        if (_includePayedForCredit != include) {
+          setState(() => _includePayedForCredit = include);
+          if (include) {
+            _loadHistoryPayments();
+          } else {
+            _loadSchedules(refresh: true, page: 1);
+          }
+        }
+        setState(() {});
+      });
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _loadSchedules(refresh: true, page: 1);
@@ -59,6 +88,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     _debounce?.cancel();
     _searchController.dispose();
     _scrollController.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
@@ -81,7 +111,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 
   void _loadSchedules({bool refresh = false, int? page}) {
-    final filters = _appliedFilters;
+    final filters = widget.creditId != null ? null : _appliedFilters;
     final sort = _currentSort;
     context.read<ScheduleBloc>().add(
       LoadSchedule(
@@ -93,9 +123,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         sortDirection: sort.sortDirection,
         clientName: filters?.clientFullName,
         investorNickname: filters?.investor,
-        creditId: filters?.contractNumber,
+        creditId: widget.creditId ?? filters?.contractNumber,
         dateFrom: filters?.dateFromIso,
         dateTo: filters?.dateToIso,
+        includePayed:
+            widget.creditId != null ? _includePayedForCredit : true,
       ),
     );
   }
@@ -173,66 +205,89 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Header(
-                  title: 'Ожидаемые платежи',
+                  title: 'Все платежи',
                   showBackButton: true,
                   showNotifications: true,
                 ),
-                const SizedBox(height: 16),
-                _buildSearchBar(),
-                const SizedBox(height: 16),
+                if (widget.creditId == null) ...[
+                  const SizedBox(height: 16),
+                  _buildSearchBar(),
+                  const SizedBox(height: 16),
+                ] else ...[
+                  const SizedBox(height: 12),
+                  if (_tabController != null)
+                    CustomTabSwitcher(
+                      controller: _tabController!,
+                      tabs: const ['Предстоящие', 'История'],
+                    ),
+                  const SizedBox(height: 12),
+                ],
                 Expanded(
-                  child: BlocBuilder<ScheduleBloc, ScheduleState>(
-                    builder: (context, state) {
-                      if (state is ScheduleInitial) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (state is ScheduleError) {
-                        return _buildErrorState(state.message);
-                      }
-                      if (state is ScheduleLoaded) {
-                        if (state.schedules.isEmpty) {
-                          return const Center(
-                            child: Text(
-                              'Нет ожидаемых платежей',
-                              style: TextStyle(
-                                color: Color(AppColors.darkGrey),
-                              ),
-                            ),
-                          );
-                        }
-                        return Refresher(
-                          onRefresh: () async {
-                            _loadSchedules(refresh: true, page: 1);
-                          },
-                          content: ListView.separated(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.only(bottom: 32),
-                            itemCount:
-                                state.schedules.length +
-                                (_isLoadingMore && state.hasMoreData ? 1 : 0),
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: 12),
-                            itemBuilder: (context, index) {
-                              if (index >= state.schedules.length) {
-                                return const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
+                  child: widget.creditId != null && _includePayedForCredit
+                      ? _buildHistoryList()
+                      : BlocBuilder<ScheduleBloc, ScheduleState>(
+                          builder: (context, state) {
+                            if (state is ScheduleInitial) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            if (state is ScheduleError) {
+                              return _buildErrorState(state.message);
+                            }
+                            if (state is ScheduleLoaded) {
+                              if (state.schedules.isEmpty) {
+                                return const Center(
+                                  child: Text(
+                                    'Нет ожидаемых платежей',
+                                    style: TextStyle(
+                                      color: Color(AppColors.darkGrey),
+                                    ),
                                   ),
                                 );
                               }
-                              final schedule = state.schedules[index];
-                              return PaymentPreviewCard(
-                                payment: _scheduleToPayment(schedule),
-                                onTap: () => _openPaymentDetail(schedule),
+                              return Refresher(
+                                onRefresh: () async {
+                                  _loadSchedules(refresh: true, page: 1);
+                                },
+                                content: ListView.separated(
+                                  controller: _scrollController,
+                                  padding: const EdgeInsets.only(bottom: 32),
+                                  itemCount:
+                                      state.schedules.length +
+                                      (_isLoadingMore && state.hasMoreData
+                                          ? 1
+                                          : 0),
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(height: 12),
+                                  itemBuilder: (context, index) {
+                                    if (index >= state.schedules.length) {
+                                      return const Padding(
+                                        padding:
+                                            EdgeInsets.symmetric(vertical: 16),
+                                        child: Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                    }
+                                    final schedule = state.schedules[index];
+                                    if (widget.creditId != null) {
+                                      return _ScheduleListTile(
+                                        schedule: schedule,
+                                        showPaid: _includePayedForCredit,
+                                      );
+                                    }
+                                    return PaymentPreviewCard(
+                                      payment: _scheduleToPayment(schedule),
+                                      onTap: () => _openPaymentDetail(schedule),
+                                    );
+                                  },
+                                ),
                               );
-                            },
-                          ),
-                        );
-                      }
-                      return const SizedBox();
-                    },
-                  ),
+                            }
+                            return const SizedBox();
+                          },
+                        ),
                 ),
               ],
             ),
@@ -307,6 +362,302 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHistoryList() {
+    if (_historyLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_historyError != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _historyError!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.red),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: _loadHistoryPayments,
+              child: const Text('Повторить'),
+            ),
+          ],
+        ),
+      );
+    }
+    if (_historyPayments.isEmpty) {
+      return const Center(
+        child: Text(
+          'Нет оплат по договору',
+          style: TextStyle(color: Color(AppColors.darkGrey)),
+        ),
+      );
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.only(bottom: 32),
+      itemCount: _historyPayments.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final payment = _historyPayments[index];
+        return _HistoryListTile(payment: payment);
+      },
+    );
+  }
+
+  Future<void> _loadHistoryPayments() async {
+    if (widget.creditId == null) return;
+    setState(() {
+      _historyLoading = true;
+      _historyError = null;
+    });
+    try {
+      final api = getIt<PaymentRemoteDataSources>();
+      final response = await api.getPaymentsByCredit(
+        creditId: widget.creditId!,
+        page: 1,
+        pageSize: 50,
+      );
+      setState(() {
+        _historyPayments = response.items;
+      });
+    } catch (e) {
+      setState(() {
+        _historyError = 'Ошибка загрузки истории: $e';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _historyLoading = false;
+        });
+      }
+    }
+  }
+}
+
+class _ScheduleListTile extends StatelessWidget {
+  const _ScheduleListTile({
+    required this.schedule,
+    this.showPaid = false,
+  });
+
+  final ScheduleModel schedule;
+  final bool showPaid;
+
+  String _formatDate(String isoDate) {
+    try {
+      final date = DateTime.parse(isoDate);
+      return DateFormat('dd.MM').format(date);
+    } catch (_) {
+      return isoDate;
+    }
+  }
+
+  String _formatCurrency(num amount) {
+    final formatter = NumberFormat.currency(
+      locale: 'ru_RU',
+      symbol: '₽',
+      decimalDigits: 0,
+    );
+    return formatter.format(amount);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dateLabel = _formatDate(schedule.paymentDate);
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x14000809),
+            offset: Offset(2, 2),
+            blurRadius: 4,
+          ),
+          BoxShadow(color: Color(0x05000809), blurRadius: 6),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: const BoxDecoration(
+              color: Color(0xFFD1D5DB),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              dateLabel,
+              style: AppStyle.manrope(
+                size: 14,
+                weight: FontWeight.w600,
+                color: const Color(0xFF4B5563),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Договор № ${schedule.creditId}',
+                  style: AppStyle.manrope(
+                    size: 16,
+                    weight: FontWeight.w500,
+                    color: const Color(AppColors.darkGrey),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _formatCurrency(schedule.paymentAmount),
+                  style: AppStyle.manrope(
+                    size: 16,
+                    weight: FontWeight.w500,
+                    color: const Color(AppColors.black),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              Icon(
+                showPaid ? Icons.check : Icons.access_time,
+                color: showPaid
+                    ? const Color(0xFF0FA958)
+                    : const Color(0xFF9CA3AF),
+                size: 18,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                showPaid ? 'Оплачен' : 'Ожидает',
+                style: AppStyle.manrope(
+                  size: 14,
+                  weight: FontWeight.w500,
+                  color: showPaid
+                      ? const Color(0xFF0FA958)
+                      : const Color(0xFF9CA3AF),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HistoryListTile extends StatelessWidget {
+  const _HistoryListTile({required this.payment});
+
+  final PaymentItemModel payment;
+
+  String _formatDate(String isoDate) {
+    try {
+      final date = DateTime.parse(isoDate);
+      return DateFormat('dd.MM').format(date);
+    } catch (_) {
+      return isoDate;
+    }
+  }
+
+  String _formatCurrency(num amount) {
+    final formatter = NumberFormat.currency(
+      locale: 'ru_RU',
+      symbol: '₽',
+      decimalDigits: 0,
+    );
+    return formatter.format(amount);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dateLabel = _formatDate(payment.paymentDate);
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x14000809),
+            offset: Offset(2, 2),
+            blurRadius: 4,
+          ),
+          BoxShadow(
+            color: Color(0x05000809),
+            blurRadius: 6,
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: const BoxDecoration(
+              color: Color(0xFFD1D5DB),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              dateLabel,
+              style: AppStyle.manrope(
+                size: 14,
+                weight: FontWeight.w600,
+                color: const Color(0xFF4B5563),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Договор № ${payment.creditId}',
+                  style: AppStyle.manrope(
+                    size: 16,
+                    weight: FontWeight.w500,
+                    color: const Color(AppColors.darkGrey),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _formatCurrency(payment.paymentAmount),
+                  style: AppStyle.manrope(
+                    size: 16,
+                    weight: FontWeight.w500,
+                    color: const Color(AppColors.black),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              Icon(Icons.check, color: const Color(0xFF0FA958), size: 18),
+              const SizedBox(width: 6),
+              Text(
+                'Оплачен',
+                style: AppStyle.manrope(
+                  size: 14,
+                  weight: FontWeight.w500,
+                  color: const Color(0xFF0FA958),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

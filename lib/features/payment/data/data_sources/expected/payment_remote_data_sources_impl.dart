@@ -31,6 +31,34 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
   }
 
   @override
+  Future<PaymentListResponseModel> getPaymentsByCredit({
+    required int creditId,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    try {
+      final response = await dio.get(
+        'Payment/by-credit/$creditId',
+        queryParameters: {
+          'page': page,
+          'pageSize': pageSize,
+        },
+      );
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        return PaymentListResponseModel.fromJson(data);
+      } else {
+        throw Exception('Не тот формат');
+      }
+    } on DioException catch (e) {
+      final message = _extractServerMessage(e);
+      throw Exception(
+        message ?? 'Ошибка получения платежей по договору: ${e.message}',
+      );
+    }
+  }
+
+  @override
   Future<PaymentItemModel> getPaymentById(int id) async {
     try {
       final response = await dio.get('Payment/$id');

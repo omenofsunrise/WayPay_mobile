@@ -85,7 +85,6 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       emit(
         PaymentError(
           'Ошибка при загрузке платежей: $e',
-          query: query,
         ),
       );
     }

@@ -15,6 +15,7 @@ class LoadSchedule extends ScheduleEvent {
   final String? dateFrom;
   final String? dateTo;
   final String? search;
+  final bool includePayed;
 
   LoadSchedule({
     this.refresh = false,
@@ -28,6 +29,7 @@ class LoadSchedule extends ScheduleEvent {
     this.dateFrom,
     this.dateTo,
     this.search,
+    this.includePayed = true,
   });
 }
 

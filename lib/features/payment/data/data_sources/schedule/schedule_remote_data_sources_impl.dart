@@ -28,6 +28,36 @@ class ScheduleRemoteDataSourcesImpl implements ScheduleRemoteDataSources {
   }
 
   @override
+  Future<ScheduleResponseModel> getScheduleByCredit({
+    required int creditId,
+    int page = 1,
+    int pageSize = 3,
+    bool includePayed = true,
+  }) async {
+    try {
+      final response = await dio.get(
+        'Schedule/by-credit/$creditId',
+        queryParameters: {
+          'page': page,
+          'pageSize': pageSize,
+          'includePayed': includePayed,
+        },
+      );
+      final data = response.data;
+
+      if (data is Map<String, dynamic>) {
+        return ScheduleResponseModel.fromJson(data);
+      } else {
+        throw Exception('Неверный формат ответа');
+      }
+    } on DioException catch (e) {
+      throw Exception(
+        'Ошибка при получении ожидаемых платежей по договору: ${e.message}',
+      );
+    }
+  }
+
+  @override
   Future<void> putSchedule(int id) async {
     try {
       await dio.put('Schedule/$id');
