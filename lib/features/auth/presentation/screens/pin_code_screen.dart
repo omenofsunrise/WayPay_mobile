@@ -169,32 +169,44 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
   }
 
   Widget _buildKey(String value) {
+    final isBack = value == 'back';
+    final display = value == 'empty' ? '' : value;
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () => _onKeyboardTap(value),
+          borderRadius: BorderRadius.circular(16),
+          onTap: display.isEmpty ? null : () => _onKeyboardTap(value),
           child: Container(
             alignment: Alignment.center,
-            width: 60,
-            height: 60,
+            width: 72,
+            height: 72,
             decoration: BoxDecoration(
-              border: value != 'back'
+              color: isBack ? const Color(0xFFF3F6F9) : Colors.white,
+              border: display.isNotEmpty && !isBack
                   ? Border.all(color: const Color(AppColors.primary))
                   : null,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x11000000),
+                  blurRadius: 6,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
-            child: value == 'back'
+            child: isBack
                 ? const Icon(
                     Icons.backspace_outlined,
                     color: Color(AppColors.primary),
+                    size: 24,
                   )
                 : Text(
-                    value,
+                    display,
                     style: AppStyle.medium20.copyWith(
+                      fontSize: 22,
                       color: const Color(AppColors.primary),
                     ),
                   ),
@@ -225,22 +237,24 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
     return Scaffold(
       backgroundColor: Color(AppColors.background),
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 32),
-            Center(
-              child: Image.asset(
-                Images.backgroundLogo,
-                height: 107,
-                width: 107,
-              ),
-            ),
-            Expanded(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(title, style: AppStyle.medium20),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
+                  Image.asset(Images.backgroundLogo, height: 84, width: 84),
+                  const SizedBox(height: 20),
+                  Text(
+                    title,
+                    style: AppStyle.medium20.copyWith(
+                      fontSize: 22,
+                      color: const Color(AppColors.black),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
                   _buildPinDots(),
                   if (_errorMessage != null) ...[
                     const SizedBox(height: 12),
@@ -249,32 +263,28 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
                       style: AppStyle.regular14.copyWith(
                         color: const Color(AppColors.red),
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
+                  const Spacer(),
+                  Column(
+                    children: keys.map((row) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: row.map((key) {
+                          if (key == 'empty') {
+                            return const SizedBox(width: 72, height: 72);
+                          }
+                          return _buildKey(key);
+                        }).toList(),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                children: keys.map((row) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: row.map((key) {
-                      if (key == 'empty') {
-                        return Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: const SizedBox(width: 60, height: 60),
-                        );
-                      }
-                      return _buildKey(key);
-                    }).toList(),
-                  );
-                }).toList(),
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
+            );
+          },
         ),
       ),
     );
