@@ -132,18 +132,10 @@ class AnalyticRemoteDataSourceImpl implements AnalyticRemoteDataSource {
       final status = e.response?.statusCode;
       final body = e.response?.data;
       final params = e.requestOptions.queryParameters;
-      final message = 'Ошибка получения аналитики платежей '
-          '[status=$status, params=$params, body=$body]';
-      developer.log(
-        'getPaymentSchedules error',
-        error: e,
-        name: 'AnalyticRemoteDataSource',
+      throw Exception(
+        'Ошибка получения аналитики платежей '
+        '[status=$status, params=$params, body=$body]',
       );
-      developer.log(
-        message,
-        name: 'AnalyticRemoteDataSource',
-      );
-      throw Exception(message);
     }
   }
 }
