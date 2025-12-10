@@ -12,11 +12,8 @@ import 'package:waypay_mobile/features/payment/data/models/expected/payment_item
 import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
 
 class PaymentDetailScreen extends StatefulWidget {
-  const PaymentDetailScreen({
-    super.key,
-    this.schedule,
-    this.payment,
-  }) : assert(schedule != null || payment != null);
+  const PaymentDetailScreen({super.key, this.schedule, this.payment})
+    : assert(schedule != null || payment != null);
 
   final ScheduleModel? schedule;
   final PaymentItemModel? payment;
@@ -33,8 +30,11 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
   late bool _isNotified;
   bool _notifyLoading = false;
   String? _error;
-  final NumberFormat _plainCurrencyFormatter =
-      NumberFormat.currency(locale: 'ru_RU', symbol: '', decimalDigits: 0);
+  final NumberFormat _plainCurrencyFormatter = NumberFormat.currency(
+    locale: 'ru_RU',
+    symbol: '',
+    decimalDigits: 0,
+  );
 
   ScheduleModel? get _schedule => widget.schedule;
   PaymentItemModel? get _payment => widget.payment;
@@ -79,9 +79,9 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
   Future<void> _contactClient() async {
     final phoneRaw = _clientPhone;
     if (phoneRaw == null || phoneRaw.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не указан номер клиента')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Не указан номер клиента')));
       return;
     }
     if (_notifyLoading) return;
@@ -98,9 +98,9 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
       await _openWhatsApp(phone, _buildWhatsappMessage());
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ошибка: $e')));
     } finally {
       if (mounted) {
         setState(() => _notifyLoading = false);
@@ -164,10 +164,9 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
   }
 
   String _buildWhatsappMessage() {
-    final companyName =
-        (_credit?.employeeName?.trim().isNotEmpty ?? false)
-            ? _credit!.employeeName
-            : 'WayPay';
+    final companyName = (_credit?.employeeName?.trim().isNotEmpty ?? false)
+        ? _credit!.employeeName
+        : 'WayPay';
     final amount = _formatPlainCurrency(_paymentAmount);
     final date = _formatIsoDate(_paymentDateRaw);
     final rest = _formatPlainCurrency(_credit?.rest);
@@ -298,16 +297,11 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                     ],
                   ),
                 ),
-                _StatusBadge(
-                  isPaid: _isPaid,
-                ),
+                _StatusBadge(isPaid: _isPaid),
               ],
             ),
             const SizedBox(height: 20),
-            _InfoRow(
-              label: 'Договор',
-              value: '№ $_creditId',
-            ),
+            _InfoRow(label: 'Договор', value: '№ $_creditId'),
             const SizedBox(height: 12),
             _InfoRow(
               label: 'Сумма договора',
@@ -374,8 +368,9 @@ class _StatusBadge extends StatelessWidget {
     final background = isPaid
         ? const Color(AppColors.primaryLight)
         : const Color(0xFFE2E4EA);
-    final color =
-        isPaid ? const Color(AppColors.primary) : const Color(AppColors.black);
+    final color = isPaid
+        ? const Color(AppColors.primary)
+        : const Color(AppColors.black);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
