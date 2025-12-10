@@ -75,11 +75,13 @@ class _PaymentCardState extends State<PaymentCard> {
       context: context,
       builder: (_) {
         final UserStorage userStorage = UserStorage();
+        final canManageAccounting = userStorage.hasPermissionSync(
+          const [Permission.manageAccounting],
+        );
         return AppModal(
           backgroundColor: Color(AppColors.background),
           menuItems: [
-            if (userStorage.hasViewContent([EmployeeRole.accountant]) &&
-                !payment.accepted)
+            if (canManageAccounting && !payment.accepted)
               PopupMenuItem(
                 child: const Text('Подтвердить'),
                 onTap: () => _handleConfirmPayment(context, payment.id),
