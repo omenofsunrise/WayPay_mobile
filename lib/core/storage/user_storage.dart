@@ -129,6 +129,11 @@ class UserStorage {
     return hasPermission;
   }
 
+  bool denyPermission(Permission permission) {
+    final perms = permissionsNotifier.value;
+    return !perms.contains(permission);
+  }
+
   bool _hasAllPrivileges(EmployeeRole? role) {
     return role == EmployeeRole.superAdmin || role == EmployeeRole.director;
   }
