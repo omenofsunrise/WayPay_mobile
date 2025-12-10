@@ -1,13 +1,14 @@
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/inputs/custom_input.dart';
+import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
 import 'package:waypay_mobile/features/note/data/data_sources/note_remote_data_source.dart';
 import 'package:waypay_mobile/features/note/data/models/note_create_request.dart';
-import 'package:waypay_mobile/core/widgets/inputs/custom_calendar.dart';
 
 class AddNoteDialog extends StatefulWidget {
   final int creditId;
@@ -21,7 +22,6 @@ class AddNoteDialog extends StatefulWidget {
 
 class _AddNoteDialogState extends State<AddNoteDialog> {
   final TextEditingController _controller = TextEditingController();
-  final TextEditingController _reminderDateController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   File? _attachedFile;
   bool _isLoading = false;
@@ -29,29 +29,48 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
   @override
   void dispose() {
     _controller.dispose();
-    _reminderDateController.dispose();
     super.dispose();
   }
 
   Future<void> _attachFile() async {
     try {
-      final XFile? file = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1920,
-        maxHeight: 1080,
-        imageQuality: 85,
+      final result = await FilePicker.platform.pickFiles(
+        withData: false,
+        allowMultiple: false,
       );
 
-      if (file != null) {
-        setState(() {
-          _attachedFile = File(file.path);
-        });
+      final path = result?.files.single.path;
+      if (path != null) {
+        setState(() => _attachedFile = File(path));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Ошибка при выборе файла: $e')));
+      }
+    }
+  }
+
+  Future<void> _attachPhoto() async {
+    try {
+      final XFile? photo = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        imageQuality: 85,
+      );
+
+      if (photo != null) {
+        setState(() {
+          _attachedFile = File(photo.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка при добавлении фото: $e')),
+        );
       }
     }
   }
@@ -75,21 +94,10 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
     try {
       final dataSource = getIt<NoteRemoteDataSource>();
 
-      DateTime? reminderDate;
-      if (_reminderDateController.text.isNotEmpty) {
-        final parts = _reminderDateController.text.split('.');
-        if (parts.length == 3) {
-          final day = int.parse(parts[0]);
-          final month = int.parse(parts[1]);
-          final year = int.parse(parts[2]);
-          reminderDate = DateTime(year, month, day);
-        }
-      }
-
       final note = NoteCreateRequest(
         noteableId: widget.creditId,
         content: _controller.text.trim(),
-        remindDate: reminderDate,
+        remindDate: null,
         file: _attachedFile?.path,
       );
 
@@ -121,229 +129,217 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
   Widget _buildAttachedFilePreview() {
     if (_attachedFile == null) return const SizedBox();
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Column(
-        children: [
-          Container(
-            height: 150,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              image: DecorationImage(
-                image: FileImage(_attachedFile!),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
+    final fileName = p.basename(_attachedFile!.path);
+    final isImage = _isImageFile(_attachedFile!.path);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 16),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: SizedBox(
+          width: 96,
+          height: 96,
+          child: Stack(
             children: [
-              const Icon(Icons.attach_file, size: 20, color: Colors.grey),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  _attachedFile!.path.split('/').last,
-                  style: const TextStyle(fontSize: 14),
-                  overflow: TextOverflow.ellipsis,
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: isImage
+                      ? Image.file(
+                          _attachedFile!,
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          color: const Color(0xFFF1F4F7),
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.insert_drive_file_outlined,
+                                size: 32,
+                                color: Color(AppColors.darkGrey),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                fileName,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(AppColors.darkGrey),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                 ),
               ),
-              IconButton(
-                onPressed: _isLoading ? null : _removeAttachedFile,
-                icon: const Icon(Icons.close, size: 20),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                iconSize: 20,
+              Positioned(
+                right: 6,
+                top: 6,
+                child: InkWell(
+                  onTap: _isLoading ? null : _removeAttachedFile,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.white70,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      size: 16,
+                      color: Color(AppColors.darkGrey),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
-  }
-
-  Widget _buildReminderDateField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 16),
-        Text(
-          'Напомнить',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey[700],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Color(AppColors.lightGreyBackground),
-              width: 2,
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: TextField(
-            controller: _reminderDateController,
-            keyboardType: TextInputType.datetime,
-            readOnly: true,
-            onTap: _showReminderCalendar,
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 14,
-              ),
-              border: InputBorder.none,
-              hintText: 'дд.мм.гггг',
-              hintStyle: TextStyle(color: Colors.grey[500]),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  Icons.calendar_today,
-                  size: 20,
-                  color: Color(AppColors.primary),
-                ),
-                onPressed: _showReminderCalendar,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ),
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              color: Colors.black,
-            ),
-          ),
-        ),
-        if (_reminderDateController.text.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Text(
-            'Напоминание установлено на: ${_reminderDateController.text}',
-            style: TextStyle(fontSize: 12, color: Color(AppColors.primary)),
-          ),
-        ],
-      ],
-    );
-  }
-
-  void _showReminderCalendar() {
-    showDialog(
-      context: context,
-      builder: (context) => CustomCalendar(
-        initialDate: _getCurrentReminderDate(),
-        onDateSelected: (DateTime date) {
-          final formattedDate =
-              '${_formatTwoDigits(date.day)}.${_formatTwoDigits(date.month)}.${date.year}';
-          _reminderDateController.text = formattedDate;
-        },
-        prefix: 'Напомнить:',
-      ),
-    );
-  }
-
-  DateTime? _getCurrentReminderDate() {
-    final text = _reminderDateController.text;
-    if (text.isEmpty) return null;
-
-    try {
-      final parts = text.split('.');
-      if (parts.length == 3) {
-        final day = int.parse(parts[0]);
-        final month = int.parse(parts[1]);
-        final year = int.parse(parts[2]);
-        return DateTime(year, month, day);
-      }
-    } catch (e) {}
-    return null;
-  }
-
-  String _formatTwoDigits(int number) {
-    return number.toString().padLeft(2, '0');
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 20),
-      decoration: const BoxDecoration(
-        color: Color(AppColors.background),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    return SafeArea(
+      child: Container(
+        margin: const EdgeInsets.only(top: 20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Новая заметка',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Новая заметка',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Color(AppColors.black),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed:
+                          _isLoading ? null : () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close, size: 24),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  iconSize: 24,
+                const SizedBox(height: 12),
+                ModalTextField(
+                  controller: _controller,
+                  label: 'Текст заметки',
+                  hintText: 'Введите текст',
+                  minLines: 5,
+                  maxLines: 5,
+                  alignLabelWithHint: true,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    _AttachmentButton(
+                      icon: Icons.attach_file,
+                      label: 'Добавить файл',
+                      onTap: _isLoading ? null : _attachFile,
+                    ),
+                    const SizedBox(width: 12),
+                    _AttachmentButton(
+                      icon: Icons.photo_library_outlined,
+                      label: 'Добавить фото',
+                      onTap: _isLoading ? null : _attachPhoto,
+                    ),
+                  ],
+                ),
+                _buildAttachedFilePreview(),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : DefaultButton(
+                          text: '+ Создать',
+                          isPrimary: true,
+                          onPressed: _createNote,
+                        ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-
-            _buildReminderDateField(),
-
-            const SizedBox(height: 16),
-            CustomInput(controller: _controller, label: 'Текст заметки'),
-            const SizedBox(height: 16),
-
-            _buildAttachedFilePreview(),
-
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: _isLoading ? null : _attachFile,
-                icon: const Icon(Icons.attach_file, size: 20),
-                label: Text(
-                  _attachedFile != null ? 'Файл прикреплен' : 'Добавить файл',
-                ),
-                style: TextButton.styleFrom(
-                  foregroundColor: _attachedFile != null
-                      ? Colors.green
-                      : Colors.grey[700],
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : DefaultButton(
-                      text: '+ Создать',
-                      isPrimary: true,
-                      onPressed: _createNote,
-                    ),
-            ),
-            SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+
+  bool _isImageFile(String path) {
+    final ext = p.extension(path).toLowerCase();
+    return [
+      '.png',
+      '.jpg',
+      '.jpeg',
+      '.heic',
+      '.heif',
+      '.gif',
+      '.bmp',
+      '.webp',
+    ].contains(ext);
+  }
+}
+
+class _AttachmentButton extends StatelessWidget {
+  const _AttachmentButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: onTap,
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        foregroundColor: const Color(AppColors.darkGrey),
+      ),
+      icon: Icon(icon, size: 22, color: const Color(AppColors.darkGrey)),
+      label: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Color(AppColors.darkGrey),
+        ),
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }

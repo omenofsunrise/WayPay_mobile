@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/form_modal/label_text_field.dart';
+import 'package:waypay_mobile/core/widgets/inputs/custom_calendar.dart';
+import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
@@ -19,89 +24,150 @@ class CreatePaymentDialog extends StatefulWidget {
 }
 
 class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
+  final _contractController = TextEditingController();
+  final _dateController = TextEditingController();
   final _amountController = TextEditingController();
+  final _currentDebtController = TextEditingController();
+  final _restController = TextEditingController();
   DateTime? _selectedDate;
   PaymentType? _selectedType;
 
   bool _isSubmitting = false;
 
   @override
+  void initState() {
+    super.initState();
+    _contractController.text = widget.credit.id.toString();
+    _selectedType = PaymentType.cash;
+    _amountController.addListener(_onFieldChanged);
+    _dateController.addListener(_onFieldChanged);
+  }
+
+  @override
   void dispose() {
-    _amountController.dispose();
+    _contractController.dispose();
+    _dateController
+      ..removeListener(_onFieldChanged)
+      ..dispose();
+    _amountController
+      ..removeListener(_onFieldChanged)
+      ..dispose();
+    _currentDebtController.dispose();
+    _restController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Новый платёж'),
-      backgroundColor: Color(AppColors.background),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // const Text(
-            //   'Сведения о договоре',
-            //   style: TextStyle(fontWeight: FontWeight.bold),
-            // ),
-            // const SizedBox(height: 12),
-            // _buildLabeledField('№ договора', widget.credit.id.toString()),
-            // _buildLabeledField('Инвестор', widget.credit.investorNickname),
-            // _buildLabeledField('Клиент', widget.credit.clientFullName),
-            // _buildLabeledField('Телефон', widget.credit.clientPhone),
-
-            // const SizedBox(height: 20),
-            // const Text(
-            //   'Сведения о платеже',
-            //   style: TextStyle(fontWeight: FontWeight.bold),
-            // ),
-            // const SizedBox(height: 12),
-            _buildDatePicker(),
-            const SizedBox(height: 12),
-            LabeledTextField(
-              label: 'Сумма платежа',
-              controller: _amountController,
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                ThousandsSeparatorInputFormatter(),
-                LengthLimitingTextInputFormatter(15),
-              ],
-            ),
-
-            // const SizedBox(height: 12),
-            // _buildLabeledField(
-            //   'Текущая задолженность',
-            //   _formatCurrency(widget.credit.currentMonthDebt),
-            // ),
-            // _buildLabeledField(
-            //   'Остаток всего долга',
-            //   _formatCurrency(widget.credit.rest),
-            // ),
-            const SizedBox(height: 12),
-            const Text('Способ оплаты'),
-            _buildPaymentTypeSelector(),
-            const SizedBox(height: 12),
-            Row(
+    _selectedType ??= PaymentType.cash;
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: DefaultButton(
-                    text: 'Отмена',
-                    onPressed: () => Navigator.pop(context),
-                    isPrimary: false,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Новый платёж',
+                        style: AppStyle.manrope(
+                          size: 20,
+                          weight: FontWeight.w600,
+                          color: const Color(AppColors.black),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close, color: Colors.black54),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(height: 12),
+                Text(
+                  'Сведения о договоре',
+                  style: AppStyle.manrope(size: 16, weight: FontWeight.w500),
+                ),
+                const SizedBox(height: 8),
+                _buildModalField(
+                  controller: _contractController,
+                  label: '№ договора',
+                  readOnly: true,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Сведения о платеже',
+                  style: AppStyle.manrope(size: 16, weight: FontWeight.w500),
+                ),
+                const SizedBox(height: 8),
+                _buildDatePickerField(),
+                const SizedBox(height: 12),
+                _buildModalField(
+                  controller: _amountController,
+                  label: 'Сумма платежа',
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    ThousandsSeparatorInputFormatter(),
+                    LengthLimitingTextInputFormatter(15),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _buildModalField(
+                  controller: _currentDebtController,
+                  label: 'Текущая задолженность',
+                ),
+                const SizedBox(height: 12),
+                _buildModalField(
+                  controller: _restController,
+                  label: 'Остаток долга',
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Способ оплаты',
+                  style: AppStyle.manrope(size: 16, weight: FontWeight.w500),
+                ),
+                const SizedBox(height: 8),
+                _buildPaymentTypeSelector(),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DefaultButton(
+                        text: 'Отменить',
+                        color: const Color(0xFFB7BFC8),
+                        textColor: const Color(AppColors.black),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                 Expanded(
                   child: DefaultButton(
-                    text: 'Создать',
-                    onPressed: _isSubmitting ? () {} : _submitPayment,
-                    isPrimary: true,
+                    text: 'Создать платёж',
+                    color: const Color(0xFF8BC7CC),
+                    textColor: Colors.white,
+                    onPressed: _canSubmit ? _submitPayment : null,
                   ),
                 ),
               ],
             ),
           ],
+            ),
+          ),
         ),
       ),
     );
@@ -125,50 +191,20 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
     );
   }
 
-  Widget _buildDatePicker() {
-    return Row(
-      children: [
-        const Text('Дата платежа:'),
-        const SizedBox(width: 8),
-        TextButton(
-          onPressed: () async {
-            final picked = await showDatePicker(
-              context: context,
-              initialDate: DateTime.now(),
-              firstDate: DateTime(2020),
-              lastDate: DateTime(2100),
-            );
-            if (picked != null) {
-              setState(() => _selectedDate = picked);
-            }
-          },
-          child: Text(
-            _selectedDate != null
-                ? DateFormat('dd.MM.yyyy').format(_selectedDate!)
-                : 'Выберите дату',
-            style: TextStyle(color: Color(AppColors.primary)),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildPaymentTypeSelector() {
     return Row(
       children: [
-        Checkbox(
-          value: _selectedType == PaymentType.cash,
-          onChanged: (_) {
-            setState(() => _selectedType = PaymentType.cash);
-          },
+        Radio<PaymentType>(
+          value: PaymentType.cash,
+          groupValue: _selectedType,
+          onChanged: (value) => setState(() => _selectedType = value),
         ),
         const Text('Наличные'),
         const SizedBox(width: 16),
-        Checkbox(
-          value: _selectedType == PaymentType.card,
-          onChanged: (_) {
-            setState(() => _selectedType = PaymentType.card);
-          },
+        Radio<PaymentType>(
+          value: PaymentType.card,
+          groupValue: _selectedType,
+          onChanged: (value) => setState(() => _selectedType = value),
         ),
         const Text('Карта'),
       ],
@@ -176,6 +212,7 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
   }
 
   Future<void> _submitPayment() async {
+    if (_isSubmitting) return;
     final text = _amountController.text.replaceAll(RegExp(r'[^0-9.]'), '');
     final amount = double.tryParse(text);
 
@@ -212,6 +249,78 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
+  }
+
+  Future<void> _pickDate() async {
+    await showDialog(
+      context: context,
+      builder: (ctx) => CustomCalendar(
+        initialDate: _selectedDate ?? DateTime.now(),
+        prefix: 'Дата:',
+        onDateSelected: (date) {
+          setState(() {
+            _selectedDate = date;
+            _dateController.text = DateFormat('dd.MM.yyyy').format(date);
+          });
+        },
+      ),
+    );
+  }
+
+  bool get _canSubmit {
+    final text = _amountController.text.replaceAll(RegExp(r'[^0-9.]'), '');
+    final amount = double.tryParse(text);
+    return !_isSubmitting && _selectedDate != null && amount != null && _selectedType != null;
+  }
+
+  void _onFieldChanged() {
+    setState(() {});
+  }
+
+  Widget _buildModalField({
+    required TextEditingController controller,
+    required String label,
+    String? hintText,
+    bool readOnly = false,
+    VoidCallback? onTap,
+    Widget? suffixIcon,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
+    return ModalTextField(
+      controller: controller,
+      label: label,
+      hintText: hintText ?? label,
+      readOnly: readOnly,
+      onTap: onTap,
+      suffixIcon: suffixIcon,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+    );
+  }
+
+  Widget _buildDatePickerField() {
+    return ModalTextField(
+      controller: _dateController,
+      label: 'Дата платежа',
+      hintText: 'Выберите дату',
+      readOnly: true,
+      onTap: _pickDate,
+      suffixIcon: Padding(
+        padding: const EdgeInsets.only(right: 4),
+        child: SvgPicture.asset(
+          SvgIcons.calendar,
+          width: 20,
+          height: 20,
+          color: const Color(0xFF6B717C),
+        ),
+      ),
+      suffixIconConstraints: const BoxConstraints(
+        minHeight: 24,
+        minWidth: 32,
+        maxWidth: 60,
+      ),
+    );
   }
 
   String _formatCurrency(num value) {

@@ -198,11 +198,13 @@ class _ControlCreditsScreenState extends State<ControlCreditsScreen> {
                                     final credit = state.credits[index];
                                     return InkWell(
                                       onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (_) => CreditFullScreen(
-                                            credit: credit,
-                                            isControl: true,
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => CreditFullScreen(
+                                              credit: credit,
+                                              isControl: true,
+                                            ),
                                           ),
                                         );
                                       },
