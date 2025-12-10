@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/core/network/dio_client.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
+import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_mobile/core/widgets/search/search_destinations.dart';
+import 'package:waypay_mobile/core/widgets/search/search_suggester.dart';
 import 'package:waypay_mobile/features/home/domain/repositories/home_repository_impl.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
@@ -23,9 +25,34 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+class _AddRow extends StatelessWidget {
+  const _AddRow({required this.icon, required this.text, required this.onTap});
+
+  final IconData icon;
+  final String text;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon, color: const Color(AppColors.darkGrey), size: 24),
+      title: Text(
+        text,
+        style: AppStyle.manrope(
+          size: 16,
+          weight: FontWeight.w500,
+          color: const Color(AppColors.black),
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+}
+
 class _HomeScreenState extends State<HomeScreen> {
   late Future<EmployeeModel> _employeeDataFuture;
   late GetEmployeeDataUseCase _getEmployeeDataUseCase;
+  late final List<SearchDestination> _destinations;
 
   @override
   void initState() {
@@ -34,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _getEmployeeDataUseCase = GetEmployeeDataUseCase(
       HomeRepositoryImpl(HomeRemoteDataSourceImpl(dio)),
     );
+    _destinations = getDefaultSearchDestinations();
     _loadEmployeeData();
   }
 
@@ -41,6 +69,91 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _employeeDataFuture = _getEmployeeDataUseCase();
     });
+  }
+
+  void _openAddBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withOpacity(0.35),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(ctx).viewInsets.bottom,
+          ),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x1A000000),
+                  blurRadius: 12,
+                  offset: Offset(0, -2),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              top: false,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+                    child: Header(
+                      title: 'Быстрое добавление',
+                      showAvatar: false,
+                      showBackButton: false,
+                      showNotifications: false,
+                      trailing: IconButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        icon: const Icon(Icons.close, color: Colors.black54),
+                      ),
+                    ),
+                  ),
+
+                  _AddRow(
+                    icon: Icons.person_add_alt,
+                    text: 'Добавить клиента',
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      context.pushNamed(Routes.clientCreateScreen.toName);
+                    },
+                  ),
+                  _AddRow(
+                    icon: Icons.description_outlined,
+                    text: 'Добавить договор',
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      context.pushNamed(Routes.newCreditDetailsScreen.toName);
+                    },
+                  ),
+                  _AddRow(
+                    icon: Icons.schedule,
+                    text: 'Добавить платёж',
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      context.pushNamed(Routes.scheduleScreen.toName);
+                    },
+                  ),
+                  _AddRow(
+                    icon: Icons.trending_up,
+                    text: 'Добавить инвестора',
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      context.pushNamed(Routes.investorsScreen.toName);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   String _formatCurrency(num? value) {
@@ -103,7 +216,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final userRole = UserStorage().getRoleSync();
-    final isAccountant = userRole == EmployeeRole.accountant;
+    final userPermissions = UserStorage().getPermissionsSync();
+    final canManageAccounting =
+        userPermissions.contains(Permission.manageAccounting) ||
+        userRole == EmployeeRole.superAdmin ||
+        userRole == EmployeeRole.director;
 
     return Scaffold(
       backgroundColor: const Color(AppColors.background),
@@ -152,6 +269,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       fullName: _getFullName(employeeData),
                       photoPath: _getAvatar(employeeData),
                       showBackButton: false,
+                      trailing: AddButton(onPressed: _openAddBottomSheet),
                     ),
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 16)),
@@ -159,14 +277,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Row(
                       children: [
                         Expanded(
-                          child: SearchField(
-                            hintText: 'Поиск',
-                            onChanged: (value) {},
-                            onSubmitted: (value) {},
-                          ),
+                          child: SearchSuggester(destinations: _destinations),
                         ),
-                        const SizedBox(width: 12),
-                        AddButton(onPressed: () {}),
                       ],
                     ),
                   ),
@@ -180,8 +292,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (_canSeeAnalyticsSection())
                     const SliverToBoxAdapter(child: SizedBox(height: 13)),
 
-                  if (isAccountant) _buildFinanceSection(employeeData),
-                  if (isAccountant)
+                  if (canManageAccounting) _buildFinanceSection(employeeData),
+                  if (canManageAccounting)
                     const SliverToBoxAdapter(child: SizedBox(height: 13)),
 
                   _buildPaymentsSection(employeeData),
@@ -260,8 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SectionTitle(text: 'Финансы'),
               const Spacer(),
               MoreDetailsButton(
-                onPressed: () =>
-                    context.pushNamed(Routes.financeScreen.toName),
+                onPressed: () => context.pushNamed(Routes.financeScreen.toName),
               ),
             ],
           ),
@@ -455,9 +566,8 @@ class _HomeScreenState extends State<HomeScreen> {
               const SectionTitle(text: 'Аналитика'),
               const Spacer(),
               MoreDetailsButton(
-                onPressed: () {
-                  // Навигация к аналитике
-                },
+                onPressed: () =>
+                    context.pushNamed(Routes.analyticsScreen.toName),
               ),
             ],
           ),
