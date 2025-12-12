@@ -105,30 +105,20 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Удаление договора №${widget.credit.id}',
-                        style: AppStyle.manrope(
-                          size: 20,
-                          weight: FontWeight.w600,
-                          color: const Color(AppColors.black),
-                        ),
-                      ),
+                Center(
+                  child: Text(
+                    'Удаление договора №${widget.credit.id}',
+                    textAlign: TextAlign.center,
+                    style: AppStyle.manrope(
+                      size: 20,
+                      weight: FontWeight.w600,
+                      color: const Color(AppColors.black),
                     ),
-                    IconButton(
-                      onPressed: () => Navigator.of(ctx).pop(false),
-                      icon: const Icon(Icons.close, color: Colors.black54),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Text(
-                  'Это действие будет невозможно отменить, вы уверены что хотите удалить договор?',
+                  'Это действие будет невозможно отменить,\nвы уверены что хотите удалить договор?',
                   textAlign: TextAlign.center,
                   style: AppStyle.manrope(
                     size: 14,
@@ -681,6 +671,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
 
   Widget _buildPaymentTile(ScheduleModel payment) {
     final date = DateTime.tryParse(payment.paymentDate);
+    final isPaid = payment.payed;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -710,14 +701,18 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
         ),
         Row(
           children: [
-            Icon(Icons.check, color: const Color(0xFF0FA958), size: 18),
+            Icon(
+              isPaid ? Icons.check : Icons.schedule,
+              color: isPaid ? const Color(0xFF0FA958) : const Color(0xFF6B7280),
+              size: 18,
+            ),
             const SizedBox(width: 6),
             Text(
-              'Оплачен',
+              isPaid ? 'Оплачен' : 'Запланирован',
               style: AppStyle.manrope(
                 size: 14,
                 weight: FontWeight.w500,
-                color: const Color(0xFF0FA958),
+                color: isPaid ? const Color(0xFF0FA958) : const Color(0xFF6B7280),
               ),
             ),
           ],
