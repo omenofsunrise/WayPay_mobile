@@ -20,6 +20,9 @@ class ModalTextField extends StatefulWidget {
     this.inputFormatters,
     this.focusNode,
     this.errorText,
+    this.prefix,
+    this.prefixText,
+    this.prefixStyle,
   });
 
   final TextEditingController controller;
@@ -37,6 +40,9 @@ class ModalTextField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final FocusNode? focusNode;
   final String? errorText;
+  final Widget? prefix;
+  final String? prefixText;
+  final TextStyle? prefixStyle;
 
   @override
   State<ModalTextField> createState() => _ModalTextFieldState();
@@ -113,6 +119,13 @@ class _ModalTextFieldState extends State<ModalTextField> {
         labelText: widget.label,
         hintText: widget.hintText,
         errorText: widget.errorText,
+        prefixText: widget.prefixText,
+        prefixStyle: widget.prefixStyle ??
+            const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Color(AppColors.black),
+            ),
         alignLabelWithHint:
             widget.alignLabelWithHint ?? (widget.minLines != null),
         suffixIcon: widget.suffixIcon,

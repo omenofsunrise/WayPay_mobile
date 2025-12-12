@@ -8,6 +8,7 @@ import 'package:waypay_mobile/features/analytics/presentation/cubit/debt_dynamic
 import 'package:waypay_mobile/features/analytics/presentation/cubit/investment_dynamic_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/sell_info_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/screens/analytic_screen.dart';
+import 'package:waypay_mobile/features/admin_panel/presentation/screen/company_data_screen.dart';
 
 import 'package:waypay_mobile/features/auth/presentation/screens/confirmation_screen.dart';
 import 'package:waypay_mobile/features/auth/presentation/screens/phone_auth_screen.dart';
@@ -119,14 +120,12 @@ class AppRouter {
       GoRoute(
         path: Routes.newCreditProductsScreen.toPath,
         name: Routes.newCreditProductsScreen.toName,
-        pageBuilder: (context, state) =>
-            SlideLeftTransition(child: NewCreditCreationScreen()),
+        builder: (context, state) => const NewCreditCreationScreen(),
       ),
       GoRoute(
         path: Routes.newCreditSchedulesScreen.toPath,
         name: Routes.newCreditSchedulesScreen.toName,
-        pageBuilder: (context, state) =>
-            SlideLeftTransition(child: NewCreditCreationScreen()),
+        builder: (context, state) => const NewCreditCreationScreen(),
       ),
       GoRoute(
         path: Routes.phoneAuthScreen.toPath,
@@ -193,6 +192,11 @@ class AppRouter {
           final employeeId = state.extra as int?;
           return ProfileScreen(employeeId: employeeId);
         },
+      ),
+      GoRoute(
+        path: Routes.companyDataScreen.toPath,
+        name: Routes.companyDataScreen.toName,
+        builder: (context, state) => const CompanyDataScreen(),
       ),
       GoRoute(
         path: Routes.profileActiveSessionsScreen.toPath,

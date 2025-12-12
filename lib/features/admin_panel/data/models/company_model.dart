@@ -6,10 +6,12 @@ class CompanyModel {
   final String city;
   final String officeAddress;
   final String bank;
-  final String inn;
   final String email;
   final String? photoPath;
   final DateTime licenceDate;
+  final int? currentBankCardId;
+  final String? supportPhone;
+  final String inn;
 
   CompanyModel({
     required this.id,
@@ -19,10 +21,12 @@ class CompanyModel {
     required this.city,
     required this.officeAddress,
     required this.bank,
-    required this.inn,
     required this.email,
     required this.licenceDate,
     this.photoPath,
+    this.currentBankCardId,
+    this.supportPhone,
+    this.inn = '',
   });
 
   CompanyModel copyWith({
@@ -32,10 +36,12 @@ class CompanyModel {
     String? city,
     String? officeAddress,
     String? bank,
-    String? inn,
     String? email,
     DateTime? licenceDate,
     String? photoPath,
+    int? currentBankCardId,
+    String? supportPhone,
+    String? inn,
   }) {
     return CompanyModel(
       id: id,
@@ -45,10 +51,12 @@ class CompanyModel {
       city: city ?? this.city,
       officeAddress: officeAddress ?? this.officeAddress,
       bank: bank ?? this.bank,
-      inn: inn ?? this.inn,
       email: email ?? this.email,
       licenceDate: licenceDate ?? this.licenceDate,
       photoPath: photoPath ?? this.photoPath,
+      currentBankCardId: currentBankCardId ?? this.currentBankCardId,
+      supportPhone: supportPhone ?? this.supportPhone,
+      inn: inn ?? this.inn,
     );
   }
 
@@ -61,11 +69,13 @@ class CompanyModel {
       city: json['city'] ?? '',
       officeAddress: json['officeAddress'] ?? '',
       bank: json['bank'] ?? '',
-      inn: json['inn'] ?? '',
       email: json['email'] ?? '',
       photoPath: json['photoPath'],
       licenceDate:
           DateTime.tryParse(json['licenceDate'] ?? '') ?? DateTime.now(),
+      currentBankCardId: json['currentBankCardId'],
+      supportPhone: json['supportPhone'],
+      inn: json['inn'] ?? '',
     );
   }
 
@@ -77,10 +87,12 @@ class CompanyModel {
     'city': city,
     'officeAddress': officeAddress,
     'bank': bank,
-    'inn': inn,
     'email': email,
     'photoPath': photoPath,
     'licenceDate': licenceDate.toIso8601String(),
+    'currentBankCardId': currentBankCardId,
+    'supportPhone': supportPhone,
+    'inn': inn,
   };
 
   Map<String, dynamic> toUpdateJson() => {
@@ -90,7 +102,9 @@ class CompanyModel {
     'city': city,
     'officeAddress': officeAddress,
     'bank': bank,
-    'inn': inn,
     'email': email,
+    'currentBankCardId': currentBankCardId,
+    'supportPhone': supportPhone,
+    'inn': inn,
   };
 }
