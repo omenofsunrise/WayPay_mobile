@@ -23,72 +23,65 @@ class CustomRadioButton extends StatelessWidget {
     return InkWell(
       onTap: () => onChanged(value),
       borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: groupValue == value
-                ? Color(AppColors.primary)
-                : Color(AppColors.grey),
-          ),
-          color: groupValue == value
-              ? Color(AppColors.primary).withOpacity(0.05)
-              : Colors.transparent,
-        ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 20,
-              height: 20,
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: groupValue == value
-                      ? Color(AppColors.primary)
-                      : Color(AppColors.grey),
-                ),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: groupValue == value
-                      ? Color(AppColors.primary)
-                      : Colors.transparent,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: AppStyle.manrope(
-                      size: 14,
-                      weight: FontWeight.w500,
-                      color: Color(AppColors.darkGrey),
-                    ),
-                  ),
-                  if (description != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      description!,
-                      style: AppStyle.manrope(
-                        size: 12,
-                        weight: FontWeight.w400,
-                        color: Color(AppColors.grey),
-                      ),
-                    ),
-                  ],
-                ],
+            _RadioGlyph(isSelected: groupValue == value),
+            const SizedBox(width: 10),
+            Text(
+              label,
+              style: AppStyle.manrope(
+                size: 16,
+                weight: FontWeight.w500,
+                color: groupValue == value
+                    ? const Color(AppColors.black)
+                    : Color(AppColors.darkGrey),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _RadioGlyph extends StatelessWidget {
+  final bool isSelected;
+
+  const _RadioGlyph({required this.isSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = isSelected ? Color(AppColors.primary) : Color(AppColors.grey);
+    return Container(
+      width: 16,
+      height: 16,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: borderColor, width: 1),
+        color: Colors.transparent,
+      ),
+      child: isSelected
+          ? Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: borderColor,
+                border: Border.all(color: Colors.transparent, width: 1),
+              ),
+            )
+          : Container(
+              width: 12,
+              height: 12,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.transparent,
+              ),
+            ),
     );
   }
 }
