@@ -29,6 +29,7 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
   bool _isSecondStep = false;
   bool _isExistingUser = false;
   String? _savedPin;
+  String? _pressedKey;
 
   @override
   void initState() {
@@ -171,14 +172,25 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
   Widget _buildKey(String value) {
     final isBack = value == 'back';
     final display = value == 'empty' ? '' : value;
+    final isPressed = _pressedKey == value;
     return Padding(
       padding: const EdgeInsets.all(8),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: display.isEmpty ? null : () => _onKeyboardTap(value),
+      child: GestureDetector(
+        onTapDown:
+            display.isEmpty ? null : (_) => setState(() => _pressedKey = value),
+        onTapCancel: () {
+          if (_pressedKey == value) setState(() => _pressedKey = null);
+        },
+        onTapUp: display.isEmpty
+            ? null
+            : (_) {
+                setState(() => _pressedKey = null);
+                _onKeyboardTap(value);
+              },
+        child: AnimatedScale(
+          scale: isPressed ? 0.94 : 1.0,
+          duration: const Duration(milliseconds: 120),
+          curve: Curves.easeOut,
           child: Container(
             alignment: Alignment.center,
             width: 72,
