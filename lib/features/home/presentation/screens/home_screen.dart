@@ -130,22 +130,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       context.pushNamed(Routes.newCreditDetailsScreen.toName);
                     },
                   ),
-                  _AddRow(
-                    icon: Icons.schedule,
-                    text: 'Добавить платёж',
-                    onTap: () {
-                      Navigator.of(ctx).pop();
-                      context.pushNamed(Routes.scheduleScreen.toName);
-                    },
-                  ),
-                  _AddRow(
-                    icon: Icons.trending_up,
-                    text: 'Добавить инвестора',
-                    onTap: () {
-                      Navigator.of(ctx).pop();
-                      context.pushNamed(Routes.investorsScreen.toName);
-                    },
-                  ),
                   const SizedBox(height: 12),
                 ],
               ),
