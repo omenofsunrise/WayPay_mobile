@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
@@ -23,7 +25,7 @@ class PeriodAppBarAction extends StatelessWidget {
 
     return PopupMenuButton<String>(
       tooltip: 'Выбрать период',
-      icon: const Icon(Icons.date_range, color: Colors.white),
+      icon: SvgPicture.asset(SvgIcons.calendar, width: 24, height: 24),
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (value) async {

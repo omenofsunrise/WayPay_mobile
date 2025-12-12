@@ -128,7 +128,9 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
     BottomNavController.instance.show();
 
     if (investor != null) {
-      debugPrint('[STEP1] Готово: инвестор ${investor.id} ${investor.nickname}');
+      debugPrint(
+        '[STEP1] Готово: инвестор ${investor.id} ${investor.nickname}',
+      );
       context.read<CreditCreationCubit>().updateBasicInfo(
         investorId: investor.id,
         selectedInvestor: investor,
@@ -201,8 +203,10 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
 
   Future<void> _showCatalogPicker() async {
     final catalogBloc = context.read<ObjectTypeBloc>();
-    final selectedCatalog =
-        context.read<CreditCreationCubit>().state.selectedCatalog;
+    final selectedCatalog = context
+        .read<CreditCreationCubit>()
+        .state
+        .selectedCatalog;
     final result = await showModalBottomSheet<ObjectTypeModel?>(
       context: context,
       clipBehavior: Clip.antiAlias,
@@ -227,8 +231,10 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
 
   Future<void> _showCategoryPicker() async {
     final catalogBloc = context.read<ObjectTypeBloc>();
-    final selectedCategory =
-        context.read<CreditCreationCubit>().state.selectedCategory;
+    final selectedCategory = context
+        .read<CreditCreationCubit>()
+        .state
+        .selectedCategory;
     final result = await showModalBottomSheet<ObjectTypeModel?>(
       context: context,
       clipBehavior: Clip.antiAlias,
@@ -260,7 +266,6 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
     context.read<CreditCreationCubit>().updateCategory(null);
     _categoryDisplayController.clear();
   }
-
 
   void _removeGuarantor() {
     context.read<CreditCreationCubit>().updateBasicInfo(
@@ -302,9 +307,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
       padding: const EdgeInsets.only(right: 4),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          customIcon ?? arrow,
-        ],
+        children: [customIcon ?? arrow],
       ),
     );
   }
@@ -347,7 +350,6 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- Основная информация ---
             _buildSectionTitle('Основная информация'),
             const SizedBox(height: 16),
 
@@ -424,8 +426,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
               label: 'Категория (необязательно)',
               onTap: _showCategoryPicker,
               showClear: state.selectedCategory != null,
-              onClear:
-                  state.selectedCategory != null ? _removeCategory : null,
+              onClear: state.selectedCategory != null ? _removeCategory : null,
             ),
 
             if (creditRequest.inDebt) ...[
@@ -453,7 +454,6 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
             ] else
               const SizedBox(height: 24),
 
-            // --- Покупатель ---
             _buildSectionTitle('Сведения о покупателе'),
             const SizedBox(height: 16),
 

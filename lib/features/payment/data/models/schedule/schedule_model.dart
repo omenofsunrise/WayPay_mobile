@@ -8,6 +8,7 @@ class ScheduleModel {
   final bool notified;
   final String clientName;
   final String clientPhone;
+  final bool payed;
 
   ScheduleModel({
     required this.id,
@@ -19,6 +20,7 @@ class ScheduleModel {
     required this.notified,
     required this.clientName,
     required this.clientPhone,
+    this.payed = false,
   });
 
   factory ScheduleModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class ScheduleModel {
       notified: json['notified'] ?? false,
       clientName: json['clientName'] ?? '',
       clientPhone: json['clientPhone'] ?? '',
+      payed: json['payed'] ?? json['paid'] ?? false,
     );
   }
 
@@ -45,6 +48,7 @@ class ScheduleModel {
     bool? notified,
     String? clientName,
     String? clientPhone,
+    bool? payed,
   }) {
     return ScheduleModel(
       id: id ?? this.id,
@@ -56,6 +60,7 @@ class ScheduleModel {
       notified: notified ?? this.notified,
       clientName: clientName ?? this.clientName,
       clientPhone: clientPhone ?? this.clientPhone,
+      payed: payed ?? this.payed,
     );
   }
 }

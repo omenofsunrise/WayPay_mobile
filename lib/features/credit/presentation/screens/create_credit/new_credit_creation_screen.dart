@@ -106,10 +106,7 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     context.read<CreditCreationCubit>().updateProducts(products);
   }
 
-  void _showInlineMessage({
-    required String message,
-    required bool isError,
-  }) {
+  void _showInlineMessage({required String message, required bool isError}) {
     if (!mounted) return;
     setState(() {
       _inlineMessage = message;
@@ -449,16 +446,10 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
       if (!mounted) return;
       GoRouter.of(context).goNamed(Routes.creditsScreen.toName);
 
-      _showInlineMessage(
-        message: 'Договор успешно создан',
-        isError: false,
-      );
+      _showInlineMessage(message: 'Договор успешно создан', isError: false);
     } catch (e) {
       if (!mounted) return;
-      _showInlineMessage(
-        message: _extractReadableError(e),
-        isError: true,
-      );
+      _showInlineMessage(message: _extractReadableError(e), isError: true);
     }
   }
 

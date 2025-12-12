@@ -21,11 +21,30 @@ class PhoneAuthScreen extends StatefulWidget {
 class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
+  final _phoneFocus = FocusNode();
   final _phoneFormatter = MaskTextInputFormatter(
     mask: ' (###) ###-##-##',
     filter: {"#": RegExp(r'\d')},
   );
   bool _isDialogShowing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _phoneFocus.addListener(_onFocusChanged);
+  }
+
+  void _onFocusChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _phoneFocus.removeListener(_onFocusChanged);
+    _phoneFocus.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,6 +140,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                         const SizedBox(height: 36),
                         TextFormField(
                           controller: _phoneController,
+                          focusNode: _phoneFocus,
                           autofocus: true,
                           keyboardType: TextInputType.phone,
                           inputFormatters: [_phoneFormatter],
@@ -129,30 +149,45 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                             labelStyle: AppStyle.regular14.copyWith(
                               color: const Color(AppColors.black),
                             ),
-                            prefix: const Text('8'),
+                            prefixText: '+7',
+                            prefixStyle: AppStyle.inter(
+                              size: 16,
+                              weight: FontWeight.w500,
+                              color: const Color(AppColors.black),
+                            ),
+                            hintText: ' (___) ___-__-__',
+                            hintStyle:
+                                AppStyle.inter(
+                                  size: 16,
+                                  weight: FontWeight.w400,
+                                ).copyWith(
+                                  color: const Color(
+                                    AppColors.black,
+                                  ).withOpacity(0.35),
+                                ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 14,
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
                                 color: Color(AppColors.primary),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
                                 color: Color(AppColors.primary),
                                 width: 2,
                               ),
                             ),
                             errorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(8),
                               borderSide: const BorderSide(color: Colors.red),
                             ),
                             focusedErrorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(8),
                               borderSide: const BorderSide(
                                 color: Colors.red,
                                 width: 2,

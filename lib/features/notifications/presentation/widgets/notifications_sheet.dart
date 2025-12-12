@@ -16,7 +16,7 @@ class NotificationsSheet extends StatelessWidget {
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
-      // Рисуем как нативный bottom sheet с закруглением сверху
+
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -257,7 +257,6 @@ class _ErrorView extends StatelessWidget {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        // spacing доступен в Flutter 3.22+, если у вас ниже — замените на SizedBox
         spacing: 12,
         children: [
           Text(
