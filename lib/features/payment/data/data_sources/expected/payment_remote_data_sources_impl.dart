@@ -82,6 +82,7 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
     required double paymentAmount,
     required DateTime datePayment,
     required PaymentType type,
+    int? bankCardId,
   }) async {
     try {
       final payload = {
@@ -90,6 +91,9 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
         'datePayment': datePayment.toIso8601String(),
         'type': paymentTypeToString(type),
       };
+      if (bankCardId != null) {
+        payload['bankCardId'] = bankCardId;
+      }
 
       await dio.post('Payment', data: payload);
     } on DioException catch (e) {

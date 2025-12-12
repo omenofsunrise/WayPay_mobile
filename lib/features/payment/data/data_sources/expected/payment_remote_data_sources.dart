@@ -14,6 +14,7 @@ abstract class PaymentRemoteDataSources {
     required double paymentAmount,
     required DateTime datePayment,
     required PaymentType type,
+    int? bankCardId,
   });
   Future<void> confirmPayment(int id);
   Future<void> deletePayment(int id);
