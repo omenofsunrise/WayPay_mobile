@@ -20,6 +20,8 @@ import 'package:waypay_mobile/features/blog/data/data_sources/profile_blog_remot
 import 'package:waypay_mobile/features/blog/presentation/bloc/blog_bloc.dart';
 import 'package:waypay_mobile/features/blog/presentation/bloc/comment_bloc.dart';
 import 'package:waypay_mobile/features/blog/presentation/cubit/profile_blog_cubit.dart';
+import 'package:waypay_mobile/features/bank_card/data/data_sources/bank_card_remote_data_source.dart';
+import 'package:waypay_mobile/features/bank_card/data/data_sources/bank_card_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source.dart';
 import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source.dart';
@@ -109,6 +111,9 @@ Future<void> initDependencies() async {
   );
   getIt.registerLazySingleton<BlacklistRemoteDataSources>(
     () => BlacklistRemoteDataSourcesImpl(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<BankCardRemoteDataSource>(
+    () => BankCardRemoteDataSourceImpl(getIt<Dio>()),
   );
   getIt.registerLazySingleton<ProductsRemoteDataSource>(
     () => ProductsRemoteDataSourceImpl(getIt<Dio>()),
