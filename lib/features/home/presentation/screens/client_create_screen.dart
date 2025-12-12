@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/core/widgets/header.dart';
 import 'package:waypay_mobile/core/widgets/inputs/custom_calendar.dart';
 import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/create_clients_requests.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 
@@ -151,8 +153,9 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
   }
 
   void _applyPhoneMask(TextEditingController controller, bool isWhatsapp) {
-    final isFormatting =
-        isWhatsapp ? _isFormattingWhatsapp : _isFormattingPhone;
+    final isFormatting = isWhatsapp
+        ? _isFormattingWhatsapp
+        : _isFormattingPhone;
     if (isFormatting) return;
 
     if (isWhatsapp) {
@@ -238,6 +241,62 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
     return '${pad(date.day)}.${pad(date.month)}.${date.year}';
   }
 
+  Widget _buildDropdownSuffix({
+    bool showClear = false,
+    VoidCallback? onClear,
+    Widget? customIcon,
+  }) {
+    const arrow = Icon(
+      Icons.keyboard_arrow_down_rounded,
+      color: Color(AppColors.darkGrey),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (showClear)
+            GestureDetector(
+              onTap: onClear,
+              child: const Padding(
+                padding: EdgeInsets.only(right: 6),
+                child: Icon(Icons.close, size: 20, color: Color(0xFF9CA3AF)),
+              ),
+            ),
+          customIcon ?? arrow,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPickerField({
+    required TextEditingController controller,
+    required String label,
+    required VoidCallback onTap,
+    bool showClear = false,
+    VoidCallback? onClear,
+    Widget? customSuffixIcon,
+  }) {
+    return ModalTextField(
+      controller: controller,
+      label: label,
+      hintText: label,
+      readOnly: true,
+      onTap: onTap,
+      suffixIcon: _buildDropdownSuffix(
+        showClear: showClear,
+        onClear: onClear,
+        customIcon: customSuffixIcon,
+      ),
+      suffixIconConstraints: const BoxConstraints(
+        minHeight: 24,
+        minWidth: 32,
+        maxWidth: 60,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<ClientsBloc, ClientsState>(
@@ -291,16 +350,15 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
                         keyboardType: TextInputType.name,
                       ),
                       const SizedBox(height: 12),
-                      ModalTextField(
+                      _buildPickerField(
                         controller: _birthDateController,
                         label: 'Дата рождения',
-                        hintText: 'дд.мм.гггг',
-                        readOnly: true,
                         onTap: () => _pickDate(_birthDateController),
-                        suffixIcon: const Icon(
-                          Icons.calendar_today,
-                          size: 20,
-                          color: Color(AppColors.primary),
+                        customSuffixIcon: SvgPicture.asset(
+                          SvgIcons.calendar,
+                          width: 20,
+                          height: 20,
+                          color: const Color(0xFF6B717C),
                         ),
                       ),
                     ],
@@ -318,16 +376,15 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
                         keyboardType: TextInputType.number,
                       ),
                       const SizedBox(height: 12),
-                      ModalTextField(
+                      _buildPickerField(
                         controller: _passportIssueDateController,
                         label: 'Дата выдачи',
-                        hintText: 'дд.мм.гггг',
-                        readOnly: true,
                         onTap: () => _pickDate(_passportIssueDateController),
-                        suffixIcon: const Icon(
-                          Icons.calendar_today,
-                          size: 20,
-                          color: Color(AppColors.primary),
+                        customSuffixIcon: SvgPicture.asset(
+                          SvgIcons.calendar,
+                          width: 20,
+                          height: 20,
+                          color: const Color(0xFF6B717C),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -397,11 +454,8 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
         Expanded(
           child: DefaultButton(
             text: _isSubmitting ? 'Сохранение...' : 'Сохранить',
-            onPressed: enabled ? _handleSave : () {},
-            color: enabled
-                ? const Color(AppColors.primary)
-                : const Color(AppColors.greyLight),
-            textColor: enabled ? Colors.white : Colors.black,
+            onPressed: enabled ? _handleSave : null,
+            isPrimary: true,
           ),
         ),
       ],
