@@ -121,6 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   value: _profileCubit,
                   child: MyProfileScreen(
                     employeeId: widget.employeeId,
+                    currentUserId: currentUser?.id,
                     refresh: () {},
                     onLogout: _logout,
                   ),

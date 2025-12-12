@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:waypay_mobile/assets/resources.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
@@ -14,11 +15,13 @@ import 'package:waypay_mobile/routes/routes.dart';
 
 class MyProfileScreen extends StatefulWidget {
   final int? employeeId;
+  final int? currentUserId;
   final VoidCallback refresh;
   final VoidCallback onLogout;
   const MyProfileScreen({
     super.key,
     this.employeeId,
+    this.currentUserId,
     required this.refresh,
     required this.onLogout,
   });
@@ -144,6 +147,27 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   }
 
   List<List<_ProfileMenuItem>> _buildMenuSections() {
+    final role = UserStorage().getRoleSync();
+    final isDirector = role == EmployeeRole.director;
+    final isAdmin = role == EmployeeRole.admin;
+    final isViewingOther =
+        widget.employeeId != null && widget.employeeId != widget.currentUserId;
+
+    if (isViewingOther) {
+      return [
+        [
+          _ProfileMenuItem(
+            icon: SvgPicture.asset(SvgIcons.statistics),
+            label: 'Статистика',
+            onTap: () => context.pushNamed(
+              Routes.profileStatsScreen.toName,
+              extra: widget.employeeId,
+            ),
+          ),
+        ],
+      ];
+    }
+
     return [
       [
         _ProfileMenuItem(
@@ -164,19 +188,21 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         ),
       ],
       [
-        _ProfileMenuItem(
-          icon: SvgPicture.asset(SvgIcons.employees),
-          label: 'Сотрудники',
-          onTap: () => context.pushNamed(Routes.profileEmployeesScreen.toName),
-        ),
+        if (isAdmin || isDirector)
+          _ProfileMenuItem(
+            icon: SvgPicture.asset(SvgIcons.employees),
+            label: 'Сотрудники',
+            onTap: () => context.pushNamed(Routes.profileEmployeesScreen.toName),
+          ),
       ],
-      [
-        _ProfileMenuItem(
-          icon: SvgPicture.asset(SvgIcons.dataCompany),
-          label: 'Данные компании',
-          onTap: () => showMessage('Раздел в разработке', context),
-        ),
-      ],
+      if (isDirector)
+        [
+          _ProfileMenuItem(
+            icon: SvgPicture.asset(SvgIcons.dataCompany),
+            label: 'Данные компании',
+            onTap: () => context.pushNamed(Routes.companyDataScreen.toName),
+          ),
+        ],
       [
         _ProfileMenuItem(
           icon: SvgPicture.asset(SvgIcons.politics),

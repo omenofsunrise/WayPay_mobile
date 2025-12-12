@@ -67,7 +67,10 @@ class _PaymentStatsProfileTableState extends State<PaymentStatsProfileTable> {
     return BlocBuilder<PaymentStatsCubit, PaymentStatsState>(
       builder: (context, state) {
         if (state is PaymentStatsLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Center(child: CircularProgressIndicator()),
+          );
         }
 
         if (state is PaymentStatsError) {
