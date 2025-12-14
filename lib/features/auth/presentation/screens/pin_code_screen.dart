@@ -176,8 +176,9 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: GestureDetector(
-        onTapDown:
-            display.isEmpty ? null : (_) => setState(() => _pressedKey = value),
+        onTapDown: display.isEmpty
+            ? null
+            : (_) => setState(() => _pressedKey = value),
         onTapCancel: () {
           if (_pressedKey == value) setState(() => _pressedKey = null);
         },

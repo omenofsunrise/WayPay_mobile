@@ -34,6 +34,8 @@ import 'package:waypay_mobile/features/home/presentation/screens/client_blacklis
 import 'package:waypay_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/main_client_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/queue_list_screen.dart';
+import 'package:waypay_mobile/features/info/privacy_policy_screen.dart';
+import 'package:waypay_mobile/features/info/screens/privacy_policy_intro_screen.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investor_pool_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
@@ -80,9 +82,22 @@ class AppRouter {
     redirect: (context, state) async {
       final tokenStorage = TokenStorage();
       final isAuthenticated = await tokenStorage.isAuthenticated();
+      final privacyAccepted = await tokenStorage.isPrivacyAccepted();
       final hasPinCode = await tokenStorage.getPinCode() != null;
 
       final here = state.uri.toString();
+
+      if (!privacyAccepted) {
+        final allowed = {
+          Routes.privacyPolicyIntroScreen.toPath,
+          Routes.privacyPolicyScreen.toPath,
+        };
+        final location = state.uri.toString();
+        if (!allowed.contains(location)) {
+          return Routes.privacyPolicyIntroScreen.toPath;
+        }
+        return null;
+      }
 
       if (!isAuthenticated) {
         if (here == '/') return Routes.phoneAuthScreen.toPath;
@@ -134,6 +149,16 @@ class AppRouter {
           final userType = state.extra as String? ?? 'employee';
           return PhoneAuthScreen(userType: userType);
         },
+      ),
+      GoRoute(
+        path: Routes.privacyPolicyIntroScreen.toPath,
+        name: Routes.privacyPolicyIntroScreen.toName,
+        builder: (context, state) => const PrivacyPolicyIntroScreen(),
+      ),
+      GoRoute(
+        path: Routes.privacyPolicyScreen.toPath,
+        name: Routes.privacyPolicyScreen.toName,
+        builder: (context, state) => const PrivacyPolicyScreen(),
       ),
 
       GoRoute(

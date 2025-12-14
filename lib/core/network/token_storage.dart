@@ -9,6 +9,7 @@ class TokenStorage {
   static const _accessExpiryKey = 'access_token_expiry';
   static const _isAuthenticatedKey = 'is_authenticated';
   static const _pinCodeKey = 'pin_code';
+  static const _privacyAcceptedKey = 'privacy_policy_accepted';
 
   static const Duration _defaultAccessTtl = Duration(minutes: 5);
 
@@ -71,6 +72,16 @@ class TokenStorage {
     await prefs.setBool(_isAuthenticatedKey, isAuthenticated);
   }
 
+  Future<void> setPrivacyAccepted(bool accepted) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_privacyAcceptedKey, accepted);
+  }
+
+  Future<bool> isPrivacyAccepted() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_privacyAcceptedKey) ?? false;
+  }
+
   Future<bool> isAuthenticated() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_isAuthenticatedKey) ?? false;
@@ -95,6 +106,7 @@ class TokenStorage {
     await prefs.remove(_accessExpiryKey);
     await prefs.remove(_isAuthenticatedKey);
     await prefs.remove(_pinCodeKey);
+    await prefs.remove(_privacyAcceptedKey);
   }
 
   Future<String?> _refreshAccessToken() async {
