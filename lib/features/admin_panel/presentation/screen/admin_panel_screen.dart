@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/form_modal/label_text_field.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
 import 'package:waypay_mobile/features/admin_panel/data/models/post_company_model.dart';
 import 'package:waypay_mobile/features/admin_panel/presentation/cubit/company_cubit.dart';
-import 'package:waypay_mobile/features/admin_panel/presentation/widgets/company_card.dart';
 import 'package:waypay_mobile/routes/routes.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
@@ -48,28 +43,22 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       filter: {"#": RegExp(r'\d')},
     );
 
-    String? phoneError;
-    String? dateError;
     DateTime? parsedDate;
 
     bool validatePhone(String value) {
       final raw = value.replaceAll(RegExp(r'\D'), '');
       if (raw.length != 10) {
-        phoneError = 'Номер должен состоять из 10 цифр';
         return false;
       }
-      phoneError = null;
       return true;
     }
 
     bool validateDate() {
-      dateError = null;
       parsedDate = null;
       final text = dateController.text.trim();
       final regex = RegExp(r'^(\d{2})\.(\d{2})\.(\d{4})$');
 
       if (!regex.hasMatch(text)) {
-        dateError = 'Введите дату в формате дд.мм.гггг';
         return false;
       }
 
@@ -81,13 +70,11 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       try {
         final date = DateTime(year, month, day);
         if (date.day != day || date.month != month || date.year != year) {
-          dateError = 'Некорректная дата';
           return false;
         }
         parsedDate = date;
         return true;
       } catch (_) {
-        dateError = 'Некорректная дата';
         return false;
       }
     }
@@ -111,32 +98,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
-                  LabeledTextField(
-                    controller: nameDirController,
-                    label: 'ФИО директора',
-                    format: LabeledTextFieldFormat.fullName,
-                  ),
-                  LabeledTextField(
-                    controller: nameCompanyController,
-                    label: 'Название компании',
-                  ),
-                  LabeledTextField(
-                    controller: phoneController,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [phoneFormatter],
-                    errorText: phoneError,
-                    prefix: const Text('8 '),
-                    label: 'Телефон администратора',
-                    onChanged: (value) => setState(() => validatePhone(value)),
-                  ),
-                  LabeledTextField(
-                    controller: dateController,
-                    keyboardType: TextInputType.datetime,
-                    format: LabeledTextFieldFormat.birthdate,
-                    errorText: dateError,
-                    label: 'Дата лицензии (дд.мм.гггг)',
-                    onChanged: (value) => setState(() => validateDate()),
-                  ),
+
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -197,7 +159,6 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: AppDrawer(),
       backgroundColor: Color(AppColors.primary),
       appBar: AppBar(
         backgroundColor: Color(AppColors.primary),
@@ -270,9 +231,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                                     padding: const EdgeInsets.all(16),
                                     itemCount: state.companies.length,
                                     itemBuilder: (context, index) {
-                                      return CompanyCard(
-                                        company: state.companies[index],
-                                      );
+                                      return const SizedBox.shrink();
                                     },
                                   ),
                                 ),

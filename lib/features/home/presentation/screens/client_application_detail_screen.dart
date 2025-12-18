@@ -2,18 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
 import 'package:waypay_mobile/features/home/data/models/credit_applications/credit_application_model.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
 class ClientApplicationDetailScreen extends StatelessWidget {
-  ClientApplicationDetailScreen({
-    super.key,
-    required this.application,
-  });
+  ClientApplicationDetailScreen({super.key, required this.application});
 
   final CreditApplicationModel application;
 
@@ -68,11 +63,7 @@ class ClientApplicationDetailScreen extends StatelessWidget {
                   showNotifications: false,
                 ),
                 const SizedBox(height: 16),
-                _InfoCard(
-                  fields: [
-                    _InfoField('ФИО менеджера', managerName),
-                  ],
-                ),
+                _InfoCard(fields: [_InfoField('ФИО менеджера', managerName)]),
                 const SizedBox(height: 12),
                 _InfoCard(
                   fields: [
@@ -170,7 +161,7 @@ class _InfoCard extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: Color(AppColors.darkGrey),
+                color: Color(AppColors.uiBorder),
               ),
             ),
             const SizedBox(height: 4),
@@ -239,7 +230,7 @@ class _ProductInfoCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: Color(AppColors.darkGrey),
+              color: Color(AppColors.uiBorder),
             ),
           ),
           const SizedBox(height: 4),
@@ -270,17 +261,11 @@ class _ProductInfoCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _ProductField(
-                  label: 'Дата',
-                  value: date,
-                ),
+                child: _ProductField(label: 'Дата', value: date),
               ),
               const SizedBox(width: 32),
               Expanded(
-                child: _ProductField(
-                  label: 'Стоимость',
-                  value: amount,
-                ),
+                child: _ProductField(label: 'Стоимость', value: amount),
               ),
             ],
           ),

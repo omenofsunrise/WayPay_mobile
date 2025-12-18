@@ -5,13 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/form_modal/label_text_field.dart';
-import 'package:waypay_mobile/core/widgets/inputs/custom_calendar.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
-import 'package:waypay_mobile/core/widgets/CustomRadioButton.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/bank_card/data/data_sources/bank_card_remote_data_source.dart';
 import 'package:waypay_mobile/features/bank_card/data/models/bank_card_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
@@ -135,10 +129,7 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
                   controller: _amountController,
                   label: 'Сумма платежа',
                   keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    ThousandsSeparatorInputFormatter(),
-                    LengthLimitingTextInputFormatter(15),
-                  ],
+                  inputFormatters: [LengthLimitingTextInputFormatter(15)],
                 ),
                 const SizedBox(height: 12),
                 _buildModalField(
@@ -249,7 +240,9 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
         paymentAmount: amount,
         datePayment: _selectedDate!,
         type: _selectedType!,
-        bankCardId: _selectedType == PaymentType.card ? _selectedBankCardId : null,
+        bankCardId: _selectedType == PaymentType.card
+            ? _selectedBankCardId
+            : null,
       );
 
       if (context.mounted) {
@@ -292,7 +285,8 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
   bool get _canSubmit {
     final text = _amountController.text.replaceAll(RegExp(r'[^0-9.]'), '');
     final amount = double.tryParse(text);
-    final bankCardValid = _selectedType != PaymentType.card || _selectedBankCardId != null;
+    final bankCardValid =
+        _selectedType != PaymentType.card || _selectedBankCardId != null;
     return !_isSubmitting &&
         _selectedDate != null &&
         amount != null &&
@@ -489,7 +483,10 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
   String _formatCard(BankCardModel card) {
     final details = card.details?.trim();
     final phone = card.phone?.trim();
-    if (details != null && details.isNotEmpty && phone != null && phone.isNotEmpty) {
+    if (details != null &&
+        details.isNotEmpty &&
+        phone != null &&
+        phone.isNotEmpty) {
       return '$details • $phone';
     }
     if (details != null && details.isNotEmpty) return details;

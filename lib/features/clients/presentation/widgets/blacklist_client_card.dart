@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class BlacklistClientCard extends StatelessWidget {
-  const BlacklistClientCard({
-    super.key,
-    required this.client,
-  });
+  const BlacklistClientCard({super.key, required this.client});
 
   final ClientModel client;
 
@@ -65,7 +62,7 @@ class BlacklistClientCard extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Color(AppColors.darkGrey),
+                  color: Color(AppColors.uiBorder),
                 ),
               ),
             ],
@@ -79,10 +76,7 @@ class BlacklistClientCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _InfoGroup(
-                  title: 'Телефон',
-                  value: client.phone,
-                ),
+                child: _InfoGroup(title: 'Телефон', value: client.phone),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -114,15 +108,16 @@ class _InfoGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment:
-          alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: alignRight
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       children: [
         Text(
           title,
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: Color(AppColors.darkGrey),
+            color: Color(AppColors.uiBorder),
           ),
         ),
         const SizedBox(height: 4),

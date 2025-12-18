@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 import 'package:waypay_mobile/features/analytics/presentation/widgets/contract_count_pie.dart';
 import 'package:waypay_mobile/features/analytics/presentation/widgets/dashboard_info_card.dart';
@@ -63,7 +61,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(AppColors.background),
-      drawer: const AppDrawer(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

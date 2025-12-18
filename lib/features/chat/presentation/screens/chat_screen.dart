@@ -16,8 +16,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:waypay_mobile/core/config/api_config.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 
@@ -39,6 +37,7 @@ import 'package:waypay_mobile/features/chat/presentation/widgets/chat_text_field
 import 'package:waypay_mobile/features/chat/presentation/widgets/telegram_link_preview.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/features/todo/presentation/widgets/task_action_dropdown.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class ChatScreen extends StatefulWidget {
   final int chatId;
@@ -1044,7 +1043,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       style: AppStyle.manrope(
                         size: 12,
                         weight: FontWeight.w400,
-                        color: const Color(AppColors.darkGrey),
+                        color: const Color(AppColors.uiBorder),
                       ),
                     ),
                   ),
@@ -1094,7 +1093,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 widget.onChatUpdated?.call();
               },
             ),
-            iconTheme: const IconThemeData(color: Color(AppColors.darkGrey)),
+            iconTheme: const IconThemeData(color: Color(AppColors.uiBorder)),
             // 🔻 убрали поиск, оставили меню с «Удалить чат»
             actions: [
               if (!widget.isGroup)
@@ -1167,7 +1166,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 style: AppStyle.manrope(
                                   size: 12,
                                   weight: FontWeight.w400,
-                                  color: const Color(AppColors.darkGrey),
+                                  color: const Color(AppColors.uiBorder),
                                 ),
                               ),
                           ],

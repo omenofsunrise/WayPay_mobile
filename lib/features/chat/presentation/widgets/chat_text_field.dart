@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class ChatTextField extends StatefulWidget {
   final TextEditingController controller;
@@ -102,7 +101,7 @@ class _ChatTextFieldState extends State<ChatTextField> {
                 Icons.send,
                 color: widget.controller.text.isEmpty
                     ? Colors.grey
-                    : Color(AppColors.comfPayment),
+                    : Color(AppColors.primary),
               ),
             ),
           ),

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:waypay_mobile/features/chat/presentation/widgets/employes_tab_content.dart';
@@ -11,6 +9,7 @@ import 'package:waypay_mobile/features/chat/presentation/widgets/photo_tab_conte
 import 'package:waypay_mobile/features/chat/presentation/widgets/video_tab_content.dart';
 import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class ChatInfoScreen extends StatefulWidget {
   final bool isGroup;

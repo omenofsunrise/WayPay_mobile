@@ -6,13 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/filters/filter_components.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
-import 'package:waypay_mobile/core/widgets/custom_tab_switcher.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
@@ -126,8 +123,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
         creditId: widget.creditId ?? filters?.contractNumber,
         dateFrom: filters?.dateFromIso,
         dateTo: filters?.dateToIso,
-        includePayed:
-            widget.creditId != null ? _includePayedForCredit : true,
+        includePayed: widget.creditId != null ? _includePayedForCredit : true,
       ),
     );
   }
@@ -241,7 +237,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                                   child: Text(
                                     'Нет ожидаемых платежей',
                                     style: TextStyle(
-                                      color: Color(AppColors.darkGrey),
+                                      color: Color(AppColors.uiBorder),
                                     ),
                                   ),
                                 );
@@ -263,8 +259,9 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                                   itemBuilder: (context, index) {
                                     if (index >= state.schedules.length) {
                                       return const Padding(
-                                        padding:
-                                            EdgeInsets.symmetric(vertical: 16),
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: 16,
+                                        ),
                                         child: Center(
                                           child: CircularProgressIndicator(),
                                         ),
@@ -393,7 +390,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
       return const Center(
         child: Text(
           'Нет оплат по договору',
-          style: TextStyle(color: Color(AppColors.darkGrey)),
+          style: TextStyle(color: Color(AppColors.uiBorder)),
         ),
       );
     }
@@ -439,10 +436,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
 }
 
 class _ScheduleListTile extends StatelessWidget {
-  const _ScheduleListTile({
-    required this.schedule,
-    this.showPaid = false,
-  });
+  const _ScheduleListTile({required this.schedule, this.showPaid = false});
 
   final ScheduleModel schedule;
   final bool showPaid;
@@ -512,7 +506,7 @@ class _ScheduleListTile extends StatelessWidget {
                   style: AppStyle.manrope(
                     size: 16,
                     weight: FontWeight.w500,
-                    color: const Color(AppColors.darkGrey),
+                    color: const Color(AppColors.uiBorder),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -592,10 +586,7 @@ class _HistoryListTile extends StatelessWidget {
             offset: Offset(2, 2),
             blurRadius: 4,
           ),
-          BoxShadow(
-            color: Color(0x05000809),
-            blurRadius: 6,
-          ),
+          BoxShadow(color: Color(0x05000809), blurRadius: 6),
         ],
       ),
       child: Row(
@@ -628,7 +619,7 @@ class _HistoryListTile extends StatelessWidget {
                   style: AppStyle.manrope(
                     size: 16,
                     weight: FontWeight.w500,
-                    color: const Color(AppColors.darkGrey),
+                    color: const Color(AppColors.uiBorder),
                   ),
                 ),
                 const SizedBox(height: 4),

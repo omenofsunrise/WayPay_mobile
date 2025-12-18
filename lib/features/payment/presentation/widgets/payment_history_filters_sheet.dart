@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/filters/filter_components.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/payment/presentation/models/payment_history_filters.dart';
 
 class PaymentHistoryFiltersSheet extends StatelessWidget {
@@ -140,7 +139,7 @@ class _PaymentHistoryFiltersFormState
       children: [
         const Text(
           'Статус платежа',
-          style: TextStyle(fontSize: 14, color: Color(AppColors.darkGrey)),
+          style: TextStyle(fontSize: 14, color: Color(AppColors.uiBorder)),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -239,9 +238,7 @@ class _PaymentHistoryFiltersFormState
 
   Widget _buildStatusChip(String label, bool value) {
     final bool selected = _confirmed == value;
-    final fillColor = selected
-        ? const Color(AppColors.primary)
-        : Colors.white;
+    final fillColor = selected ? const Color(AppColors.primary) : Colors.white;
     final borderColor = selected
         ? const Color(AppColors.primary)
         : const Color(0xFFD9DDE5);

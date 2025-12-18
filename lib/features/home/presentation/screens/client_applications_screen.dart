@@ -4,15 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/custom_tab_switcher.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/filters/filter_components.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
+
 import 'package:waypay_mobile/features/home/data/models/credit_applications/credit_application_model.dart';
 import 'package:waypay_mobile/features/home/domain/entities/client_application_filters.dart';
 import 'package:waypay_mobile/features/home/presentation/cubit/client_applications/client_applications_cubit.dart';
@@ -39,10 +33,9 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
 
   static const _searchDelay = Duration(milliseconds: 400);
 
-  ClientApplicationsTab get _currentTab =>
-      _tabController.index == 0
-          ? ClientApplicationsTab.all
-          : ClientApplicationsTab.mine;
+  ClientApplicationsTab get _currentTab => _tabController.index == 0
+      ? ClientApplicationsTab.all
+      : ClientApplicationsTab.mine;
 
   @override
   void initState() {
@@ -68,8 +61,9 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
   void _handleTabChange() {
     if (_tabController.indexIsChanging) return;
     final cubit = context.read<ClientApplicationsCubit>();
-    final tabState =
-        _currentTab == ClientApplicationsTab.all ? cubit.state.allTab : cubit.state.myTab;
+    final tabState = _currentTab == ClientApplicationsTab.all
+        ? cubit.state.allTab
+        : cubit.state.myTab;
     if (!tabState.initialized) {
       _loadCurrentTab();
     }
@@ -84,7 +78,8 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
     final hasQuery = query.isNotEmpty;
     final meetsPhoneRequirement = digits.length >= 11;
     final meetsNameRequirement = query.length >= 4;
-    final shouldSearch = hasQuery && (meetsPhoneRequirement || meetsNameRequirement);
+    final shouldSearch =
+        hasQuery && (meetsPhoneRequirement || meetsNameRequirement);
 
     setState(() => _showSearchHint = hasQuery && !shouldSearch);
 
@@ -143,9 +138,8 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => ClientApplicationsFiltersSheet(
-        initialFilters: _appliedFilters,
-      ),
+      builder: (_) =>
+          ClientApplicationsFiltersSheet(initialFilters: _appliedFilters),
     );
     BottomNavController.instance.show();
     if (result != null) {
@@ -153,19 +147,13 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
       setState(() {
         _appliedFilters = applied;
       });
-      await _loadCurrentTab(
-        filters: applied,
-        replaceFilters: true,
-      );
+      await _loadCurrentTab(filters: applied, replaceFilters: true);
     }
   }
 
   Future<void> _clearAppliedFilters() async {
     setState(() => _appliedFilters = null);
-    await _loadCurrentTab(
-      filters: null,
-      replaceFilters: true,
-    );
+    await _loadCurrentTab(filters: null, replaceFilters: true);
   }
 
   void _openDetails(CreditApplicationModel application) {
@@ -210,7 +198,7 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
                     'Введите минимум 4 символа ФИО или полный номер телефона',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Color(AppColors.darkGrey),
+                      color: Color(AppColors.uiBorder),
                     ),
                   ),
                 ),
@@ -246,29 +234,32 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: BlocBuilder<ClientApplicationsCubit,
-                    ClientApplicationsState>(
-                  builder: (context, state) {
-                    return TabBarView(
-                      controller: _tabController,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        _ApplicationsTabContent(
-                          data: state.allTab,
-                          onRetry: () =>
-                              _loadTab(tab: ClientApplicationsTab.all),
-                          onApplicationTap: _openDetails,
-                        ),
-                        _ApplicationsTabContent(
-                          data: state.myTab,
-                          onRetry: () =>
-                              _loadTab(tab: ClientApplicationsTab.mine),
-                          onApplicationTap: _openDetails,
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                child:
+                    BlocBuilder<
+                      ClientApplicationsCubit,
+                      ClientApplicationsState
+                    >(
+                      builder: (context, state) {
+                        return TabBarView(
+                          controller: _tabController,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: [
+                            _ApplicationsTabContent(
+                              data: state.allTab,
+                              onRetry: () =>
+                                  _loadTab(tab: ClientApplicationsTab.all),
+                              onApplicationTap: _openDetails,
+                            ),
+                            _ApplicationsTabContent(
+                              data: state.myTab,
+                              onRetry: () =>
+                                  _loadTab(tab: ClientApplicationsTab.mine),
+                              onApplicationTap: _openDetails,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
               ),
             ],
           ),
@@ -318,10 +309,7 @@ class _ApplicationsTabContent extends StatelessWidget {
     }
 
     if (data.error != null) {
-      return _ErrorView(
-        message: data.error!,
-        onRetry: onRetry,
-      );
+      return _ErrorView(message: data.error!, onRetry: onRetry);
     }
 
     if (data.items.isEmpty) {
@@ -375,10 +363,7 @@ class _ErrorView extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.red,
-                fontSize: 15,
-              ),
+              style: const TextStyle(color: Colors.red, fontSize: 15),
             ),
             const SizedBox(height: 12),
             DefaultButton(
@@ -406,14 +391,14 @@ class _EmptyApplicationsView extends StatelessWidget {
           Icon(
             Icons.inbox_outlined,
             size: 48,
-            color: Color(AppColors.darkGrey),
+            color: Color(AppColors.uiBorder),
           ),
           SizedBox(height: 12),
           Text(
             'Нет заявок по текущим фильтрам',
             style: TextStyle(
               fontSize: 15,
-              color: Color(AppColors.darkGrey),
+              color: Color(AppColors.uiBorder),
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
@@ -423,4 +408,3 @@ class _EmptyApplicationsView extends StatelessWidget {
     );
   }
 }
-

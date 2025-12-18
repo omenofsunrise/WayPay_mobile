@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/filters/filter_components.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/home/domain/entities/client_application_filters.dart';
 
 class ClientApplicationsFiltersSheet extends StatelessWidget {
@@ -14,11 +12,7 @@ class ClientApplicationsFiltersSheet extends StatelessWidget {
       'Республика Татарстан',
       'Московская область',
     ],
-    this.districts = const [
-      'Веденский',
-      'Грозненский',
-      'Урус-Мартановский',
-    ],
+    this.districts = const ['Веденский', 'Грозненский', 'Урус-Мартановский'],
   });
 
   final ClientApplicationFilters? initialFilters;
@@ -64,13 +58,13 @@ class _ClientApplicationsFiltersFormState
   final _districtController = TextEditingController();
 
   List<TextEditingController> get _controllers => [
-        _minCostController,
-        _maxCostController,
-        _minTermController,
-        _maxTermController,
-        _regionController,
-        _districtController,
-      ];
+    _minCostController,
+    _maxCostController,
+    _minTermController,
+    _maxTermController,
+    _regionController,
+    _districtController,
+  ];
 
   @override
   void initState() {
@@ -118,17 +112,17 @@ class _ClientApplicationsFiltersFormState
   }
 
   ClientApplicationFilters _buildFilters() => ClientApplicationFilters(
-        minCost: _parseToInt(_minCostController.text),
-        maxCost: _parseToInt(_maxCostController.text),
-        minTerm: _parseToInt(_minTermController.text),
-        maxTerm: _parseToInt(_maxTermController.text),
-        region: _regionController.text.trim().isEmpty
-            ? null
-            : _regionController.text.trim(),
-        district: _districtController.text.trim().isEmpty
-            ? null
-            : _districtController.text.trim(),
-      );
+    minCost: _parseToInt(_minCostController.text),
+    maxCost: _parseToInt(_maxCostController.text),
+    minTerm: _parseToInt(_minTermController.text),
+    maxTerm: _parseToInt(_maxTermController.text),
+    region: _regionController.text.trim().isEmpty
+        ? null
+        : _regionController.text.trim(),
+    district: _districtController.text.trim().isEmpty
+        ? null
+        : _districtController.text.trim(),
+  );
 
   int? _parseToInt(String value) {
     final digits = value.replaceAll(RegExp(r'\D'), '');
@@ -223,7 +217,7 @@ class _ClientApplicationsFiltersFormState
           hintText: 'Выберите регион',
           suffixIcon: const Icon(
             Icons.expand_more,
-            color: Color(AppColors.darkGrey),
+            color: Color(AppColors.uiBorder),
           ),
           onTap: _selectRegion,
         ),
@@ -235,7 +229,7 @@ class _ClientApplicationsFiltersFormState
           hintText: 'Выберите район',
           suffixIcon: const Icon(
             Icons.expand_more,
-            color: Color(AppColors.darkGrey),
+            color: Color(AppColors.uiBorder),
           ),
           onTap: _selectDistrict,
         ),

@@ -8,10 +8,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:waypay_mobile/core/config/api_config.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/chat_video_bloc.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/paged_bloc.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class VideosTabContent extends StatefulWidget {
   final int chatId;

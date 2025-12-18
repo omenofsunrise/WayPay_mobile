@@ -3,10 +3,10 @@ import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class InvestorPoolDetailScreen extends StatefulWidget {
   const InvestorPoolDetailScreen({super.key, required this.pool});
@@ -154,7 +154,7 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
                           _error ?? 'Нет данных',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            color: Color(AppColors.darkGrey),
+                            color: Color(AppColors.uiBorder),
                           ),
                         ),
                       )
@@ -222,7 +222,7 @@ class _NicknameCard extends StatelessWidget {
               fontWeight: FontWeight.w400,
               fontSize: 14,
               height: 24 / 14,
-              color: Color(AppColors.darkGrey),
+              color: Color(AppColors.uiBorder),
             ),
           ),
           const SizedBox(height: 4),
@@ -342,7 +342,7 @@ class _MetricCard extends StatelessWidget {
                 fontSize: 14,
                 height: 20 / 14,
                 letterSpacing: 0,
-                color: Color(AppColors.darkGrey),
+                color: Color(AppColors.uiBorder),
               ),
             ),
             const SizedBox(height: 6),

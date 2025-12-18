@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:waypay_mobile/features/blog/presentation/screens/comments_screen.dart';
@@ -14,6 +11,7 @@ import 'package:waypay_mobile/features/blog/presentation/widgets/post_card.dart'
 import 'package:waypay_mobile/features/blog/presentation/bloc/blog_bloc.dart';
 import 'package:waypay_mobile/features/blog/presentation/bloc/blog_event.dart';
 import 'package:waypay_mobile/features/blog/presentation/bloc/blog_state.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 enum FeedType { all, myBlog, liked }
 
@@ -309,7 +307,7 @@ class _BlogScreenState extends State<BlogScreen> {
                         style: AppStyle.manrope(
                           size: 14,
                           weight: FontWeight.w500,
-                          color: Color(AppColors.comfPayment),
+                          color: Color(AppColors.primary),
                         ),
                       ),
                     ),

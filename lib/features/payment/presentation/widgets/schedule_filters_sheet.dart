@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/filters/filter_components.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/payment/presentation/models/schedule_filters.dart';
 
 class ScheduleFiltersSheet extends StatelessWidget {
@@ -43,12 +42,12 @@ class _ScheduleFiltersFormState extends State<_ScheduleFiltersForm> {
   final _dateFormat = DateFormat('dd.MM.yyyy');
 
   List<TextEditingController> get _controllers => [
-        _contractController,
-        _investorController,
-        _clientController,
-        _dateFromController,
-        _dateToController,
-      ];
+    _contractController,
+    _investorController,
+    _clientController,
+    _dateFromController,
+    _dateToController,
+  ];
 
   @override
   void initState() {

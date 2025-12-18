@@ -3,10 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/features/notifications/presentation/cubit/notifications_cubit.dart';
 import 'package:waypay_mobile/features/notifications/presentation/widgets/notifications_sheet.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class NotificationsBellButton extends StatelessWidget {
   final double iconSize;
@@ -57,7 +56,7 @@ class _NotificationsBellButtonBody extends StatelessWidget {
         final badgeVisible = showBadge && unread > 0;
         final badgeText = unread > 99 ? '99+' : '$unread';
         final hitSize = iconSize < 44 ? 44.0 : iconSize;
-        final iconTint = iconColor ?? const Color(AppColors.darkGrey);
+        final iconTint = iconColor ?? const Color(AppColors.uiBorder);
         final bubbleColor = badgeColor ?? const Color(AppColors.primaryLight);
 
         return SizedBox(

@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/core/network/dio_client.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/search/search_destinations.dart';
 import 'package:waypay_mobile/core/widgets/search/search_suggester.dart';
 import 'package:waypay_mobile/features/home/domain/repositories/home_repository_impl.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/buttons/add_button.dart';
-import 'package:waypay_mobile/core/widgets/buttons/more_info_button.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/home/presentation/widgets/dashboard_card.dart';
 import 'package:waypay_mobile/features/home/presentation/widgets/section_title.dart';
 import 'package:waypay_mobile/features/home/data/models/employee_model.dart';
@@ -35,7 +32,7 @@ class _AddRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon, color: const Color(AppColors.darkGrey), size: 24),
+      leading: Icon(icon, color: const Color(AppColors.uiBorder), size: 24),
       title: Text(
         text,
         style: AppStyle.manrope(
@@ -250,6 +247,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 slivers: [
                   SliverToBoxAdapter(
                     child: Header(
+                      onAvatarTap: () {
+                        context.pushNamed(Routes.profileScreen.toName);
+                      },
                       fullName: _getFullName(employeeData),
                       photoPath: _getAvatar(employeeData),
                       showBackButton: false,

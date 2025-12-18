@@ -3,8 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class DashboardInfoTile extends StatelessWidget {
   final Color circleColor;
@@ -71,7 +70,7 @@ class DashboardInfoTile extends StatelessWidget {
                     isGrowth! ? Icons.arrow_drop_up : Icons.arrow_drop_down,
                     size: 36,
                     color: isGrowth!
-                        ? Color(AppColors.radioColor)
+                        ? Color(AppColors.primary)
                         : Color(AppColors.red),
                   ),
                 if (isGrowth != null)
@@ -84,7 +83,7 @@ class DashboardInfoTile extends StatelessWidget {
                         weight: FontWeight.w400,
                         color: isGrowth != null
                             ? (isGrowth!
-                                  ? Color(AppColors.radioColor)
+                                  ? Color(AppColors.primary)
                                   : Color(AppColors.red))
                             : Colors.black,
                       ),

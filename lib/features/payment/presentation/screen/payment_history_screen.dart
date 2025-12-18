@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/filters/filter_components.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 import 'package:waypay_mobile/features/payment/presentation/bloc/expected/payment_bloc.dart';
 import 'package:waypay_mobile/features/payment/presentation/models/payment_history_filters.dart';
@@ -73,19 +71,19 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     final filters = _appliedFilters;
     final sort = _currentSort;
     context.read<PaymentBloc>().add(
-          LoadPayment(
-            refresh: refresh,
-            page: page,
-            pageSize: 10,
-            sortBy: sort.sortBy,
-            descending: sort.sortDirection == 'desc',
-            search: _searchQuery.isEmpty ? null : _searchQuery,
-            investorNickname: filters?.investor,
-            dateFrom: filters?.dateFrom,
-            dateTo: filters?.dateTo,
-            confirmed: filters?.confirmed,
-          ),
-        );
+      LoadPayment(
+        refresh: refresh,
+        page: page,
+        pageSize: 10,
+        sortBy: sort.sortBy,
+        descending: sort.sortDirection == 'desc',
+        search: _searchQuery.isEmpty ? null : _searchQuery,
+        investorNickname: filters?.investor,
+        dateFrom: filters?.dateFrom,
+        dateTo: filters?.dateTo,
+        confirmed: filters?.confirmed,
+      ),
+    );
   }
 
   void _onSearchChanged(String value) {
@@ -142,10 +140,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   }
 
   void _openPaymentDetail(PaymentItemModel payment) {
-    context.pushNamed(
-      Routes.paymentDetailScreen.toName,
-      extra: payment,
-    );
+    context.pushNamed(Routes.paymentDetailScreen.toName, extra: payment);
   }
 
   @override
@@ -187,7 +182,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                             child: Text(
                               'История платежей пуста',
                               style: TextStyle(
-                                color: Color(AppColors.darkGrey),
+                                color: Color(AppColors.uiBorder),
                               ),
                             ),
                           );
@@ -253,10 +248,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           iconAsset: SvgIcons.sort,
         ),
         const SizedBox(width: 12),
-        FilterButton(
-          onTap: _openFilters,
-          isActive: _appliedFilters != null,
-        ),
+        FilterButton(onTap: _openFilters, isActive: _appliedFilters != null),
       ],
     );
   }
@@ -290,10 +282,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 }
 
 class _ScheduleSortSheet extends StatelessWidget {
-  const _ScheduleSortSheet({
-    required this.options,
-    required this.selected,
-  });
+  const _ScheduleSortSheet({required this.options, required this.selected});
 
   final List<PaymentSortOption> options;
   final PaymentSortOption selected;
@@ -322,8 +311,9 @@ class _ScheduleSortSheet extends StatelessWidget {
                         option.title,
                         style: TextStyle(
                           fontSize: 16,
-                          fontWeight:
-                              isActive ? FontWeight.w600 : FontWeight.w400,
+                          fontWeight: isActive
+                              ? FontWeight.w600
+                              : FontWeight.w400,
                           color: isActive
                               ? const Color(AppColors.primary)
                               : const Color(AppColors.black),

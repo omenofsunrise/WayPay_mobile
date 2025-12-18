@@ -3,12 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/filters/filter_components.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/widgets/investor_picker_modal.dart';
@@ -77,16 +75,18 @@ class _PaymentIncomeScreenState extends State<PaymentIncomeScreen> {
       (_investorFilter != null && _investorFilter!.isNotEmpty);
 
   void _loadPayments({required bool refresh}) {
-    debugPrint('[PAYMENT_INCOME] loading payments: '
-        'refresh=$refresh search=${_currentSearch} '
-        'investor=$_investorFilter month=$_selectedMonth year=$_selectedYear '
-        'dateFrom=$_dateFrom dateTo=$_dateTo');
+    debugPrint(
+      '[PAYMENT_INCOME] loading payments: '
+      'refresh=$refresh search=${_currentSearch} '
+      'investor=$_investorFilter month=$_selectedMonth year=$_selectedYear '
+      'dateFrom=$_dateFrom dateTo=$_dateTo',
+    );
     context.read<PaymentBloc>().add(
-          LoadPayment(
-            refresh: refresh,
-            page: refresh ? 1 : null,
-            search: _currentSearch.isEmpty ? null : _currentSearch,
-            dateFrom: _dateFrom,
+      LoadPayment(
+        refresh: refresh,
+        page: refresh ? 1 : null,
+        search: _currentSearch.isEmpty ? null : _currentSearch,
+        dateFrom: _dateFrom,
         dateTo: _dateTo,
         investorNickname: _investorFilter,
       ),
@@ -293,7 +293,7 @@ class _PaymentIncomeCard extends StatelessWidget {
                 'Договор № ${payment.creditId}',
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Color(AppColors.darkGrey),
+                  color: Color(AppColors.uiBorder),
                 ),
               ),
               const Spacer(),
@@ -301,7 +301,7 @@ class _PaymentIncomeCard extends StatelessWidget {
                 'от $date',
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Color(AppColors.darkGrey),
+                  color: Color(AppColors.uiBorder),
                 ),
               ),
             ],
@@ -323,7 +323,7 @@ class _PaymentIncomeCard extends StatelessWidget {
                   'Платёж',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Color(AppColors.darkGrey),
+                    color: Color(AppColors.uiBorder),
                   ),
                 ),
               ),
@@ -333,7 +333,7 @@ class _PaymentIncomeCard extends StatelessWidget {
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Color(AppColors.darkGrey),
+                    color: Color(AppColors.uiBorder),
                   ),
                 ),
               ),

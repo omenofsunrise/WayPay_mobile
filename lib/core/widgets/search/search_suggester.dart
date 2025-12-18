@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
 import 'package:waypay_mobile/routes/routes.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class SearchDestination {
   const SearchDestination({
@@ -24,10 +23,7 @@ class SearchDestination {
 }
 
 class SearchSuggester extends StatefulWidget {
-  const SearchSuggester({
-    super.key,
-    required this.destinations,
-  });
+  const SearchSuggester({super.key, required this.destinations});
 
   final List<SearchDestination> destinations;
 
@@ -81,9 +77,7 @@ class _SearchSuggesterState extends State<SearchSuggester> {
     }
     final variants = _expandQueryVariants(query);
     final matches = widget.destinations
-        .where(
-          (d) => variants.any((variant) => d.matches(variant)),
-        )
+        .where((d) => variants.any((variant) => d.matches(variant)))
         .take(5)
         .map((d) => d.title)
         .toList();
@@ -145,9 +139,7 @@ class _SearchSuggesterState extends State<SearchSuggester> {
             child: Align(
               alignment: Alignment.topLeft,
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: _fieldSize?.width ?? 360,
-                ),
+                constraints: BoxConstraints(maxWidth: _fieldSize?.width ?? 360),
                 child: _buildResultsCard(),
               ),
             ),

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/features/profile/presentation/cubit/payment_stats_cubit.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class PaymentStatsProfileTable extends StatefulWidget {
   final int? employeeId;
@@ -28,7 +27,10 @@ class _PaymentStatsProfileTableState extends State<PaymentStatsProfileTable> {
     const months = 12;
     final cubit = context.read<PaymentStatsCubit>();
     if (widget.employeeId != null) {
-      cubit.loadStatsByEmployeeId(employeeId: widget.employeeId!, months: months);
+      cubit.loadStatsByEmployeeId(
+        employeeId: widget.employeeId!,
+        months: months,
+      );
     } else {
       cubit.loadStats(months: months);
     }
@@ -86,8 +88,10 @@ class _PaymentStatsProfileTableState extends State<PaymentStatsProfileTable> {
               GestureDetector(
                 onTap: () => setState(() => _isExpanded = !_isExpanded),
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -97,10 +101,7 @@ class _PaymentStatsProfileTableState extends State<PaymentStatsProfileTable> {
                         offset: Offset(2, 2),
                         blurRadius: 4,
                       ),
-                      BoxShadow(
-                        color: Color(0x05000809),
-                        blurRadius: 6,
-                      ),
+                      BoxShadow(color: Color(0x05000809), blurRadius: 6),
                     ],
                   ),
                   child: Row(
@@ -118,7 +119,7 @@ class _PaymentStatsProfileTableState extends State<PaymentStatsProfileTable> {
                         _isExpanded
                             ? Icons.keyboard_arrow_up_rounded
                             : Icons.keyboard_arrow_down_rounded,
-                        color: const Color(AppColors.darkGrey),
+                        color: const Color(AppColors.uiBorder),
                       ),
                     ],
                   ),
@@ -139,10 +140,7 @@ class _PaymentStatsProfileTableState extends State<PaymentStatsProfileTable> {
                             offset: Offset(2, 2),
                             blurRadius: 4,
                           ),
-                          BoxShadow(
-                            color: Color(0x05000809),
-                            blurRadius: 6,
-                          ),
+                          BoxShadow(color: Color(0x05000809), blurRadius: 6),
                         ],
                       ),
                       child: Padding(
@@ -164,8 +162,7 @@ class _PaymentStatsProfileTableState extends State<PaymentStatsProfileTable> {
                                   child: _PaymentStatValue(
                                     label: 'Подтверждённые',
                                     value: _formatCurrency(stat.assumed),
-                                    valueColor:
-                                        const Color(AppColors.darkGrey),
+                                    valueColor: const Color(AppColors.uiBorder),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -173,8 +170,7 @@ class _PaymentStatsProfileTableState extends State<PaymentStatsProfileTable> {
                                   child: _PaymentStatValue(
                                     label: 'Неподтверждённые',
                                     value: _formatCurrency(stat.notAssumed),
-                                    valueColor:
-                                        const Color(AppColors.primary),
+                                    valueColor: const Color(AppColors.primary),
                                   ),
                                 ),
                               ],

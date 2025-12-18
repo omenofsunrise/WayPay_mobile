@@ -3,16 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
 import 'package:waypay_mobile/features/credit/presentation/widgets/add_note_dialog.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
-
 import 'package:waypay_mobile/core/storage/user_storage.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_event.dart';
@@ -684,7 +680,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
               Text(
                 'Договор № ${payment.creditId}',
                 style: _valueTextStyle.copyWith(
-                  color: const Color(AppColors.darkGrey),
+                  color: const Color(AppColors.uiBorder),
                 ),
               ),
               const SizedBox(height: 4),
@@ -712,7 +708,9 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
               style: AppStyle.manrope(
                 size: 14,
                 weight: FontWeight.w500,
-                color: isPaid ? const Color(0xFF0FA958) : const Color(0xFF6B7280),
+                color: isPaid
+                    ? const Color(0xFF0FA958)
+                    : const Color(0xFF6B7280),
               ),
             ),
           ],

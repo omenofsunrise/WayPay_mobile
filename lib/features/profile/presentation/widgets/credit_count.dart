@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/features/profile/presentation/cubit/credit_stats_cubit.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class CreditCount extends StatefulWidget {
   final int? employeeId;
@@ -27,7 +26,10 @@ class _CreditCountState extends State<CreditCount> {
     const months = 12;
     final cubit = context.read<CreditStatsCubit>();
     if (widget.employeeId != null) {
-      cubit.loadStatsByEmployeeId(employeeId: widget.employeeId!, months: months);
+      cubit.loadStatsByEmployeeId(
+        employeeId: widget.employeeId!,
+        months: months,
+      );
     } else {
       cubit.loadStats(months: months);
     }
@@ -73,8 +75,10 @@ class _CreditCountState extends State<CreditCount> {
               GestureDetector(
                 onTap: () => setState(() => _isExpanded = !_isExpanded),
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -84,10 +88,7 @@ class _CreditCountState extends State<CreditCount> {
                         offset: Offset(2, 2),
                         blurRadius: 4,
                       ),
-                      BoxShadow(
-                        color: Color(0x05000809),
-                        blurRadius: 6,
-                      ),
+                      BoxShadow(color: Color(0x05000809), blurRadius: 6),
                     ],
                   ),
                   child: Row(
@@ -105,7 +106,7 @@ class _CreditCountState extends State<CreditCount> {
                         _isExpanded
                             ? Icons.keyboard_arrow_up_rounded
                             : Icons.keyboard_arrow_down_rounded,
-                        color: const Color(AppColors.darkGrey),
+                        color: const Color(AppColors.uiBorder),
                       ),
                     ],
                   ),
@@ -126,10 +127,7 @@ class _CreditCountState extends State<CreditCount> {
                             offset: Offset(2, 2),
                             blurRadius: 4,
                           ),
-                          BoxShadow(
-                            color: Color(0x05000809),
-                            blurRadius: 6,
-                          ),
+                          BoxShadow(color: Color(0x05000809), blurRadius: 6),
                         ],
                       ),
                       child: Padding(

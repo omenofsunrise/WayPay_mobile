@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class ContractHistoryCard extends StatelessWidget {
   const ContractHistoryCard({
@@ -68,7 +68,7 @@ class ContractHistoryCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: Color(AppColors.darkGrey),
+                        color: Color(AppColors.uiBorder),
                       ),
                     ),
                   ],
@@ -79,7 +79,7 @@ class ContractHistoryCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    color: Color(AppColors.darkGrey),
+                    color: Color(AppColors.uiBorder),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -132,7 +132,7 @@ class _AmountColumn extends StatelessWidget {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: Color(AppColors.darkGrey),
+            color: Color(AppColors.uiBorder),
           ),
         ),
         const SizedBox(height: 6),

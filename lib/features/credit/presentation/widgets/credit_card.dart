@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/utils/price_formatter.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/widgets/credit_modal.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class CreditCardWidget extends StatelessWidget {
   final CreditModel credit;
@@ -27,10 +26,8 @@ class CreditCardWidget extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => CreditFullScreen(
-              credit: credit,
-              isControl: isControl,
-            ),
+            builder: (_) =>
+                CreditFullScreen(credit: credit, isControl: isControl),
           ),
         );
       },
@@ -135,8 +132,9 @@ class CreditCardWidget extends StatelessWidget {
     bool alignRight = false,
   }) {
     return Column(
-      crossAxisAlignment:
-          alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: alignRight
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       children: [
         Text(
           label,

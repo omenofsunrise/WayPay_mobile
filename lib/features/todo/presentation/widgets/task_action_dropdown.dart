@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 enum TaskAction { edit, delete }
 
@@ -18,7 +17,7 @@ class TaskActionsDropdown extends StatelessWidget {
         side: BorderSide(color: Colors.grey.shade300, width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(Icons.more_horiz, size: 22, color: Color(AppColors.darkGrey)),
+      child: Icon(Icons.more_horiz, size: 22, color: Color(AppColors.uiBorder)),
       onSelected: (action) {
         onActionSelected(action);
       },
@@ -29,7 +28,7 @@ class TaskActionsDropdown extends StatelessWidget {
             height: 32,
             child: Row(
               children: [
-                Icon(Icons.edit, size: 24, color: Color(AppColors.darkGrey)),
+                Icon(Icons.edit, size: 24, color: Color(AppColors.uiBorder)),
                 SizedBox(width: 10),
                 Text(
                   'Изменить',
@@ -47,7 +46,7 @@ class TaskActionsDropdown extends StatelessWidget {
             height: 32,
             child: Row(
               children: [
-                Icon(Icons.delete, size: 24, color: Color(AppColors.darkGrey)),
+                Icon(Icons.delete, size: 24, color: Color(AppColors.uiBorder)),
                 SizedBox(width: 10),
                 Text(
                   'Удалить',

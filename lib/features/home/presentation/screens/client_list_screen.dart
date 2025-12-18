@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/buttons/add_button.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/features/home/presentation/widgets/client_info_card.dart';
@@ -116,7 +115,7 @@ class _ClientListScreenState extends State<ClientListScreen> {
                       'Введите минимум 4 символа ФИО или полный номер телефона',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Color(AppColors.darkGrey),
+                        color: Color(AppColors.uiBorder),
                       ),
                     ),
                   ),
@@ -141,10 +140,7 @@ class _ClientListScreenState extends State<ClientListScreen> {
             padding: EdgeInsets.only(top: 32),
             child: Text(
               'Чтобы увидеть клиентов, введите ФИО или номер телефона в поиске.',
-              style: TextStyle(
-                fontSize: 15,
-                color: Color(AppColors.darkGrey),
-              ),
+              style: TextStyle(fontSize: 15, color: Color(AppColors.uiBorder)),
               textAlign: TextAlign.center,
             ),
           ),
@@ -175,7 +171,9 @@ class _ClientListScreenState extends State<ClientListScreen> {
               ),
               const SizedBox(height: 12),
               ElevatedButton(
-                onPressed: _lastSubmittedQuery.isEmpty ? null : _retryLastSearch,
+                onPressed: _lastSubmittedQuery.isEmpty
+                    ? null
+                    : _retryLastSearch,
                 child: const Text('Повторить'),
               ),
             ],
@@ -192,10 +190,7 @@ class _ClientListScreenState extends State<ClientListScreen> {
             child: Text(
               'Клиенты не найдены',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(AppColors.darkGrey),
-              ),
+              style: TextStyle(fontSize: 16, color: Color(AppColors.uiBorder)),
             ),
           ),
         );
@@ -209,28 +204,25 @@ class _ClientListScreenState extends State<ClientListScreen> {
 
   SliverList _buildClientList(List<ClientModel> clients) {
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final client = clients[index];
-          final whatsApp = _resolveWhatsapp(client);
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final client = clients[index];
+        final whatsApp = _resolveWhatsapp(client);
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: ClientInfoCard(
-              fullName: client.fullName,
-              clientId: client.id.toString(),
-              birthDate: _formatDate(client.birthdate),
-              phone: client.phone,
-              whatsApp: whatsApp,
-              onTap: () => context.pushNamed(
-                Routes.clientDetailScreen.toName,
-                extra: client,
-              ),
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: ClientInfoCard(
+            fullName: client.fullName,
+            clientId: client.id.toString(),
+            birthDate: _formatDate(client.birthdate),
+            phone: client.phone,
+            whatsApp: whatsApp,
+            onTap: () => context.pushNamed(
+              Routes.clientDetailScreen.toName,
+              extra: client,
             ),
-          );
-        },
-        childCount: clients.length,
-      ),
+          ),
+        );
+      }, childCount: clients.length),
     );
   }
 
@@ -246,8 +238,8 @@ class _ClientListScreenState extends State<ClientListScreen> {
 
   void _retryLastSearch() {
     if (_lastSubmittedQuery.isEmpty) return;
-    context
-        .read<ClientsBloc>()
-        .add(SearchClients(_lastSubmittedQuery, pageSize: 20));
+    context.read<ClientsBloc>().add(
+      SearchClients(_lastSubmittedQuery, pageSize: 20),
+    );
   }
 }

@@ -4,16 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/buttons/add_button.dart';
-import 'package:waypay_mobile/core/widgets/cards/credit_card.dart';
-import 'package:waypay_mobile/core/widgets/filters/filter_components.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_mobile/features/credit/presentation/widgets/credit_card.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
+
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
@@ -275,7 +271,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
                             ),
                           ),
                         ],
-          const SizedBox(height: 4),
+                        const SizedBox(height: 4),
                       ],
                     );
                   },
@@ -364,7 +360,7 @@ class _CreditTabSheet extends StatelessWidget {
     return FilterSheet(
       title: 'Сортировка',
       keepHeaderPinned: true,
-     child: Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [

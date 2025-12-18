@@ -9,19 +9,15 @@ import 'package:waypay_mobile/features/analytics/presentation/cubit/investment_d
 import 'package:waypay_mobile/features/analytics/presentation/cubit/sell_info_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/screens/analytic_screen.dart';
 import 'package:waypay_mobile/features/admin_panel/presentation/screen/company_data_screen.dart';
-
 import 'package:waypay_mobile/features/auth/presentation/screens/confirmation_screen.dart';
 import 'package:waypay_mobile/features/auth/presentation/screens/phone_auth_screen.dart';
 import 'package:waypay_mobile/features/auth/presentation/screens/pin_code_screen.dart';
-
 import 'package:waypay_mobile/features/bottom_navigation_bar/main_layout.dart';
 import 'package:waypay_mobile/features/blog/presentation/screens/blog_screen.dart';
-import 'package:waypay_mobile/features/credit/presentation/screens/create_credit/custom_page_transitions.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/create_credit/new_credit_creation_screen.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/credit_screen.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
-import 'package:waypay_mobile/features/finance/presentation/screens/budget_screen.dart';
 import 'package:waypay_mobile/features/home/data/models/credit_applications/credit_application_model.dart';
 import 'package:waypay_mobile/features/home/presentation/cubit/client_applications/client_applications_cubit.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/client_application_detail_screen.dart';
@@ -43,7 +39,6 @@ import 'package:waypay_mobile/features/investors/presentation/screens/investor_p
 import 'package:waypay_mobile/features/investors/presentation/screens/investor_pool_screen.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investors_hub_screen.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investors_screen.dart';
-import 'package:waypay_mobile/features/product/presentation/screens/product_screen.dart';
 import 'package:waypay_mobile/features/finance/presentation/screens/finance_main_screen.dart';
 import 'package:waypay_mobile/features/finance/presentation/screens/budget_applications_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/profile_screen.dart';
@@ -52,7 +47,6 @@ import 'package:waypay_mobile/features/profile/presentation/screens/active_sessi
 import 'package:waypay_mobile/features/profile/presentation/screens/employees_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/add_employee_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_bloc.dart';
-import 'package:waypay_mobile/features/todo/presentation/screen/todo_screen.dart';
 import 'package:waypay_mobile/features/chat/presentation/screens/all_chat_screen.dart';
 import 'package:waypay_mobile/features/calc/calculator_page.dart';
 import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
@@ -255,12 +249,6 @@ class AppRouter {
         },
       ),
 
-      GoRoute(
-        path: Routes.productScreen.toPath,
-        name: Routes.productScreen.toName,
-        builder: (context, state) => const ProductsScreen(),
-      ),
-
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainLayout(navigationShell: navigationShell);
@@ -343,11 +331,6 @@ class AppRouter {
                           ],
                           child: const BudgetApplicationsScreen(),
                         ),
-                      ),
-                      GoRoute(
-                        path: Routes.budgetScreen.toPath,
-                        name: Routes.budgetScreen.toName,
-                        builder: (context, state) => const BudgetScreen(),
                       ),
                     ],
                   ),
@@ -475,15 +458,15 @@ class AppRouter {
               ),
             ],
           ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: Routes.todoScreen.toPath,
-                name: Routes.todoScreen.toName,
-                builder: (context, state) => const TodoScreen(),
-              ),
-            ],
-          ),
+          // StatefulShellBranch(
+          //   routes: [
+          //     GoRoute(
+          //       path: Routes.todoScreen.toPath,
+          //       name: Routes.todoScreen.toName,
+          //       builder: (context, state) => const TodoScreen(),
+          //     ),
+          //   ],
+          // ),
           StatefulShellBranch(
             routes: [
               GoRoute(

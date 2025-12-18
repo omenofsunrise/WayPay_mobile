@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
 import 'package:waypay_mobile/features/finance/data/data_source/budget_remote_data_source.dart';
 import 'package:waypay_mobile/features/finance/data/models/create_budget_outcome_dto.dart';
 import 'package:intl/intl.dart';
@@ -13,8 +9,7 @@ class AddBudgetExpenseScreen extends StatefulWidget {
   const AddBudgetExpenseScreen({super.key});
 
   @override
-  State<AddBudgetExpenseScreen> createState() =>
-      _AddBudgetExpenseScreenState();
+  State<AddBudgetExpenseScreen> createState() => _AddBudgetExpenseScreenState();
 }
 
 class _AddBudgetExpenseScreenState extends State<AddBudgetExpenseScreen> {
@@ -26,7 +21,9 @@ class _AddBudgetExpenseScreenState extends State<AddBudgetExpenseScreen> {
   String? _amountError;
 
   bool get _canSubmit =>
-      !_isSaving && _getAmountValue() > 0 && _commentController.text.trim().isNotEmpty;
+      !_isSaving &&
+      _getAmountValue() > 0 &&
+      _commentController.text.trim().isNotEmpty;
 
   @override
   void initState() {
@@ -94,9 +91,9 @@ class _AddBudgetExpenseScreenState extends State<AddBudgetExpenseScreen> {
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Не удалось сохранить: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Не удалось сохранить: $e')));
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investor_report_screen.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class InvestorCard extends StatefulWidget {
   final InvestorsModel investor;

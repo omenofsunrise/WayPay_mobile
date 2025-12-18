@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
@@ -96,7 +95,7 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
           child: Text(
             'Введите ФИО или номер телефона, чтобы найти клиента.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(AppColors.darkGrey)),
+            style: TextStyle(color: Color(AppColors.uiBorder)),
           ),
         );
       }
@@ -105,7 +104,7 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
           child: Text(
             'Введите минимум 4 символа ФИО или полный номер телефона',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(AppColors.darkGrey)),
+            style: TextStyle(color: Color(AppColors.uiBorder)),
           ),
         );
       }
@@ -137,7 +136,7 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
         return const Center(
           child: Text(
             'Клиенты не найдены',
-            style: TextStyle(color: Color(AppColors.darkGrey)),
+            style: TextStyle(color: Color(AppColors.uiBorder)),
           ),
         );
       }
@@ -166,7 +165,7 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
             ),
             trailing: Text(
               'ID ${client.id}',
-              style: const TextStyle(color: Color(AppColors.darkGrey)),
+              style: const TextStyle(color: Color(AppColors.uiBorder)),
             ),
           );
         },
@@ -212,7 +211,7 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
                   'Введите минимум 4 символа ФИО или полный номер телефона',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Color(AppColors.darkGrey),
+                    color: Color(AppColors.uiBorder),
                   ),
                 ),
               ),

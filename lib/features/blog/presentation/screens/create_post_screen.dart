@@ -4,10 +4,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/blog/data/data_sources/blog_remote_data_sources.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -157,7 +156,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                           style: AppStyle.manrope(
                             size: 14,
                             weight: FontWeight.w500,
-                            color: const Color(AppColors.comfPayment),
+                            color: const Color(AppColors.primary),
                           ),
                         ),
                       ),
@@ -225,7 +224,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                                 child: ListTile(
                                   leading: Icon(
                                     Icons.insert_drive_file,
-                                    color: Color(AppColors.comfPayment),
+                                    color: Color(AppColors.primary),
                                   ),
                                   title: Text(entry.value.name),
                                   subtitle: Text(

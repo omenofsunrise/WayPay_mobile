@@ -4,12 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investor_pool_bloc.dart';
 import 'package:waypay_mobile/routes/routes.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class InvestorPoolScreen extends StatefulWidget {
   const InvestorPoolScreen({super.key});
@@ -84,9 +83,9 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
                     if (state is InvestorPoolError) {
                       return _InvestorPoolError(
                         message: state.message,
-                        onRetry: () => context
-                            .read<InvestorPoolBloc>()
-                            .add(LoadInvestorPool(refresh: true)),
+                        onRetry: () => context.read<InvestorPoolBloc>().add(
+                          LoadInvestorPool(refresh: true),
+                        ),
                       );
                     }
                     if (state is InvestorPoolLoaded) {
@@ -95,7 +94,7 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
                           child: Text(
                             'Нет пулов инвесторов по текущим параметрам',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Color(AppColors.darkGrey)),
+                            style: TextStyle(color: Color(AppColors.uiBorder)),
                           ),
                         );
                       }
@@ -106,10 +105,8 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
                                   notification.metrics.maxScrollExtent - 200 &&
                               state.hasMore) {
                             context.read<InvestorPoolBloc>().add(
-                                  LoadInvestorPool(
-                                    page: state.currentPage + 1,
-                                  ),
-                                );
+                              LoadInvestorPool(page: state.currentPage + 1),
+                            );
                           }
                           return false;
                         },
@@ -117,12 +114,15 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
                           padding: const EdgeInsets.only(bottom: 24),
                           itemCount:
                               state.items.length + (state.hasMore ? 1 : 0),
-                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 12),
                           itemBuilder: (context, index) {
                             if (index >= state.items.length) {
                               return const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 16),
-                                child: Center(child: CircularProgressIndicator()),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
                               );
                             }
                             final pool = state.items[index];
@@ -200,7 +200,7 @@ class _InvestorPoolCard extends StatelessWidget {
                       'ID: ${pool.id}',
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Color(AppColors.darkGrey),
+                        color: Color(AppColors.uiBorder),
                       ),
                     ),
                     const Spacer(),
@@ -210,7 +210,7 @@ class _InvestorPoolCard extends StatelessWidget {
                           : '',
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Color(AppColors.darkGrey),
+                        color: Color(AppColors.uiBorder),
                       ),
                     ),
                   ],
@@ -267,7 +267,7 @@ class _InfoColumn extends StatelessWidget {
           label,
           style: const TextStyle(
             fontSize: 13,
-            color: Color(AppColors.darkGrey),
+            color: Color(AppColors.uiBorder),
           ),
         ),
         const SizedBox(height: 4),
@@ -302,10 +302,7 @@ class _InvestorPoolError extends StatelessWidget {
             style: const TextStyle(color: Colors.red),
           ),
           const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: onRetry,
-            child: const Text('Повторить'),
-          ),
+          ElevatedButton(onPressed: onRetry, child: const Text('Повторить')),
         ],
       ),
     );

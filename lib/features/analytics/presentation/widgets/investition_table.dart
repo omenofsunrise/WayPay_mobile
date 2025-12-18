@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/investment_dynamic_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/investment_dynamic_state.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class InvestitionTable extends StatefulWidget {
   const InvestitionTable({super.key});
@@ -125,7 +124,7 @@ class _InvestitionTableState extends State<InvestitionTable> {
                                   style: AppStyle.manrope(
                                     size: 15,
                                     weight: FontWeight.w400,
-                                    color: Color(AppColors.darkGrey),
+                                    color: Color(AppColors.uiBorder),
                                   ),
                                 ),
                               ),
@@ -138,7 +137,7 @@ class _InvestitionTableState extends State<InvestitionTable> {
                                   style: AppStyle.manrope(
                                     size: 15,
                                     weight: FontWeight.w400,
-                                    color: Color(AppColors.comfPayment),
+                                    color: Color(AppColors.primary),
                                   ),
                                 ),
                               ),

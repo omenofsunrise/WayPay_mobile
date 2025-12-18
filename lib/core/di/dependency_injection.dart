@@ -27,7 +27,6 @@ import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_da
 import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source.dart';
 import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/chat/data/service/chat_hub_service.dart';
-import 'package:waypay_mobile/features/chat/presentation/bloc/chat/chat_bloc.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/black_catalog/black_catalog_remote_data_source.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/black_catalog/black_catalog_remote_data_source_impl.dart';
@@ -58,9 +57,6 @@ import 'package:waypay_mobile/features/note/data/data_sources/note_remote_data_s
 import 'package:waypay_mobile/features/notifications/data/data_source/notifications_data_source.dart';
 import 'package:waypay_mobile/features/notifications/data/data_source/notifications_data_source_impl.dart';
 import 'package:waypay_mobile/features/notifications/presentation/cubit/notifications_cubit.dart';
-import 'package:waypay_mobile/features/product/data/data_sources/products_remote_data_source.dart';
-import 'package:waypay_mobile/features/product/data/data_sources/products_remote_data_source_impl.dart';
-import 'package:waypay_mobile/features/product/presentation/bloc/products_bloc.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/queue/queue_remote_data_source.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/queue/queue_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/queue/queue_bloc.dart';
@@ -114,9 +110,6 @@ Future<void> initDependencies() async {
   );
   getIt.registerLazySingleton<BankCardRemoteDataSource>(
     () => BankCardRemoteDataSourceImpl(getIt<Dio>()),
-  );
-  getIt.registerLazySingleton<ProductsRemoteDataSource>(
-    () => ProductsRemoteDataSourceImpl(getIt<Dio>()),
   );
   getIt.registerLazySingleton<BudgetRemoteDataSource>(
     () => BudgetRemoteDataSourceImpl(getIt<Dio>()),
@@ -188,7 +181,6 @@ Future<void> initDependencies() async {
   getIt.registerFactory(() => BlackCatalogCubit());
   getIt.registerFactory(() => ClientApplicationsCubit());
   getIt.registerFactory(() => BlacklistBloc());
-  getIt.registerFactory(() => ProductsBloc());
   getIt.registerFactory(() => BudgetIncomeBloc());
   getIt.registerFactory(() => BudgetExpenseBloc());
   getIt.registerFactory(() => QueueBloc());

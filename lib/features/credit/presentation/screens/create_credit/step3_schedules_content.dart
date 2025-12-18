@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
 import 'package:waypay_mobile/features/credit/data/models/schedule_preview_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class Step3SchedulesContent extends StatefulWidget {
   final bool nextMonthStart;
@@ -410,7 +410,7 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
           message,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            color: Color(AppColors.darkGrey),
+            color: Color(AppColors.uiBorder),
             fontSize: 14,
           ),
         ),

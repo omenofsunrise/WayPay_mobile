@@ -1,26 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/storage/user_storage.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/app_modal.dart';
-import 'package:waypay_mobile/core/widgets/buttons/add_button.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/custom_tab_switcher.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
-import 'package:waypay_mobile/core/widgets/pagination_widget.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
-import 'package:waypay_mobile/features/finance/data/data_source/budget_remote_data_source.dart';
-import 'package:waypay_mobile/features/finance/data/models/create_budget_outcome_dto.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
 import 'package:waypay_mobile/features/finance/presentation/screens/add_budget_income_screen.dart';
 import 'package:waypay_mobile/features/finance/presentation/screens/add_budget_expense_screen.dart';
-import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 
 class BudgetApplicationsScreen extends StatefulWidget {
   const BudgetApplicationsScreen({super.key});
@@ -34,7 +20,6 @@ class _BudgetApplicationsScreenState extends State<BudgetApplicationsScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
-  final _userStorage = UserStorage();
   final TextEditingController _monthController = TextEditingController();
   final TextEditingController _yearController = TextEditingController();
   int _selectedMonth = DateTime.now().month;
@@ -72,7 +57,9 @@ class _BudgetApplicationsScreenState extends State<BudgetApplicationsScreen>
 
   Future<void> _loadIncome({int? page}) async {
     // ignore: avoid_print
-    print('[BudgetScreen][LOAD_INCOME] month=$_selectedMonth year=$_selectedYear page=$page');
+    print(
+      '[BudgetScreen][LOAD_INCOME] month=$_selectedMonth year=$_selectedYear page=$page',
+    );
     context.read<BudgetIncomeBloc>().add(
       LoadBudgetIncomeEvent(
         month: _selectedMonth,
@@ -135,127 +122,6 @@ class _BudgetApplicationsScreenState extends State<BudgetApplicationsScreen>
     if (result == true) {
       await _loadExpense();
     }
-  }
-
-  void _openEntryDetails({
-    required bool isIncome,
-    required int id,
-    required double amount,
-    required DateTime? createdAt,
-    required String? comment,
-    String? investorName,
-    required int currentPage,
-  }) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AppModal(
-        backgroundColor: const Color(AppColors.background),
-        title: isIncome ? 'Детали прихода' : 'Детали расхода',
-        menuItems:
-            _userStorage.hasViewContent([
-              EmployeeRole.superAdmin,
-              EmployeeRole.director,
-            ])
-            ? [
-                PopupMenuItem(
-                  child: const Text('Удалить'),
-                  onTap: () async {
-                    Navigator.pop(dialogContext);
-
-                    final confirmed = await showDialog<bool>(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        backgroundColor: const Color(AppColors.background),
-                        title: const Text('Удаление'),
-                        content: const Text('Удалить эту запись?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: const Text('Отмена'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: const Text('Удалить'),
-                          ),
-                        ],
-                      ),
-                    );
-
-                    if (confirmed != true || !mounted) return;
-
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (_) =>
-                          const Center(child: CircularProgressIndicator()),
-                    );
-
-                    try {
-                      if (isIncome) {
-                        await getIt<BudgetRemoteDataSource>()
-                            .deleteBudgetIncome(id);
-                        if (!mounted) return;
-                        Navigator.pop(context);
-                        await _loadIncome(page: currentPage);
-                      } else {
-                        await getIt<BudgetRemoteDataSource>()
-                            .deleteBudgetOutcome(id);
-                        if (!mounted) return;
-                        Navigator.pop(context);
-                        await _loadExpense(page: currentPage);
-                      }
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            isIncome ? 'Приход удален' : 'Расход удален',
-                          ),
-                        ),
-                      );
-                    } catch (e) {
-                      if (!mounted) return;
-                      Navigator.pop(context);
-                      showDialog(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                          backgroundColor: const Color(AppColors.background),
-                          title: const Text('Ошибка'),
-                          content: Text('Не удалось удалить.\n$e'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Ок'),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ]
-            : null,
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _DetailRow(label: 'Сумма', value: _formatCurrency(amount)),
-            _DetailRow(
-              label: 'Дата',
-              value: createdAt != null
-                  ? DateFormat('dd.MM.yyyy').format(createdAt)
-                  : 'не указана',
-            ),
-            _DetailRow(
-              label: isIncome ? 'Инвестор' : 'Комментарий',
-              value: isIncome
-                  ? ((investorName?.trim().isEmpty ?? true)
-                      ? '-'
-                      : investorName!)
-                  : ((comment?.trim().isEmpty ?? true) ? '-' : comment!),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -363,7 +229,7 @@ class _BudgetApplicationsScreenState extends State<BudgetApplicationsScreen>
       onTap: onTap,
       suffixIcon: const Icon(
         Icons.keyboard_arrow_down_rounded,
-        color: Color(AppColors.darkGrey),
+        color: Color(AppColors.uiBorder),
       ),
       suffixIconConstraints: const BoxConstraints(minHeight: 24, minWidth: 24),
     );
@@ -595,16 +461,6 @@ class _BudgetEntriesList extends StatelessWidget {
                   ),
           ),
         ),
-        if (hasData && totalPages > 1)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: PaginationWidget(
-              currentPage: currentPage,
-              totalPages: totalPages,
-              onPageSelected: onPageSelected,
-              isCompact: true,
-            ),
-          ),
       ],
     );
   }

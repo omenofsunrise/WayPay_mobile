@@ -3,11 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/queue/queue_bloc.dart';
@@ -151,17 +150,7 @@ class _QueueListViewState extends State<_QueueListView> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    ElevatedButton(
-                      onPressed: _showCreateQueueDialog,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(AppColors.primary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        padding: const EdgeInsets.all(12),
-                      ),
-                      child: const Icon(Icons.add, color: Colors.white),
-                    ),
+                    AddButton(onPressed: _showCreateQueueDialog),
                   ],
                 ),
               ),
@@ -181,7 +170,7 @@ class _QueueListViewState extends State<_QueueListView> {
                       'Введите минимум 4 символа ФИО или полный номер телефона',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Color(AppColors.darkGrey),
+                        color: Color(AppColors.uiBorder),
                       ),
                     ),
                   ),
@@ -237,7 +226,7 @@ class _QueueListViewState extends State<_QueueListView> {
             child: Text(
               'Очередь пуста',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Color(AppColors.darkGrey)),
+              style: TextStyle(fontSize: 16, color: Color(AppColors.uiBorder)),
             ),
           ),
         );
@@ -390,7 +379,7 @@ class _CreateQueueModalState extends State<_CreateQueueModal> {
               ),
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.close, color: Color(AppColors.darkGrey)),
+                icon: const Icon(Icons.close, color: Color(AppColors.uiBorder)),
               ),
             ],
           ),
@@ -417,9 +406,8 @@ class _CreateQueueModalState extends State<_CreateQueueModal> {
                 'Высокий приоритет',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
-              Switch(
+              ToggleSwitch(
                 value: _highPriority,
-                activeThumbColor: const Color(AppColors.primary),
                 onChanged: (value) => setState(() => _highPriority = value),
               ),
             ],
@@ -663,7 +651,7 @@ class _ClientPickerModalState extends State<_ClientPickerModal> {
                   'Введите минимум 4 символа ФИО или полный номер телефона',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Color(AppColors.darkGrey),
+                    color: Color(AppColors.uiBorder),
                   ),
                 ),
               ),
@@ -697,7 +685,7 @@ class _ClientPickerModalState extends State<_ClientPickerModal> {
           child: Text(
             'Введите ФИО или номер телефона, чтобы найти клиента.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(AppColors.darkGrey)),
+            style: TextStyle(color: Color(AppColors.uiBorder)),
           ),
         );
       }
@@ -706,7 +694,7 @@ class _ClientPickerModalState extends State<_ClientPickerModal> {
           child: Text(
             'Введите минимум 4 символа ФИО или полный номер телефона',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(AppColors.darkGrey)),
+            style: TextStyle(color: Color(AppColors.uiBorder)),
           ),
         );
       }
@@ -738,7 +726,7 @@ class _ClientPickerModalState extends State<_ClientPickerModal> {
         return const Center(
           child: Text(
             'Клиенты не найдены',
-            style: TextStyle(color: Color(AppColors.darkGrey)),
+            style: TextStyle(color: Color(AppColors.uiBorder)),
           ),
         );
       }
@@ -767,7 +755,7 @@ class _ClientPickerModalState extends State<_ClientPickerModal> {
             ),
             trailing: Text(
               'ID ${client.id}',
-              style: const TextStyle(color: Color(AppColors.darkGrey)),
+              style: const TextStyle(color: Color(AppColors.uiBorder)),
             ),
           );
         },

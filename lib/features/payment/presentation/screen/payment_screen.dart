@@ -4,12 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
-import 'package:waypay_mobile/core/widgets/app_modal.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
 import 'package:waypay_mobile/features/payment/presentation/bloc/expected/payment_bloc.dart';
@@ -68,85 +64,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
     super.dispose();
   }
 
-  void _openFilterModal(BuildContext context) {
-    final paymentBloc = context.read<PaymentBloc>();
-    final tempController = TextEditingController(text: _searchController.text);
-
-    showDialog(
-      context: context,
-      builder: (_) => AppModal(
-        title: 'Фильтры',
-        backgroundColor: const Color(AppColors.background),
-        contentPadding: const EdgeInsets.all(16),
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: tempController,
-              decoration: InputDecoration(
-                hintText: 'Поиск по имени...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
-              onChanged: (value) {
-                if (_debounce?.isActive ?? false) _debounce!.cancel();
-                _debounce = Timer(const Duration(milliseconds: 500), () {
-                  final q = value.trim();
-                  if (q.isNotEmpty) {
-                    paymentBloc.add(SearchPayment(q, pageSize: 10));
-                  } else {
-                    paymentBloc.add(
-                      LoadPayment(refresh: true, page: 1, pageSize: 10),
-                    );
-                  }
-                });
-              },
-            ),
-          ],
-        ),
-        actions: [
-          DefaultButton(
-            text: 'Сбросить',
-            onPressed: () {
-              tempController.clear();
-              setState(() => _searchController.clear());
-              paymentBloc.add(
-                LoadPayment(refresh: true, page: 1, pageSize: 10),
-              );
-              Navigator.pop(context);
-            },
-          ),
-          const SizedBox(width: 12),
-          DefaultButton(
-            text: 'Применить',
-            isPrimary: true,
-            onPressed: () {
-              setState(() => _searchController.text = tempController.text);
-              final q = _searchController.text.trim();
-              if (q.isNotEmpty) {
-                paymentBloc.add(SearchPayment(q, pageSize: 10));
-              } else {
-                paymentBloc.add(
-                  LoadPayment(refresh: true, page: 1, pageSize: 10),
-                );
-              }
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final scheduleState = context.watch<PaymentScheduleCubit>().state;
-    final showAnalyticsSpacing = _canViewAnalytics &&
+    final showAnalyticsSpacing =
+        _canViewAnalytics &&
         scheduleState is! PaymentScheduleError &&
         scheduleState is! PaymentScheduleNoAccess &&
         !(scheduleState is PaymentScheduleLoaded &&
@@ -348,7 +270,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     'Нет ожидаемых платежей',
-                    style: TextStyle(color: Color(AppColors.darkGrey)),
+                    style: TextStyle(color: Color(AppColors.uiBorder)),
                   ),
                 );
               }
@@ -432,7 +354,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     'История платежей пуста',
-                    style: TextStyle(color: Color(AppColors.darkGrey)),
+                    style: TextStyle(color: Color(AppColors.uiBorder)),
                   ),
                 );
               }

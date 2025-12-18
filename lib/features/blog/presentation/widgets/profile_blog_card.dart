@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/form_modal/label_text_field.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
 import 'package:waypay_mobile/features/blog/data/models/profile_blog_model.dart';
 import 'package:waypay_mobile/features/blog/presentation/cubit/profile_blog_cubit.dart';
@@ -14,7 +10,7 @@ import 'package:waypay_mobile/features/chat/data/service/chat_hub_service.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat/chat_bloc.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
 import 'package:waypay_mobile/features/chat/presentation/screens/chat_screen.dart';
-import 'package:waypay_mobile/routes/routes.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class ProfileBlogCard extends StatefulWidget {
   final ProfileBlogModel user;
@@ -84,7 +80,7 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                     height: 30,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: Color(AppColors.comfPayment),
+                        color: Color(AppColors.primary),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -126,7 +122,7 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                                   Icon(
                                     Icons.edit,
                                     size: 16,
-                                    color: Color(AppColors.darkGrey),
+                                    color: Color(AppColors.uiBorder),
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
@@ -134,7 +130,7 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                                     style: AppStyle.manrope(
                                       size: 12,
                                       weight: FontWeight.w400,
-                                      color: Color(AppColors.darkGrey),
+                                      color: Color(AppColors.uiBorder),
                                     ),
                                   ),
                                 ],
@@ -150,7 +146,7 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                                 size: 13,
                                 weight: FontWeight.w400,
                                 color: widget.user.description == null
-                                    ? Color(AppColors.darkGrey)
+                                    ? Color(AppColors.uiBorder)
                                     : Color(AppColors.black),
                               ),
                             ),
@@ -160,30 +156,32 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                   ],
                 ),
               ),
-              if (_isEditing)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: LabeledTextField(
-                              label: '',
-                              controller: _controller,
-                              hintText: 'Введите описание',
+                          if (_isEditing)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Column(
+                                children: [
+                                  const SizedBox(height: 16),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _controller,
+                                          decoration: const InputDecoration(
+                                            hintText: 'Введите описание',
+                                          ),
+                                          onSubmitted: (_) => _saveDescription(),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.send),
+                                        onPressed: _saveDescription,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.send),
-                            onPressed: _saveDescription,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -202,7 +200,7 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                         style: AppStyle.manrope(
                           size: 12,
                           weight: FontWeight.w400,
-                          color: Color(AppColors.darkGrey),
+                          color: Color(AppColors.uiBorder),
                         ),
                       ),
                     ],
@@ -221,7 +219,7 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                         style: AppStyle.manrope(
                           size: 12,
                           weight: FontWeight.w400,
-                          color: Color(AppColors.darkGrey),
+                          color: Color(AppColors.uiBorder),
                         ),
                       ),
                     ],
@@ -240,7 +238,7 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                         style: AppStyle.manrope(
                           size: 12,
                           weight: FontWeight.w400,
-                          color: Color(AppColors.darkGrey),
+                          color: Color(AppColors.uiBorder),
                         ),
                       ),
                     ],
@@ -299,7 +297,7 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                       width: double.infinity,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: Color(AppColors.comfPayment),
+                          color: Color(AppColors.primary),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Center(

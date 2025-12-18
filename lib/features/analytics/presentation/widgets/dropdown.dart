@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 enum PeriodOption {
   last7Days('За последние 7 дней'),
@@ -95,7 +93,7 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
               style: AppStyle.manrope(
                 size: 14,
                 weight: FontWeight.w400,
-                color: Color(AppColors.radioColor),
+                color: Color(AppColors.primary),
               ),
             ),
           ),
@@ -143,7 +141,7 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
       height: 18,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Color(AppColors.radioColor), width: 1),
+        border: Border.all(color: Color(AppColors.primary), width: 1),
       ),
       child: Center(
         child: Container(
@@ -160,7 +158,7 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
               height: 10,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(AppColors.radioColor),
+                color: Color(AppColors.primary),
               ),
             ),
           ),

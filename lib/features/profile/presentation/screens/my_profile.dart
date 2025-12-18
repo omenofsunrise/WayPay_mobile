@@ -5,13 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:waypay_mobile/routes/routes.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class MyProfileScreen extends StatefulWidget {
   final int? employeeId;
@@ -192,7 +191,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           _ProfileMenuItem(
             icon: SvgPicture.asset(SvgIcons.employees),
             label: 'Сотрудники',
-            onTap: () => context.pushNamed(Routes.profileEmployeesScreen.toName),
+            onTap: () =>
+                context.pushNamed(Routes.profileEmployeesScreen.toName),
           ),
       ],
       if (isDirector)

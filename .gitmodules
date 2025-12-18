@@ -1,0 +1,6 @@
+[submodule "packages/ui_kit"]
+	path = packages/ui_kit
+	url = https://github.com/omenofsunrise/waypay_styles.git
+[submodule "packages/waypay_styles"]
+	path = packages/waypay_styles
+	url = https://github.com/omenofsunrise/waypay_styles.git

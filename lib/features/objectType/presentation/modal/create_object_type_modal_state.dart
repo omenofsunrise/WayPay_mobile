@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_event.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_state.dart';
@@ -10,10 +10,7 @@ import 'package:waypay_mobile/features/objectType/data/models/object_type_model.
 class CreateObjectTypeModal extends StatefulWidget {
   final String entityType;
 
-  const CreateObjectTypeModal({
-    super.key,
-    required this.entityType,
-  });
+  const CreateObjectTypeModal({super.key, required this.entityType});
 
   @override
   State<CreateObjectTypeModal> createState() => _CreateObjectTypeModalState();
@@ -72,10 +69,7 @@ class _CreateObjectTypeModalState extends State<CreateObjectTypeModal> {
                 const Expanded(
                   child: Text(
                     'Новый каталог',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                 ),
                 IconButton(
@@ -124,9 +118,9 @@ class _CreateObjectTypeModalState extends State<CreateObjectTypeModal> {
                         setState(() {
                           _isCreating = false;
                         });
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(state.message)),
-                        );
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(state.message)));
                       }
                     },
                     builder: (context, state) {

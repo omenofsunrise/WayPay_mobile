@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
 import 'package:waypay_mobile/features/admin_panel/data/data_sources/company_remote_data_source.dart';
 import 'package:waypay_mobile/features/info/privacy_policy_screen.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class InfoScreen extends StatefulWidget {
   const InfoScreen({super.key});
@@ -45,7 +43,6 @@ class _InfoScreenState extends State<InfoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(AppColors.primary),
-      drawer: const AppDrawer(),
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
         backgroundColor: const Color(AppColors.primary),
@@ -85,7 +82,7 @@ class _InfoScreenState extends State<InfoScreen> {
                     style: AppStyle.inter(
                       size: 16,
                       weight: FontWeight.w400,
-                      color: Color(AppColors.darkGrey),
+                      color: Color(AppColors.uiBorder),
                     ),
                   ),
                   SizedBox(height: 50),
@@ -103,7 +100,7 @@ class _InfoScreenState extends State<InfoScreen> {
                     style: AppStyle.inter(
                       size: 16,
                       weight: FontWeight.w400,
-                      color: Color(AppColors.darkGrey),
+                      color: Color(AppColors.uiBorder),
                     ),
                   ),
                   Text(
@@ -111,7 +108,7 @@ class _InfoScreenState extends State<InfoScreen> {
                     style: AppStyle.inter(
                       size: 16,
                       weight: FontWeight.w400,
-                      color: Color(AppColors.comfPayment),
+                      color: Color(AppColors.primary),
                     ),
                   ),
                   SizedBox(height: 25),
@@ -131,7 +128,7 @@ class _InfoScreenState extends State<InfoScreen> {
                     style: AppStyle.inter(
                       size: 16,
                       weight: FontWeight.w400,
-                      color: Color(AppColors.darkGrey),
+                      color: Color(AppColors.uiBorder),
                     ),
                   ),
                   Spacer(),
@@ -161,7 +158,7 @@ class _InfoScreenState extends State<InfoScreen> {
                         style: AppStyle.inter(
                           size: 20,
                           weight: FontWeight.w400,
-                          color: Color(AppColors.comfPayment),
+                          color: Color(AppColors.primary),
                         ),
                       ),
                     ),

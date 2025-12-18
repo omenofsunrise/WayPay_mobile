@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/features/clients/data/models/black_catalog/black_catalog_client_model.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class BlackCatalogCard extends StatelessWidget {
   const BlackCatalogCard({super.key, required this.client});
@@ -68,7 +68,7 @@ class BlackCatalogCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Color(AppColors.darkGrey),
+                    color: Color(AppColors.uiBorder),
                   ),
                 ),
               ],
@@ -99,10 +99,7 @@ class BlackCatalogCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            _LabeledValue(
-              label: 'Адрес',
-              value: _resolveAddress(),
-            ),
+            _LabeledValue(label: 'Адрес', value: _resolveAddress()),
           ],
         ),
       ),
@@ -126,7 +123,7 @@ class _LabeledValue extends StatelessWidget {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: Color(AppColors.darkGrey),
+            color: Color(AppColors.uiBorder),
           ),
         ),
         const SizedBox(height: 4),

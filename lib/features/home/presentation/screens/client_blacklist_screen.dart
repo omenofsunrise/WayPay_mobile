@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+
 import 'package:waypay_mobile/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
 import 'package:waypay_mobile/features/clients/presentation/widgets/blacklist_client_card.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class ClientBlacklistScreen extends StatefulWidget {
   const ClientBlacklistScreen({super.key});
@@ -39,7 +39,8 @@ class _ClientBlacklistScreenState extends State<ClientBlacklistScreen> {
     final hasQuery = query.isNotEmpty;
     final meetsPhoneRequirement = digits.length >= 11;
     final meetsNameRequirement = query.length >= 4;
-    final shouldSearch = hasQuery && (meetsPhoneRequirement || meetsNameRequirement);
+    final shouldSearch =
+        hasQuery && (meetsPhoneRequirement || meetsNameRequirement);
 
     if (!hasQuery) {
       setState(() {
@@ -67,8 +68,8 @@ class _ClientBlacklistScreenState extends State<ClientBlacklistScreen> {
       if (!mounted) return;
       _lastSubmittedQuery = query;
       context.read<BlacklistBloc>().add(
-            SearchBlacklistedClients(query, pageSize: 20),
-          );
+        SearchBlacklistedClients(query, pageSize: 20),
+      );
     });
   }
 
@@ -76,9 +77,9 @@ class _ClientBlacklistScreenState extends State<ClientBlacklistScreen> {
 
   void _retryLastSearch() {
     if (_lastSubmittedQuery.isEmpty) return;
-    context
-        .read<BlacklistBloc>()
-        .add(SearchBlacklistedClients(_lastSubmittedQuery, pageSize: 20));
+    context.read<BlacklistBloc>().add(
+      SearchBlacklistedClients(_lastSubmittedQuery, pageSize: 20),
+    );
   }
 
   @override
@@ -105,7 +106,7 @@ class _ClientBlacklistScreenState extends State<ClientBlacklistScreen> {
                     'Введите минимум 4 символа ФИО или полный номер телефона',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Color(AppColors.darkGrey),
+                      color: Color(AppColors.uiBorder),
                     ),
                   ),
                 ),
@@ -132,10 +133,7 @@ class _ClientBlacklistScreenState extends State<ClientBlacklistScreen> {
     }
 
     if (state is BlacklistError) {
-      return _ErrorView(
-        message: state.message,
-        onRetry: _retryLastSearch,
-      );
+      return _ErrorView(message: state.message, onRetry: _retryLastSearch);
     }
 
     if (state is BlacklistLoaded) {
@@ -143,15 +141,15 @@ class _ClientBlacklistScreenState extends State<ClientBlacklistScreen> {
         return const _EmptyView();
       }
 
-          return ListView.builder(
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.zero,
-            itemCount: state.clients.length,
-            itemBuilder: (context, index) {
-              final client = state.clients[index];
-              return BlacklistClientCard(client: client);
-            },
-          );
+      return ListView.builder(
+        physics: const BouncingScrollPhysics(),
+        padding: EdgeInsets.zero,
+        itemCount: state.clients.length,
+        itemBuilder: (context, index) {
+          final client = state.clients[index];
+          return BlacklistClientCard(client: client);
+        },
+      );
     }
 
     return const SizedBox.shrink();
@@ -172,7 +170,7 @@ class _StartSearchPlaceholder extends StatelessWidget {
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 15,
-            color: Color(AppColors.darkGrey),
+            color: Color(AppColors.uiBorder),
           ),
         ),
       ),
@@ -190,7 +188,7 @@ class _EmptyView extends StatelessWidget {
         'Клиенты не найдены',
         style: TextStyle(
           fontSize: 16,
-          color: Color(AppColors.darkGrey),
+          color: Color(AppColors.uiBorder),
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -218,10 +216,7 @@ class _ErrorView extends StatelessWidget {
               style: const TextStyle(color: Colors.red),
             ),
             const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: const Text('Повторить'),
-            ),
+            ElevatedButton(onPressed: onRetry, child: const Text('Повторить')),
           ],
         ),
       ),

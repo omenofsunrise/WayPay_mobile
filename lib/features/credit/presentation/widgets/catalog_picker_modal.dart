@@ -3,9 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+
 import 'package:waypay_mobile/features/objectType/data/models/get_object_types_query.dart';
 import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
@@ -50,12 +49,12 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
   String get _modalTitle =>
       widget.title ?? (_isCategory ? 'Выбор категории' : 'Выбор каталога');
 
-  String get _createText => widget.createButtonLabel ??
+  String get _createText =>
+      widget.createButtonLabel ??
       (_isCategory ? 'Создать категорию' : 'Создать новый каталог');
 
-  String get _emptyText => _isCategory
-      ? 'Категории не найдены'
-      : 'Каталоги не найдены';
+  String get _emptyText =>
+      _isCategory ? 'Категории не найдены' : 'Каталоги не найдены';
 
   String get _noneText => _isCategory ? 'Без категории' : 'Без каталога';
 
@@ -153,7 +152,7 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
                           child: Text(
                             _emptyText,
                             style: const TextStyle(
-                              color: Color(AppColors.darkGrey),
+                              color: Color(AppColors.uiBorder),
                             ),
                           ),
                         );
@@ -219,9 +218,7 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
       backgroundColor: Colors.transparent,
       builder: (_) => BlocProvider.value(
         value: bloc,
-        child: CreateObjectTypeModal(
-          entityType: widget.entityType,
-        ),
+        child: CreateObjectTypeModal(entityType: widget.entityType),
       ),
     );
 
@@ -278,9 +275,7 @@ class _CatalogListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 8),
         onTap: onTap,
         title: Text(
@@ -340,10 +335,7 @@ class _CatalogListItem extends StatelessWidget {
 }
 
 class _SlidableActionContent extends StatelessWidget {
-  const _SlidableActionContent({
-    required this.iconPath,
-    required this.label,
-  });
+  const _SlidableActionContent({required this.iconPath, required this.label});
 
   final String iconPath;
   final String label;
@@ -358,10 +350,7 @@ class _SlidableActionContent extends StatelessWidget {
           iconPath,
           width: 22,
           height: 22,
-          colorFilter: const ColorFilter.mode(
-            Colors.white,
-            BlendMode.srcIn,
-          ),
+          colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
         ),
         const SizedBox(height: 4),
         Text(

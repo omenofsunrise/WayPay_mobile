@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_bloc.dart';
@@ -60,7 +59,8 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
 
   void _updateCanSubmit() {
     final digits = phoneFormatter.getUnmaskedText();
-    final isFilled = _fullNameController.text.trim().isNotEmpty &&
+    final isFilled =
+        _fullNameController.text.trim().isNotEmpty &&
         _addressController.text.trim().isNotEmpty &&
         digits.length == 10 &&
         _surchargeController.text.trim().isNotEmpty &&
@@ -113,13 +113,14 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
       widget.employeesBloc.add(LoadEmployeesEvent(page: 1));
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Сотрудник добавлен')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Сотрудник добавлен')));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка создания: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ошибка создания: $e')));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -156,7 +157,9 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Widget _buildDropdownSuffix({
@@ -166,7 +169,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   }) {
     const arrow = Icon(
       Icons.keyboard_arrow_down_rounded,
-      color: Color(AppColors.darkGrey),
+      color: Color(AppColors.uiBorder),
     );
 
     return Padding(
@@ -182,7 +185,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                 child: Icon(
                   Icons.close,
                   size: 16,
-                  color: Color(AppColors.darkGrey),
+                  color: Color(AppColors.uiBorder),
                 ),
               ),
             ),
@@ -204,10 +207,11 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
       hintText: label,
       readOnly: true,
       onTap: onTap,
-      suffixIcon: customSuffixIcon ??
+      suffixIcon:
+          customSuffixIcon ??
           const Icon(
             Icons.keyboard_arrow_down_rounded,
-            color: Color(AppColors.darkGrey),
+            color: Color(AppColors.uiBorder),
           ),
       suffixIconConstraints: const BoxConstraints(
         minHeight: 24,
@@ -254,10 +258,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
               label: 'ФИО сотрудника',
             ),
             const SizedBox(height: 12),
-            _buildInputField(
-              controller: _addressController,
-              label: 'Адрес',
-            ),
+            _buildInputField(controller: _addressController, label: 'Адрес'),
             const SizedBox(height: 12),
             _buildPickerField(
               controller: _roleController,
@@ -276,9 +277,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
               controller: _surchargeController,
               label: 'Минимальная надбавка, %',
               keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             const SizedBox(height: 24),
             Row(

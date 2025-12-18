@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
 import 'package:waypay_mobile/features/payment/presentation/cubit/payment_schedule_cubit.dart';
 import 'package:waypay_mobile/features/payment/presentation/widgets/payment_schedule_card.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class PaymentAnalyticsScreen extends StatelessWidget {
   const PaymentAnalyticsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final hasAccess =
-        UserStorage().hasPermissionSync([Permission.viewAnalytic]);
+    final hasAccess = UserStorage().hasPermissionSync([
+      Permission.viewAnalytic,
+    ]);
 
     if (!hasAccess) {
       return Scaffold(
@@ -24,7 +25,7 @@ class PaymentAnalyticsScreen extends StatelessWidget {
             child: Text(
               'Нет доступа к аналитике платежей',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Color(AppColors.darkGrey)),
+              style: TextStyle(color: Color(AppColors.uiBorder)),
             ),
           ),
         ),
@@ -65,7 +66,7 @@ class PaymentAnalyticsScreen extends StatelessWidget {
                         child: Text(
                           'Нет доступа к аналитике платежей',
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Color(AppColors.darkGrey)),
+                          style: TextStyle(color: Color(AppColors.uiBorder)),
                         ),
                       );
                     }
@@ -75,7 +76,7 @@ class PaymentAnalyticsScreen extends StatelessWidget {
                         return const Center(
                           child: Text(
                             'Нет данных аналитики',
-                            style: TextStyle(color: Color(AppColors.darkGrey)),
+                            style: TextStyle(color: Color(AppColors.uiBorder)),
                           ),
                         );
                       }
@@ -125,10 +126,7 @@ class _ErrorState extends StatelessWidget {
             style: const TextStyle(color: Colors.red),
           ),
           const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: onRetry,
-            child: const Text('Повторить'),
-          ),
+          ElevatedButton(onPressed: onRetry, child: const Text('Повторить')),
         ],
       ),
     );

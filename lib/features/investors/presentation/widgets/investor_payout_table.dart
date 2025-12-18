@@ -3,8 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_model.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class InvestorPayoutTable extends StatefulWidget {
   final int investorId;
@@ -143,7 +142,7 @@ class _InvestorPayoutTableState extends State<InvestorPayoutTable> {
           style: AppStyle.manrope(
             size: 15,
             weight: FontWeight.w400,
-            color: Color(AppColors.comfPayment),
+            color: Color(AppColors.primary),
           ),
         ),
       ),

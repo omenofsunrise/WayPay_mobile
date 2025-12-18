@@ -3,15 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/features/profile/presentation/cubit/profile_cubit.dart'
     show ProfileCubit;
 import 'package:waypay_mobile/features/profile/presentation/screens/my_profile.dart';
-import 'package:waypay_mobile/features/profile/presentation/widgets/edit_profile_modal.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -71,20 +68,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) setState(() {});
   }
 
-  void _openEditProfile() {
-    if (currentUser == null) return;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => BlocProvider.value(
-        value: _profileCubit,
-        child: EditProfileModal(currentUser: currentUser!),
-      ),
-    );
-  }
-
   @override
   void dispose() {
     _profileCubit.close();
@@ -101,7 +84,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: const AppDrawer(),
       backgroundColor: const Color(AppColors.background),
       body: SafeArea(
         child: Padding(

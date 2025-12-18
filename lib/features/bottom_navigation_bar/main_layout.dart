@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
 import 'package:waypay_mobile/routes/routes.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class MainLayout extends StatelessWidget {
   const MainLayout({super.key, required this.navigationShell});
@@ -28,8 +28,9 @@ class MainLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locationPath = GoRouterState.of(context).uri.path;
-    final highlightedIndex =
-        _newCreditPaths.contains(locationPath) ? 3 : navigationShell.currentIndex;
+    final highlightedIndex = _newCreditPaths.contains(locationPath)
+        ? 3
+        : navigationShell.currentIndex;
 
     return Scaffold(
       body: navigationShell,
@@ -115,7 +116,7 @@ class _NavItem extends StatelessWidget {
   final VoidCallback onTap;
 
   static const _brand = Color(AppColors.primary);
-  static const _iconColor = Color(AppColors.darkGrey);
+  static const _iconColor = Color(AppColors.uiBorder);
 
   @override
   Widget build(BuildContext context) {

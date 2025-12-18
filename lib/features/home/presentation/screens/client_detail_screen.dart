@@ -9,9 +9,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/custom_tab_switcher.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/passport_photo_type.dart';
@@ -24,6 +23,7 @@ import 'package:waypay_mobile/features/home/presentation/widgets/upload_photo_pl
 import 'package:waypay_mobile/features/note/data/data_sources/note_remote_data_source.dart';
 import 'package:waypay_mobile/features/note/data/models/note_create_request.dart';
 import 'package:waypay_mobile/features/note/data/models/note_model.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class ClientDetailScreen extends StatefulWidget {
   const ClientDetailScreen({super.key, this.client});
@@ -560,7 +560,7 @@ class _ClientHistoryTabState extends State<_ClientHistoryTab> {
             child: Text(
               'История договоров отсутствует',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15, color: Color(AppColors.darkGrey)),
+              style: TextStyle(fontSize: 15, color: Color(AppColors.uiBorder)),
             ),
           );
         }
@@ -795,7 +795,7 @@ class _CommentsTabState extends State<_CommentsTab> {
             child: Text(
               'Комментариев пока нет',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15, color: Color(AppColors.darkGrey)),
+              style: TextStyle(fontSize: 15, color: Color(AppColors.uiBorder)),
             ),
           )
         else
@@ -833,7 +833,7 @@ class _CommentsTabState extends State<_CommentsTab> {
                 border: InputBorder.none,
                 hintText: 'Добавьте комментарий о клиенте...',
                 hintStyle: TextStyle(
-                  color: const Color(AppColors.darkGrey).withOpacity(.7),
+                  color: const Color(AppColors.uiBorder).withOpacity(.7),
                 ),
               ),
             ),
@@ -989,7 +989,7 @@ class _CommentCard extends StatelessWidget {
                           _formattedDate,
                           style: const TextStyle(
                             fontSize: 12,
-                            color: Color(AppColors.darkGrey),
+                            color: Color(AppColors.uiBorder),
                           ),
                         ),
                       ],
@@ -999,7 +999,7 @@ class _CommentCard extends StatelessWidget {
                     onPressed: onDelete,
                     icon: const Icon(
                       Icons.delete_outline,
-                      color: Color(AppColors.darkGrey),
+                      color: Color(AppColors.uiBorder),
                     ),
                   ),
                 ],

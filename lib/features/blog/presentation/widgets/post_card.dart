@@ -6,8 +6,6 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import 'package:waypay_mobile/core/config/api_config.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
 import 'package:waypay_mobile/features/blog/data/data_sources/blog_remote_data_sources.dart';
 import 'package:waypay_mobile/features/blog/presentation/screens/blog_profile_screen.dart';
@@ -15,6 +13,7 @@ import 'package:waypay_mobile/features/blog/presentation/widgets/image_modal_vie
 import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source.dart';
 import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source.dart';
 import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class PostCard extends StatefulWidget {
   final int id;
@@ -271,7 +270,7 @@ class _PostCardState extends State<PostCard> {
                         size: 20,
                         color: widget.isLiked
                             ? const Color(AppColors.red)
-                            : const Color(AppColors.darkGrey),
+                            : const Color(AppColors.uiBorder),
                       ),
                       const SizedBox(width: 5),
                       Text(
@@ -279,7 +278,7 @@ class _PostCardState extends State<PostCard> {
                         style: AppStyle.manrope(
                           size: 14,
                           weight: FontWeight.w400,
-                          color: const Color(AppColors.darkGrey),
+                          color: const Color(AppColors.uiBorder),
                         ),
                       ),
                     ],
@@ -292,7 +291,7 @@ class _PostCardState extends State<PostCard> {
                       const Icon(
                         Icons.chat_bubble_outline,
                         size: 20,
-                        color: Color(AppColors.darkGrey),
+                        color: Color(AppColors.uiBorder),
                       ),
                       const SizedBox(width: 5),
                       Text(
@@ -300,7 +299,7 @@ class _PostCardState extends State<PostCard> {
                         style: AppStyle.manrope(
                           size: 14,
                           weight: FontWeight.w400,
-                          color: const Color(AppColors.darkGrey),
+                          color: const Color(AppColors.uiBorder),
                         ),
                       ),
                     ],
@@ -322,7 +321,7 @@ class _PostCardState extends State<PostCard> {
                     child: const Icon(
                       Icons.share,
                       size: 20,
-                      color: Color(AppColors.darkGrey),
+                      color: Color(AppColors.uiBorder),
                     ),
                   ),
               ],
@@ -611,7 +610,7 @@ class _SharePostDialogState extends State<_SharePostDialog> {
                     style: AppStyle.manrope(
                       size: 13,
                       weight: FontWeight.w400,
-                      color: const Color(AppColors.darkGrey),
+                      color: const Color(AppColors.uiBorder),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -731,14 +730,14 @@ class _SharePostDialogState extends State<_SharePostDialog> {
                       style: AppStyle.manrope(
                         size: 14,
                         weight: FontWeight.w400,
-                        color: const Color(AppColors.darkGrey),
+                        color: const Color(AppColors.uiBorder),
                       ),
                     ),
                   ),
                   ElevatedButton(
                     onPressed: canSend ? _send : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(AppColors.comfPayment),
+                      backgroundColor: const Color(AppColors.primary),
                       disabledBackgroundColor: Colors.grey.shade300,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(

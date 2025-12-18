@@ -4,16 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/pagination_widget.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
-import 'package:waypay_mobile/core/widgets/app_modal.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
 import 'package:waypay_mobile/features/clients/presentation/widgets/blacklist_client_card.dart';
-import 'package:waypay_mobile/features/clients/presentation/widgets/client_selector_modal.dart';
-import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
 class BlacklistScreen extends StatefulWidget {
@@ -54,111 +48,9 @@ class _BlacklistScreenState extends State<BlacklistScreen> {
     }
   }
 
-  void _openFilterModal() {
-    final blacklistBloc = context.read<BlacklistBloc>();
-    final tempController = TextEditingController(text: _searchController.text);
-
-    showDialog(
-      context: context,
-      builder: (_) => AppModal(
-        title: 'Фильтры',
-        backgroundColor: const Color(AppColors.background),
-        contentPadding: const EdgeInsets.all(16),
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: tempController,
-              decoration: InputDecoration(
-                hintText: 'Поиск по имени...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
-              onChanged: (value) {
-                if (_debounce?.isActive ?? false) _debounce!.cancel();
-                _debounce = Timer(const Duration(milliseconds: 500), () {
-                  final q = value.trim();
-                  if (q.isNotEmpty) {
-                    blacklistBloc.add(
-                      SearchBlacklistedClients(q, pageSize: 10),
-                    );
-                  } else {
-                    blacklistBloc.add(
-                      LoadBlacklistedClients(
-                        refresh: true,
-                        page: 1,
-                        pageSize: 10,
-                      ),
-                    );
-                  }
-                });
-              },
-            ),
-          ],
-        ),
-        actions: [
-          DefaultButton(
-            text: 'Сбросить',
-            onPressed: () {
-              tempController.clear();
-              setState(() => _searchController.clear());
-              blacklistBloc.add(
-                LoadBlacklistedClients(refresh: true, page: 1, pageSize: 10),
-              );
-              Navigator.pop(context);
-            },
-          ),
-          const SizedBox(width: 12),
-          DefaultButton(
-            text: 'Применить',
-            isPrimary: true,
-            onPressed: () {
-              setState(() => _searchController.text = tempController.text);
-              final q = _searchController.text.trim();
-              if (q.isNotEmpty) {
-                blacklistBloc.add(SearchBlacklistedClients(q, pageSize: 10));
-              } else {
-                blacklistBloc.add(
-                  LoadBlacklistedClients(refresh: true, page: 1, pageSize: 10),
-                );
-              }
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _openAddToBlacklistModal() {
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return BlocProvider(
-          create: (_) =>
-              ClientsBloc()
-                ..add(LoadClients(refresh: true, page: 1, pageSize: 10)),
-          child: ClientSelectorModalContent(
-            onSave: (selectedClient) {
-              context.read<BlacklistBloc>().add(
-                AddClientToBlacklist(selectedClient),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const AppDrawer(),
       backgroundColor: const Color(AppColors.primary),
       appBar: AppBar(
         backgroundColor: const Color(AppColors.primary),
@@ -168,18 +60,6 @@ class _BlacklistScreenState extends State<BlacklistScreen> {
           'Чёрный список',
           style: TextStyle(color: Colors.white),
         ),
-        actions: [
-          IconButton(
-            tooltip: 'Добавить в чёрный список',
-            icon: const Icon(Icons.add, color: Colors.white),
-            onPressed: _openAddToBlacklistModal,
-          ),
-          IconButton(
-            tooltip: 'Фильтры',
-            icon: const Icon(Icons.filter_alt, color: Colors.white),
-            onPressed: _openFilterModal,
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -267,24 +147,6 @@ class _BlacklistScreenState extends State<BlacklistScreen> {
                                   ),
                                 ),
                         ),
-
-                        if (state.totalPages > 1)
-                          PaginationWidget(
-                            currentPage: state.currentPage,
-                            totalPages: state.totalPages,
-                            onPageSelected: (page) {
-                              context.read<BlacklistBloc>().add(
-                                LoadBlacklistedClients(
-                                  refresh: true,
-                                  page: page,
-                                  pageSize: 10,
-                                  search: _searchController.text.isEmpty
-                                      ? null
-                                      : _searchController.text,
-                                ),
-                              );
-                            },
-                          ),
                         const SizedBox(height: 16),
                       ],
                     );

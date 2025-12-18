@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class BlogActionDropdown extends StatelessWidget {
   final Future<void> Function(String action) onActionSelected;
@@ -16,7 +15,7 @@ class BlogActionDropdown extends StatelessWidget {
         side: BorderSide(color: Colors.grey.shade300, width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(Icons.more_horiz, size: 22, color: Color(AppColors.darkGrey)),
+      child: Icon(Icons.more_horiz, size: 22, color: Color(AppColors.uiBorder)),
       onSelected: (action) {
         onActionSelected(action);
       },
@@ -27,7 +26,7 @@ class BlogActionDropdown extends StatelessWidget {
             height: 32,
             child: Row(
               children: [
-                Icon(Icons.delete, size: 24, color: Color(AppColors.darkGrey)),
+                Icon(Icons.delete, size: 24, color: Color(AppColors.uiBorder)),
                 SizedBox(width: 10),
                 Text(
                   'Удалить',

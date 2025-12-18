@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
 import 'package:waypay_mobile/features/finance/data/data_source/budget_remote_data_source.dart';
 import 'package:waypay_mobile/features/finance/data/models/create_budget_income_dto.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
@@ -26,8 +22,9 @@ class _AddBudgetIncomeScreenState extends State<AddBudgetIncomeScreen> {
   final TextEditingController _companyAmountController = TextEditingController(
     text: '0',
   );
-  final TextEditingController _investorAmountController =
-      TextEditingController(text: '0');
+  final TextEditingController _investorAmountController = TextEditingController(
+    text: '0',
+  );
   final TextEditingController _companyShareController = TextEditingController(
     text: '100',
   );
@@ -93,10 +90,7 @@ class _AddBudgetIncomeScreenState extends State<AddBudgetIncomeScreen> {
       _companyShareController.text = clamped.toString();
       _investorShareController.text = investor.toString();
       _companyShare = clamped.toDouble();
-      _updateAmountsFromPercent(
-        _companyShare,
-        investor.toDouble(),
-      );
+      _updateAmountsFromPercent(_companyShare, investor.toDouble());
     });
   }
 
@@ -108,10 +102,7 @@ class _AddBudgetIncomeScreenState extends State<AddBudgetIncomeScreen> {
       _investorShareController.text = clamped.toString();
       _companyShareController.text = company.toString();
       _companyShare = company.toDouble();
-      _updateAmountsFromPercent(
-        company.toDouble(),
-        clamped.toDouble(),
-      );
+      _updateAmountsFromPercent(company.toDouble(), clamped.toDouble());
     });
   }
 
@@ -149,8 +140,7 @@ class _AddBudgetIncomeScreenState extends State<AddBudgetIncomeScreen> {
     final available = (investor?.cashbox ?? investor?.balance)?.toDouble();
     if (available == null) return const SizedBox.shrink();
     final entered = _getTotalAmount();
-    final remaining =
-        (available - entered).clamp(0, available).toDouble();
+    final remaining = (available - entered).clamp(0, available).toDouble();
 
     return Container(
       width: double.infinity,
@@ -478,18 +468,12 @@ class _AddBudgetIncomeScreenState extends State<AddBudgetIncomeScreen> {
           _companyAmountController.text = _formatInputValue(0);
           _investorAmountController.text = _formatInputValue(0);
         } else {
-          _updateAmountsFromPercent(
-            _companyShare,
-            100 - _companyShare,
-          );
+          _updateAmountsFromPercent(_companyShare, 100 - _companyShare);
         }
       });
       return true;
     } else if (enabled) {
-      _updateAmountsFromPercent(
-        _companyShare,
-        100 - _companyShare,
-      );
+      _updateAmountsFromPercent(_companyShare, 100 - _companyShare);
     }
     return false;
   }
@@ -547,8 +531,7 @@ class _AddBudgetIncomeScreenState extends State<AddBudgetIncomeScreen> {
   }
 
   double _getTotalAmount() {
-    final cleaned =
-        _amountController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    final cleaned = _amountController.text.replaceAll(RegExp(r'[^0-9]'), '');
     if (cleaned.isEmpty) return 0;
     return double.tryParse(cleaned) ?? 0;
   }

@@ -4,12 +4,12 @@
 // import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:go_router/go_router.dart';
 // import 'package:waypay_mobile/core/network/token_storage.dart';
-// import 'package:waypay_mobile/core/theme/app_colors.dart';
+//
 // import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
-// import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+// import 'package:waypay_styles/waypay_styles.dart';
 // import 'package:waypay_mobile/core/widgets/pagination_widget.dart';
 // import 'package:waypay_mobile/core/widgets/refresh.dart';
-// import 'package:waypay_mobile/core/widgets/app_modal.dart';
+// import 'package:waypay_styles/waypay_styles.dart';
 // import 'package:waypay_mobile/features/clients/data/models/queue/queue_request_model.dart';
 // import 'package:waypay_mobile/features/clients/presentation/bloc/queue/queue_bloc.dart';
 // import 'package:waypay_mobile/features/clients/presentation/widgets/queue_card.dart';
@@ -60,7 +60,8 @@
 
 //     showDialog(
 //       context: context,
-//       builder: (_) => AppModal(
+//       builder: (_) => const SizedBox.shrink(), // AppModal removed (was here)
+      // 
 //         title: 'Фильтры',
 //         backgroundColor: const Color(AppColors.background),
 //         contentPadding: const EdgeInsets.all(16),

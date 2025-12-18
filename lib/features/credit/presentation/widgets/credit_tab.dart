@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 enum CreditTab {
   all('Все договоры', SvgIcons.doc),

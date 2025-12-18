@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_bloc.dart';
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_event.dart';
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_state.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/add_employee_screen.dart';
 import 'package:waypay_mobile/routes/routes.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class EmployeesScreen extends StatefulWidget {
   const EmployeesScreen({super.key});
@@ -33,10 +32,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
       backgroundColor: Colors.transparent,
       builder: (_) => BlocProvider.value(
         value: bloc,
-        child: AddEmployeeScreen(
-          employeesBloc: bloc,
-          isModal: true,
-        ),
+        child: AddEmployeeScreen(employeesBloc: bloc, isModal: true),
       ),
     );
   }
@@ -122,10 +118,7 @@ class _EmployeeCard extends StatelessWidget {
   final Employee employee;
   final VoidCallback onTap;
 
-  const _EmployeeCard({
-    required this.employee,
-    required this.onTap,
-  });
+  const _EmployeeCard({required this.employee, required this.onTap});
 
   String _initials(String name) {
     final parts = name.trim().split(' ').where((e) => e.isNotEmpty).toList();
@@ -151,10 +144,7 @@ class _EmployeeCard extends StatelessWidget {
                 offset: Offset(2, 2),
                 blurRadius: 4,
               ),
-              BoxShadow(
-                color: Color(0x05000809),
-                blurRadius: 6,
-              ),
+              BoxShadow(color: Color(0x05000809), blurRadius: 6),
             ],
           ),
           child: Padding(
@@ -192,10 +182,7 @@ class _EmployeeCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: _InfoRow(
-                        label: 'Роль',
-                        value: employee.roleLabel,
-                      ),
+                      child: _InfoRow(label: 'Роль', value: employee.roleLabel),
                     ),
                     Expanded(
                       child: _InfoRow(
@@ -209,16 +196,10 @@ class _EmployeeCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: _InfoRow(
-                        label: 'Адрес',
-                        value: employee.address,
-                      ),
+                      child: _InfoRow(label: 'Адрес', value: employee.address),
                     ),
                     Expanded(
-                      child: _InfoRow(
-                        label: 'Телефон',
-                        value: employee.phone,
-                      ),
+                      child: _InfoRow(label: 'Телефон', value: employee.phone),
                     ),
                   ],
                 ),
@@ -251,13 +232,7 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          value,
-          style: AppStyle.manrope(
-            size: 16,
-            weight: FontWeight.w500,
-          ),
-        ),
+        Text(value, style: AppStyle.manrope(size: 16, weight: FontWeight.w500)),
       ],
     );
   }
@@ -285,10 +260,7 @@ class _ActionButton extends StatelessWidget {
               offset: Offset(2, 2),
               blurRadius: 4,
             ),
-            BoxShadow(
-              color: Color(0x05000809),
-              blurRadius: 6,
-            ),
+            BoxShadow(color: Color(0x05000809), blurRadius: 6),
           ],
         ),
         child: Icon(icon, color: Colors.white),

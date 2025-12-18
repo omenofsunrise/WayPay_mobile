@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class DashboardCard extends StatelessWidget {
   final String title;
@@ -59,7 +59,7 @@ class DashboardCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Color(AppColors.darkGrey),
+                    color: Color(AppColors.uiBorder),
                   ),
                 ),
 
@@ -70,7 +70,7 @@ class DashboardCard extends StatelessWidget {
                     description!,
                     style: const TextStyle(
                       fontSize: 14,
-                      color: Color(AppColors.darkGrey),
+                      color: Color(AppColors.uiBorder),
                     ),
                   ),
                   const SizedBox(height: 8),

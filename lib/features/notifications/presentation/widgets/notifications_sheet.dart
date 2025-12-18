@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/features/notifications/data/models/notification_model.dart';
 import 'package:waypay_mobile/features/notifications/presentation/cubit/notifications_cubit.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class NotificationsSheet extends StatelessWidget {
   const NotificationsSheet({super.key});
@@ -183,7 +182,7 @@ class _NotificationTile extends StatelessWidget {
                       size: 16,
                       weight: isUnread ? FontWeight.w600 : FontWeight.w500,
                       color: Color(
-                        isUnread ? AppColors.black : AppColors.darkGrey,
+                        isUnread ? AppColors.black : AppColors.uiBorder,
                       ),
                     ),
                   ),

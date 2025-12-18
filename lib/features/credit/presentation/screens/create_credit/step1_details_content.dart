@@ -2,12 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
-import 'package:waypay_mobile/core/widgets/custom_checkbox.dart';
-import 'package:waypay_mobile/core/widgets/inputs/custom_calendar.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/features/clients/presentation/widgets/client_picker_modal.dart';
@@ -20,6 +16,7 @@ import 'package:waypay_mobile/features/investors/presentation/widgets/investor_p
 import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
 import 'package:waypay_mobile/features/credit/presentation/widgets/catalog_picker_modal.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class Step1DetailsContent extends StatefulWidget {
   final TextEditingController firstPaymentController;
@@ -300,7 +297,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
   }) {
     const arrow = Icon(
       Icons.keyboard_arrow_down_rounded,
-      color: Color(AppColors.darkGrey),
+      color: Color(AppColors.uiBorder),
     );
 
     return Padding(

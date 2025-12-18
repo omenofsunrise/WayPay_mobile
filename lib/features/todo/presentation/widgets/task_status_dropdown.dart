@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/features/todo/data/models/todo_model.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class TaskStatusDropdown extends StatelessWidget {
   final TodoTask task;
@@ -29,7 +28,7 @@ class TaskStatusDropdown extends StatelessWidget {
         side: BorderSide(color: Color(AppColors.greyLight), width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(Icons.sync_alt, size: 22, color: Color(AppColors.darkGrey)),
+      child: Icon(Icons.sync_alt, size: 22, color: Color(AppColors.uiBorder)),
       onSelected: (status) {
         if (status != task.taskStatus) {
           onStatusChange(status);
@@ -48,9 +47,7 @@ class TaskStatusDropdown extends StatelessWidget {
                 style: AppStyle.manrope(
                   size: 14,
                   weight: FontWeight.w400,
-                  color: isCurrent
-                      ? Color(AppColors.comfPayment)
-                      : Colors.black,
+                  color: isCurrent ? Color(AppColors.primary) : Colors.black,
                 ),
               ),
             ),

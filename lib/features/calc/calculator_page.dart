@@ -4,13 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/inputs/custom_calendar.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:pdf/pdf.dart';
@@ -667,7 +662,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const AppDrawer(),
       backgroundColor: Colors.white,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(56),
@@ -881,7 +875,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }) {
     const arrow = Icon(
       Icons.keyboard_arrow_down_rounded,
-      color: Color(AppColors.darkGrey),
+      color: Color(AppColors.uiBorder),
     );
 
     return Row(
@@ -896,7 +890,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               child: Icon(
                 Icons.close,
                 size: 16,
-                color: Color(AppColors.darkGrey),
+                color: Color(AppColors.uiBorder),
               ),
             ),
           ),
@@ -1017,7 +1011,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               style: AppStyle.manrope(
                 size: 15,
                 weight: FontWeight.w400,
-                color: const Color(AppColors.darkGrey),
+                color: const Color(AppColors.uiBorder),
               ),
             ),
           ),

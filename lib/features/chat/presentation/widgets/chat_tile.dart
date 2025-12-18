@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class ChatTile extends StatelessWidget {
   final String chatName;
@@ -63,7 +62,7 @@ class ChatTile extends StatelessWidget {
                             height: 8,
                             child: DecoratedBox(
                               decoration: BoxDecoration(
-                                color: Color(AppColors.comfPayment),
+                                color: Color(AppColors.primary),
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -77,7 +76,7 @@ class ChatTile extends StatelessWidget {
                         style: AppStyle.manrope(
                           size: 12,
                           weight: FontWeight.w600,
-                          color: const Color(AppColors.darkGrey),
+                          color: const Color(AppColors.uiBorder),
                         ),
                       ),
                   ],
@@ -87,7 +86,7 @@ class ChatTile extends StatelessWidget {
                   style: AppStyle.manrope(
                     size: 14,
                     weight: FontWeight.w400,
-                    color: const Color(AppColors.darkGrey),
+                    color: const Color(AppColors.uiBorder),
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,

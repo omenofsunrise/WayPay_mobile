@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class PaymentPreviewCard extends StatelessWidget {
   const PaymentPreviewCard({
@@ -103,7 +103,7 @@ class PaymentPreviewCard extends StatelessWidget {
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                             height: 24 / 14,
-                            color: Color(AppColors.darkGrey),
+                            color: Color(AppColors.uiBorder),
                           ),
                         ),
                         if (showStatus) ...[
@@ -187,7 +187,7 @@ class _InfoColumn extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w400,
             height: 24 / 14,
-            color: Color(AppColors.darkGrey),
+            color: Color(AppColors.uiBorder),
           ),
         ),
         const SizedBox(height: 4),

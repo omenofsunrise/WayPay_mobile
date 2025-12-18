@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/sell_info_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/sell_info_state.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class PaymentDynamicTable extends StatefulWidget {
   const PaymentDynamicTable({super.key});
@@ -79,19 +78,19 @@ class _PaymentDynamicTableState extends State<PaymentDynamicTable> {
                     children: [
                       _dataCell(
                         r['period'] as String,
-                        color: AppColors.darkGrey,
+                        color: AppColors.uiBorder,
                       ),
                       _dataCell(
                         currency.format(r['sell']),
-                        color: AppColors.comfPayment,
+                        color: AppColors.primary,
                       ),
                       _dataCell(
                         currency.format(r['purchase']),
-                        color: AppColors.comfPayment,
+                        color: AppColors.primary,
                       ),
                       _dataCell(
                         currency.format(r['cash']),
-                        color: AppColors.comfPayment,
+                        color: AppColors.primary,
                       ),
                     ],
                   ),

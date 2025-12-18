@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_event.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_state.dart';
@@ -70,9 +69,8 @@ class _ObjectTypeSelectionModalState extends State<ObjectTypeSelectionModal> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => CreateObjectTypeModal(
-        entityType: widget.entityType,
-      ),
+      builder: (context) =>
+          CreateObjectTypeModal(entityType: widget.entityType),
     ).then((created) {
       if (created != null) {
         widget.onObjectTypeSelected(created);

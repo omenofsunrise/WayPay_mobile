@@ -3,11 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/app_drawer/app_drawer.dart';
-import 'package:waypay_mobile/core/widgets/app_modal.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source.dart';
 import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source.dart';
@@ -44,67 +40,6 @@ class _AllChatScreenState extends State<AllChatScreen> {
     _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
-  }
-
-  void _openSearchModal() {
-    final tempController = TextEditingController(text: _searchController.text);
-
-    showDialog(
-      context: context,
-      builder: (_) => AppModal(
-        title: 'Поиск',
-        backgroundColor: const Color(AppColors.background),
-        contentPadding: const EdgeInsets.all(16),
-        content: StatefulBuilder(
-          builder: (context, setModalState) {
-            return TextField(
-              controller: tempController,
-              decoration: InputDecoration(
-                hintText: 'Поиск по чатам...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
-              onChanged: (value) {
-                if (_debounce?.isActive ?? false) _debounce!.cancel();
-                _debounce = Timer(const Duration(milliseconds: 400), () {
-                  context.read<ChatListBloc>().add(
-                    ChatListSearchChanged(value.trim()),
-                  );
-                });
-              },
-            );
-          },
-        ),
-        actions: [
-          DefaultButton(
-            text: 'Сбросить',
-            onPressed: () {
-              tempController.clear();
-              _searchController.text = '';
-              context.read<ChatListBloc>().add(const ChatListStarted());
-              Navigator.pop(context);
-            },
-          ),
-          const SizedBox(width: 12),
-          DefaultButton(
-            text: 'Применить',
-            isPrimary: true,
-            onPressed: () {
-              _searchController.text = tempController.text;
-              context.read<ChatListBloc>().add(
-                ChatListSearchChanged(_searchController.text.trim()),
-              );
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -159,19 +94,6 @@ class _AllChatScreenState extends State<AllChatScreen> {
               );
             },
           ),
-          actions: [
-            IconButton(
-              tooltip: 'Поиск',
-              icon: const Icon(Icons.search, color: Color(AppColors.grey)),
-              onPressed: _openSearchModal,
-            ),
-            IconButton(
-              tooltip: 'Обновить',
-              icon: const Icon(Icons.refresh, color: Color(AppColors.grey)),
-              onPressed: () =>
-                  context.read<ChatListBloc>().add(const ChatListRefreshed()),
-            ),
-          ],
         ),
 
         body: Container(

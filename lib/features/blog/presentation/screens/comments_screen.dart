@@ -6,8 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:waypay_mobile/core/config/api_config.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
 
@@ -21,6 +19,7 @@ import 'package:waypay_mobile/features/blog/presentation/bloc/comment_event.dart
 import 'package:waypay_mobile/features/blog/presentation/bloc/comment_state.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class CommentsScreen extends StatefulWidget {
   final int postId;

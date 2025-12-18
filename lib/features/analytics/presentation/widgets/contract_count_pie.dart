@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/analytic_items_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/analytic_items_state.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class ContractsPieChart extends StatelessWidget {
   const ContractsPieChart({super.key});
@@ -115,7 +114,7 @@ class ContractsPieChart extends StatelessWidget {
                               centerSpaceRadius: 50,
                               sections: [
                                 PieChartSectionData(
-                                  color: Color(AppColors.creditsCount),
+                                  color: Color(AppColors.primaryLight),
                                   value: activeContracts.toDouble(),
                                   radius: 15,
                                   title: '',
@@ -159,7 +158,7 @@ class ContractsPieChart extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildLegendItem(
-                            Color(AppColors.creditsCount),
+                            Color(AppColors.primaryLight),
                             'Действующие',
                             activeContracts,
                           ),

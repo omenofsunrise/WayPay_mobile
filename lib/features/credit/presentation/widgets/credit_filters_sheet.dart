@@ -3,10 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/filters/filter_components.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
 import 'package:waypay_mobile/features/objectType/data/models/get_object_types_query.dart';
 import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
@@ -53,13 +51,13 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
   final _dateFormat = DateFormat('dd.MM.yyyy');
 
   List<TextEditingController> get _controllers => [
-        _contractController,
-        _clientController,
-        _investorController,
-        _dateFromController,
-        _dateToController,
-        _catalogController,
-      ];
+    _contractController,
+    _clientController,
+    _investorController,
+    _dateFromController,
+    _dateToController,
+    _catalogController,
+  ];
 
   @override
   void initState() {
@@ -234,8 +232,9 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
         if (state is ObjectTypeLoaded) {
           _applyCatalogFromState(state.objectTypes);
         }
-        final types =
-            state is ObjectTypeLoaded ? state.objectTypes : <ObjectTypeModel>[];
+        final types = state is ObjectTypeLoaded
+            ? state.objectTypes
+            : <ObjectTypeModel>[];
         final isLoading = state is ObjectTypeLoading && types.isEmpty;
 
         return Column(
@@ -243,7 +242,7 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
           children: [
             ModalTextField(
               controller: _catalogController,
-                label: 'Категория',
+              label: 'Категория',
               hintText: 'Выберите категорию',
               readOnly: true,
               onTap: () {
@@ -268,9 +267,7 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xFFD9DDE5),
-                  ),
+                  border: Border.all(color: const Color(0xFFD9DDE5)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -309,7 +306,7 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
         padding: EdgeInsets.symmetric(horizontal: 16),
         child: Text(
           'Категории не найдены',
-          style: TextStyle(color: Color(AppColors.darkGrey)),
+          style: TextStyle(color: Color(AppColors.uiBorder)),
         ),
       );
     }
@@ -317,7 +314,8 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
     return ListView.separated(
       shrinkWrap: true,
       itemCount: types.length + 1,
-      separatorBuilder: (_, __) => const Divider(height: 1, indent: 16, endIndent: 16),
+      separatorBuilder: (_, __) =>
+          const Divider(height: 1, indent: 16, endIndent: 16),
       itemBuilder: (context, index) {
         if (index == 0) {
           final isSelected = _selectedCatalog == null;

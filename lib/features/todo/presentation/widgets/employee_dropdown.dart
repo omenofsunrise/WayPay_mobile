@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_bloc.dart';
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_event.dart';
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_state.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class EmployeeDropdown extends StatefulWidget {
   final EmployeeName? selectedEmployee;

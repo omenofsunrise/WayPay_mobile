@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 
 final NumberFormat _ruNumberFormatter = NumberFormat.decimalPattern('ru_RU')
@@ -371,8 +369,9 @@ class __ProductItemState extends State<_ProductItem> {
     }
 
     _nameController.text = product.name;
-    _priceController.text =
-        product.price == 0 ? '' : _formatCurrencyValue(product.price);
+    _priceController.text = product.price == 0
+        ? ''
+        : _formatCurrencyValue(product.price);
     _quantityController.text = product.quantity.toString();
     final displayValue = widget.markupType == 0
         ? product.surcharge
@@ -395,13 +394,10 @@ class __ProductItemState extends State<_ProductItem> {
     final double? rawValue = surchargeText.isEmpty
         ? null
         : double.tryParse(surchargeText);
-    final surchargePercent =
-        widget.markupType == 0 ? rawValue : null;
+    final surchargePercent = widget.markupType == 0 ? rawValue : null;
     final surchargeAmount = rawValue == null
         ? null
-        : (widget.markupType == 0
-            ? (price * rawValue) / 100
-            : rawValue);
+        : (widget.markupType == 0 ? (price * rawValue) / 100 : rawValue);
 
     return CreditProduct(
       name: name,
@@ -454,8 +450,7 @@ class __ProductItemState extends State<_ProductItem> {
   }
 
   String? _formatCurrencyInput(String value) {
-    var sanitized =
-        value.replaceAll('\u00A0', '').replaceAll(' ', '');
+    var sanitized = value.replaceAll('\u00A0', '').replaceAll(' ', '');
     sanitized = sanitized.replaceAll(RegExp(r'[^0-9.,]'), '');
     if (sanitized.isEmpty) return '';
 
@@ -481,8 +476,7 @@ class __ProductItemState extends State<_ProductItem> {
   }
 
   String _normalizeNumberInput(String value) {
-    var cleaned =
-        value.replaceAll('\u00A0', '').replaceAll(' ', '');
+    var cleaned = value.replaceAll('\u00A0', '').replaceAll(' ', '');
     cleaned = cleaned.replaceAll(RegExp(r'[^0-9.,]'), '');
     cleaned = cleaned.replaceAll(',', '.');
     return cleaned.trim();

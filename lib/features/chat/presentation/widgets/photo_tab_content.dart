@@ -4,10 +4,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:waypay_mobile/core/config/api_config.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/chat_photo_bloc.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/paged_bloc.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class PhotosTabContent extends StatefulWidget {
   final int chatId;

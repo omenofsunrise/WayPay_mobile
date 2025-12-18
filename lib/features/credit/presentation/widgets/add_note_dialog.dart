@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/note/data/data_sources/note_remote_data_source.dart';
 import 'package:waypay_mobile/features/note/data/models/note_create_request.dart';
 
@@ -145,10 +143,7 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: isImage
-                      ? Image.file(
-                          _attachedFile!,
-                          fit: BoxFit.cover,
-                        )
+                      ? Image.file(_attachedFile!, fit: BoxFit.cover)
                       : Container(
                           color: const Color(0xFFF1F4F7),
                           padding: const EdgeInsets.all(12),
@@ -159,7 +154,7 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
                               const Icon(
                                 Icons.insert_drive_file_outlined,
                                 size: 32,
-                                color: Color(AppColors.darkGrey),
+                                color: Color(AppColors.uiBorder),
                               ),
                               const SizedBox(height: 6),
                               Text(
@@ -170,7 +165,7 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
-                                  color: Color(AppColors.darkGrey),
+                                  color: Color(AppColors.uiBorder),
                                 ),
                               ),
                             ],
@@ -199,7 +194,7 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
                     child: const Icon(
                       Icons.close,
                       size: 16,
-                      color: Color(AppColors.darkGrey),
+                      color: Color(AppColors.uiBorder),
                     ),
                   ),
                 ),
@@ -243,8 +238,9 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
                       ),
                     ),
                     IconButton(
-                      onPressed:
-                          _isLoading ? null : () => Navigator.of(context).pop(),
+                      onPressed: _isLoading
+                          ? null
+                          : () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.close, size: 24),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -329,15 +325,15 @@ class _AttachmentButton extends StatelessWidget {
       onPressed: onTap,
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        foregroundColor: const Color(AppColors.darkGrey),
+        foregroundColor: const Color(AppColors.uiBorder),
       ),
-      icon: Icon(icon, size: 22, color: const Color(AppColors.darkGrey)),
+      icon: Icon(icon, size: 22, color: const Color(AppColors.uiBorder)),
       label: Text(
         label,
         style: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w500,
-          color: Color(AppColors.darkGrey),
+          color: Color(AppColors.uiBorder),
         ),
         overflow: TextOverflow.ellipsis,
       ),

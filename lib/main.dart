@@ -3,7 +3,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/features/admin_panel/presentation/cubit/company_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/analytic_items_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/debt_dynamic_cubit.dart';
@@ -15,7 +14,6 @@ import 'package:waypay_mobile/features/blog/presentation/bloc/comment_bloc.dart'
 import 'package:waypay_mobile/features/blog/presentation/cubit/profile_blog_cubit.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
-import 'package:waypay_mobile/features/clients/presentation/widgets/client_picker_modal.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/create_credit/new_credit_creation_screen.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
@@ -23,7 +21,6 @@ import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
-import 'package:waypay_mobile/features/product/presentation/bloc/products_bloc.dart';
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_bloc.dart';
 import 'package:waypay_mobile/features/profile/presentation/cubit/credit_stats_cubit.dart';
 import 'package:waypay_mobile/features/profile/presentation/cubit/payment_stats_cubit.dart';
@@ -32,6 +29,7 @@ import 'package:waypay_mobile/features/todo/presentation/bloc/task_bloc.dart';
 import 'package:waypay_mobile/features/network_error/screens/network_error_screen.dart';
 import 'package:waypay_mobile/routes/app_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -104,7 +102,6 @@ class _MyAppState extends State<MyApp> {
       providers: [
         BlocProvider(create: (_) => getIt<AuthCubit>()),
         BlocProvider(create: (_) => getIt<InvestorsBloc>()),
-        BlocProvider(create: (_) => getIt<ProductsBloc>()),
         BlocProvider(create: (_) => getIt<BudgetIncomeBloc>()),
         BlocProvider(create: (_) => getIt<BudgetExpenseBloc>()),
         BlocProvider(create: (_) => getIt<CreditBloc>()),

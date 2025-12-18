@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/analytics/presentation/widgets/dropdown.dart';
 
 class PeriodAppBarAction extends StatelessWidget {
@@ -75,7 +74,7 @@ class PeriodAppBarAction extends StatelessWidget {
               style: AppStyle.manrope(
                 size: 14,
                 weight: FontWeight.w400,
-                color: Color(AppColors.radioColor),
+                color: Color(AppColors.primary),
               ),
             ),
           ),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/features/chat/data/models/chat/chat_link_response.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/paged_bloc.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/chat_links_bloc.dart';
 import 'package:waypay_mobile/features/chat/presentation/widgets/telegram_link_preview.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class LinksTabContent extends StatefulWidget {
   final int chatId;

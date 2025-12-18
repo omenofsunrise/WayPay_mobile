@@ -3,12 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investor_report_screen.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class InvestorsScreen extends StatefulWidget {
   const InvestorsScreen({super.key});
@@ -95,7 +94,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                         return const Center(
                           child: Text(
                             'Нет инвесторов по текущим параметрам',
-                            style: TextStyle(color: Color(AppColors.darkGrey)),
+                            style: TextStyle(color: Color(AppColors.uiBorder)),
                             textAlign: TextAlign.center,
                           ),
                         );
@@ -107,10 +106,8 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                                   notification.metrics.maxScrollExtent - 200 &&
                               state.hasMoreData) {
                             context.read<InvestorsBloc>().add(
-                                  LoadInvestorsEvent(
-                                    page: state.currentPage + 1,
-                                  ),
-                                );
+                              LoadInvestorsEvent(page: state.currentPage + 1),
+                            );
                           }
                           return false;
                         },
@@ -128,8 +125,10 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                             final investor = state.investors[index];
                             return _InvestorCard(investor: investor);
                           },
-                          separatorBuilder: (_, __) => const SizedBox(height: 12),
-                          itemCount: state.investors.length +
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 12),
+                          itemCount:
+                              state.investors.length +
                               ((state.hasMoreData) ? 1 : 0),
                         ),
                       );
@@ -215,7 +214,7 @@ class _InvestorCard extends StatelessWidget {
                       'ID: ${investor.id}',
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Color(AppColors.darkGrey),
+                        color: Color(AppColors.uiBorder),
                       ),
                     ),
                     const Spacer(),
@@ -223,7 +222,7 @@ class _InvestorCard extends StatelessWidget {
                       createdAtText == '—' ? '' : 'от $createdAtText',
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Color(AppColors.darkGrey),
+                        color: Color(AppColors.uiBorder),
                       ),
                     ),
                   ],
@@ -247,12 +246,12 @@ class _InvestorCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 24),
-                Expanded(
-                  child: _InfoColumn(
-                    label: 'Дата окончания договора',
-                    value: endDateText,
-                  ),
-                ),
+                    Expanded(
+                      child: _InfoColumn(
+                        label: 'Дата окончания договора',
+                        value: endDateText,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -265,10 +264,7 @@ class _InvestorCard extends StatelessWidget {
 }
 
 class _InfoColumn extends StatelessWidget {
-  const _InfoColumn({
-    required this.label,
-    required this.value,
-  });
+  const _InfoColumn({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -282,7 +278,7 @@ class _InfoColumn extends StatelessWidget {
           label,
           style: const TextStyle(
             fontSize: 13,
-            color: Color(AppColors.darkGrey),
+            color: Color(AppColors.uiBorder),
           ),
         ),
         const SizedBox(height: 4),

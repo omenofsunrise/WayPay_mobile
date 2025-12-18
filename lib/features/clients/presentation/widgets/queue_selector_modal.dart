@@ -2,10 +2,10 @@
 // import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:go_router/go_router.dart';
 // import 'package:intl/intl.dart';
-// import 'package:waypay_mobile/core/theme/app_colors.dart';
-// import 'package:waypay_mobile/core/theme/app_style.dart';
-// import 'package:waypay_mobile/core/widgets/app_modal.dart';
-// import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+//
+//
+// import 'package:waypay_styles/waypay_styles.dart';
+// import 'package:waypay_styles/waypay_styles.dart';
 // import 'package:waypay_mobile/core/widgets/form_modal/label_text_field.dart';
 // import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 // import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
@@ -105,7 +105,8 @@
 
 //   @override
 //   Widget build(BuildContext context) {
-//     return AppModal(
+//     return const SizedBox.shrink(); // AppModal removed (was here)
+    // 
 //       title: 'Добавить в очередь',
 //       backgroundColor: Color(AppColors.background),
 //       content: Column(
@@ -179,14 +180,13 @@
 //                 'Высокий приоритет',
 //                 style: TextStyle(color: Colors.black, fontSize: 16),
 //               ),
-//               Switch(
+//               ToggleSwitch(
 //                 value: _highPriority,
 //                 onChanged: (value) {
 //                   setState(() {
 //                     _highPriority = value;
 //                   });
 //                 },
-//                 activeColor: const Color(AppColors.primary),
 //               ),
 //             ],
 //           ),

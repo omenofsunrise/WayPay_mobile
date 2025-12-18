@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:waypay_mobile/features/blog/presentation/bloc/blog_bloc.dart';
@@ -18,6 +16,7 @@ import 'package:waypay_mobile/features/blog/presentation/screens/create_post_scr
 import 'package:waypay_mobile/features/blog/presentation/widgets/post_card.dart';
 import 'package:waypay_mobile/features/blog/presentation/widgets/profile_blog_card.dart';
 import 'package:waypay_mobile/routes/routes.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class ProfileBlogScreen extends StatefulWidget {
   final int id;
@@ -173,7 +172,7 @@ class _ProfileBlogScreenState extends State<ProfileBlogScreen> {
                                   style: AppStyle.manrope(
                                     size: 14,
                                     weight: FontWeight.w500,
-                                    color: Color(AppColors.comfPayment),
+                                    color: Color(AppColors.primary),
                                   ),
                                 ),
                               ),

@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/features/payment/data/models/payment_schedule_summary.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class PaymentScheduleCard extends StatelessWidget {
   const PaymentScheduleCard({super.key, required this.summary});
@@ -12,13 +12,13 @@ class PaymentScheduleCard extends StatelessWidget {
 
   double get _paidPercent =>
       summary.incomePercent == 0 && summary.expectedIncome > 0
-          ? (summary.realIncome / summary.expectedIncome) * 100
-          : summary.incomePercent;
+      ? (summary.realIncome / summary.expectedIncome) * 100
+      : summary.incomePercent;
 
   double get _debtPercent =>
       summary.debtPercent == 0 && summary.expectedIncome > 0
-          ? (summary.debt / summary.expectedIncome) * 100
-          : summary.debtPercent;
+      ? (summary.debt / summary.expectedIncome) * 100
+      : summary.debtPercent;
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +61,7 @@ class PaymentScheduleCard extends StatelessWidget {
           const SizedBox(height: 16),
           Row(
             children: [
-              _DonutChart(
-                paidPercent: _paidPercent.clamp(0, 100),
-              ),
+              _DonutChart(paidPercent: _paidPercent.clamp(0, 100)),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -129,10 +127,7 @@ class _PercentRow extends StatelessWidget {
         Container(
           width: 12,
           height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 8),
         Expanded(
@@ -140,7 +135,7 @@ class _PercentRow extends StatelessWidget {
             label,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(AppColors.darkGrey),
+              color: Color(AppColors.uiBorder),
             ),
           ),
         ),
@@ -176,7 +171,7 @@ class _AmountRow extends StatelessWidget {
           label,
           style: const TextStyle(
             fontSize: 14,
-            color: Color(AppColors.darkGrey),
+            color: Color(AppColors.uiBorder),
           ),
         ),
         const Spacer(),

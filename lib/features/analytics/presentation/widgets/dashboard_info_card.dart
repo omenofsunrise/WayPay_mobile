@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/analytic_items_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/analytic_items_state.dart';
 import 'package:waypay_mobile/features/analytics/presentation/widgets/dashboard_info_tile.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class DashboardInfoCard extends StatelessWidget {
   const DashboardInfoCard({super.key});

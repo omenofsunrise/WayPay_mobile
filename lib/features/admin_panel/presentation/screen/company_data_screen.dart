@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:waypay_mobile/assets/resources.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/inputs/modal_text_field.dart';
 import 'package:waypay_mobile/features/admin_panel/data/data_sources/company_remote_data_source.dart';
 import 'package:waypay_mobile/features/admin_panel/data/models/company_model.dart';
 import 'package:waypay_mobile/features/bank_card/data/data_sources/bank_card_remote_data_source.dart';
@@ -130,7 +124,7 @@ class _CompanyDataScreenState extends State<CompanyDataScreen> {
   }) {
     const arrow = Icon(
       Icons.keyboard_arrow_down_rounded,
-      color: Color(AppColors.darkGrey),
+      color: Color(AppColors.uiBorder),
     );
 
     return Padding(

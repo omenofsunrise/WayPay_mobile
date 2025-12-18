@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
@@ -282,7 +281,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                         'ФИО клиента',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Color(AppColors.darkGrey),
+                          color: Color(AppColors.uiBorder),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -339,7 +338,7 @@ class _InfoRow extends StatelessWidget {
             label,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(AppColors.darkGrey),
+              color: Color(AppColors.uiBorder),
             ),
           ),
         ),

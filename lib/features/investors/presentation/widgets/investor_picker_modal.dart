@@ -3,9 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 
@@ -15,8 +13,10 @@ class InvestorPickerModal extends StatefulWidget {
     this.includeInvestor = true,
     this.includePool = true,
     this.title = 'Выбор инвестора/пула',
-  }) : assert(includeInvestor || includePool,
-            'Хотя бы один тип должен быть доступен');
+  }) : assert(
+         includeInvestor || includePool,
+         'Хотя бы один тип должен быть доступен',
+       );
 
   final bool includeInvestor;
   final bool includePool;
@@ -79,7 +79,7 @@ class _InvestorTile extends StatelessWidget {
                 textAlign: TextAlign.right,
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Color(AppColors.darkGrey),
+                  color: Color(AppColors.uiBorder),
                 ),
               ),
             ),
@@ -196,7 +196,7 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
             return const Center(
               child: Text(
                 'Инвесторы не найдены',
-                style: TextStyle(color: Color(AppColors.darkGrey)),
+                style: TextStyle(color: Color(AppColors.uiBorder)),
               ),
             );
           }
@@ -222,7 +222,7 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
           child: Text(
             'Введите имя или номер телефона, чтобы найти инвестора.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(AppColors.darkGrey)),
+            style: TextStyle(color: Color(AppColors.uiBorder)),
           ),
         );
       }
@@ -255,7 +255,7 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
         return const Center(
           child: Text(
             'Инвесторы не найдены',
-            style: TextStyle(color: Color(AppColors.darkGrey)),
+            style: TextStyle(color: Color(AppColors.uiBorder)),
           ),
         );
       }
@@ -314,7 +314,7 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
                   'Введите имя или номер телефона для поиска',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Color(AppColors.darkGrey),
+                    color: Color(AppColors.uiBorder),
                   ),
                 ),
               ),

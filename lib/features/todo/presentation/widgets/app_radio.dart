@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class AppRadioButton extends StatelessWidget {
   final bool isSelected;
@@ -25,9 +24,7 @@ class AppRadioButton extends StatelessWidget {
             width: 19,
             height: 19,
             decoration: BoxDecoration(
-              color: isSelected
-                  ? Color(AppColors.radioColor)
-                  : Colors.transparent,
+              color: isSelected ? Color(AppColors.primary) : Colors.transparent,
               border: Border.all(color: Color(AppColors.borderColor), width: 1),
             ),
             child: isSelected

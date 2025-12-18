@@ -2,9 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
-import 'package:waypay_mobile/core/widgets/search_field.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/clients/presentation/cubit/black_catalog/black_catalog_cubit.dart';
 import 'package:waypay_mobile/features/clients/presentation/widgets/black_catalog_card.dart';
 
@@ -107,7 +105,7 @@ class _ClientBlackCatalogScreenState extends State<ClientBlackCatalogScreen> {
                     'Введите минимум 4 символа ФИО или полный номер телефона',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Color(AppColors.darkGrey),
+                      color: Color(AppColors.uiBorder),
                     ),
                   ),
                 ),
@@ -120,9 +118,7 @@ class _ClientBlackCatalogScreenState extends State<ClientBlackCatalogScreen> {
                     }
 
                     if (state is BlackCatalogLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
+                      return const Center(child: CircularProgressIndicator());
                     }
 
                     if (state is BlackCatalogError) {
@@ -178,7 +174,7 @@ class _StartSearchPlaceholder extends StatelessWidget {
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 15,
-            color: Color(AppColors.darkGrey),
+            color: Color(AppColors.uiBorder),
           ),
         ),
       ),
@@ -196,7 +192,7 @@ class _EmptyView extends StatelessWidget {
         'Клиенты не найдены',
         style: TextStyle(
           fontSize: 16,
-          color: Color(AppColors.darkGrey),
+          color: Color(AppColors.uiBorder),
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -224,10 +220,7 @@ class _ErrorView extends StatelessWidget {
               style: const TextStyle(color: Colors.red),
             ),
             const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: const Text('Повторить'),
-            ),
+            ElevatedButton(onPressed: onRetry, child: const Text('Повторить')),
           ],
         ),
       ),

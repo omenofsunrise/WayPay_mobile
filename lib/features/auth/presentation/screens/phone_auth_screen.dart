@@ -3,11 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:waypay_mobile/assets/resources.dart' show Images;
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
+
 import 'package:waypay_mobile/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:waypay_mobile/features/auth/presentation/widgets/call_confirmation_dialog.dart';
-import 'package:waypay_mobile/core/widgets/buttons/default_button.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
 class PhoneAuthScreen extends StatefulWidget {
@@ -198,8 +197,9 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                                   ),
                                   errorBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
-                                    borderSide:
-                                        const BorderSide(color: Colors.red),
+                                    borderSide: const BorderSide(
+                                      color: Colors.red,
+                                    ),
                                   ),
                                   focusedErrorBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
@@ -210,8 +210,8 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                                   ),
                                 ),
                                 validator: (value) {
-                                  final digits =
-                                      _phoneFormatter.getUnmaskedText();
+                                  final digits = _phoneFormatter
+                                      .getUnmaskedText();
                                   if (digits.isEmpty) {
                                     return 'Введите номер телефона';
                                   }
@@ -230,17 +230,16 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                                       text: 'Подтвердить',
                                       isPrimary: true,
                                       onPressed: () {
-                                        if (_formKey.currentState!
-                                            .validate()) {
+                                        if (_formKey.currentState!.validate()) {
                                           final formattedPhone =
                                               '8${_phoneFormatter.getUnmaskedText()}';
                                           debugPrint(
                                             '🔐 Начинаем авторизацию для: $formattedPhone',
                                           );
                                           context.read<AuthCubit>().startAuth(
-                                                formattedPhone,
-                                                widget.userType,
-                                              );
+                                            formattedPhone,
+                                            widget.userType,
+                                          );
                                         }
                                       },
                                     ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_mobile/core/theme/app_colors.dart';
-import 'package:waypay_mobile/core/widgets/header.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/profile/presentation/widgets/credit_count.dart';
 import 'package:waypay_mobile/features/profile/presentation/widgets/payment_stats_table.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class ProfileStatisticsScreen extends StatelessWidget {
   final int? employeeId;

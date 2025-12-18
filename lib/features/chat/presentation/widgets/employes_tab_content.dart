@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/theme/app_style.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source.dart';
@@ -12,6 +11,7 @@ import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/chat_mem
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
 import 'package:waypay_mobile/features/chat/presentation/screens/chat_screen.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class EmployesTabContent extends StatefulWidget {
   final int chatId;
