@@ -13,8 +13,6 @@ class TokenStorage {
 
   static const Duration _defaultAccessTtl = Duration(minutes: 5);
 
-  String _ts() => DateTime.now().toIso8601String();
-
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,

@@ -37,7 +37,6 @@ class _CallConfirmationDialogState extends State<CallConfirmationDialog> {
       try {
         setState(() => _isChecking = true);
         await widget.onTryConfirm();
-      } catch (e) {
       } finally {
         if (mounted) {
           setState(() => _isChecking = false);
