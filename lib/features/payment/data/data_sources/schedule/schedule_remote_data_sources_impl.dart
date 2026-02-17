@@ -65,4 +65,18 @@ class ScheduleRemoteDataSourcesImpl implements ScheduleRemoteDataSources {
       throw Exception('Ошибка обновления статуса уведомления: ${e.message}');
     }
   }
+
+  @override
+  Future<String> getFilledSender(int scheduleId) async {
+    try {
+      final response = await dio.get('SenderSettings/filled/$scheduleId');
+      final data = response.data;
+      if (data is String) {
+        return data;
+      }
+      throw Exception('Неверный формат ответа');
+    } on DioException catch (e) {
+      throw Exception('Ошибка при получении сообщения: ${e.message}');
+    }
+  }
 }

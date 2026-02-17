@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
@@ -29,11 +28,6 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
   late bool _isNotified;
   bool _notifyLoading = false;
   String? _error;
-  final NumberFormat _plainCurrencyFormatter = NumberFormat.currency(
-    locale: 'ru_RU',
-    symbol: '',
-    decimalDigits: 0,
-  );
 
   ScheduleModel? get _schedule => widget.schedule;
   PaymentItemModel? get _payment => widget.payment;
@@ -86,15 +80,20 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
     if (_notifyLoading) return;
     setState(() => _notifyLoading = true);
     try {
-      if (_schedule != null && !_isNotified) {
-        await _scheduleSource.putSchedule(_schedule!.id);
-        _isNotified = true;
+      final scheduleId = _schedule?.id ?? _payment?.id ?? 0;
+      if (scheduleId == 0) {
+        throw Exception('Не удалось определить график платежа');
       }
       final phone = _preparePhone(phoneRaw);
       if (phone == null) {
         throw Exception('Неверный номер клиента');
       }
-      await _openWhatsApp(phone, _buildWhatsappMessage());
+      final message = await _scheduleSource.getFilledSender(scheduleId);
+      final opened = await _openWhatsApp(phone, message);
+      if (opened && !_isNotified) {
+        await _scheduleSource.putSchedule(scheduleId);
+        _isNotified = true;
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -128,11 +127,6 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
     return formatter.format(value);
   }
 
-  String _formatPlainCurrency(num? value) {
-    if (value == null) return '—';
-    return _plainCurrencyFormatter.format(value).trim();
-  }
-
   String _formatIsoDate(String? iso) {
     if (iso == null || iso.isEmpty) return '—';
     try {
@@ -143,50 +137,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
     }
   }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return '—';
-    return DateFormat('dd.MM.yyyy').format(date);
-  }
-
-  int _overdueDays() {
-    final due = DateTime.tryParse(_paymentDateRaw);
-    if (due == null) return 0;
-    final diff = DateTime.now().difference(due).inDays;
-    return diff > 0 ? diff : 0;
-  }
-
-  String _paymentDayDescription() {
-    final due = DateTime.tryParse(_paymentDateRaw);
-    if (due == null) return '—';
-    final day = due.day;
-    return '$day число каждого следующего месяца.';
-  }
-
-  String _buildWhatsappMessage() {
-    final companyName = (_credit?.employeeName?.trim().isNotEmpty ?? false)
-        ? _credit!.employeeName
-        : 'WayPay';
-    final amount = _formatPlainCurrency(_paymentAmount);
-    final date = _formatIsoDate(_paymentDateRaw);
-    final rest = _formatPlainCurrency(_credit?.rest);
-    final purchaseDate = _formatDate(_credit?.creditDate);
-    final paymentDay = _paymentDayDescription();
-    final overdue = _overdueDays();
-    const supportPhone = '+7 928 ХХХ-ХХ-ХХ';
-
-    return 'Клиент уведомлён в WhatsApp компании $companyName в размере '
-        '$amount, $date.\n\n'
-        'РЕКВИЗИТЫ для перевода:\n\n'
-        'Остаток: $rest рублей.\n'
-        'Дата покупки: $purchaseDate.\n'
-        'Дата оплаты: $paymentDay\n'
-        'ПРОСРОЧКА (дни): $overdue.\n\n'
-        'В случае просрочки без причины, мы вынуждены будем принять меры!🚫\n'
-        'Не портите вашу историю рассрочки!\n\n'
-        'Телефон поддержки:\n$supportPhone';
-  }
-
-  Future<void> _openWhatsApp(String phone, String message) async {
+  Future<bool> _openWhatsApp(String phone, String message) async {
     final uri = Uri.parse(
       'https://wa.me/$phone?text=${Uri.encodeComponent(message)}',
     );
@@ -196,6 +147,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
         const SnackBar(content: Text('Не удалось открыть WhatsApp')),
       );
     }
+    return success;
   }
 
   @override
