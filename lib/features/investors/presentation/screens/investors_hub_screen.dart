@@ -28,7 +28,7 @@ class InvestorsHubScreen extends StatelessWidget {
               const Header(
                 title: 'Инвесторы',
                 showBackButton: true,
-                showNotifications: true,
+                showNotifications: false,
               ),
               const SizedBox(height: 24),
               _InvestorsCard(

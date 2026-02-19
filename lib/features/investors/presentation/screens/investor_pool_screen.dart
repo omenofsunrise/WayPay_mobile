@@ -63,7 +63,7 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
               const Header(
                 title: 'Пул инвесторов',
                 showBackButton: true,
-                showNotifications: true,
+                showNotifications: false,
               ),
               const SizedBox(height: 16),
               SearchField(

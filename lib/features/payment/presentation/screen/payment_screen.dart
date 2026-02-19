@@ -85,7 +85,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               const Header(
                 title: 'Платежи',
                 showBackButton: true,
-                showNotifications: true,
+                showNotifications: false,
               ),
               SizedBox(height: showAnalyticsSpacing ? 24 : 0),
               Expanded(

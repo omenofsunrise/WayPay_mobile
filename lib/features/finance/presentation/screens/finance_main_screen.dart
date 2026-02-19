@@ -20,7 +20,7 @@ class FinanceMainScreen extends StatelessWidget {
               const Header(
                 title: 'Финансы',
                 showBackButton: true,
-                showNotifications: true,
+                showNotifications: false,
               ),
               const SizedBox(height: 16),
               MainClientCard(

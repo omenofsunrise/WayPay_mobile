@@ -162,7 +162,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 const Header(
                   title: 'История платежей',
                   showBackButton: true,
-                  showNotifications: true,
+                  showNotifications: false,
                 ),
                 const SizedBox(height: 16),
                 _buildSearchBar(),

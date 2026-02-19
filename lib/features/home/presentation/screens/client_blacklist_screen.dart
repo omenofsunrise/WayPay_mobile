@@ -92,7 +92,11 @@ class _ClientBlacklistScreenState extends State<ClientBlacklistScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Header(title: 'Чёрный список', showBackButton: true),
+              const Header(
+                title: 'Чёрный список',
+                showBackButton: true,
+                showNotifications: false,
+              ),
               const SizedBox(height: 16),
               SearchField(
                 controller: _searchController,

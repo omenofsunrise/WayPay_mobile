@@ -43,7 +43,7 @@ class PaymentAnalyticsScreen extends StatelessWidget {
               const Header(
                 title: 'Аналитика платежей',
                 showBackButton: true,
-                showNotifications: true,
+                showNotifications: false,
               ),
               const SizedBox(height: 16),
               Expanded(

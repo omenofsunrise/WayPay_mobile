@@ -86,7 +86,11 @@ class _ClientListScreenState extends State<ClientListScreen> {
             physics: const ClampingScrollPhysics(),
             slivers: [
               SliverToBoxAdapter(
-                child: Header(title: 'Список клиентов', showBackButton: true),
+                child: Header(
+                  title: 'Список клиентов',
+                  showBackButton: true,
+                  showNotifications: false,
+                ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 16)),
               SliverToBoxAdapter(

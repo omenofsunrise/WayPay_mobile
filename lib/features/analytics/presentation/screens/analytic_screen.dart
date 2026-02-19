@@ -70,7 +70,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               Header(
                 title: 'Аналитика',
                 showBackButton: true,
-                showNotifications: true,
+                showNotifications: false,
                 trailing: PeriodAppBarAction(
                   selected: _selected,
                   onChanged: (option, range) {

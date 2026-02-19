@@ -124,7 +124,7 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
               const Header(
                 title: 'Детали инвестора',
                 showBackButton: true,
-                showNotifications: true,
+                showNotifications: false,
               ),
               const SizedBox(height: 16),
               Expanded(

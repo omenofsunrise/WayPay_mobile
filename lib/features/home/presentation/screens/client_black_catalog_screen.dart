@@ -91,7 +91,11 @@ class _ClientBlackCatalogScreenState extends State<ClientBlackCatalogScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Header(title: 'Чёрный каталог', showBackButton: true),
+              const Header(
+                title: 'Чёрный каталог',
+                showBackButton: true,
+                showNotifications: false,
+              ),
               const SizedBox(height: 16),
               SearchField(
                 controller: _searchController,

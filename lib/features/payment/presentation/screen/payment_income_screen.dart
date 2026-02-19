@@ -155,7 +155,7 @@ class _PaymentIncomeScreenState extends State<PaymentIncomeScreen> {
                 const Header(
                   title: 'Доходы от платежей',
                   showBackButton: true,
-                  showNotifications: true,
+                  showNotifications: false,
                 ),
                 const SizedBox(height: 16),
                 _buildSearchBar(),

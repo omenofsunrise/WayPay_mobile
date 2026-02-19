@@ -142,7 +142,7 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
               const Header(
                 title: 'Детали пула',
                 showBackButton: true,
-                showNotifications: true,
+                showNotifications: false,
               ),
               const SizedBox(height: 16),
               Expanded(

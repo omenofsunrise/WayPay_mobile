@@ -106,6 +106,7 @@ class _MainClientScreenState extends State<MainClientScreen> {
                       fullName: _getFullName(employeeData),
                       photoPath: _getAvatar(employeeData),
                       showBackButton: true,
+                      showNotifications: false,
                     ),
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 16)),

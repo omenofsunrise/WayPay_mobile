@@ -254,6 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       photoPath: _getAvatar(employeeData),
                       showBackButton: false,
                       trailing: AddButton(onPressed: _openAddBottomSheet),
+                      showNotifications: false,
                     ),
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 16)),

@@ -65,7 +65,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
               const Header(
                 title: 'Инвесторы',
                 showBackButton: true,
-                showNotifications: true,
+                showNotifications: false,
               ),
               const SizedBox(height: 16),
               SearchField(

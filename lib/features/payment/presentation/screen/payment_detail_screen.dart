@@ -163,7 +163,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
               const Header(
                 title: 'Детали платежа',
                 showBackButton: true,
-                showNotifications: true,
+                showNotifications: false,
               ),
               const SizedBox(height: 16),
               Expanded(child: _buildContent()),

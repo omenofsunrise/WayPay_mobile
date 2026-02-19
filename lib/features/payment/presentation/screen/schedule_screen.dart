@@ -203,7 +203,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                 const Header(
                   title: 'Все платежи',
                   showBackButton: true,
-                  showNotifications: true,
+                  showNotifications: false,
                 ),
                 if (widget.creditId == null) ...[
                   const SizedBox(height: 16),

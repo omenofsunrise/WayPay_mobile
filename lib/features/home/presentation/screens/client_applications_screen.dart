@@ -173,7 +173,11 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Header(title: 'Заявки', showBackButton: true),
+              const Header(
+                title: 'Заявки',
+                showBackButton: true,
+                showNotifications: false,
+              ),
               const SizedBox(height: 16),
               Row(
                 children: [
