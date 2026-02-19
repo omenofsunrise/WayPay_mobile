@@ -62,6 +62,7 @@ import 'package:waypay_mobile/features/payment/presentation/screen/payment_incom
 import 'package:waypay_mobile/features/payment/presentation/screen/payment_screen.dart';
 import 'package:waypay_mobile/features/payment/presentation/screen/schedule_screen.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
+import 'package:waypay_mobile/features/todo/presentation/screens/todo_screen.dart';
 
 import 'package:waypay_mobile/routes/routes.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
@@ -458,15 +459,15 @@ class AppRouter {
               ),
             ],
           ),
-          // StatefulShellBranch(
-          //   routes: [
-          //     GoRoute(
-          //       path: Routes.todoScreen.toPath,
-          //       name: Routes.todoScreen.toName,
-          //       builder: (context, state) => const TodoScreen(),
-          //     ),
-          //   ],
-          // ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.todoScreen.toPath,
+                name: Routes.todoScreen.toName,
+                builder: (context, state) => const TodoScreen(),
+              ),
+            ],
+          ),
           StatefulShellBranch(
             routes: [
               GoRoute(

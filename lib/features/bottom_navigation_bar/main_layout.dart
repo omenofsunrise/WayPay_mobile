@@ -3,7 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
-import 'package:waypay_mobile/routes/routes.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 
 class MainLayout extends StatelessWidget {
@@ -42,10 +41,6 @@ class MainLayout extends StatelessWidget {
             currentIndex: highlightedIndex,
             items: _navConfigs,
             onTap: (index) {
-              if (index == 3) {
-                context.pushNamed(Routes.newCreditDetailsScreen.toName);
-                return;
-              }
               navigationShell.goBranch(
                 index,
                 initialLocation: index == navigationShell.currentIndex,
