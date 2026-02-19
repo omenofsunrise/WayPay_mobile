@@ -46,9 +46,16 @@ class CreditModel {
   });
 
   factory CreditModel.fromJson(Map<String, dynamic> json) {
+    final creditDateRaw = json['creditDate'];
+    DateTime creditDate;
+    if (creditDateRaw is String && creditDateRaw.isNotEmpty) {
+      creditDate = DateTime.parse(creditDateRaw);
+    } else {
+      creditDate = DateTime.fromMillisecondsSinceEpoch(0);
+    }
     return CreditModel(
       id: (json['id'] as num).toInt(),
-      creditDate: DateTime.parse(json['creditDate'] as String),
+      creditDate: creditDate,
       totalAmount: json['totalAmount'] as num,
       isActive: json['isActive'] as bool,
       isFavourite: json['isFavourite'] as bool,
@@ -56,9 +63,9 @@ class CreditModel {
       investorId: (json['investorId'] as num?)?.toInt(),
       guarantorId: (json['guarantorId'] as num?)?.toInt(),
       termMonths: (json['termMonths'] as num).toInt(),
-      clientFullName: json['clientFullName'] as String,
-      investorNickname: json['investorNickname'] as String,
-      clientPhone: json['clientPhone'] as String,
+      clientFullName: json['clientFullName'] as String? ?? '',
+      investorNickname: json['investorNickname'] as String? ?? '',
+      clientPhone: json['clientPhone'] as String? ?? '',
       firstPayment: json['firstPayment'] as num,
       accured: json['accured'] as num,
       payed: json['payed'] as num,
@@ -67,7 +74,7 @@ class CreditModel {
       debt: json['debt'] as num,
       incomeRubles: json['incomeRubles'] as num,
       incomePercents: json['incomePercents'] as num,
-      employeeName: json['employeeName'] as String,
+      employeeName: json['employeeName'] as String? ?? '',
     );
   }
 
