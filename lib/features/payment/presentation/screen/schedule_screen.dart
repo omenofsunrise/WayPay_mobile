@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
 import 'package:waypay_styles/waypay_styles.dart';
@@ -13,11 +14,11 @@ import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
+import 'package:waypay_mobile/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
 import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
 import 'package:waypay_mobile/features/payment/presentation/bloc/schedule/schedule_bloc.dart';
 import 'package:waypay_mobile/features/payment/presentation/models/payment_sort_option.dart';
 import 'package:waypay_mobile/features/payment/presentation/models/schedule_filters.dart';
-import 'package:waypay_mobile/features/payment/presentation/widgets/payment_preview_card.dart';
 import 'package:waypay_mobile/features/payment/presentation/widgets/schedule_filters_sheet.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
@@ -35,6 +36,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   final _searchController = TextEditingController();
   final _tokenStorage = TokenStorage();
   final _scrollController = ScrollController();
+  final _scheduleSource = getIt<ScheduleRemoteDataSources>();
   bool _isLoadingMore = false;
   String _searchQuery = '';
   Timer? _debounce;
@@ -45,6 +47,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   List<PaymentItemModel> _historyPayments = [];
   bool _historyLoading = false;
   String? _historyError;
+  final Set<int> _whatsAppLoading = {};
 
   @override
   void initState() {
@@ -184,6 +187,56 @@ class _ScheduleScreenState extends State<ScheduleScreen>
     context.pushNamed(Routes.paymentDetailScreen.toName, extra: schedule);
   }
 
+  Future<void> _sendWhatsAppMessage(ScheduleModel schedule) async {
+    final scheduleId = schedule.id;
+    if (_whatsAppLoading.contains(scheduleId)) return;
+    final phone = _preparePhone(schedule.clientPhone);
+    if (phone == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Не указан номер клиента')),
+      );
+      return;
+    }
+    setState(() => _whatsAppLoading.add(scheduleId));
+    try {
+      final message = await _scheduleSource.getFilledSender(scheduleId);
+      final uri = Uri.parse(
+        'https://wa.me/$phone?text=${Uri.encodeComponent(message)}',
+      );
+      final opened = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!opened) {
+        throw Exception('Не удалось открыть WhatsApp');
+      }
+      if (!schedule.notified) {
+        await _scheduleSource.putSchedule(scheduleId);
+        _loadSchedules(refresh: true, page: 1);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ошибка: $e')));
+    } finally {
+      if (mounted) {
+        setState(() => _whatsAppLoading.remove(scheduleId));
+      }
+    }
+  }
+
+  String? _preparePhone(String raw) {
+    var digits = raw.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) return null;
+    if (digits.startsWith('8')) {
+      digits = '7${digits.substring(1)}';
+    } else if (!digits.startsWith('7')) {
+      digits = '7$digits';
+    }
+    return digits;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -274,9 +327,15 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                                         showPaid: _includePayedForCredit,
                                       );
                                     }
-                                    return PaymentPreviewCard(
-                                      payment: _scheduleToPayment(schedule),
-                                      onTap: () => _openPaymentDetail(schedule),
+                                    return _ScheduleListTile(
+                                      schedule: schedule,
+                                      showPaid: false,
+                                      onTap: () =>
+                                          _openPaymentDetail(schedule),
+                                      onWhatsAppTap: () =>
+                                          _sendWhatsAppMessage(schedule),
+                                      isWhatsAppLoading: _whatsAppLoading
+                                          .contains(schedule.id),
                                     );
                                   },
                                 ),
@@ -314,21 +373,6 @@ class _ScheduleScreenState extends State<ScheduleScreen>
         const SizedBox(width: 12),
         FilterButton(onTap: _openFilters, isActive: _appliedFilters != null),
       ],
-    );
-  }
-
-  PaymentItemModel _scheduleToPayment(ScheduleModel schedule) {
-    return PaymentItemModel(
-      id: schedule.id,
-      creditId: schedule.creditId,
-      paymentAmount: schedule.paymentAmount,
-      paymentDate: schedule.paymentDate,
-      type: PaymentType.cash,
-      accepted: false,
-      clientFullName: schedule.clientName,
-      investorNickname: null,
-      employeeFullName: null,
-      income: 0,
     );
   }
 
@@ -436,10 +480,19 @@ class _ScheduleScreenState extends State<ScheduleScreen>
 }
 
 class _ScheduleListTile extends StatelessWidget {
-  const _ScheduleListTile({required this.schedule, this.showPaid = false});
+  const _ScheduleListTile({
+    required this.schedule,
+    this.showPaid = false,
+    this.onTap,
+    this.onWhatsAppTap,
+    this.isWhatsAppLoading = false,
+  });
 
   final ScheduleModel schedule;
   final bool showPaid;
+  final VoidCallback? onTap;
+  final VoidCallback? onWhatsAppTap;
+  final bool isWhatsAppLoading;
 
   String _formatDate(String isoDate) {
     try {
@@ -462,6 +515,7 @@ class _ScheduleListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateLabel = _formatDate(schedule.paymentDate);
+    final isNotified = schedule.notified;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
       decoration: BoxDecoration(
@@ -476,74 +530,118 @@ class _ScheduleListTile extends StatelessWidget {
           BoxShadow(color: Color(0x05000809), blurRadius: 6),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: const BoxDecoration(
-              color: Color(0xFFD1D5DB),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              dateLabel,
-              style: AppStyle.manrope(
-                size: 14,
-                weight: FontWeight.w600,
-                color: const Color(0xFF4B5563),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Договор № ${schedule.creditId}',
-                  style: AppStyle.manrope(
-                    size: 16,
-                    weight: FontWeight.w500,
-                    color: const Color(AppColors.uiBorder),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _formatCurrency(schedule.paymentAmount),
-                  style: AppStyle.manrope(
-                    size: 16,
-                    weight: FontWeight.w500,
-                    color: const Color(AppColors.black),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Row(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(
-                showPaid ? Icons.check : Icons.access_time,
-                color: showPaid
-                    ? const Color(0xFF0FA958)
-                    : const Color(0xFF9CA3AF),
-                size: 18,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                showPaid ? 'Оплачен' : 'Ожидает',
-                style: AppStyle.manrope(
-                  size: 14,
-                  weight: FontWeight.w500,
-                  color: showPaid
-                      ? const Color(0xFF0FA958)
-                      : const Color(0xFF9CA3AF),
+              Container(
+                width: 48,
+                height: 48,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFD1D5DB),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  dateLabel,
+                  style: AppStyle.manrope(
+                    size: 14,
+                    weight: FontWeight.w600,
+                    color: const Color(0xFF4B5563),
+                  ),
                 ),
               ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Договор № ${schedule.creditId}',
+                      style: AppStyle.manrope(
+                        size: 16,
+                        weight: FontWeight.w500,
+                        color: const Color(AppColors.uiBorder),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatCurrency(schedule.paymentAmount),
+                      style: AppStyle.manrope(
+                        size: 16,
+                        weight: FontWeight.w500,
+                        color: const Color(AppColors.black),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (showPaid)
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.check,
+                      color: Color(0xFF0FA958),
+                      size: 18,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Оплачен',
+                      style: AppStyle.manrope(
+                        size: 14,
+                        weight: FontWeight.w500,
+                        color: const Color(0xFF0FA958),
+                      ),
+                    ),
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Text(
+                      isNotified ? 'Уведомлён' : 'Не уведомлён',
+                      style: AppStyle.manrope(
+                        size: 14,
+                        weight: FontWeight.w500,
+                        color: isNotified
+                            ? const Color(0xFF9CA3AF)
+                            : const Color(0xFF0FA958),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    InkWell(
+                      onTap: isWhatsAppLoading ? null : onWhatsAppTap,
+                      borderRadius: BorderRadius.circular(20),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: isWhatsAppLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : isNotified
+                            ? const Icon(
+                                Icons.check,
+                                size: 22,
+                                color: Color(0xFF0FA958),
+                              )
+                            : Image.asset(
+                                Images.whatsappLogo,
+                                width: 24,
+                                height: 24,
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
