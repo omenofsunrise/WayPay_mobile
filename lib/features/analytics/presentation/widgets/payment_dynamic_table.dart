@@ -177,7 +177,7 @@ class _PaymentDynamicTableState extends State<PaymentDynamicTable> {
     child: Text(
       text,
       style: AppStyle.manrope(size: 14, weight: FontWeight.w500),
-      textAlign: TextAlign.left,
+      textAlign: TextAlign.right,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     ),
@@ -192,7 +192,7 @@ class _PaymentDynamicTableState extends State<PaymentDynamicTable> {
         weight: FontWeight.w400,
         color: color,
       ),
-      textAlign: TextAlign.left,
+      textAlign: TextAlign.right,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     ),
