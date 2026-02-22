@@ -13,7 +13,7 @@ class PaymentDynamicTable extends StatefulWidget {
 }
 
 class _PaymentDynamicTableState extends State<PaymentDynamicTable> {
-  bool _isExpanded = true;
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -174,31 +174,27 @@ class _PaymentDynamicTableState extends State<PaymentDynamicTable> {
 
   Widget _headerCell(String text) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-    child: Center(
-      child: Text(
-        text,
-        style: AppStyle.manrope(size: 14, weight: FontWeight.w500),
-        textAlign: TextAlign.center,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
+    child: Text(
+      text,
+      style: AppStyle.manrope(size: 14, weight: FontWeight.w500),
+      textAlign: TextAlign.left,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     ),
   );
 
   Widget _dataCell(String text, {required Color color}) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-    child: Center(
-      child: Text(
-        text,
-        style: AppStyle.manrope(
-          size: 14,
-          weight: FontWeight.w400,
-          color: color,
-        ),
-        textAlign: TextAlign.center,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+    child: Text(
+      text,
+      style: AppStyle.manrope(
+        size: 14,
+        weight: FontWeight.w400,
+        color: color,
       ),
+      textAlign: TextAlign.left,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     ),
   );
 }

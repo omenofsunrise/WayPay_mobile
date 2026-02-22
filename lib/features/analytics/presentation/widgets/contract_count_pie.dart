@@ -139,39 +139,27 @@ class ContractsPieChart extends StatelessWidget {
                                   color: Color(AppColors.primary),
                                   value: activeContracts.toDouble(),
                                   radius: 12,
-                                  title: '',
+                                  title: activeContracts.toString(),
+                                  titleStyle: AppStyle.manrope(
+                                    size: 14,
+                                    weight: FontWeight.w500,
+                                    color: Color(AppColors.primary),
+                                  ),
+                                  titlePositionPercentageOffset: 2.5,
                                 ),
                                 PieChartSectionData(
                                   color: Color(AppColors.primaryLight),
                                   value: inactiveContracts.toDouble(),
                                   radius: 12,
-                                  title: '',
+                                  title: inactiveContracts.toString(),
+                                  titleStyle: AppStyle.manrope(
+                                    size: 14,
+                                    weight: FontWeight.w500,
+                                    color: Color(AppColors.primaryLight),
+                                  ),
+                                  titlePositionPercentageOffset: 1.7,
                                 ),
                               ],
-                            ),
-                          ),
-                          Positioned(
-                            left: 6,
-                            top: 4,
-                            child: Text(
-                              inactiveContracts.toString(),
-                              style: AppStyle.manrope(
-                                size: 14,
-                                weight: FontWeight.w500,
-                                color: Color(AppColors.primaryLight),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            right: 6,
-                            bottom: 4,
-                            child: Text(
-                              activeContracts.toString(),
-                              style: AppStyle.manrope(
-                                size: 14,
-                                weight: FontWeight.w500,
-                                color: Color(AppColors.primary),
-                              ),
                             ),
                           ),
                         ],

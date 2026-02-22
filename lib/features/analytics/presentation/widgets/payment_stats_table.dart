@@ -13,7 +13,7 @@ class PaymentStatsTable extends StatefulWidget {
 }
 
 class _PaymentStatsTableState extends State<PaymentStatsTable> {
-  bool _isExpanded = true;
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -143,6 +143,7 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
                                       size: 14,
                                       weight: FontWeight.w500,
                                     ),
+                                    textAlign: TextAlign.left,
                                   ),
                                 ),
                                 Padding(
@@ -156,6 +157,7 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
                                       size: 14,
                                       weight: FontWeight.w500,
                                     ),
+                                    textAlign: TextAlign.left,
                                   ),
                                 ),
                                 Padding(
@@ -169,6 +171,7 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
                                       size: 14,
                                       weight: FontWeight.w500,
                                     ),
+                                    textAlign: TextAlign.left,
                                   ),
                                 ),
                               ],
@@ -191,6 +194,7 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
                                         weight: FontWeight.w400,
                                         color: const Color(0xFF50555C),
                                       ),
+                                      textAlign: TextAlign.left,
                                     ),
                                   ),
                                   Padding(
@@ -205,6 +209,7 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
                                         weight: FontWeight.w400,
                                         color: const Color(0xFF111111),
                                       ),
+                                      textAlign: TextAlign.left,
                                     ),
                                   ),
                                   Padding(
@@ -219,6 +224,7 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
                                         weight: FontWeight.w400,
                                         color: const Color(0xFF111111),
                                       ),
+                                      textAlign: TextAlign.left,
                                     ),
                                   ),
                                 ],

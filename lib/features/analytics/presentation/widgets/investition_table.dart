@@ -13,7 +13,7 @@ class InvestitionTable extends StatefulWidget {
 }
 
 class _InvestitionTableState extends State<InvestitionTable> {
-  bool _isExpanded = true;
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +135,7 @@ class _InvestitionTableState extends State<InvestitionTable> {
                                       size: 14,
                                       weight: FontWeight.w500,
                                     ),
+                                    textAlign: TextAlign.left,
                                   ),
                                 ),
                                 Padding(
@@ -148,6 +149,7 @@ class _InvestitionTableState extends State<InvestitionTable> {
                                       size: 14,
                                       weight: FontWeight.w500,
                                     ),
+                                    textAlign: TextAlign.left,
                                   ),
                                 ),
                               ],
@@ -170,6 +172,7 @@ class _InvestitionTableState extends State<InvestitionTable> {
                                         weight: FontWeight.w400,
                                         color: const Color(0xFF50555C),
                                       ),
+                                      textAlign: TextAlign.left,
                                     ),
                                   ),
                                   Padding(
@@ -184,6 +187,7 @@ class _InvestitionTableState extends State<InvestitionTable> {
                                         weight: FontWeight.w400,
                                         color: const Color(0xFF111111),
                                       ),
+                                      textAlign: TextAlign.left,
                                     ),
                                   ),
                                 ],
