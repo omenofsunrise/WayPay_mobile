@@ -13,7 +13,7 @@ class PaymentDynamicTable extends StatefulWidget {
 }
 
 class _PaymentDynamicTableState extends State<PaymentDynamicTable> {
-  bool _isExpanded = false;
+  bool _isExpanded = true;
 
   @override
   Widget build(BuildContext context) {
@@ -25,16 +25,16 @@ class _PaymentDynamicTableState extends State<PaymentDynamicTable> {
 
     return BlocBuilder<SellInfoCubit, SellInfoState>(
       builder: (context, state) {
-        Widget? body;
+        Widget? table;
 
         if (_isExpanded) {
           if (state is SellInfoLoading) {
-            body = const Padding(
+            table = const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Center(child: CircularProgressIndicator()),
             );
           } else if (state is SellInfoError) {
-            body = Padding(
+            table = Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(child: Text('Ошибка: ${state.message}')),
             );
@@ -53,16 +53,17 @@ class _PaymentDynamicTableState extends State<PaymentDynamicTable> {
               },
             ).reversed.toList();
 
-            body = Table(
+            table = Table(
               columnWidths: const {
                 0: FlexColumnWidth(1),
-                1: FlexColumnWidth(),
-                2: FlexColumnWidth(),
-                3: FlexColumnWidth(),
+                1: FlexColumnWidth(1),
+                2: FlexColumnWidth(1),
+                3: FlexColumnWidth(1),
               },
-              border: TableBorder.all(
-                color: Color(AppColors.borderColor),
-                borderRadius: BorderRadius.circular(10),
+              border: const TableBorder(
+                horizontalInside: BorderSide(color: Color(0xFFE6E9EE)),
+                top: BorderSide(color: Color(0xFFE6E9EE)),
+                bottom: BorderSide(color: Color(0xFFE6E9EE)),
               ),
               children: [
                 TableRow(
@@ -78,19 +79,19 @@ class _PaymentDynamicTableState extends State<PaymentDynamicTable> {
                     children: [
                       _dataCell(
                         r['period'] as String,
-                        color: AppColors.uiBorder,
+                        color: const Color(0xFF50555C),
                       ),
                       _dataCell(
                         currency.format(r['sell']),
-                        color: AppColors.primary,
+                        color: const Color(0xFF111111),
                       ),
                       _dataCell(
                         currency.format(r['purchase']),
-                        color: AppColors.primary,
+                        color: const Color(0xFF111111),
                       ),
                       _dataCell(
                         currency.format(r['cash']),
-                        color: AppColors.primary,
+                        color: const Color(0xFF111111),
                       ),
                     ],
                   ),
@@ -98,68 +99,105 @@ class _PaymentDynamicTableState extends State<PaymentDynamicTable> {
               ],
             );
           } else {
-            body = const Padding(
+            table = const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Center(child: Text('Нет данных')),
             );
           }
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // заголовок секции (аккордеон)
-            InkWell(
-              onTap: () => setState(() => _isExpanded = !_isExpanded),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: Text(
-                      'Динамика продаж, покупок и остатка в кассе',
-                      style: AppStyle.manrope(
-                        size: 15,
-                        weight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                  Icon(
-                    _isExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: Colors.black54,
-                  ),
-                ],
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x14000809),
+                blurRadius: 4,
+                offset: Offset(2, 2),
               ),
-            ),
-            const SizedBox(height: 12),
-            if (body != null) body,
-          ],
+              BoxShadow(
+                color: Color(0x05000809),
+                blurRadius: 6,
+                offset: Offset(0, 0),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              InkWell(
+                onTap: () => setState(() => _isExpanded = !_isExpanded),
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                overlayColor: MaterialStateProperty.all(Colors.transparent),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Динамика продаж и покупок',
+                          style: AppStyle.manrope(
+                            size: 16,
+                            weight: FontWeight.w500,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Icon(
+                        _isExpanded
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                        color: const Color(0xFF50555C),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (_isExpanded)
+                const Divider(
+                  height: 0,
+                  thickness: 1,
+                  color: Color(0xFFE6E9EE),
+                ),
+              if (table != null) table,
+            ],
+          ),
         );
       },
     );
   }
 
   Widget _headerCell(String text) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 12),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
     child: Center(
       child: Text(
         text,
-        style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
+        style: AppStyle.manrope(size: 14, weight: FontWeight.w500),
+        textAlign: TextAlign.center,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     ),
   );
 
-  Widget _dataCell(String text, {required int color}) => Padding(
-    padding: const EdgeInsets.all(8),
+  Widget _dataCell(String text, {required Color color}) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
     child: Center(
       child: Text(
         text,
         style: AppStyle.manrope(
-          size: 15,
+          size: 14,
           weight: FontWeight.w400,
-          color: Color(color),
+          color: color,
         ),
+        textAlign: TextAlign.center,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     ),
   );

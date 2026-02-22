@@ -43,8 +43,19 @@ class ContractsPieChart extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Color(AppColors.borderColor)),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x14000809),
+                    blurRadius: 4,
+                    offset: Offset(2, 2),
+                  ),
+                  BoxShadow(
+                    color: Color(0x05000809),
+                    blurRadius: 6,
+                    offset: Offset(0, 0),
+                  ),
+                ],
               ),
               child: Center(
                 child: Stack(
@@ -89,17 +100,28 @@ class ContractsPieChart extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Color(AppColors.borderColor)),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x14000809),
+                  blurRadius: 4,
+                  offset: Offset(2, 2),
+                ),
+                BoxShadow(
+                  color: Color(0x05000809),
+                  blurRadius: 6,
+                  offset: Offset(0, 0),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Количество договоров',
-                  style: AppStyle.manrope(size: 15, weight: FontWeight.w400),
+                  style: AppStyle.manrope(size: 16, weight: FontWeight.w500),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     SizedBox(
@@ -111,62 +133,79 @@ class ContractsPieChart extends StatelessWidget {
                           PieChart(
                             PieChartData(
                               sectionsSpace: 0,
-                              centerSpaceRadius: 50,
+                              centerSpaceRadius: 46,
                               sections: [
                                 PieChartSectionData(
-                                  color: Color(AppColors.primaryLight),
+                                  color: Color(AppColors.primary),
                                   value: activeContracts.toDouble(),
-                                  radius: 15,
+                                  radius: 12,
                                   title: '',
                                 ),
                                 PieChartSectionData(
-                                  color: Color(AppColors.greyLight),
+                                  color: Color(AppColors.primaryLight),
                                   value: inactiveContracts.toDouble(),
-                                  radius: 15,
+                                  radius: 12,
                                   title: '',
                                 ),
                               ],
                             ),
                           ),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Всего',
-                                style: AppStyle.manrope(
-                                  size: 20,
-                                  weight: FontWeight.w400,
-                                ),
+                          Positioned(
+                            left: 6,
+                            top: 4,
+                            child: Text(
+                              inactiveContracts.toString(),
+                              style: AppStyle.manrope(
+                                size: 14,
+                                weight: FontWeight.w500,
+                                color: Color(AppColors.primaryLight),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '$totalContracts',
-                                style: AppStyle.manrope(
-                                  size: 20,
-                                  weight: FontWeight.w400,
-                                ),
+                            ),
+                          ),
+                          Positioned(
+                            right: 6,
+                            bottom: 4,
+                            child: Text(
+                              activeContracts.toString(),
+                              style: AppStyle.manrope(
+                                size: 14,
+                                weight: FontWeight.w500,
+                                color: Color(AppColors.primary),
                               ),
-                            ],
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildLegendItem(
-                            Color(AppColors.primaryLight),
+                            Color(AppColors.primary),
                             'Действующие',
                             activeContracts,
                           ),
-                          const SizedBox(height: 30),
+                          const SizedBox(height: 12),
                           _buildLegendItem(
-                            Colors.grey.shade400,
+                            Color(AppColors.primaryLight),
                             'Закрытые',
                             inactiveContracts,
+                          ),
+                          const SizedBox(height: 12),
+                          const Divider(
+                            height: 1,
+                            thickness: 1,
+                            color: Color(0xFFE6E9EE),
+                          ),
+                          const SizedBox(height: 10),
+                          _buildLegendItem(
+                            const Color(0x00000000),
+                            'Всего',
+                            totalContracts,
+                            showDot: false,
                           ),
                         ],
                       ),
@@ -186,21 +225,27 @@ class ContractsPieChart extends StatelessWidget {
     );
   }
 
-  Widget _buildLegendItem(Color color, String label, int count) {
+  Widget _buildLegendItem(
+    Color color,
+    String label,
+    int count, {
+    bool showDot = true,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Container(
-          width: 10,
-          height: 10,
-          margin: const EdgeInsets.only(top: 3),
-          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-        ),
-        const SizedBox(width: 3),
+        if (showDot)
+          Container(
+            width: 8,
+            height: 8,
+            margin: const EdgeInsets.only(top: 3),
+            color: color,
+          ),
+        if (showDot) const SizedBox(width: 6),
         Expanded(
           child: Text(
             label,
-            style: AppStyle.manrope(size: 15, weight: FontWeight.w400),
+            style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             softWrap: true,
@@ -209,7 +254,7 @@ class ContractsPieChart extends StatelessWidget {
         const SizedBox(width: 3),
         Text(
           count.toString(),
-          style: AppStyle.manrope(size: 15, weight: FontWeight.w400),
+          style: AppStyle.manrope(size: 14, weight: FontWeight.w400),
         ),
       ],
     );

@@ -9,7 +9,6 @@ import 'package:waypay_mobile/features/analytics/presentation/cubit/investment_d
 import 'package:waypay_mobile/features/analytics/presentation/cubit/sell_info_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/screens/analytic_screen.dart';
 import 'package:waypay_mobile/features/admin_panel/presentation/screen/company_data_screen.dart';
-import 'package:waypay_mobile/features/auth/presentation/screens/confirmation_screen.dart';
 import 'package:waypay_mobile/features/auth/presentation/screens/phone_auth_screen.dart';
 import 'package:waypay_mobile/features/auth/presentation/screens/pin_code_screen.dart';
 import 'package:waypay_mobile/features/bottom_navigation_bar/main_layout.dart';
@@ -97,10 +96,7 @@ class AppRouter {
       if (!isAuthenticated) {
         if (here == '/') return Routes.phoneAuthScreen.toPath;
 
-        final guestAllowed = {
-          Routes.phoneAuthScreen.toPath,
-          Routes.confirmationScreen.toPath,
-        };
+        final guestAllowed = {Routes.phoneAuthScreen.toPath};
         if (!guestAllowed.contains(here)) {
           return Routes.phoneAuthScreen.toPath;
         }
@@ -108,8 +104,7 @@ class AppRouter {
       }
       if (hasPinCode) {
         if (here == '/' ||
-            here == Routes.phoneAuthScreen.toPath ||
-            here == Routes.confirmationScreen.toPath) {
+            here == Routes.phoneAuthScreen.toPath) {
           return Routes.pinCodeScreen.toPath;
         }
         return null;
@@ -154,15 +149,6 @@ class AppRouter {
         path: Routes.privacyPolicyScreen.toPath,
         name: Routes.privacyPolicyScreen.toName,
         builder: (context, state) => const PrivacyPolicyScreen(),
-      ),
-
-      GoRoute(
-        path: Routes.confirmationScreen.toPath,
-        name: Routes.confirmationScreen.toName,
-        builder: (context, state) {
-          final phone = state.extra as String? ?? '';
-          return ConfirmationScreen(phone: phone);
-        },
       ),
 
       GoRoute(

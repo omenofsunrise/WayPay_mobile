@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_mobile/core/widgets/dashboard_info_mini_card.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_styles/waypay_styles.dart';
@@ -78,37 +77,6 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
     if (value is num) return value.toDouble();
     if (value is String) return double.tryParse(value) ?? 0;
     return 0;
-  }
-
-  Widget _buildCard(String title, String value, String icon) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(color: Color(0x14000809), blurRadius: 4)],
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset(icon, width: 48, height: 48),
-            const SizedBox(height: 12),
-            Text(
-              value,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.black54),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -312,7 +280,17 @@ class _AnalyticsGrid extends StatelessWidget {
               .map(
                 (metric) => SizedBox(
                   width: itemWidth,
-                  child: _MetricCard(metric: metric),
+                  child: DashboardInfoMiniCard(
+                    circleColor:
+                        metric.backgroundColor ??
+                        (metric.highlighted
+                            ? const Color(0x4D14BFDB)
+                            : const Color(0xFFE4F4F1)),
+                    iconAsset: metric.icon,
+                    title: metric.title,
+                    value: metric.value,
+                    valueColor: metric.valueColor,
+                  ),
                 ),
               )
               .toList(),
@@ -338,81 +316,4 @@ class _MetricData {
   final Color valueColor;
   final bool highlighted;
   final Color? backgroundColor;
-}
-
-class _MetricCard extends StatelessWidget {
-  const _MetricCard({required this.metric});
-
-  final _MetricData metric;
-
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: 160, maxWidth: 171),
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 128),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x14000809),
-              offset: Offset(2, 2),
-              blurRadius: 4,
-            ),
-            BoxShadow(
-              color: Color(0x05000809),
-              offset: Offset(0, 0),
-              blurRadius: 6,
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color:
-                    metric.backgroundColor ??
-                    (metric.highlighted
-                        ? const Color(0x4D14BFDB)
-                        : const Color(0xFFE4F4F1)),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Center(
-                child: SvgPicture.asset(metric.icon, width: 20, height: 20),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              metric.title,
-              style: const TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-                height: 20 / 14,
-                letterSpacing: 0,
-                color: Color(AppColors.uiBorder),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              metric.value,
-              style: TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-                height: 1.2,
-                letterSpacing: 0,
-                color: metric.valueColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

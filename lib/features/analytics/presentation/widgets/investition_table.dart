@@ -13,7 +13,7 @@ class InvestitionTable extends StatefulWidget {
 }
 
 class _InvestitionTableState extends State<InvestitionTable> {
-  bool _isExpanded = false;
+  bool _isExpanded = true;
 
   @override
   Widget build(BuildContext context) {
@@ -49,104 +49,151 @@ class _InvestitionTableState extends State<InvestitionTable> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                InkWell(
-                  onTap: () => setState(() => _isExpanded = !_isExpanded),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x14000809),
+                        blurRadius: 4,
+                        offset: Offset(2, 2),
+                      ),
+                      BoxShadow(
+                        color: Color(0x05000809),
+                        blurRadius: 6,
+                        offset: Offset(0, 0),
+                      ),
+                    ],
+                  ),
+                  child: Column(
                     children: [
-                      Text(
-                        'Динамика инвестиций',
-                        style: AppStyle.manrope(
-                          size: 15,
-                          weight: FontWeight.w400,
+                      InkWell(
+                        onTap: () => setState(() => _isExpanded = !_isExpanded),
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        overlayColor: MaterialStateProperty.all(
+                          Colors.transparent,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Динамика инвестиций',
+                                  style: AppStyle.manrope(
+                                    size: 16,
+                                    weight: FontWeight.w500,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Icon(
+                                _isExpanded
+                                    ? Icons.keyboard_arrow_up
+                                    : Icons.keyboard_arrow_down,
+                                color: const Color(0xFF50555C),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      Icon(
-                        _isExpanded
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
-                        color: Colors.black54,
-                      ),
+                      if (_isExpanded)
+                        const Divider(
+                          height: 0,
+                          thickness: 1,
+                          color: Color(0xFFE6E9EE),
+                        ),
+                      if (_isExpanded)
+                        Table(
+                          columnWidths: const {
+                            0: FlexColumnWidth(1),
+                            1: FlexColumnWidth(1),
+                          },
+                          border: const TableBorder(
+                            horizontalInside:
+                                BorderSide(color: Color(0xFFE6E9EE)),
+                            top: BorderSide(color: Color(0xFFE6E9EE)),
+                            bottom: BorderSide(color: Color(0xFFE6E9EE)),
+                          ),
+                          children: [
+                            TableRow(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 10,
+                                  ),
+                                  child: Text(
+                                    'Дата',
+                                    style: AppStyle.manrope(
+                                      size: 14,
+                                      weight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 10,
+                                  ),
+                                  child: Text(
+                                    'Сумма',
+                                    style: AppStyle.manrope(
+                                      size: 14,
+                                      weight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            ...List.generate(rowCount, (index) {
+                              final month = periodsDesc[index].periodName;
+                              final sum = periodsDesc[index].value.toInt();
+
+                              return TableRow(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 10,
+                                    ),
+                                    child: Text(
+                                      month,
+                                      style: AppStyle.manrope(
+                                        size: 14,
+                                        weight: FontWeight.w400,
+                                        color: const Color(0xFF50555C),
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 10,
+                                    ),
+                                    child: Text(
+                                      currencyFormatter.format(sum),
+                                      style: AppStyle.manrope(
+                                        size: 14,
+                                        weight: FontWeight.w400,
+                                        color: const Color(0xFF111111),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }),
+                          ],
+                        ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
-                if (_isExpanded)
-                  Table(
-                    columnWidths: const {
-                      0: FlexColumnWidth(),
-                      1: FlexColumnWidth(),
-                    },
-                    border: TableBorder.all(
-                      color: Color(AppColors.borderColor),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    children: [
-                      TableRow(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 17),
-                            child: Center(
-                              child: Text(
-                                'Дата',
-                                style: AppStyle.manrope(
-                                  size: 15,
-                                  weight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Center(
-                              child: Text(
-                                'Сумма, руб',
-                                style: AppStyle.manrope(
-                                  size: 15,
-                                  weight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      ...List.generate(rowCount, (index) {
-                        final month = periodsDesc[index].periodName;
-                        final sum = periodsDesc[index].value.toInt();
-
-                        return TableRow(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(
-                                child: Text(
-                                  month,
-                                  style: AppStyle.manrope(
-                                    size: 15,
-                                    weight: FontWeight.w400,
-                                    color: Color(AppColors.uiBorder),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(
-                                child: Text(
-                                  currencyFormatter.format(sum),
-                                  style: AppStyle.manrope(
-                                    size: 15,
-                                    weight: FontWeight.w400,
-                                    color: Color(AppColors.primary),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      }),
-                    ],
-                  ),
               ],
             ),
           );

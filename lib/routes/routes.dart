@@ -1,7 +1,6 @@
 enum Routes {
   userTypeSelectionScreen,
   phoneAuthScreen,
-  confirmationScreen,
   pinCodeScreen,
   investorsScreen,
   investorsHubScreen,
@@ -53,8 +52,6 @@ extension RoutesExtension on Routes {
         return '/user_type_selection_screen';
       case Routes.phoneAuthScreen:
         return '/phone_auth_screen';
-      case Routes.confirmationScreen:
-        return '/confirmation_screen';
       case Routes.pinCodeScreen:
         return '/pin_code_screen';
       case Routes.investorsScreen:
@@ -148,8 +145,6 @@ extension RoutesExtension on Routes {
         return 'USER_TYPE_SELECTION_SCREEN';
       case Routes.phoneAuthScreen:
         return 'PHONE_AUTH_SCREEN';
-      case Routes.confirmationScreen:
-        return 'CALL_CONFIRMATION_SCREEN';
       case Routes.pinCodeScreen:
         return 'PIN_CODE_SCREEN';
       case Routes.investorsScreen:

@@ -90,13 +90,8 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
             }
 
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              final formattedPhone = '8${_phoneFormatter.getUnmaskedText()}';
-              debugPrint(
-                '🚀 Переход на confirmationScreen с телефоном: $formattedPhone',
-              );
               context.pushReplacementNamed(
-                Routes.confirmationScreen.toName,
-                extra: formattedPhone,
+                Routes.pinCodeScreen.toName,
               );
             });
           }
