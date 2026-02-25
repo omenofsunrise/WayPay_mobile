@@ -79,6 +79,8 @@ import 'package:waypay_mobile/features/sold_products/data/data_sources/sold_prod
 import 'package:waypay_mobile/features/sold_products/data/data_sources/sold_product_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/todo/data/data_soucres/task_remote_data_source.dart';
 import 'package:waypay_mobile/features/todo/data/data_soucres/task_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/todo/data/data_soucres/task_note_remote_data_source.dart';
+import 'package:waypay_mobile/features/todo/data/data_soucres/task_note_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/todo/presentation/bloc/task_bloc.dart';
 import '../config/api_config.dart';
 import '../network/dio_client.dart';
@@ -143,6 +145,9 @@ Future<void> initDependencies() async {
   );
   getIt.registerLazySingleton<TaskRemoteDataSource>(
     () => TaskRemoteDataSourceImpl(getIt<Dio>(instanceName: 'second')),
+  );
+  getIt.registerLazySingleton<TaskNoteRemoteDataSource>(
+    () => TaskNoteRemoteDataSourceImpl(getIt<Dio>(instanceName: 'second')),
   );
   getIt.registerLazySingleton<BlogRemoteDataSources>(
     () => BlogRemoteDataSourcesImpl(getIt<Dio>(instanceName: 'second')),

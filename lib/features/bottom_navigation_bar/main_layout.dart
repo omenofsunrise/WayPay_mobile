@@ -11,15 +11,12 @@ class MainLayout extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
   static const _navConfigs = [
-    _NavItemConfig(branchIndex: 0, icon: SvgIcons.home),
-    _NavItemConfig(branchIndex: 2, icon: SvgIcons.chat),
-    _NavItemConfig(
-      branchIndex: 3,
-      icon: SvgIcons.add,
-      activeIcon: SvgIcons.add,
-    ),
-    _NavItemConfig(branchIndex: 4, icon: SvgIcons.blog),
-    _NavItemConfig(branchIndex: 5, icon: SvgIcons.calculator),
+    _NavItemConfig(icon: SvgIcons.home),
+    _NavItemConfig(icon: SvgIcons.todo),
+    _NavItemConfig(icon: SvgIcons.chat),
+    _NavItemConfig(icon: SvgIcons.add, activeIcon: SvgIcons.add),
+    _NavItemConfig(icon: SvgIcons.blog),
+    _NavItemConfig(icon: SvgIcons.calculator),
   ];
   static const _newCreditPaths = {
     '/new_credit_details_screen',
@@ -30,13 +27,9 @@ class MainLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locationPath = GoRouterState.of(context).uri.path;
-    final highlightedBranchIndex =
-        _newCreditPaths.contains(locationPath)
-            ? 3
-            : navigationShell.currentIndex;
-    final highlightedNavIndex = _navConfigs.indexWhere(
-      (config) => config.branchIndex == highlightedBranchIndex,
-    );
+    final highlightedIndex = _newCreditPaths.contains(locationPath)
+        ? 3
+        : navigationShell.currentIndex;
 
     return Scaffold(
       body: navigationShell,
@@ -45,7 +38,7 @@ class MainLayout extends StatelessWidget {
         builder: (context, visible, _) {
           if (!visible) return const SizedBox.shrink();
           return _AppBottomNavBar(
-            currentIndex: highlightedNavIndex,
+            currentIndex: highlightedIndex,
             items: _navConfigs,
             onTap: (index) {
               navigationShell.goBranch(
@@ -97,7 +90,7 @@ class _AppBottomNavBar extends StatelessWidget {
             return _NavItem(
               icon: selected ? config.activeIcon ?? config.icon : config.icon,
               selected: selected,
-              onTap: () => onTap(config.branchIndex),
+              onTap: () => onTap(index),
             );
           }),
         ),
@@ -150,13 +143,8 @@ class _NavItem extends StatelessWidget {
 }
 
 class _NavItemConfig {
-  const _NavItemConfig({
-    required this.branchIndex,
-    required this.icon,
-    this.activeIcon,
-  });
+  const _NavItemConfig({required this.icon, this.activeIcon});
 
-  final int branchIndex;
   final String icon;
   final String? activeIcon;
 }
