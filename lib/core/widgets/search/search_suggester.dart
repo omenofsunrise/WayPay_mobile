@@ -59,13 +59,18 @@ class _SearchSuggesterState extends State<SearchSuggester> {
   }
 
   void _measureField() {
-    final renderBox =
-        _fieldKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      setState(() {
-        _fieldSize = renderBox.size;
-      });
+    final renderObject = _fieldKey.currentContext?.findRenderObject();
+    if (renderObject is! RenderBox) return;
+    if (!renderObject.hasSize) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _measureField());
+      return;
     }
+    if (!mounted) return;
+    final size = renderObject.size;
+    if (_fieldSize == size) return;
+    setState(() {
+      _fieldSize = size;
+    });
   }
 
   void _onChanged(String raw) {

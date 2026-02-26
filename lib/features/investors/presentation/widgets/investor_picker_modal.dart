@@ -4,8 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
+import 'package:waypay_mobile/features/investors/presentation/bloc/investor_pool_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
+
+class InvestorPickerResult {
+  const InvestorPickerResult.investor(this.investor) : pool = null;
+  const InvestorPickerResult.pool(this.pool) : investor = null;
+
+  final InvestorsModel? investor;
+  final InvestorPoolModel? pool;
+}
 
 class InvestorPickerModal extends StatefulWidget {
   const InvestorPickerModal({
@@ -28,13 +38,13 @@ class InvestorPickerModal extends StatefulWidget {
 
 class _InvestorTile extends StatelessWidget {
   const _InvestorTile({
-    required this.investor,
+    required this.name,
     required this.cashText,
     required this.contractText,
     required this.onTap,
   });
 
-  final InvestorsModel investor;
+  final String name;
   final String cashText;
   final String contractText;
   final VoidCallback onTap;
@@ -51,7 +61,7 @@ class _InvestorTile extends StatelessWidget {
             Expanded(
               flex: 4,
               child: Text(
-                investor.nickname,
+                name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -106,6 +116,11 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
     context.read<InvestorsBloc>().add(
       LoadInvestorsEvent(refresh: true, page: 1, pageSize: 10),
     );
+    if (widget.includePool) {
+      context.read<InvestorPoolBloc>().add(
+        LoadInvestorPool(refresh: true, page: 1, pageSize: 10),
+      );
+    }
   }
 
   @override
@@ -129,6 +144,9 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
         _hasValidSearch = false;
       });
       context.read<InvestorsBloc>().add(ResetSearchInvestorsEvent());
+      if (widget.includePool) {
+        context.read<InvestorPoolBloc>().add(ResetInvestorPool());
+      }
       return;
     }
 
@@ -143,6 +161,9 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
         if (!mounted) return;
         _lastSubmittedQuery = query;
         context.read<InvestorsBloc>().add(SearchInvestorsEvent(query));
+        if (widget.includePool) {
+          context.read<InvestorPoolBloc>().add(SearchInvestorPool(query));
+        }
       });
     } else {
       setState(() {
@@ -157,11 +178,21 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
       context.read<InvestorsBloc>().add(
         LoadInvestorsEvent(refresh: true, page: 1, pageSize: 10),
       );
+      if (widget.includePool) {
+        context.read<InvestorPoolBloc>().add(
+          LoadInvestorPool(refresh: true, page: 1, pageSize: 10),
+        );
+      }
       return;
     }
     context.read<InvestorsBloc>().add(
       SearchInvestorsEvent(_lastSubmittedQuery),
     );
+    if (widget.includePool) {
+      context.read<InvestorPoolBloc>().add(
+        SearchInvestorPool(_lastSubmittedQuery),
+      );
+    }
   }
 
   String _formatCash(double? value) {
@@ -178,68 +209,105 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
     return '$day.$month.$year';
   }
 
-  List<InvestorsModel> _filterByType(List<InvestorsModel> investors) {
-    return investors.where((investor) {
-      final isPool = investor.isCompany == true;
-      if (isPool && !widget.includePool) return false;
-      if (!isPool && !widget.includeInvestor) return false;
-      return true;
-    }).toList();
+  List<InvestorsModel> _extractInvestors(InvestorsState state) {
+    if (!widget.includeInvestor) return [];
+    if (state is InvestorsLoaded) return state.investors;
+    return [];
   }
 
-  Widget _buildResults(InvestorsState state) {
+  List<InvestorPoolModel> _extractPools(InvestorPoolState state) {
+    if (!widget.includePool) return [];
+    if (state is InvestorPoolLoaded) return state.items;
+    return [];
+  }
+
+  Widget _buildResults(InvestorsState investorsState, InvestorPoolState poolState) {
+    final investors = _extractInvestors(investorsState);
+    final pools = _extractPools(poolState);
+    final hasData = investors.isNotEmpty || pools.isNotEmpty;
+
+    if (!hasData) {
+      final isLoading =
+          investorsState is InvestorsLoading || poolState is InvestorPoolLoading;
+      if (isLoading) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (investorsState is InvestorsError && poolState is InvestorPoolError) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Ошибка загрузки списка.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.red),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: _retryLastSearch,
+              child: const Text('Повторить'),
+            ),
+          ],
+        );
+      }
+      if (investorsState is InvestorsError && !widget.includePool) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              investorsState.message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.red),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: _retryLastSearch,
+              child: const Text('Повторить'),
+            ),
+          ],
+        );
+      }
+      if (poolState is InvestorPoolError && !widget.includeInvestor) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              poolState.message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.red),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: _retryLastSearch,
+              child: const Text('Повторить'),
+            ),
+          ],
+        );
+      }
+      return Center(
+        child: Text(
+          widget.includePool
+              ? 'Инвесторы и пулы не найдены'
+              : 'Инвесторы не найдены',
+          style: const TextStyle(color: Color(AppColors.uiBorder)),
+        ),
+      );
+    }
+
     if (!_hasValidSearch) {
       if (_searchController.text.trim().isEmpty) {
-        if (state is InvestorsLoaded) {
-          final filtered = _filterByType(state.investors);
-          if (filtered.isEmpty) {
-            return const Center(
-              child: Text(
-                'Инвесторы не найдены',
-                style: TextStyle(color: Color(AppColors.uiBorder)),
-              ),
-            );
-          }
-          return ListView.separated(
-            itemCount: filtered.length,
-            separatorBuilder: (_, __) =>
-                const Divider(height: 16, color: Color(0xFFE5E5EA)),
-            itemBuilder: (_, index) {
-              final investor = filtered[index];
-              return _InvestorTile(
-                investor: investor,
-                cashText: _formatCash(investor.cashbox),
-                contractText: _formatDateShort(investor.contractEndDate),
-                onTap: () => Navigator.of(context).pop(investor),
-              );
-            },
-          );
-        }
-        if (state is InvestorsLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        return const Center(
-          child: Text(
-            'Введите имя или номер телефона, чтобы найти инвестора.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Color(AppColors.uiBorder)),
-          ),
-        );
+        return _buildCombinedList(investors, pools);
       }
       return const SizedBox.shrink();
     }
 
-    if (state is InvestorsLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (state is InvestorsError) {
+    if (investorsState is InvestorsError && poolState is InvestorPoolError) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            state.message,
+          const Text(
+            'Ошибка загрузки списка.',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.red),
+            style: TextStyle(color: Colors.red),
           ),
           const SizedBox(height: 12),
           ElevatedButton(
@@ -249,32 +317,47 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
         ],
       );
     }
-    if (state is InvestorsLoaded) {
-      final filtered = _filterByType(state.investors);
-      if (filtered.isEmpty) {
-        return const Center(
-          child: Text(
-            'Инвесторы не найдены',
-            style: TextStyle(color: Color(AppColors.uiBorder)),
+
+    return _buildCombinedList(investors, pools);
+  }
+
+  Widget _buildCombinedList(
+    List<InvestorsModel> investors,
+    List<InvestorPoolModel> pools,
+  ) {
+    final items = <Widget>[];
+    for (final investor in investors) {
+      items.add(
+        _InvestorTile(
+          name: investor.nickname,
+          cashText: _formatCash(investor.cashbox),
+          contractText: _formatDateShort(investor.contractEndDate),
+          onTap: () => Navigator.of(context).pop(
+            InvestorPickerResult.investor(investor),
           ),
-        );
-      }
-      return ListView.separated(
-        itemCount: filtered.length,
-        separatorBuilder: (_, __) =>
-            const Divider(height: 16, color: Color(0xFFE5E5EA)),
-        itemBuilder: (_, index) {
-          final investor = filtered[index];
-          return _InvestorTile(
-            investor: investor,
-            cashText: _formatCash(investor.cashbox),
-            contractText: _formatDateShort(investor.contractEndDate),
-            onTap: () => Navigator.of(context).pop(investor),
-          );
-        },
+        ),
       );
     }
-    return const SizedBox.shrink();
+    for (final pool in pools) {
+      final date = pool.activeUntil ?? pool.createdAt;
+      items.add(
+        _InvestorTile(
+          name: pool.name,
+          cashText: _formatCash(pool.balance),
+          contractText: _formatDateShort(date),
+          onTap: () => Navigator.of(context).pop(
+            InvestorPickerResult.pool(pool),
+          ),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      itemCount: items.length,
+      separatorBuilder: (_, __) =>
+          const Divider(height: 16, color: Color(0xFFE5E5EA)),
+      itemBuilder: (_, index) => items[index],
+    );
   }
 
   @override
@@ -323,7 +406,12 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
           SizedBox(
             height: 320,
             child: BlocBuilder<InvestorsBloc, InvestorsState>(
-              builder: (context, state) => _buildResults(state),
+              builder: (context, investorsState) {
+                return BlocBuilder<InvestorPoolBloc, InvestorPoolState>(
+                  builder: (context, poolState) =>
+                      _buildResults(investorsState, poolState),
+                );
+              },
             ),
           ),
           const SizedBox(height: 16),

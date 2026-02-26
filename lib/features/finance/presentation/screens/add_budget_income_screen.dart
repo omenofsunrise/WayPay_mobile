@@ -6,6 +6,7 @@ import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/finance/data/data_source/budget_remote_data_source.dart';
 import 'package:waypay_mobile/features/finance/data/models/create_budget_income_dto.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
+import 'package:waypay_mobile/features/investors/presentation/bloc/investor_pool_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/widgets/investor_picker_modal.dart';
 
@@ -107,7 +108,7 @@ class _AddBudgetIncomeScreenState extends State<AddBudgetIncomeScreen> {
   }
 
   Future<void> _openInvestorPicker() async {
-    final selected = await showModalBottomSheet<InvestorsModel>(
+    final selected = await showModalBottomSheet<InvestorPickerResult>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -116,8 +117,11 @@ class _AddBudgetIncomeScreenState extends State<AddBudgetIncomeScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => BlocProvider(
-        create: (_) => InvestorsBloc(),
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => InvestorsBloc()),
+          BlocProvider(create: (_) => InvestorPoolBloc()),
+        ],
         child: const InvestorPickerModal(
           includeInvestor: true,
           includePool: false,
@@ -126,10 +130,11 @@ class _AddBudgetIncomeScreenState extends State<AddBudgetIncomeScreen> {
       ),
     );
 
-    if (selected != null) {
+    if (selected?.investor != null) {
+      final investor = selected!.investor!;
       setState(() {
-        _selectedInvestor = selected;
-        _investorController.text = selected.nickname;
+        _selectedInvestor = investor;
+        _investorController.text = investor.nickname;
         _investorError = null;
       });
     }

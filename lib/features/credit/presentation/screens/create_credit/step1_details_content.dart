@@ -3,14 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
-import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/features/clients/presentation/widgets/client_picker_modal.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
-import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
+import 'package:waypay_mobile/features/investors/presentation/bloc/investor_pool_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/widgets/investor_picker_modal.dart';
 import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
@@ -93,7 +92,11 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
   }
 
   void _syncDisplayControllers(CreditCreationState state) {
-    _investorDisplayController.text = state.selectedInvestor?.nickname ?? '';
+    if (state.selectedPool != null) {
+      _investorDisplayController.text = state.selectedPool?.name ?? '';
+    } else {
+      _investorDisplayController.text = state.selectedInvestor?.nickname ?? '';
+    }
     _clientDisplayController.text = state.selectedClient?.fullName ?? '';
     _catalogDisplayController.text = state.selectedCatalog?.name ?? '';
     _guarantorDisplayController.text =
@@ -104,7 +107,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
   Future<void> _showInvestorPicker() async {
     BottomNavController.instance.hide();
 
-    final investor = await showModalBottomSheet<InvestorsModel>(
+    final result = await showModalBottomSheet<InvestorPickerResult>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -113,8 +116,11 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => BlocProvider(
-        create: (_) => InvestorsBloc(),
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => InvestorsBloc()),
+          BlocProvider(create: (_) => InvestorPoolBloc()),
+        ],
         child: const InvestorPickerModal(
           includeInvestor: true,
           includePool: true,
@@ -124,13 +130,25 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
 
     BottomNavController.instance.show();
 
-    if (investor != null) {
+    if (result?.investor != null) {
+      final investor = result!.investor!;
       debugPrint(
         '[STEP1] Готово: инвестор ${investor.id} ${investor.nickname}',
       );
       context.read<CreditCreationCubit>().updateBasicInfo(
         investorId: investor.id,
+        poolId: null,
         selectedInvestor: investor,
+        clearSelectedPool: true,
+      );
+    } else if (result?.pool != null) {
+      final pool = result!.pool!;
+      debugPrint('[STEP1] Готово: пул ${pool.id} ${pool.name}');
+      context.read<CreditCreationCubit>().updateBasicInfo(
+        poolId: pool.id,
+        investorId: null,
+        selectedPool: pool,
+        clearSelectedInvestor: true,
       );
     }
   }
@@ -370,6 +388,9 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
                   selectedInvestor: newValue
                       ? null
                       : cubit.state.selectedInvestor,
+                  selectedPool: newValue ? null : cubit.state.selectedPool,
+                  clearSelectedInvestor: newValue,
+                  clearSelectedPool: newValue,
                 );
               },
               label: 'Договор в долг',

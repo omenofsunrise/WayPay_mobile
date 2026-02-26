@@ -5,9 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
 import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
+import 'package:waypay_mobile/features/investors/presentation/bloc/investor_pool_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/widgets/investor_picker_modal.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
@@ -515,7 +513,7 @@ class _PaymentFilterFormState extends State<_PaymentFilterForm> {
   }
 
   Future<void> _selectInvestor() async {
-    final result = await showModalBottomSheet<InvestorsModel>(
+    final result = await showModalBottomSheet<InvestorPickerResult>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -524,8 +522,11 @@ class _PaymentFilterFormState extends State<_PaymentFilterForm> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => BlocProvider(
-        create: (_) => InvestorsBloc(),
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => InvestorsBloc()),
+          BlocProvider(create: (_) => InvestorPoolBloc()),
+        ],
         child: const InvestorPickerModal(
           includeInvestor: true,
           includePool: false,
@@ -533,9 +534,10 @@ class _PaymentFilterFormState extends State<_PaymentFilterForm> {
         ),
       ),
     );
-    if (result != null) {
+    if (result?.investor != null) {
+      final investor = result!.investor!;
       setState(() {
-        _investorController.text = result.nickname;
+        _investorController.text = investor.nickname;
       });
     }
   }

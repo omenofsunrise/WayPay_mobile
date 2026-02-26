@@ -8,6 +8,7 @@ import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_dat
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
 
@@ -22,6 +23,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
           totalAmountWithSurcharge: 0,
           selectedClient: null,
           selectedInvestor: null,
+          selectedPool: null,
           selectedCatalog: null,
           selectedCategory: null,
           schedulePreview: [],
@@ -73,8 +75,11 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     String? debtComment,
     ClientModel? selectedClient,
     InvestorsModel? selectedInvestor,
+    InvestorPoolModel? selectedPool,
     ObjectTypeModel? selectedCatalog,
     ObjectTypeModel? selectedCategory,
+    bool clearSelectedInvestor = false,
+    bool clearSelectedPool = false,
   }) {
     CreateCreditRequest updatedRequest = state.creditRequest.copyWith(
       clientId: clientId,
@@ -99,9 +104,12 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
       state.copyWith(
         creditRequest: updatedRequest,
         selectedClient: selectedClient ?? state.selectedClient,
-        selectedInvestor: selectedInvestor ?? state.selectedInvestor,
+        selectedInvestor: selectedInvestor,
+        selectedPool: selectedPool,
         selectedCatalog: selectedCatalog ?? state.selectedCatalog,
         selectedCategory: selectedCategory ?? state.selectedCategory,
+        clearSelectedInvestor: clearSelectedInvestor,
+        clearSelectedPool: clearSelectedPool,
       ),
     );
   }
@@ -428,7 +436,8 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     final payload = state.creditRequest.toJson()
       ..['totalAmountWithSurcharge'] = state.totalAmountWithSurcharge
       ..['selectedClient'] = state.selectedClient?.id
-      ..['selectedInvestor'] = state.selectedInvestor?.id;
+      ..['selectedInvestor'] = state.selectedInvestor?.id
+      ..['selectedPool'] = state.selectedPool?.id;
     print('[$stage] ${jsonEncode(payload)}');
   }
 
@@ -536,6 +545,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
         totalAmountWithSurcharge: 0,
         selectedClient: null,
         selectedInvestor: null,
+        selectedPool: null,
         selectedCatalog: null,
         selectedCategory: null,
         schedulePreview: [],
