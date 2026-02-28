@@ -41,65 +41,83 @@ class TodoSectionCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         children: [
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: const Color(AppColors.white),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x14000809),
-                  offset: Offset(2, 2),
-                  blurRadius: 4,
+          DragTarget<TodoTask>(
+            onWillAcceptWithDetails: (details) =>
+                details.data.taskStatus != item.status,
+            onAcceptWithDetails: (details) =>
+                onTaskDropped(details.data, item.status),
+            builder: (context, candidateData, rejectedData) {
+              final isActive = candidateData.isNotEmpty;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 160),
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? const Color(0x1A25CBA1)
+                      : const Color(AppColors.white),
+                  borderRadius: BorderRadius.circular(12),
+                  border: isActive
+                      ? Border.all(
+                          color: const Color(0xFF25CBA1),
+                          width: 1,
+                        )
+                      : null,
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x14000809),
+                      offset: Offset(2, 2),
+                      blurRadius: 4,
+                    ),
+                    BoxShadow(
+                      color: Color(0x05000809),
+                      offset: Offset(0, 0),
+                      blurRadius: 6,
+                    ),
+                  ],
                 ),
-                BoxShadow(
-                  color: Color(0x05000809),
-                  offset: Offset(0, 0),
-                  blurRadius: 6,
-                ),
-              ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: onToggle,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 18,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.title,
-                          style: AppStyle.manrope(
-                            size: 18,
-                            weight: FontWeight.w500,
-                            color: const Color(AppColors.black),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: onToggle,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 18,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item.title,
+                              style: AppStyle.manrope(
+                                size: 18,
+                                weight: FontWeight.w500,
+                                color: const Color(AppColors.black),
+                              ),
+                            ),
                           ),
-                        ),
+                          Text(
+                            item.tasks.length.toString(),
+                            style: AppStyle.manrope(
+                              size: 18,
+                              weight: FontWeight.w600,
+                              color: const Color(AppColors.black),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Icon(
+                            isExpanded
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            color: const Color(0xFF111111),
+                          ),
+                        ],
                       ),
-                      Text(
-                        item.tasks.length.toString(),
-                        style: AppStyle.manrope(
-                          size: 18,
-                          weight: FontWeight.w600,
-                          color: const Color(AppColors.black),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Icon(
-                        isExpanded
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
-                        color: const Color(0xFF111111),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
           if (isExpanded) ...[
             const SizedBox(height: 12),
