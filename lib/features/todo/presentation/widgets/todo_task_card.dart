@@ -34,11 +34,6 @@ class TodoTaskCard extends StatelessWidget {
     return 'Не назначено';
   }
 
-  String get _description {
-    if ((task.creatorName ?? '').isNotEmpty) return task.creatorName!;
-    return 'Описание отсутствует';
-  }
-
   String get _initials {
     final parts = _assigneeName
         .split(RegExp(r'\s+'))
@@ -95,15 +90,6 @@ class TodoTaskCard extends StatelessWidget {
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                _description,
-                style: AppStyle.manrope(
-                  size: 14,
-                  weight: FontWeight.w400,
-                  color: const Color(AppColors.uiBorder),
-                ),
               ),
               const SizedBox(height: 12),
               Row(

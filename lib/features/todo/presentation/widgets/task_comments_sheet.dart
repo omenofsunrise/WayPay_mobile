@@ -239,15 +239,6 @@ class _TaskCommentsSheetState extends State<TaskCommentsSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
-              Text(
-                task.creatorName ?? 'Описание отсутствует',
-                style: AppStyle.manrope(
-                  size: 14,
-                  weight: FontWeight.w400,
-                  color: const Color(AppColors.uiBorder),
-                ),
-              ),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
