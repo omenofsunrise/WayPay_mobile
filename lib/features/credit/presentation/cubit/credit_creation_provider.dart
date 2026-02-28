@@ -275,13 +275,13 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     int markupType,
   ) {
     return products.map((product) {
-      double surchargeAmount = 0;
+      double? surchargeAmount;
 
       if (markupType == 0) {
         final surchargePercent = product.surcharge ?? 0;
         surchargeAmount = (product.price * surchargePercent) / 100;
       } else {
-        surchargeAmount = product.surcharge ?? 0;
+        surchargeAmount = product.surchargeAmount;
       }
 
       return product.copyWith(surchargeAmount: surchargeAmount);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_styles/waypay_styles.dart';
@@ -241,6 +242,11 @@ class _ProductItem extends StatefulWidget {
 }
 
 class __ProductItemState extends State<_ProductItem> {
+  static final TextInputFormatter _percentInputFormatter =
+      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'));
+  static final TextInputFormatter _currencyInputFormatter =
+      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,\u00A0 ]'));
+
   late final TextEditingController _nameController;
   late final TextEditingController _priceController;
   late final TextEditingController _quantityController;
@@ -352,6 +358,11 @@ class __ProductItemState extends State<_ProductItem> {
           label: widget.markupType == 0 ? 'Надбавка %' : 'Надбавка ₽',
           hintText: widget.markupType == 0 ? 'Надбавка %' : 'Надбавка ₽',
           keyboardType: TextInputType.number,
+          inputFormatters: [
+            widget.markupType == 0
+                ? _percentInputFormatter
+                : _currencyInputFormatter,
+          ],
           onChanged: _handleSurchargeChanged,
         ),
 
