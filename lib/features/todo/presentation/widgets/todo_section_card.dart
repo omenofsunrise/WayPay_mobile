@@ -23,6 +23,8 @@ class TodoSectionCard extends StatelessWidget {
     required this.onToggle,
     required this.onCommentsTap,
     required this.noteCounts,
+    required this.onTaskDropped,
+    required this.onDragUpdate,
   });
 
   final TodoSectionItem item;
@@ -30,6 +32,8 @@ class TodoSectionCard extends StatelessWidget {
   final VoidCallback onToggle;
   final void Function(TodoTask task) onCommentsTap;
   final Map<int, int> noteCounts;
+  final void Function(TodoTask task, TaskStatus newStatus) onTaskDropped;
+  final void Function(Offset globalPosition) onDragUpdate;
 
   @override
   Widget build(BuildContext context) {
@@ -99,23 +103,81 @@ class TodoSectionCard extends StatelessWidget {
           ),
           if (isExpanded) ...[
             const SizedBox(height: 12),
-            if (item.tasks.isEmpty)
-              const Text(
-                'Нет задач',
-                style: TextStyle(color: Color(AppColors.uiBorder)),
-              )
-            else
-              Column(
-                children: item.tasks
-                    .map(
-                      (task) => TodoTaskCard(
-                        task: task,
-                        onCommentsTap: () => onCommentsTap(task),
-                        commentsCount: noteCounts[task.id] ?? 0,
-                      ),
-                    )
-                    .toList(),
-              ),
+            DragTarget<TodoTask>(
+              onWillAcceptWithDetails: (details) =>
+                  details.data.taskStatus != item.status,
+              onAcceptWithDetails: (details) =>
+                  onTaskDropped(details.data, item.status),
+              builder: (context, candidateData, rejectedData) {
+                final isActive = candidateData.isNotEmpty;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 160),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? const Color(0x1A25CBA1)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    border: isActive
+                        ? Border.all(
+                            color: const Color(0xFF25CBA1),
+                            width: 1,
+                          )
+                        : null,
+                  ),
+                  child: item.tasks.isEmpty
+                      ? const Text(
+                          'Нет задач',
+                          style: TextStyle(color: Color(AppColors.uiBorder)),
+                        )
+                      : Column(
+                          children: item.tasks
+                              .map(
+                                (task) => LongPressDraggable<TodoTask>(
+                                  data: task,
+                                  dragAnchorStrategy:
+                                      pointerDragAnchorStrategy,
+                                  onDragUpdate: (details) =>
+                                      onDragUpdate(details.globalPosition),
+                                  feedback: Material(
+                                    color: Colors.transparent,
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxWidth:
+                                            MediaQuery.of(context).size.width -
+                                                32,
+                                      ),
+                                      child: Opacity(
+                                        opacity: 0.9,
+                                        child: TodoTaskCard(
+                                          task: task,
+                                          onCommentsTap: () {},
+                                          commentsCount:
+                                              noteCounts[task.id] ?? 0,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  childWhenDragging: Opacity(
+                                    opacity: 0.4,
+                                    child: TodoTaskCard(
+                                      task: task,
+                                      onCommentsTap: () => onCommentsTap(task),
+                                      commentsCount: noteCounts[task.id] ?? 0,
+                                    ),
+                                  ),
+                                  child: TodoTaskCard(
+                                    task: task,
+                                    onCommentsTap: () => onCommentsTap(task),
+                                    commentsCount: noteCounts[task.id] ?? 0,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                );
+              },
+            ),
           ],
         ],
       ),

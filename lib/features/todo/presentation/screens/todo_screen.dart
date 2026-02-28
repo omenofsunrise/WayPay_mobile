@@ -20,6 +20,7 @@ class TodoScreen extends StatefulWidget {
 
 class _TodoScreenState extends State<TodoScreen> {
   late final TaskBloc _taskBloc;
+  final ScrollController _scrollController = ScrollController();
   final Map<int, int> _noteCounts = {};
   final Map<TaskStatus, bool> _expanded = {
     TaskStatus.pending: false,
@@ -37,6 +38,7 @@ class _TodoScreenState extends State<TodoScreen> {
   @override
   void dispose() {
     _taskBloc.close();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -87,6 +89,37 @@ class _TodoScreenState extends State<TodoScreen> {
     BottomNavController.instance.show();
   }
 
+  void _autoScrollOnDrag(Offset globalPosition) {
+    if (!_scrollController.hasClients) return;
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.hasSize) return;
+
+    final local = renderBox.globalToLocal(globalPosition);
+    const edge = 80.0;
+    const step = 14.0;
+    final height = renderBox.size.height;
+    final position = _scrollController.position;
+    double target = position.pixels;
+
+    if (local.dy < edge) {
+      target = (position.pixels - step).clamp(
+        position.minScrollExtent,
+        position.maxScrollExtent,
+      );
+    } else if (local.dy > height - edge) {
+      target = (position.pixels + step).clamp(
+        position.minScrollExtent,
+        position.maxScrollExtent,
+      );
+    } else {
+      return;
+    }
+
+    if (target != position.pixels) {
+      _scrollController.jumpTo(target);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,6 +130,7 @@ class _TodoScreenState extends State<TodoScreen> {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: CustomScrollView(
+              controller: _scrollController,
               physics: const ClampingScrollPhysics(),
               slivers: [
                 SliverToBoxAdapter(
@@ -160,6 +194,16 @@ class _TodoScreenState extends State<TodoScreen> {
                             onToggle: () => _toggleSection(item.status),
                             onCommentsTap: _openComments,
                             noteCounts: _noteCounts,
+                            onTaskDropped: (task, newStatus) {
+                              if (task.taskStatus == newStatus) return;
+                              _taskBloc.add(
+                                UpdateTaskStatus(
+                                  taskId: task.id,
+                                  newStatus: newStatus,
+                                ),
+                              );
+                            },
+                            onDragUpdate: _autoScrollOnDrag,
                           );
                         }, childCount: sections.length),
                       );
