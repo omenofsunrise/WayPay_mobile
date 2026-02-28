@@ -452,7 +452,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
       }
 
       for (final product in state.creditRequest.products) {
-        if (product.name.isEmpty) {
+        if (product.name.trim().isEmpty) {
           throw Exception('Название товара не может быть пустым');
         }
         if (product.price <= 0) {

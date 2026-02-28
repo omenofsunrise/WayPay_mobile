@@ -386,7 +386,7 @@ class __ProductItemState extends State<_ProductItem> {
   }
 
   CreditProduct _buildProductFromControllers() {
-    final name = _nameController.text.trim();
+    final name = _nameController.text;
     final priceText = _normalizeNumberInput(_priceController.text);
     final price = double.tryParse(priceText) ?? 0;
     final quantity = int.tryParse(_quantityController.text.trim()) ?? 1;
@@ -411,7 +411,7 @@ class __ProductItemState extends State<_ProductItem> {
   bool _isProductEmpty(CreditProduct product) {
     final surchargeValue = product.surcharge ?? 0;
     final surchargeAmount = product.surchargeAmount ?? 0;
-    return product.name.isEmpty &&
+    return product.name.trim().isEmpty &&
         product.price == 0 &&
         product.quantity == 1 &&
         surchargeValue == 0 &&
