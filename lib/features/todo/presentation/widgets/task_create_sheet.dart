@@ -250,27 +250,40 @@ class _TaskCreateSelector<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final maxHeight = MediaQuery.of(context).size.height * 0.7;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 12),
-            ...items.map(
-              (item) => ListTile(
-                title: Text(itemLabel(item)),
-                trailing: selected == item
-                    ? const Icon(Icons.check, color: Color(AppColors.primary))
-                    : null,
-                onTap: () => Navigator.of(context).pop(item),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxHeight),
+          child: Column(
+            children: [
+              Text(
+                title,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    return ListTile(
+                      title: Text(itemLabel(item)),
+                      trailing: selected == item
+                          ? const Icon(
+                              Icons.check,
+                              color: Color(AppColors.primary),
+                            )
+                          : null,
+                      onTap: () => Navigator.of(context).pop(item),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -290,6 +303,7 @@ class _EmployeeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final maxHeight = MediaQuery.of(context).size.height * 0.7;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -303,41 +317,53 @@ class _EmployeeSelector extends StatelessWidget {
             }
             if (state is EmployeeFullNamesLoaded) {
               final items = state.fullNames;
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
+              final totalCount = items.length + (allowEmpty ? 1 : 0);
+              return ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: maxHeight),
+                child: Column(
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  if (allowEmpty)
-                    ListTile(
-                      title: const Text('Нет ответственного'),
-                      trailing: selected == null
-                          ? const Icon(
-                              Icons.check,
-                              color: Color(AppColors.primary),
-                            )
-                          : null,
-                      onTap: () => Navigator.of(context).pop(null),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: totalCount,
+                        itemBuilder: (context, index) {
+                          if (allowEmpty && index == 0) {
+                            return ListTile(
+                              title: const Text('Нет ответственного'),
+                              trailing: selected == null
+                                  ? const Icon(
+                                      Icons.check,
+                                      color: Color(AppColors.primary),
+                                    )
+                                  : null,
+                              onTap: () => Navigator.of(context).pop(null),
+                            );
+                          }
+                          final employeeIndex =
+                              index - (allowEmpty ? 1 : 0);
+                          final employee = items[employeeIndex];
+                          return ListTile(
+                            title: Text(employee.fullName),
+                            trailing: selected?.id == employee.id
+                                ? const Icon(
+                                    Icons.check,
+                                    color: Color(AppColors.primary),
+                                  )
+                                : null,
+                            onTap: () => Navigator.of(context).pop(employee),
+                          );
+                        },
+                      ),
                     ),
-                  ...items.map(
-                    (employee) => ListTile(
-                      title: Text(employee.fullName),
-                      trailing: selected?.id == employee.id
-                          ? const Icon(
-                              Icons.check,
-                              color: Color(AppColors.primary),
-                            )
-                          : null,
-                      onTap: () => Navigator.of(context).pop(employee),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               );
             }
             return const SizedBox.shrink();
