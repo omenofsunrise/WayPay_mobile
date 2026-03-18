@@ -46,19 +46,17 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
       investorId: null,
       poolId: null,
       creditDate: now,
+      startPaymentDay: now.add(const Duration(days: 1)),
       firstPayment: 0,
       termMonths: 0,
-      paymentDay: now.add(const Duration(days: 1)).day,
-      nextMonthStart: false,
-      currentMonthStart: false,
       inDebt: false,
       debtComment: null,
       products: [CreditProduct(name: '', price: 0, quantity: 1)],
     );
   }
 
-  int _getNextPaymentDay(DateTime date) {
-    return date.add(const Duration(days: 1)).day;
+  DateTime _getDefaultStartPaymentDay(DateTime date) {
+    return date.add(const Duration(days: 1));
   }
 
   void updateBasicInfo({
@@ -96,8 +94,8 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     );
 
     if (creditDate != null) {
-      final nextDay = _getNextPaymentDay(creditDate);
-      updatedRequest = updatedRequest.copyWith(paymentDay: nextDay);
+      final nextDay = _getDefaultStartPaymentDay(creditDate);
+      updatedRequest = updatedRequest.copyWith(startPaymentDay: nextDay);
     }
 
     emit(
@@ -145,9 +143,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
   void updatePaymentInfo({
     double? firstPayment,
     int? termMonths,
-    int? paymentDay,
-    bool? nextMonthStart,
-    bool? currentMonthStart,
+    DateTime? startPaymentDay,
   }) {
     double adjustedFirstPayment =
         firstPayment ?? state.creditRequest.firstPayment;
@@ -159,9 +155,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     final updatedRequest = state.creditRequest.copyWith(
       firstPayment: adjustedFirstPayment,
       termMonths: termMonths,
-      paymentDay: paymentDay,
-      nextMonthStart: nextMonthStart,
-      currentMonthStart: currentMonthStart,
+      startPaymentDay: startPaymentDay,
     );
 
     emit(state.copyWith(creditRequest: updatedRequest));
@@ -180,13 +174,17 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     );
 
     try {
+      final params = _derivePreviewParams(
+        state.creditRequest.creditDate,
+        state.creditRequest.startPaymentDay,
+      );
       final preview = await _dataSource.getSchedulePreview(
         totalAmount: state.totalAmountWithSurcharge,
         firstPayment: state.creditRequest.firstPayment,
         termMonths: state.creditRequest.termMonths,
-        paymentDay: state.creditRequest.paymentDay,
-        currentMonthStart: state.creditRequest.currentMonthStart,
-        nextMonthStart: state.creditRequest.nextMonthStart,
+        paymentDay: params.paymentDay,
+        currentMonthStart: params.currentMonthStart,
+        nextMonthStart: params.nextMonthStart,
       );
 
       emit(
@@ -261,13 +259,25 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     _saveMarkupType(markupType);
   }
 
-  void updateStartMonthOption(bool isCurrentMonth) {
-    final updatedRequest = state.creditRequest.copyWith(
-      currentMonthStart: isCurrentMonth,
-      nextMonthStart: !isCurrentMonth,
+  _SchedulePreviewParams _derivePreviewParams(
+    DateTime creditDate,
+    DateTime startPaymentDay,
+  ) {
+    final paymentDay = startPaymentDay.day;
+    final sameMonth = _isSameMonth(creditDate, startPaymentDay);
+    final nextMonth = _isSameMonth(_addMonths(creditDate, 1), startPaymentDay);
+    return _SchedulePreviewParams(
+      paymentDay: paymentDay,
+      currentMonthStart: sameMonth,
+      nextMonthStart: !sameMonth && nextMonth,
     );
+  }
 
-    emit(state.copyWith(creditRequest: updatedRequest));
+  bool _isSameMonth(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month;
+
+  DateTime _addMonths(DateTime date, int months) {
+    return DateTime(date.year, date.month + months, 1);
   }
 
   List<CreditProduct> _recalculateSurchargeAmounts(
@@ -386,13 +396,17 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     );
 
     try {
+      final params = _derivePreviewParams(
+        state.creditRequest.creditDate,
+        state.creditRequest.startPaymentDay,
+      );
       final requestData = {
         'totalAmount': state.totalAmountWithSurcharge,
         'firstPayment': state.creditRequest.firstPayment,
         'termMonths': state.creditRequest.termMonths,
-        'paymentDay': state.creditRequest.paymentDay,
-        'currentMonthStart': state.creditRequest.currentMonthStart,
-        'nextMonthStart': state.creditRequest.nextMonthStart,
+        'paymentDay': params.paymentDay,
+        'currentMonthStart': params.currentMonthStart,
+        'nextMonthStart': params.nextMonthStart,
       };
       print('Schedule preview payload: ${jsonEncode(requestData)}');
 
@@ -400,9 +414,9 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
         totalAmount: state.totalAmountWithSurcharge,
         firstPayment: state.creditRequest.firstPayment,
         termMonths: state.creditRequest.termMonths,
-        paymentDay: state.creditRequest.paymentDay,
-        currentMonthStart: state.creditRequest.currentMonthStart,
-        nextMonthStart: state.creditRequest.nextMonthStart,
+        paymentDay: params.paymentDay,
+        currentMonthStart: params.currentMonthStart,
+        nextMonthStart: params.nextMonthStart,
       );
 
       emit(
@@ -479,9 +493,9 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
         throw Exception('Срок договора должен быть больше 0 месяцев');
       }
 
-      if (state.creditRequest.paymentDay < 1 ||
-          state.creditRequest.paymentDay > 31) {
-        throw Exception('День платежа должен быть от 1 до 31');
+      if (state.creditRequest.startPaymentDay
+          .isBefore(state.creditRequest.creditDate)) {
+        throw Exception('Начало выплат не может быть раньше даты договора');
       }
 
       Guarantor? guarantor;
@@ -503,11 +517,9 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
         investorId: state.creditRequest.investorId,
         poolId: state.creditRequest.poolId,
         creditDate: state.creditRequest.creditDate,
+        startPaymentDay: state.creditRequest.startPaymentDay,
         firstPayment: state.creditRequest.firstPayment,
         termMonths: state.creditRequest.termMonths,
-        paymentDay: state.creditRequest.paymentDay,
-        nextMonthStart: state.creditRequest.nextMonthStart,
-        currentMonthStart: state.creditRequest.currentMonthStart,
         inDebt: state.creditRequest.inDebt,
         debtComment: state.creditRequest.debtComment?.trim(),
         products: state.creditRequest.products.map((product) {
@@ -600,4 +612,16 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     }
     return 'Не удалось построить график. Повторите попытку позже.';
   }
+}
+
+class _SchedulePreviewParams {
+  final int paymentDay;
+  final bool currentMonthStart;
+  final bool nextMonthStart;
+
+  const _SchedulePreviewParams({
+    required this.paymentDay,
+    required this.currentMonthStart,
+    required this.nextMonthStart,
+  });
 }

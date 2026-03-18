@@ -10,11 +10,9 @@ class CreateCreditRequest {
   int? investorId;
   int? poolId;
   DateTime creditDate;
+  DateTime startPaymentDay;
   double firstPayment;
   int termMonths;
-  int paymentDay;
-  bool nextMonthStart;
-  bool currentMonthStart;
   bool inDebt;
   String? debtComment;
   List<CreditProduct> products;
@@ -29,11 +27,9 @@ class CreateCreditRequest {
     this.investorId,
     this.poolId,
     required this.creditDate,
+    required this.startPaymentDay,
     required this.firstPayment,
     required this.termMonths,
-    required this.paymentDay,
-    required this.nextMonthStart,
-    required this.currentMonthStart,
     required this.inDebt,
     this.debtComment,
     required this.products,
@@ -49,11 +45,9 @@ class CreateCreditRequest {
     int? investorId,
     int? poolId,
     DateTime? creditDate,
+    DateTime? startPaymentDay,
     double? firstPayment,
     int? termMonths,
-    int? paymentDay,
-    bool? nextMonthStart,
-    bool? currentMonthStart,
     bool? inDebt,
     String? debtComment,
     List<CreditProduct>? products,
@@ -70,11 +64,9 @@ class CreateCreditRequest {
       investorId: investorId ?? this.investorId,
       poolId: poolId ?? this.poolId,
       creditDate: creditDate ?? this.creditDate,
+      startPaymentDay: startPaymentDay ?? this.startPaymentDay,
       firstPayment: firstPayment ?? this.firstPayment,
       termMonths: termMonths ?? this.termMonths,
-      paymentDay: paymentDay ?? this.paymentDay,
-      nextMonthStart: nextMonthStart ?? this.nextMonthStart,
-      currentMonthStart: currentMonthStart ?? this.currentMonthStart,
       inDebt: inDebt ?? this.inDebt,
       debtComment: debtComment ?? this.debtComment,
       products: products ?? this.products,
@@ -92,11 +84,9 @@ class CreateCreditRequest {
       'investorId': investorId,
       'poolId': poolId,
       'creditDate': creditDate.toIso8601String(),
+      'startPaymentDay': startPaymentDay.toIso8601String(),
       'firstPayment': firstPayment,
       'termMonths': termMonths,
-      'paymentDay': paymentDay,
-      'nextMonthStart': nextMonthStart,
-      'currentMonthStart': currentMonthStart,
       'inDebt': inDebt,
       'debtComment': debtComment,
       'products': products.map((p) => p.toJson()).toList(),

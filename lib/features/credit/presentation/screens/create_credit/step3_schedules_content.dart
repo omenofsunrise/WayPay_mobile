@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
@@ -10,30 +11,20 @@ import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation
 import 'package:waypay_styles/waypay_styles.dart';
 
 class Step3SchedulesContent extends StatefulWidget {
-  final bool nextMonthStart;
-  final bool currentMonthStart;
-  final ValueChanged<bool> onNextMonthStartChanged;
-  final ValueChanged<bool> onCurrentMonthStartChanged;
-  final VoidCallback onNearestMonthStartChanged;
   final double firstPayment;
   final int termMonths;
-  final int? paymentDay;
-  final ValueChanged<int> onPaymentDayChanged;
+  final DateTime startPaymentDay;
+  final ValueChanged<DateTime> onStartPaymentDayChanged;
   final ValueChanged<double> onFirstPaymentChanged;
   final ValueChanged<int> onTermMonthsChanged;
   final double totalAmount;
 
   const Step3SchedulesContent({
     super.key,
-    required this.nextMonthStart,
-    required this.currentMonthStart,
-    required this.onNextMonthStartChanged,
-    required this.onCurrentMonthStartChanged,
-    required this.onNearestMonthStartChanged,
     required this.firstPayment,
     required this.termMonths,
-    required this.paymentDay,
-    required this.onPaymentDayChanged,
+    required this.startPaymentDay,
+    required this.onStartPaymentDayChanged,
     required this.onFirstPaymentChanged,
     required this.onTermMonthsChanged,
     required this.totalAmount,
@@ -43,13 +34,11 @@ class Step3SchedulesContent extends StatefulWidget {
   State<Step3SchedulesContent> createState() => _Step3SchedulesContentState();
 }
 
-enum _PaymentStartOption { current, next, later }
-
 class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
   late TextEditingController _firstPaymentPercentController;
   late TextEditingController _firstPaymentAmountController;
   late TextEditingController _termMonthsController;
-  late TextEditingController _paymentDayController;
+  late TextEditingController _startPaymentDayController;
   Timer? _debounceTimer;
   bool _isFormattingAmount = false;
 
@@ -60,18 +49,12 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     _firstPaymentPercentController = TextEditingController();
     _firstPaymentAmountController = TextEditingController();
     _termMonthsController = TextEditingController();
-    _paymentDayController = TextEditingController();
+    _startPaymentDayController = TextEditingController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateControllers();
       _loadSchedulePreview();
     });
-  }
-
-  _PaymentStartOption get _startOption {
-    if (widget.currentMonthStart) return _PaymentStartOption.current;
-    if (widget.nextMonthStart) return _PaymentStartOption.next;
-    return _PaymentStartOption.later;
   }
 
   @override
@@ -80,9 +63,7 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     _updateControllers();
     if (oldWidget.firstPayment != widget.firstPayment ||
         oldWidget.termMonths != widget.termMonths ||
-        oldWidget.paymentDay != widget.paymentDay ||
-        oldWidget.currentMonthStart != widget.currentMonthStart ||
-        oldWidget.nextMonthStart != widget.nextMonthStart) {
+        oldWidget.startPaymentDay != widget.startPaymentDay) {
       _loadSchedulePreviewDebounced();
     }
   }
@@ -120,12 +101,10 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
       _termMonthsController.text = newTermText;
     }
 
-    final currentPaymentDay = _paymentDayController.text;
-    final newPaymentDayText = widget.paymentDay != null
-        ? '${widget.paymentDay} число'
-        : '';
-    if (currentPaymentDay != newPaymentDayText) {
-      _paymentDayController.text = newPaymentDayText;
+    final currentStartDate = _startPaymentDayController.text;
+    final newStartDateText = _formatDate(widget.startPaymentDay);
+    if (currentStartDate != newStartDateText) {
+      _startPaymentDayController.text = newStartDateText;
     }
   }
 
@@ -195,34 +174,6 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     }
   }
 
-  void _handleCurrentMonthSelection() {
-    widget.onCurrentMonthStartChanged(true);
-    widget.onNextMonthStartChanged(false);
-  }
-
-  void _handleNextMonthSelection() {
-    widget.onNextMonthStartChanged(true);
-    widget.onCurrentMonthStartChanged(false);
-  }
-
-  void _handleLaterSelection() {
-    widget.onNearestMonthStartChanged();
-  }
-
-  void _handleStartOptionChanged(_PaymentStartOption option) {
-    switch (option) {
-      case _PaymentStartOption.current:
-        _handleCurrentMonthSelection();
-        break;
-      case _PaymentStartOption.next:
-        _handleNextMonthSelection();
-        break;
-      case _PaymentStartOption.later:
-        _handleLaterSelection();
-        break;
-    }
-  }
-
   String _stripFormatting(String value) =>
       value.replaceAll(RegExp(r'[^0-9]'), '');
 
@@ -242,53 +193,30 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     context.read<CreditCreationCubit>().loadSchedulePreview();
   }
 
-  Future<void> _showPaymentDayPicker() async {
-    final selectedDay = await showModalBottomSheet<int>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Выберите день платежа',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: 320,
-                  child: ListView.separated(
-                    itemCount: 31,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      final day = index + 1;
-                      return ListTile(
-                        title: Text('$day число'),
-                        trailing: widget.paymentDay == day
-                            ? const Icon(
-                                Icons.check,
-                                color: Color(AppColors.primary),
-                              )
-                            : null,
-                        onTap: () => Navigator.of(context).pop(day),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+  DateTime? _parseDate(String value) {
+    if (value.length != 10) return null;
+    final parts = value.split('.');
+    if (parts.length != 3) return null;
+    final day = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final year = int.tryParse(parts[2]);
+    if (day == null || month == null || year == null) return null;
+    final date = DateTime(year, month, day);
+    if (date.year != year || date.month != month || date.day != day) {
+      return null;
+    }
+    return date;
+  }
 
-    if (selectedDay != null) {
-      widget.onPaymentDayChanged(selectedDay);
+  String _formatDate(DateTime date) {
+    String pad(int n) => n.toString().padLeft(2, '0');
+    return '${pad(date.day)}.${pad(date.month)}.${date.year}';
+  }
+
+  void _handleStartPaymentDayInput(String value) {
+    final parsed = _parseDate(value);
+    if (parsed != null) {
+      widget.onStartPaymentDayChanged(parsed);
     }
   }
 
@@ -304,25 +232,6 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
-            _StartOptionRadio(
-              title: 'Начинать выплаты с текущего месяца',
-              value: _PaymentStartOption.current,
-              groupValue: _startOption,
-              onChanged: _handleStartOptionChanged,
-            ),
-            _StartOptionRadio(
-              title: 'Начинать выплаты со следующего месяца',
-              value: _PaymentStartOption.next,
-              groupValue: _startOption,
-              onChanged: _handleStartOptionChanged,
-            ),
-            _StartOptionRadio(
-              title: 'Начинать выплаты через месяц',
-              value: _PaymentStartOption.later,
-              groupValue: _startOption,
-              onChanged: _handleStartOptionChanged,
-            ),
-            const SizedBox(height: 16),
             ModalTextField(
               controller: _firstPaymentPercentController,
               label: 'Первоначальный взнос, %',
@@ -351,11 +260,16 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
             const SizedBox(height: 16),
 
             ModalTextField(
-              controller: _paymentDayController,
-              label: 'Уплата до',
-              readOnly: true,
-              onTap: _showPaymentDayPicker,
-              suffixIcon: const Icon(Icons.keyboard_arrow_down),
+              controller: _startPaymentDayController,
+              label: 'Начало выплат',
+              hintText: 'дд.мм.гггг',
+              keyboardType: TextInputType.datetime,
+              inputFormatters: const [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(8),
+                _DateDottedFormatter(),
+              ],
+              onChanged: _handleStartPaymentDayInput,
             ),
 
             const SizedBox(height: 24),
@@ -516,39 +430,8 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
     _firstPaymentPercentController.dispose();
     _firstPaymentAmountController.dispose();
     _termMonthsController.dispose();
-    _paymentDayController.dispose();
+    _startPaymentDayController.dispose();
     super.dispose();
-  }
-}
-
-class _StartOptionRadio extends StatelessWidget {
-  const _StartOptionRadio({
-    required this.title,
-    required this.value,
-    required this.groupValue,
-    required this.onChanged,
-  });
-
-  final String title;
-  final _PaymentStartOption value;
-  final _PaymentStartOption groupValue;
-  final ValueChanged<_PaymentStartOption> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return RadioListTile<_PaymentStartOption>(
-      value: value,
-      groupValue: groupValue,
-      onChanged: (option) {
-        if (option != null) onChanged(option);
-      },
-      activeColor: const Color(AppColors.primary),
-      title: Text(
-        title,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-      ),
-      contentPadding: EdgeInsets.zero,
-    );
   }
 }
 
@@ -608,3 +491,34 @@ const TextStyle _tableCellStyle = TextStyle(
   fontSize: 16,
   height: 24 / 16,
 );
+
+class _DateDottedFormatter extends TextInputFormatter {
+  const _DateDottedFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) {
+      return newValue.copyWith(
+        text: '',
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+    }
+
+    final buffer = StringBuffer();
+    for (var i = 0; i < digits.length; i++) {
+      buffer.write(digits[i]);
+      if ((i == 1 || i == 3) && i != digits.length - 1) {
+        buffer.write('.');
+      }
+    }
+    final formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}

@@ -20,13 +20,11 @@ import 'package:waypay_styles/waypay_styles.dart';
 class Step1DetailsContent extends StatefulWidget {
   final TextEditingController firstPaymentController;
   final TextEditingController termMonthsController;
-  final TextEditingController paymentDayController;
 
   const Step1DetailsContent({
     super.key,
     required this.firstPaymentController,
     required this.termMonthsController,
-    required this.paymentDayController,
   });
 
   @override

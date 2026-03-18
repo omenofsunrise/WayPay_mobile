@@ -23,7 +23,6 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _firstPaymentController = TextEditingController();
   final _termMonthsController = TextEditingController();
-  final _paymentDayController = TextEditingController();
   final _firstPaymentPercentController = TextEditingController();
   final _firstPaymentAmountController = TextEditingController();
   String? _inlineMessage;
@@ -41,7 +40,6 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
 
     _firstPaymentController.text = creditRequest.firstPayment.toString();
     _termMonthsController.text = creditRequest.termMonths.toString();
-    _paymentDayController.text = creditRequest.paymentDay.toString();
 
     _updateFirstPaymentFields(
       creditRequest.firstPayment,
@@ -70,29 +68,10 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
     );
   }
 
-  void _updateNearestMonthStart() {
+  void _updateStartPaymentDay(DateTime date) {
     context.read<CreditCreationCubit>().updatePaymentInfo(
-      nextMonthStart: false,
-      currentMonthStart: false,
+      startPaymentDay: date,
     );
-  }
-
-  void _updateCurrentMonthStart(bool value) {
-    context.read<CreditCreationCubit>().updatePaymentInfo(
-      currentMonthStart: value,
-      nextMonthStart: !value,
-    );
-  }
-
-  void _updateNextMonthStart(bool value) {
-    context.read<CreditCreationCubit>().updatePaymentInfo(
-      nextMonthStart: value,
-      currentMonthStart: !value,
-    );
-  }
-
-  void _updatePaymentDay(int day) {
-    context.read<CreditCreationCubit>().updatePaymentInfo(paymentDay: day);
   }
 
   void _updateMarkupType(int markupType) {
@@ -214,13 +193,6 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
                     .toString();
               }
 
-              if (_paymentDayController.text.isEmpty ||
-                  int.parse(_paymentDayController.text) !=
-                      creditRequest.paymentDay) {
-                _paymentDayController.text = creditRequest.paymentDay
-                    .toString();
-              }
-
               _updateFirstPaymentFields(
                 creditRequest.firstPayment,
                 state.totalAmountWithSurcharge,
@@ -270,7 +242,6 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
       return Step1DetailsContent(
         firstPaymentController: _firstPaymentController,
         termMonthsController: _termMonthsController,
-        paymentDayController: _paymentDayController,
       );
     } else if (location == Routes.newCreditProductsScreen.toPath) {
       return BlocBuilder<CreditCreationCubit, CreditCreationState>(
@@ -288,15 +259,10 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
       return BlocBuilder<CreditCreationCubit, CreditCreationState>(
         builder: (context, state) {
           return Step3SchedulesContent(
-            nextMonthStart: state.creditRequest.nextMonthStart,
-            currentMonthStart: state.creditRequest.currentMonthStart,
-            onNextMonthStartChanged: _updateNextMonthStart,
-            onCurrentMonthStartChanged: _updateCurrentMonthStart,
-            onNearestMonthStartChanged: _updateNearestMonthStart,
             firstPayment: state.creditRequest.firstPayment,
             termMonths: state.creditRequest.termMonths,
-            paymentDay: state.creditRequest.paymentDay,
-            onPaymentDayChanged: _updatePaymentDay,
+            startPaymentDay: state.creditRequest.startPaymentDay,
+            onStartPaymentDayChanged: _updateStartPaymentDay,
             onFirstPaymentChanged: (amount) {
               context.read<CreditCreationCubit>().updateFirstPayment(amount);
             },
@@ -424,9 +390,8 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
   bool _isStep3Valid(CreditCreationState state) {
     final request = state.creditRequest;
     final hasTerm = request.termMonths > 0;
-    final hasPaymentDay = request.paymentDay > 0;
     final hasAmount = state.totalAmountWithSurcharge > 0;
-    return hasTerm && hasPaymentDay && hasAmount;
+    return hasTerm && hasAmount;
   }
 
   void _finishCreditCreation() async {
@@ -463,7 +428,6 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
   void dispose() {
     _firstPaymentController.dispose();
     _termMonthsController.dispose();
-    _paymentDayController.dispose();
     _firstPaymentPercentController.dispose();
     _firstPaymentAmountController.dispose();
     super.dispose();

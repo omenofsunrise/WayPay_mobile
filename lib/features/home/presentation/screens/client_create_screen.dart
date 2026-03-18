@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/services.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_styles/waypay_styles.dart';
@@ -209,19 +209,11 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
     return value.substring(start, actualEnd);
   }
 
-  Future<void> _pickDate(TextEditingController controller) async {
-    final initialDate = _parseDate(controller.text) ?? DateTime.now();
-    await showDialog(
-      context: context,
-      builder: (context) => CustomCalendar(
-        initialDate: initialDate,
-        onDateSelected: (date) {
-          controller.text = _formatDate(date);
-        },
-        prefix: 'Дата:',
-      ),
-    );
-  }
+  List<TextInputFormatter> _dateInputFormatters() => [
+    FilteringTextInputFormatter.digitsOnly,
+    LengthLimitingTextInputFormatter(8),
+    const _DateDottedFormatter(),
+  ];
 
   DateTime? _parseDate(String value) {
     if (value.isEmpty) return null;
@@ -234,64 +226,16 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
     return DateTime(year, month, day);
   }
 
-  String _formatDate(DateTime date) {
-    String pad(int n) => n.toString().padLeft(2, '0');
-    return '${pad(date.day)}.${pad(date.month)}.${date.year}';
-  }
-
-  Widget _buildDropdownSuffix({
-    bool showClear = false,
-    VoidCallback? onClear,
-    Widget? customIcon,
-  }) {
-    const arrow = Icon(
-      Icons.keyboard_arrow_down_rounded,
-      color: Color(AppColors.uiBorder),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 4),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (showClear)
-            GestureDetector(
-              onTap: onClear,
-              child: const Padding(
-                padding: EdgeInsets.only(right: 6),
-                child: Icon(Icons.close, size: 20, color: Color(0xFF9CA3AF)),
-              ),
-            ),
-          customIcon ?? arrow,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPickerField({
+  Widget _buildDateField({
     required TextEditingController controller,
     required String label,
-    required VoidCallback onTap,
-    bool showClear = false,
-    VoidCallback? onClear,
-    Widget? customSuffixIcon,
   }) {
     return ModalTextField(
       controller: controller,
       label: label,
-      hintText: label,
-      readOnly: true,
-      onTap: onTap,
-      suffixIcon: _buildDropdownSuffix(
-        showClear: showClear,
-        onClear: onClear,
-        customIcon: customSuffixIcon,
-      ),
-      suffixIconConstraints: const BoxConstraints(
-        minHeight: 24,
-        minWidth: 32,
-        maxWidth: 60,
-      ),
+      hintText: 'дд.мм.гггг',
+      keyboardType: TextInputType.datetime,
+      inputFormatters: _dateInputFormatters(),
     );
   }
 
@@ -348,16 +292,9 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
                         keyboardType: TextInputType.name,
                       ),
                       const SizedBox(height: 12),
-                      _buildPickerField(
+                      _buildDateField(
                         controller: _birthDateController,
                         label: 'Дата рождения',
-                        onTap: () => _pickDate(_birthDateController),
-                        customSuffixIcon: SvgPicture.asset(
-                          SvgIcons.calendar,
-                          width: 20,
-                          height: 20,
-                          color: const Color(0xFF6B717C),
-                        ),
                       ),
                     ],
                   ),
@@ -374,16 +311,9 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
                         keyboardType: TextInputType.number,
                       ),
                       const SizedBox(height: 12),
-                      _buildPickerField(
+                      _buildDateField(
                         controller: _passportIssueDateController,
                         label: 'Дата выдачи',
-                        onTap: () => _pickDate(_passportIssueDateController),
-                        customSuffixIcon: SvgPicture.asset(
-                          SvgIcons.calendar,
-                          width: 20,
-                          height: 20,
-                          color: const Color(0xFF6B717C),
-                        ),
                       ),
                       const SizedBox(height: 12),
                       ModalTextField(
@@ -483,6 +413,37 @@ class _Section extends StatelessWidget {
         const SizedBox(height: 8),
         ...children,
       ],
+    );
+  }
+}
+
+class _DateDottedFormatter extends TextInputFormatter {
+  const _DateDottedFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) {
+      return newValue.copyWith(
+        text: '',
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+    }
+
+    final buffer = StringBuffer();
+    for (var i = 0; i < digits.length; i++) {
+      buffer.write(digits[i]);
+      if ((i == 1 || i == 3) && i != digits.length - 1) {
+        buffer.write('.');
+      }
+    }
+    final formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }
