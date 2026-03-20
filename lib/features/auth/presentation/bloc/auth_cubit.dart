@@ -29,7 +29,7 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } catch (e) {
-      emit(AuthError('Не удалось начать авторизацию'));
+      emit(AuthError(_mapAuthError(e, 'Не удалось начать авторизацию')));
     }
   }
 
@@ -68,6 +68,17 @@ class AuthCubit extends Cubit<AuthState> {
       }
 
       emit(AuthSuccess());
-    } catch (e) {}
+    } catch (e) {
+      emit(AuthError(_mapAuthError(e, 'Не удалось подтвердить звонок')));
+    }
+  }
+
+  String _mapAuthError(Object error, String fallback) {
+    final raw = error.toString();
+    if (raw.startsWith('Exception:')) {
+      final message = raw.replaceFirst('Exception:', '').trim();
+      if (message.isNotEmpty) return message;
+    }
+    return fallback;
   }
 }

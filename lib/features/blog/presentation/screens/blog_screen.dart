@@ -155,63 +155,56 @@ class _BlogScreenState extends State<BlogScreen> {
   Widget _buildSearchOrTitle() {
     if (_isSearching) {
       return Expanded(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 16),
-          child: TextField(
-            controller: _searchController,
-            autofocus: true,
-            style: const TextStyle(color: Colors.black),
-            cursorColor: Colors.black,
-            decoration: const InputDecoration(
-              hintText: 'Поиск...',
-              hintStyle: TextStyle(color: Colors.black87),
-              border: InputBorder.none,
-              isDense: true,
-            ),
-            textInputAction: TextInputAction.search,
-            onChanged: (value) {
-              _searchDebounce?.cancel();
-              _searchDebounce = Timer(const Duration(milliseconds: 500), () {
-                setState(() {
-                  _searchQuery = value;
-                });
-                _load();
-              });
-            },
+        child: TextField(
+          controller: _searchController,
+          autofocus: true,
+          style: const TextStyle(color: Colors.black),
+          cursorColor: Colors.black,
+          decoration: const InputDecoration(
+            hintText: 'Поиск...',
+            hintStyle: TextStyle(color: Colors.black87),
+            border: InputBorder.none,
+            isDense: true,
           ),
+          textInputAction: TextInputAction.search,
+          onChanged: (value) {
+            _searchDebounce?.cancel();
+            _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+              setState(() {
+                _searchQuery = value;
+              });
+              _load();
+            });
+          },
         ),
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(left: 16),
-      child: PopupMenuButton<FeedType>(
-        color: Color(AppColors.white),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        itemBuilder: (context) => [
-          _buildFeedItem(FeedType.all, 'Вся лента'),
-          _buildFeedItem(FeedType.myBlog, 'Мой блог'),
-          _buildFeedItem(FeedType.liked, 'Понравившиеся посты'),
-        ],
-        offset: const Offset(0, 40),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: Text(
-                _titleForFeed(_selectedFeed),
-                style: AppStyle.manrope(
-                  size: 25,
-                  weight: FontWeight.w600,
-                  color: Color(AppColors.black),
-                ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
+    return PopupMenuButton<FeedType>(
+      color: Color(AppColors.white),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      itemBuilder: (context) => [
+        _buildFeedItem(FeedType.all, 'Вся лента'),
+        _buildFeedItem(FeedType.myBlog, 'Мой блог'),
+        _buildFeedItem(FeedType.liked, 'Понравившиеся посты'),
+      ],
+      offset: const Offset(0, 40),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Expanded(
+            child: Text(
+              _titleForFeed(_selectedFeed),
+              style: AppStyle.semiBold23.copyWith(
+                fontWeight: FontWeight.w500,
+                color: const Color(AppColors.black),
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
-            const Icon(Icons.arrow_drop_down, color: Color(AppColors.grey)),
-          ],
-        ),
+          ),
+          const Icon(Icons.arrow_drop_down, color: Color(AppColors.grey)),
+        ],
       ),
     );
   }
@@ -234,7 +227,7 @@ class _BlogScreenState extends State<BlogScreen> {
         elevation: 0,
         backgroundColor: const Color(AppColors.background),
         iconTheme: const IconThemeData(color: Colors.white),
-        titleSpacing: 0,
+        titleSpacing: 16,
         title: _buildSearchOrTitle(),
         actions: [
           if (_isSearching)

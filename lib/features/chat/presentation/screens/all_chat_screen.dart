@@ -53,6 +53,7 @@ class _AllChatScreenState extends State<AllChatScreen> {
           elevation: 0,
           iconTheme: const IconThemeData(color: Colors.white),
           centerTitle: false,
+          titleSpacing: 16,
           title: BlocBuilder<ChatListBloc, ChatListState>(
             builder: (context, state) {
               final badge = state.totalUnread;
@@ -60,10 +61,9 @@ class _AllChatScreenState extends State<AllChatScreen> {
                 children: [
                   Text(
                     'Чаты',
-                    style: AppStyle.manrope(
-                      size: 25,
-                      weight: FontWeight.w600,
-                      color: Colors.black,
+                    style: AppStyle.semiBold23.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: const Color(AppColors.black),
                     ),
                   ),
                   if (badge > 0)

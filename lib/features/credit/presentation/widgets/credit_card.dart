@@ -4,6 +4,7 @@ import 'package:waypay_mobile/core/utils/price_formatter.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/widgets/credit_modal.dart';
 import 'package:waypay_styles/waypay_styles.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CreditCardWidget extends StatelessWidget {
   final CreditModel credit;
@@ -18,6 +19,50 @@ class CreditCardWidget extends StatelessWidget {
   });
 
   String _formatDate(DateTime date) => DateFormat('dd.MM.yyyy').format(date);
+
+  String _normalizePhone(String value) {
+    final digits = value.replaceAll(RegExp(r'\\D'), '');
+    if (digits.length == 11 &&
+        (digits.startsWith('7') || digits.startsWith('8'))) {
+      return digits.substring(1);
+    }
+    if (digits.length > 10) {
+      return digits.substring(digits.length - 10);
+    }
+    return digits;
+  }
+
+  bool _isCallable(String value) => _normalizePhone(value).length >= 10;
+
+  Future<void> _callPhone(BuildContext context, String value) async {
+    final digits = _normalizePhone(value);
+    if (digits.length < 10) return;
+    final uri = Uri.parse('tel:+7$digits');
+    final success = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!success && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Не удалось открыть телефон')),
+      );
+    }
+  }
+
+  Future<void> _openWhatsApp(BuildContext context, String value) async {
+    final digits = _normalizePhone(value);
+    if (digits.length < 10) return;
+    final uri = Uri.parse('https://wa.me/7$digits');
+    final success = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!success && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Не удалось открыть WhatsApp')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +133,21 @@ class CreditCardWidget extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (_isCallable(credit.clientPhone)) ...[
+                  IconButton(
+                    icon: const Icon(Icons.phone, size: 20),
+                    color: const Color(AppColors.primary),
+                    tooltip: 'Позвонить',
+                    onPressed: () => _callPhone(context, credit.clientPhone),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chat, size: 20),
+                    color: const Color(AppColors.primary),
+                    tooltip: 'WhatsApp',
+                    onPressed: () =>
+                        _openWhatsApp(context, credit.clientPhone),
+                  ),
+                ],
                 GestureDetector(
                   onTap: onFavouriteToggle,
                   child: Icon(

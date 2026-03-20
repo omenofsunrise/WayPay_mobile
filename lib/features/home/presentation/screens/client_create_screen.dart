@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
-import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:waypay_mobile/assets/resources.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/create_clients_requests.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/get_clients_query.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
+import 'package:waypay_styles/waypay_styles.dart';
 
 class ClientCreateScreen extends StatefulWidget {
   const ClientCreateScreen({super.key});
@@ -19,18 +23,30 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
   final _fullNameController = TextEditingController();
   final _birthDateController = TextEditingController();
   final _passportNumberController = TextEditingController();
-  final _passportIssueDateController = TextEditingController();
   final _registrationAddressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _whatsAppController = TextEditingController();
+  final _phoneMask = MaskTextInputFormatter(
+    mask: ' (###) ###-##-##',
+    filter: {"#": RegExp(r'\d')},
+  );
+  final _whatsAppMask = MaskTextInputFormatter(
+    mask: ' (###) ###-##-##',
+    filter: {"#": RegExp(r'\d')},
+  );
 
   late final List<TextEditingController> _allControllers;
+  final ClientRemoteDataSource _clientDataSource =
+      getIt<ClientRemoteDataSource>();
   bool _isFormValid = false;
   bool _isSubmitting = false;
   String? _submissionError;
-  bool _isFormattingPhone = false;
-  bool _isFormattingWhatsapp = false;
+  String? _phoneExistsError;
+  bool _isFormattingFullName = false;
   bool _isFormattingPassport = false;
+  Timer? _phoneCheckDebounce;
+  String _lastCheckedPhoneDigits = '';
+  String _pendingPhoneDigits = '';
 
   @override
   void initState() {
@@ -39,16 +55,14 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
       _fullNameController,
       _birthDateController,
       _passportNumberController,
-      _passportIssueDateController,
       _registrationAddressController,
       _phoneController,
-      _whatsAppController,
     ];
     for (final controller in _allControllers) {
       controller.addListener(_handleFormChanged);
     }
+    _fullNameController.addListener(_onFullNameChanged);
     _phoneController.addListener(_onMainPhoneChanged);
-    _whatsAppController.addListener(_onWhatsappChanged);
     _passportNumberController.addListener(_onPassportChanged);
   }
 
@@ -56,9 +70,10 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
     final filled = _allControllers.every(
       (controller) => controller.text.trim().isNotEmpty,
     );
-    if (filled != _isFormValid) {
+    final isValidNow = filled && _phoneExistsError == null;
+    if (isValidNow != _isFormValid) {
       setState(() {
-        _isFormValid = filled;
+        _isFormValid = isValidNow;
       });
     }
   }
@@ -68,9 +83,10 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
     for (final controller in _allControllers) {
       controller.removeListener(_handleFormChanged);
     }
+    _fullNameController.removeListener(_onFullNameChanged);
     _phoneController.removeListener(_onMainPhoneChanged);
-    _whatsAppController.removeListener(_onWhatsappChanged);
     _passportNumberController.removeListener(_onPassportChanged);
+    _phoneCheckDebounce?.cancel();
     for (final controller in _allControllers) {
       controller.dispose();
     }
@@ -81,20 +97,14 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
     if (!_isFormValid || _isSubmitting) return;
 
     final birthDate = _parseDate(_birthDateController.text);
-    final docIssueDate = _parseDate(_passportIssueDateController.text);
-    final phoneDigits = _normalizeDigits(_phoneController.text);
-    final whatsappDigits = _normalizeDigits(_whatsAppController.text);
+    final phoneDigits =
+        _normalizePhoneDigits(_phoneMask.getUnmaskedText());
+    final whatsappDigits =
+        _normalizePhoneDigits(_whatsAppMask.getUnmaskedText());
 
     if (birthDate == null) {
       setState(() {
         _submissionError = 'Введите корректную дату рождения';
-      });
-      return;
-    }
-
-    if (docIssueDate == null) {
-      setState(() {
-        _submissionError = 'Введите корректную дату выдачи паспорта';
       });
       return;
     }
@@ -111,7 +121,7 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
       phone: '8$phoneDigits',
       doc: _passportNumberController.text.trim(),
       birthdate: birthDate.toUtc().toIso8601String(),
-      docIssueDate: docIssueDate.toUtc().toIso8601String(),
+      docIssueDate: null,
       registrationAddress: _registrationAddressController.text.trim(),
       secondPhone: whatsappDigits.isNotEmpty ? '8$whatsappDigits' : null,
     );
@@ -126,9 +136,33 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
 
   String _normalizeDigits(String value) => value.replaceAll(RegExp(r'\D'), '');
 
-  void _onMainPhoneChanged() => _applyPhoneMask(_phoneController, false);
+  void _onFullNameChanged() {
+    if (_isFormattingFullName) return;
+    final raw = _fullNameController.text;
+    final upper = raw.toUpperCase();
+    if (raw == upper) return;
+    _isFormattingFullName = true;
+    final selection = _fullNameController.selection;
+    _fullNameController.value = TextEditingValue(
+      text: upper,
+      selection: selection,
+    );
+    _isFormattingFullName = false;
+  }
 
-  void _onWhatsappChanged() => _applyPhoneMask(_whatsAppController, true);
+  String _normalizePhoneDigits(String value) {
+    var digits = _normalizeDigits(value);
+    if (digits.length == 11 &&
+        (digits.startsWith('7') || digits.startsWith('8'))) {
+      digits = digits.substring(1);
+    }
+    if (digits.length > 10) {
+      digits = digits.substring(digits.length - 10);
+    }
+    return digits;
+  }
+
+  void _onMainPhoneChanged() => _schedulePhoneCheck();
 
   void _onPassportChanged() {
     if (_isFormattingPassport) return;
@@ -150,63 +184,49 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
     _isFormattingPassport = false;
   }
 
-  void _applyPhoneMask(TextEditingController controller, bool isWhatsapp) {
-    final isFormatting = isWhatsapp
-        ? _isFormattingWhatsapp
-        : _isFormattingPhone;
-    if (isFormatting) return;
-
-    if (isWhatsapp) {
-      _isFormattingWhatsapp = true;
-    } else {
-      _isFormattingPhone = true;
-    }
-
-    var digits = _normalizeDigits(controller.text);
-    if (digits.startsWith('7') || digits.startsWith('8')) {
-      digits = digits.substring(1);
-    }
-    if (digits.length > 10) {
-      digits = digits.substring(0, 10);
-    }
-
-    String formatted;
-    if (digits.isEmpty) {
-      formatted = '';
-    } else {
-      final buffer = StringBuffer('+7 ');
-      buffer.write('(');
-      buffer.write(_slice(digits, 0, 3));
-      if (digits.length >= 3) {
-        buffer.write(') ');
-        buffer.write(_slice(digits, 3, 6));
+  void _schedulePhoneCheck() {
+    _phoneCheckDebounce?.cancel();
+    final digits = _normalizePhoneDigits(_phoneMask.getUnmaskedText());
+    if (digits.length < 10) {
+      if (_phoneExistsError != null) {
+        setState(() {
+          _phoneExistsError = null;
+        });
+        _handleFormChanged();
       }
-      if (digits.length >= 6) {
-        buffer.write('-');
-        buffer.write(_slice(digits, 6, 8));
-      }
-      if (digits.length >= 8) {
-        buffer.write('-');
-        buffer.write(_slice(digits, 8, 10));
-      }
-      formatted = buffer.toString().trimRight();
+      _lastCheckedPhoneDigits = '';
+      return;
     }
-    controller.value = TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
-    );
-
-    if (isWhatsapp) {
-      _isFormattingWhatsapp = false;
-    } else {
-      _isFormattingPhone = false;
-    }
+    _pendingPhoneDigits = digits;
+    _phoneCheckDebounce = Timer(const Duration(milliseconds: 500), () {
+      _checkPhoneExists(digits);
+    });
   }
 
-  String _slice(String value, int start, int end) {
-    if (value.length <= start) return '';
-    final actualEnd = value.length < end ? value.length : end;
-    return value.substring(start, actualEnd);
+  Future<void> _checkPhoneExists(String digits) async {
+    if (_isSubmitting) return;
+    if (digits == _lastCheckedPhoneDigits) return;
+    _lastCheckedPhoneDigits = digits;
+    try {
+      final response = await _clientDataSource.getClients(
+        GetClientsQuery(phone: '8$digits', page: 1, pageSize: 1),
+      );
+      if (!mounted) return;
+      if (_pendingPhoneDigits != digits) return;
+      final exists = response.clients.isNotEmpty;
+      setState(() {
+        _phoneExistsError =
+            exists ? 'Клиент с таким номером телефона уже есть' : null;
+      });
+      _handleFormChanged();
+    } catch (_) {
+      if (!mounted) return;
+      if (_pendingPhoneDigits != digits) return;
+      setState(() {
+        _phoneExistsError = null;
+      });
+      _handleFormChanged();
+    }
   }
 
   List<TextInputFormatter> _dateInputFormatters() => [
@@ -286,6 +306,16 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
                     title: 'Основная информация',
                     children: [
                       ModalTextField(
+                        controller: _phoneController,
+                        label: 'Телефон',
+                        hintText: ' (___) ___-__-__',
+                        keyboardType: TextInputType.phone,
+                        inputFormatters: [_phoneMask],
+                        prefixText: '8',
+                        errorText: _phoneExistsError,
+                      ),
+                      const SizedBox(height: 12),
+                      ModalTextField(
                         controller: _fullNameController,
                         label: 'ФИО клиента',
                         hintText: 'Введите ФИО',
@@ -311,11 +341,6 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
                         keyboardType: TextInputType.number,
                       ),
                       const SizedBox(height: 12),
-                      _buildDateField(
-                        controller: _passportIssueDateController,
-                        label: 'Дата выдачи',
-                      ),
-                      const SizedBox(height: 12),
                       ModalTextField(
                         controller: _registrationAddressController,
                         label: 'Адрес регистрации',
@@ -327,20 +352,15 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
                 const SliverToBoxAdapter(child: SizedBox(height: 16)),
                 SliverToBoxAdapter(
                   child: _Section(
-                    title: 'Контактные данные',
+                    title: 'Дополнительные данные',
                     children: [
-                      ModalTextField(
-                        controller: _phoneController,
-                        label: 'Телефон',
-                        hintText: '+7 (___) ___-__-__',
-                        keyboardType: TextInputType.phone,
-                      ),
-                      const SizedBox(height: 12),
                       ModalTextField(
                         controller: _whatsAppController,
                         label: 'Whatsapp',
-                        hintText: '+7 (___) ___-__-__',
+                        hintText: ' (___) ___-__-__',
                         keyboardType: TextInputType.phone,
+                        inputFormatters: [_whatsAppMask],
+                        prefixText: '8',
                       ),
                     ],
                   ),

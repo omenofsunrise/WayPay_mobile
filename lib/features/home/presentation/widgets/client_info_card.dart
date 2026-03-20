@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:waypay_styles/waypay_styles.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ClientInfoCard extends StatelessWidget {
   const ClientInfoCard({
@@ -81,11 +82,23 @@ class ClientInfoCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: _LabeledValue(label: 'Телефон', value: phone),
+                      child: _LabeledValue(
+                        label: 'Телефон',
+                        value: phone,
+                        onTap: _isCallable(phone)
+                            ? () => _callPhone(phone)
+                            : null,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _LabeledValue(label: 'WhatsApp', value: whatsApp),
+                      child: _LabeledValue(
+                        label: 'WhatsApp',
+                        value: whatsApp,
+                        onTap: _isCallable(whatsApp)
+                            ? () => _openWhatsApp(whatsApp)
+                            : null,
+                      ),
                     ),
                   ],
                 ),
@@ -96,13 +109,49 @@ class ClientInfoCard extends StatelessWidget {
       ),
     );
   }
+
+  String _normalizePhone(String value) {
+    final digits = value.replaceAll(RegExp(r'\\D'), '');
+    if (digits.length == 11 &&
+        (digits.startsWith('7') || digits.startsWith('8'))) {
+      return digits.substring(1);
+    }
+    if (digits.length > 10) {
+      return digits.substring(digits.length - 10);
+    }
+    return digits;
+  }
+
+  Future<void> _callPhone(String value) async {
+    final digits = _normalizePhone(value);
+    if (digits.length < 10) return;
+    final uri = Uri.parse('tel:+7$digits');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _openWhatsApp(String value) async {
+    final digits = _normalizePhone(value);
+    if (digits.length < 10) return;
+    final uri = Uri.parse('https://wa.me/7$digits');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  bool _isCallable(String value) {
+    final digits = _normalizePhone(value);
+    return digits.length >= 10;
+  }
 }
 
 class _LabeledValue extends StatelessWidget {
-  const _LabeledValue({required this.label, required this.value});
+  const _LabeledValue({
+    required this.label,
+    required this.value,
+    this.onTap,
+  });
 
   final String label;
   final String value;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -119,14 +168,27 @@ class _LabeledValue extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(AppColors.black),
+        if (onTap != null)
+          InkWell(
+            onTap: onTap,
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(AppColors.primary),
+              ),
+            ),
+          )
+        else
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(AppColors.black),
+            ),
           ),
-        ),
       ],
     );
   }

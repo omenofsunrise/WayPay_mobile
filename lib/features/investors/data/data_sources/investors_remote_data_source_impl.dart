@@ -76,6 +76,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
         'sortDirection': sortDirection ?? 'asc',
       };
       if (search != null && search.isNotEmpty) {
+        queryParams['search'] = search;
         queryParams['name'] = search;
       }
       final response = await dio.get(

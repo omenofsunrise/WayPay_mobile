@@ -103,6 +103,7 @@ class InfoFieldData {
     this.labelStyle,
     this.valueStyle,
     this.valueTextAlign = TextAlign.start,
+    this.onTap,
   });
 
   final String? label;
@@ -110,6 +111,7 @@ class InfoFieldData {
   final TextStyle? labelStyle;
   final TextStyle? valueStyle;
   final TextAlign valueTextAlign;
+  final VoidCallback? onTap;
 }
 
 class _FieldTile extends StatelessWidget {
@@ -135,17 +137,33 @@ class _FieldTile extends StatelessWidget {
           ),
           const SizedBox(height: 4),
         ],
-        Text(
-          data.value,
-          textAlign: data.valueTextAlign,
-          style:
-              data.valueStyle ??
-              const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(AppColors.black),
-              ),
-        ),
+        if (data.onTap != null)
+          InkWell(
+            onTap: data.onTap,
+            child: Text(
+              data.value,
+              textAlign: data.valueTextAlign,
+              style:
+                  data.valueStyle ??
+                  const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(AppColors.primary),
+                  ),
+            ),
+          )
+        else
+          Text(
+            data.value,
+            textAlign: data.valueTextAlign,
+            style:
+                data.valueStyle ??
+                const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(AppColors.black),
+                ),
+          ),
       ],
     );
   }

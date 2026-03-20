@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:waypay_mobile/assets/resources.dart' show Images;
 
 import 'package:waypay_mobile/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:waypay_mobile/features/auth/presentation/widgets/call_confirmation_dialog.dart';
@@ -98,14 +97,11 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
 
           if (state is AuthError) {
             debugPrint('❌ AuthError: ${state.message}');
-
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
         builder: (context, state) {
           final isLoading = state is AuthLoading;
+          final errorMessage = state is AuthError ? state.message : null;
 
           debugPrint(
             '🔄 Builder вызван, состояние: $state, isLoading: $isLoading',
@@ -116,134 +112,144 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
             body: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Stack(
+                child: Column(
                   children: [
-                    Align(
-                      alignment: Alignment.topCenter,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 65),
-                        child: Image.asset(
-                          Images.backgroundLogo,
-                          height: 110,
-                          width: 110,
-                        ),
+                    const Spacer(),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (errorMessage != null) ...[
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFF1F0),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: const Color(0xFFFFCCC7),
+                                ),
+                              ),
+                              child: Text(
+                                errorMessage,
+                                style: AppStyle.inter(
+                                  size: 14,
+                                  weight: FontWeight.w500,
+                                  color: const Color(0xFFCF1322),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                          Text(
+                            'Авторизация сотрудника',
+                            style: AppStyle.manrope(
+                              size: 24,
+                              weight: FontWeight.w600,
+                              color: const Color(AppColors.black),
+                            ),
+                          ),
+                          const SizedBox(height: 36),
+                          TextFormField(
+                            controller: _phoneController,
+                            focusNode: _phoneFocus,
+                            autofocus: true,
+                            keyboardType: TextInputType.phone,
+                            inputFormatters: [_phoneFormatter],
+                            decoration: InputDecoration(
+                              labelText: 'Номер телефона',
+                              labelStyle: AppStyle.regular14.copyWith(
+                                color: const Color(AppColors.black),
+                              ),
+                              prefixText: '+7',
+                              prefixStyle: AppStyle.inter(
+                                size: 16,
+                                weight: FontWeight.w500,
+                                color: const Color(AppColors.black),
+                              ),
+                              hintText: ' (___) ___-__-__',
+                              hintStyle:
+                                  AppStyle.inter(
+                                    size: 16,
+                                    weight: FontWeight.w400,
+                                  ).copyWith(
+                                    color: const Color(
+                                      AppColors.black,
+                                    ).withOpacity(0.35),
+                                  ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 14,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: Color(AppColors.primary),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: Color(AppColors.primary),
+                                  width: 2,
+                                ),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(
+                                  color: Colors.red,
+                                ),
+                              ),
+                              focusedErrorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(
+                                  color: Colors.red,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            validator: (value) {
+                              final digits = _phoneFormatter
+                                  .getUnmaskedText();
+                              if (digits.isEmpty) {
+                                return 'Введите номер телефона';
+                              }
+                              if (digits.length != 10) {
+                                return 'Номер должен состоять из 10 цифр';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 18),
+                          isLoading
+                              ? const Center(
+                                  child: CircularProgressIndicator(),
+                                )
+                              : DefaultButton(
+                                  text: 'Подтвердить',
+                                  isPrimary: true,
+                                  onPressed: () {
+                                    if (_formKey.currentState!.validate()) {
+                                      final formattedPhone =
+                                          '8${_phoneFormatter.getUnmaskedText()}';
+                                      debugPrint(
+                                        '🔐 Начинаем авторизацию для: $formattedPhone',
+                                      );
+                                      context.read<AuthCubit>().startAuth(
+                                        formattedPhone,
+                                        widget.userType,
+                                      );
+                                    }
+                                  },
+                                ),
+                        ],
                       ),
                     ),
-                    Column(
-                      children: [
-                        const Spacer(),
-                        Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Авторизация сотрудника',
-                                style: AppStyle.manrope(
-                                  size: 24,
-                                  weight: FontWeight.w600,
-                                  color: const Color(AppColors.black),
-                                ),
-                              ),
-                              const SizedBox(height: 36),
-                              TextFormField(
-                                controller: _phoneController,
-                                focusNode: _phoneFocus,
-                                autofocus: true,
-                                keyboardType: TextInputType.phone,
-                                inputFormatters: [_phoneFormatter],
-                                decoration: InputDecoration(
-                                  labelText: 'Номер телефона',
-                                  labelStyle: AppStyle.regular14.copyWith(
-                                    color: const Color(AppColors.black),
-                                  ),
-                                  prefixText: '+7',
-                                  prefixStyle: AppStyle.inter(
-                                    size: 16,
-                                    weight: FontWeight.w500,
-                                    color: const Color(AppColors.black),
-                                  ),
-                                  hintText: ' (___) ___-__-__',
-                                  hintStyle:
-                                      AppStyle.inter(
-                                        size: 16,
-                                        weight: FontWeight.w400,
-                                      ).copyWith(
-                                        color: const Color(
-                                          AppColors.black,
-                                        ).withOpacity(0.35),
-                                      ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 14,
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(
-                                      color: Color(AppColors.primary),
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(
-                                      color: Color(AppColors.primary),
-                                      width: 2,
-                                    ),
-                                  ),
-                                  errorBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: const BorderSide(
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                  focusedErrorBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: const BorderSide(
-                                      color: Colors.red,
-                                      width: 2,
-                                    ),
-                                  ),
-                                ),
-                                validator: (value) {
-                                  final digits = _phoneFormatter
-                                      .getUnmaskedText();
-                                  if (digits.isEmpty) {
-                                    return 'Введите номер телефона';
-                                  }
-                                  if (digits.length != 10) {
-                                    return 'Номер должен состоять из 10 цифр';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 18),
-                              isLoading
-                                  ? const Center(
-                                      child: CircularProgressIndicator(),
-                                    )
-                                  : DefaultButton(
-                                      text: 'Подтвердить',
-                                      isPrimary: true,
-                                      onPressed: () {
-                                        if (_formKey.currentState!.validate()) {
-                                          final formattedPhone =
-                                              '8${_phoneFormatter.getUnmaskedText()}';
-                                          debugPrint(
-                                            '🔐 Начинаем авторизацию для: $formattedPhone',
-                                          );
-                                          context.read<AuthCubit>().startAuth(
-                                            formattedPhone,
-                                            widget.userType,
-                                          );
-                                        }
-                                      },
-                                    ),
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
-                      ],
-                    ),
+                    const Spacer(),
                   ],
                 ),
               ),

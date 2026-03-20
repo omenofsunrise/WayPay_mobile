@@ -65,7 +65,7 @@ class DashboardInfoCard extends StatelessWidget {
                 circleColor: const Color(AppColors.greenTie),
                 iconAsset: SvgIcons.rub,
                 title: 'Сумма остатков',
-                value: currencyFormatter.format(data.purchases),
+                value: currencyFormatter.format(data.restAmount),
               ),
               DashboardInfoMiniCard(
                 circleColor: const Color(AppColors.orangeTie),

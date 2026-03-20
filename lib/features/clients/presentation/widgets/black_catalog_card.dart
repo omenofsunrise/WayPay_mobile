@@ -30,12 +30,6 @@ class BlackCatalogCard extends StatelessWidget {
     return value;
   }
 
-  String _resolvePhone() {
-    final value = client.phone;
-    if (value == null || value.isEmpty) return '—';
-    return value;
-  }
-
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
@@ -77,26 +71,8 @@ class BlackCatalogCard extends StatelessWidget {
             _LabeledValue(label: 'Документ', value: _resolveDoc()),
             const SizedBox(height: 20),
             _LabeledValue(
-              label: 'Дата выдачи',
-              value: _formatDate(client.docIssueDate),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: _LabeledValue(
-                    label: 'Телефон',
-                    value: _resolvePhone(),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _LabeledValue(
-                    label: 'Дата рождения',
-                    value: _formatDate(client.birthdate),
-                  ),
-                ),
-              ],
+              label: 'Дата рождения',
+              value: _formatDate(client.birthdate),
             ),
             const SizedBox(height: 20),
             _LabeledValue(label: 'Адрес', value: _resolveAddress()),

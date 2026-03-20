@@ -10,6 +10,8 @@ class AnalyticItemsResponse {
   final int totalCredits;
   final int sales;
   final int purchases;
+  final int restAmount;
+  final int restAmountDiffrence;
 
   AnalyticItemsResponse({
     required this.investmentAmount,
@@ -23,6 +25,8 @@ class AnalyticItemsResponse {
     required this.totalCredits,
     required this.sales,
     required this.purchases,
+    required this.restAmount,
+    required this.restAmountDiffrence,
   });
 
   factory AnalyticItemsResponse.fromJson(Map<String, dynamic> json) {
@@ -38,6 +42,8 @@ class AnalyticItemsResponse {
       totalCredits: json['totalCredits'] ?? 0,
       sales: json['sales'] ?? 0,
       purchases: json['purchases'] ?? 0,
+      restAmount: json['restAmount'] ?? 0,
+      restAmountDiffrence: json['restAmountDiffrence'] ?? 0,
     );
   }
 
@@ -54,6 +60,8 @@ class AnalyticItemsResponse {
       'totalCredits': totalCredits,
       'sales': sales,
       'purchases': purchases,
+      'restAmount': restAmount,
+      'restAmountDiffrence': restAmountDiffrence,
     };
   }
 }

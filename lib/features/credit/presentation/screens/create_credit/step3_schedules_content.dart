@@ -264,10 +264,10 @@ class _Step3SchedulesContentState extends State<Step3SchedulesContent> {
               label: 'Начало выплат',
               hintText: 'дд.мм.гггг',
               keyboardType: TextInputType.datetime,
-              inputFormatters: const [
+              inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
                 LengthLimitingTextInputFormatter(8),
-                _DateDottedFormatter(),
+                const _DateDottedFormatter(),
               ],
               onChanged: _handleStartPaymentDayInput,
             ),

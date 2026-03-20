@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/assets/resources.dart';
@@ -15,13 +14,6 @@ import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_event.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_state.dart';
-import 'package:waypay_mobile/features/credit/presentation/widgets/credit_filters_sheet.dart';
-import 'package:waypay_mobile/features/credit/presentation/widgets/credit_tab.dart';
-import 'package:waypay_mobile/features/objectType/data/models/get_object_types_query.dart';
-import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
-import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
-import 'package:waypay_mobile/features/objectType/presentation/block/object_type_event.dart';
-import 'package:waypay_mobile/features/objectType/presentation/block/object_type_state.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
@@ -35,9 +27,6 @@ class CreditsScreen extends StatefulWidget {
 class _CreditsScreenState extends State<CreditsScreen> {
   final _searchController = TextEditingController();
   Timer? _debounce;
-  CreditTab _selectedTab = CreditTab.all;
-  GetCreditsQuery? _appliedFilters;
-  ObjectTypeModel? _selectedCategory;
 
   @override
   void initState() {
@@ -58,47 +47,27 @@ class _CreditsScreenState extends State<CreditsScreen> {
         (_searchController.text.trim().isEmpty
             ? null
             : _searchController.text.trim());
-    final filters = _appliedFilters;
-    final int? categoryId = _selectedCategory?.id ?? filters?.creditTypeId;
+    final parsed = _parseSearch(trimmedSearch);
 
     return GetCreditsQuery(
-      search: trimmedSearch,
-      isFavourite: _selectedTab == CreditTab.favourite ? true : null,
-      isActive: _selectedTab == CreditTab.archived ? false : null,
-      debt: _selectedTab == CreditTab.debtors ? true : null,
-      creditId: filters?.creditId,
-      dateFrom: filters?.dateFrom,
-      dateTo: filters?.dateTo,
-      investorNickname: filters?.investorNickname,
-      clientFullname: filters?.clientFullname,
-      creditTypeId: categoryId,
+      creditId: parsed.creditId,
+      clientFullname: parsed.clientFullname,
+      search: null,
       page: page,
     );
   }
 
-  bool _hasFilterValues(
-    GetCreditsQuery? query, {
-    ObjectTypeModel? categoryOverride,
-  }) {
-    final categoryValue = categoryOverride ?? _selectedCategory;
-    final hasQueryValues =
-        query != null &&
-        (query.creditId != null ||
-            query.dateFrom != null ||
-            query.dateTo != null ||
-            (query.investorNickname != null &&
-                query.investorNickname!.isNotEmpty) ||
-            (query.clientFullname != null &&
-                query.clientFullname!.isNotEmpty) ||
-            query.creditTypeId != null);
-    return hasQueryValues || categoryValue != null;
-  }
-
-  void _clearFilters() {
-    if (!_hasFilterValues(_appliedFilters)) return;
-    setState(() => _appliedFilters = null);
-    _selectedCategory = null;
-    _loadCredits();
+  _ParsedSearch _parseSearch(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return const _ParsedSearch();
+    }
+    final trimmed = value.trim();
+    final digits = trimmed.replaceAll(RegExp(r'\\D'), '');
+    final hasLetters = RegExp(r'[A-Za-zА-Яа-я]').hasMatch(trimmed);
+    if (digits.isNotEmpty && !hasLetters) {
+      return _ParsedSearch(creditId: int.tryParse(digits));
+    }
+    return _ParsedSearch(clientFullname: trimmed);
   }
 
   void _toggleFavourite(int creditId) {
@@ -110,91 +79,6 @@ class _CreditsScreenState extends State<CreditsScreen> {
     _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
-  }
-
-  Future<void> _openFilterModal(BuildContext context) async {
-    final objectTypeBloc = BlocProvider.of<ObjectTypeBloc>(
-      context,
-      listen: false,
-    );
-
-    final result = await showModalBottomSheet<GetCreditsQuery>(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      clipBehavior: Clip.antiAlias,
-      barrierColor: Colors.white.withOpacity(0.7),
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) {
-        return BlocProvider.value(
-          value: objectTypeBloc,
-          child: CreditFiltersSheet(initialFilters: _appliedFilters),
-        );
-      },
-    );
-
-    if (result != null) {
-      final hasValues = _hasFilterValues(result, categoryOverride: null);
-      setState(() {
-        _selectedCategory = null;
-        _appliedFilters = hasValues ? result : null;
-      });
-      _loadCredits();
-    }
-  }
-
-  Future<void> _openCreditTabSheet() async {
-    final objectTypeBloc = context.read<ObjectTypeBloc>();
-    objectTypeBloc.add(
-      LoadObjectTypesEvent(
-        refresh: true,
-        query: GetObjectTypesQuery(
-          page: 1,
-          pageSize: 100,
-          entityType: 'CreditTab',
-        ),
-      ),
-    );
-
-    final result = await showModalBottomSheet<_CreditTabSelectionResult>(
-      context: context,
-      useRootNavigator: true,
-      clipBehavior: Clip.antiAlias,
-      barrierColor: Colors.white.withOpacity(0.7),
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) => BlocProvider.value(
-        value: objectTypeBloc,
-        child: _CreditTabSheet(
-          selectedTab: _selectedTab,
-          selectedCategory: _selectedCategory,
-        ),
-      ),
-    );
-
-    if (result == null) return;
-
-    if (result.category != null) {
-      setState(() {
-        _selectedCategory = result.category;
-        _selectedTab = CreditTab.all;
-      });
-      _loadCredits();
-      return;
-    }
-
-    if (result.tab != null && result.tab != _selectedTab) {
-      setState(() {
-        _selectedTab = result.tab!;
-        _selectedCategory = null;
-      });
-      _loadCredits();
-    }
   }
 
   void _onSearchChanged(String value) {
@@ -246,31 +130,6 @@ class _CreditsScreenState extends State<CreditsScreen> {
                         ),
                         const SizedBox(height: 16),
                         _buildSearchBar(),
-                        if (_hasFilterValues(_appliedFilters)) ...[
-                          const SizedBox(height: 12),
-                          GestureDetector(
-                            onTap: _clearFilters,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: const [
-                                Text(
-                                  'Сбросить фильтры',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(AppColors.primary),
-                                  ),
-                                ),
-                                SizedBox(width: 4),
-                                Icon(
-                                  Icons.close,
-                                  size: 18,
-                                  color: Color(AppColors.primary),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
                         const SizedBox(height: 4),
                       ],
                     );
@@ -312,205 +171,17 @@ class _CreditsScreenState extends State<CreditsScreen> {
   }
 
   Widget _buildSearchBar() {
-    final hasCustomTab =
-        _selectedTab != CreditTab.all || _selectedCategory != null;
     return Row(
       children: [
         Expanded(
           child: SearchField(
             controller: _searchController,
-            hintText: 'Поиск',
+            hintText: 'Поиск по № договора или ФИО',
             onChanged: _onSearchChanged,
             onSubmitted: _onSearchChanged,
           ),
         ),
-        const SizedBox(width: 12),
-        FilterButton(
-          onTap: _openCreditTabSheet,
-          isActive: hasCustomTab,
-          iconAsset: _selectedCategory != null
-              ? SvgIcons.filter
-              : _selectedTab.iconPath,
-          activeIconColor: Colors.white,
-        ),
-        const SizedBox(width: 12),
-        FilterButton(
-          onTap: () => _openFilterModal(context),
-          isActive: _hasFilterValues(_appliedFilters),
-        ),
       ],
-    );
-  }
-}
-
-class _CreditTabSheet extends StatelessWidget {
-  const _CreditTabSheet({required this.selectedTab, this.selectedCategory});
-
-  final CreditTab selectedTab;
-  final ObjectTypeModel? selectedCategory;
-
-  @override
-  Widget build(BuildContext context) {
-    final tabs = [
-      CreditTab.all,
-      CreditTab.favourite,
-      CreditTab.archived,
-      CreditTab.debtors,
-    ];
-    return FilterSheet(
-      title: 'Сортировка',
-      keepHeaderPinned: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ...tabs.map((tab) {
-            final isActive = tab == selectedTab && selectedCategory == null;
-            final color = isActive
-                ? const Color(AppColors.primary)
-                : const Color(0xFF6B717C);
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () => Navigator.of(
-                    context,
-                  ).pop(_CreditTabSelectionResult.tab(tab)),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 14,
-                      horizontal: 4,
-                    ),
-                    child: Row(
-                      children: [
-                        SvgPicture.asset(
-                          tab.iconPath,
-                          width: 20,
-                          height: 20,
-                          colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            tab.label,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Color(AppColors.black),
-                            ),
-                          ),
-                        ),
-                        if (isActive)
-                          const Icon(
-                            Icons.check,
-                            color: Color(AppColors.primary),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }),
-          const SizedBox(height: 6),
-          BlocBuilder<ObjectTypeBloc, ObjectTypeState>(
-            builder: (context, state) {
-              if (state is ObjectTypeLoading) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                );
-              }
-              if (state is ObjectTypeError) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(
-                    state.message,
-                    style: AppStyle.manrope(
-                      size: 14,
-                      weight: FontWeight.w400,
-                      color: const Color(AppColors.red),
-                    ),
-                  ),
-                );
-              }
-              if (state is ObjectTypeLoaded) {
-                final categories = state.objectTypes
-                    .where(
-                      (type) => type.entityType.toLowerCase() == 'credittab',
-                    )
-                    .toList();
-                if (categories.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
-                      'Категории не найдены',
-                      style: AppStyle.manrope(
-                        size: 14,
-                        weight: FontWeight.w400,
-                        color: const Color(0xFF6B717C),
-                      ),
-                    ),
-                  );
-                }
-                return Column(
-                  children: categories.map((category) {
-                    final bool isActive = selectedCategory?.id == category.id;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () => Navigator.of(
-                            context,
-                          ).pop(_CreditTabSelectionResult.category(category)),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 14,
-                              horizontal: 4,
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.label_outline,
-                                  size: 20,
-                                  color: Color(0xFF6B717C),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    category.name,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(AppColors.black),
-                                    ),
-                                  ),
-                                ),
-                                if (isActive)
-                                  const Icon(
-                                    Icons.check,
-                                    color: Color(AppColors.primary),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
-        ],
-      ),
     );
   }
 }
@@ -591,15 +262,9 @@ class _CreditListState extends State<_CreditList> {
   }
 }
 
-class _CreditTabSelectionResult {
-  final CreditTab? tab;
-  final ObjectTypeModel? category;
+class _ParsedSearch {
+  final int? creditId;
+  final String? clientFullname;
 
-  const _CreditTabSelectionResult._({this.tab, this.category});
-
-  const _CreditTabSelectionResult.tab(CreditTab tab)
-    : this._(tab: tab, category: null);
-
-  const _CreditTabSelectionResult.category(ObjectTypeModel category)
-    : this._(tab: null, category: category);
+  const _ParsedSearch({this.creditId, this.clientFullname});
 }

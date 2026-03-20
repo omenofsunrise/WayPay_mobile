@@ -27,7 +27,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return StartAuthResponseModel.fromJson(response.data);
     } on DioException catch (e) {
       print('❌ Ошибка startAuth: ${e.response?.data}');
-      throw Exception('Ошибка старта авторизации: ${e.message}');
+      throw Exception(_extractErrorMessage(e, 'Не удалось начать авторизацию'));
     }
   }
 
@@ -61,7 +61,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
     } on DioException catch (e) {
       print('❌ Ошибка confirmCall: ${e.response?.data}');
-      throw Exception('Ошибка подтверждения звонка: ${e.message}');
+      throw Exception(_extractErrorMessage(e, 'Ошибка подтверждения звонка'));
     }
   }
 
@@ -123,7 +123,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } on DioException catch (e) {
       print('❌ Ошибка getAuthInfo: ${e.response?.data}');
       throw Exception(
-        'Ошибка получения информации о пользователе: ${e.message}',
+        _extractErrorMessage(
+          e,
+          'Ошибка получения информации о пользователе',
+        ),
       );
     }
   }
@@ -216,8 +219,34 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         }
       }
 
-      throw Exception('Ошибка установки PIN: ${e.message}');
+      throw Exception(_extractErrorMessage(e, 'Ошибка установки PIN'));
     }
+  }
+
+  String _extractErrorMessage(DioException e, String fallback) {
+    final data = e.response?.data;
+    if (data is Map<String, dynamic>) {
+      final candidates = [
+        data['message'],
+        data['Message'],
+        data['error'],
+        data['Error'],
+        data['detail'],
+        data['title'],
+      ].whereType<String>();
+      for (final value in candidates) {
+        final trimmed = value.trim();
+        if (trimmed.isNotEmpty) return trimmed;
+      }
+    }
+    if (data is String && data.trim().isNotEmpty) {
+      return data.trim();
+    }
+    final message = e.message?.trim();
+    if (message != null && message.isNotEmpty) {
+      return message;
+    }
+    return fallback;
   }
 
   @override

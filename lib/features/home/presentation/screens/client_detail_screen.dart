@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_styles/waypay_styles.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
@@ -175,6 +176,32 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
     return widget.client?.phone ?? '-';
   }
 
+  String _normalizePhone(String value) {
+    final digits = value.replaceAll(RegExp(r'\\D'), '');
+    if (digits.length == 11 &&
+        (digits.startsWith('7') || digits.startsWith('8'))) {
+      return digits.substring(1);
+    }
+    if (digits.length > 10) {
+      return digits.substring(digits.length - 10);
+    }
+    return digits;
+  }
+
+  Future<void> _callPhone(String value) async {
+    final digits = _normalizePhone(value);
+    if (digits.length < 10) return;
+    final uri = Uri.parse('tel:+7$digits');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _openWhatsApp(String value) async {
+    final digits = _normalizePhone(value);
+    if (digits.length < 10) return;
+    final uri = Uri.parse('https://wa.me/7$digits');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
   String get _birthDate {
     if (widget.client == null) return '-';
     return _dateFormat.format(widget.client!.birthdate);
@@ -194,14 +221,8 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
     return trimmed;
   }
 
-  String? get _passportIssueDate {
-    final issue = widget.client?.docIssueYear;
-    if (issue == null || issue <= 0) return null;
-    return issue.toString();
-  }
-
   bool get _hasPassportSection =>
-      _passportNumber != null || _passportIssueDate != null;
+      _passportNumber != null || _registrationAddress != null;
 
   Future<void> _loadPassportPhotos() async {
     final clientId = widget.client?.id;
@@ -402,11 +423,17 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
                 child: InfoSectionCard(
                   fieldsPerRow: 2,
                   fields: [
-                    InfoFieldData(label: 'Телефон', value: _phone),
+                    InfoFieldData(
+                      label: 'Телефон',
+                      value: _phone,
+                      onTap: _phone == '-' ? null : () => _callPhone(_phone),
+                    ),
                     InfoFieldData(
                       label: 'WhatsApp',
                       value: _whatsApp,
                       valueTextAlign: TextAlign.end,
+                      onTap:
+                          _whatsApp == '-' ? null : () => _openWhatsApp(_whatsApp),
                     ),
                   ],
                 ),
@@ -419,19 +446,6 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
                   ],
                 ),
               ),
-              if (_registrationAddress != null) ...[
-                const SliverToBoxAdapter(child: SizedBox(height: 12)),
-                SliverToBoxAdapter(
-                  child: InfoSectionCard(
-                    fields: [
-                      InfoFieldData(
-                        label: 'Адрес регистрации',
-                        value: _registrationAddress!,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
               if (_hasPassportSection) ...[
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
                 SliverToBoxAdapter(
@@ -443,10 +457,10 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
                           label: 'Серия и номер паспорта',
                           value: _passportNumber!,
                         ),
-                      if (_passportIssueDate != null)
+                      if (_registrationAddress != null)
                         InfoFieldData(
-                          label: 'Дата выдачи',
-                          value: _passportIssueDate!,
+                          label: 'Адрес',
+                          value: _registrationAddress!,
                         ),
                     ],
                   ),

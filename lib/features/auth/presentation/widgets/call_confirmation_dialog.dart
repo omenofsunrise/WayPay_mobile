@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 
 class CallConfirmationDialog extends StatefulWidget {
@@ -51,6 +52,21 @@ class _CallConfirmationDialogState extends State<CallConfirmationDialog> {
     super.dispose();
   }
 
+  Future<void> _callNumber() async {
+    final digits = widget.callPhone.replaceAll(RegExp(r'\\D'), '');
+    if (digits.isEmpty) return;
+    final uri = Uri(scheme: 'tel', path: digits);
+    final launched = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Не удалось открыть телефон')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -75,14 +91,17 @@ class _CallConfirmationDialogState extends State<CallConfirmationDialog> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            Text(
-              widget.callPhone,
-              style: AppStyle.inter(
-                size: 20,
-                weight: FontWeight.w700,
-                color: const Color(AppColors.primary),
+            GestureDetector(
+              onTap: _callNumber,
+              child: Text(
+                widget.callPhone,
+                style: AppStyle.inter(
+                  size: 20,
+                  weight: FontWeight.w700,
+                  color: const Color(AppColors.primary),
+                ).copyWith(decoration: TextDecoration.underline),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             Text(
