@@ -97,10 +97,10 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
     if (!_isFormValid || _isSubmitting) return;
 
     final birthDate = _parseDate(_birthDateController.text);
-    final phoneDigits =
-        _normalizePhoneDigits(_phoneMask.getUnmaskedText());
-    final whatsappDigits =
-        _normalizePhoneDigits(_whatsAppMask.getUnmaskedText());
+    final phoneDigits = _normalizePhoneDigits(_phoneMask.getUnmaskedText());
+    final whatsappDigits = _normalizePhoneDigits(
+      _whatsAppMask.getUnmaskedText(),
+    );
 
     if (birthDate == null) {
       setState(() {
@@ -139,15 +139,30 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
   void _onFullNameChanged() {
     if (_isFormattingFullName) return;
     final raw = _fullNameController.text;
-    final upper = raw.toUpperCase();
-    if (raw == upper) return;
+
+    final formatted = _capitalizeWords(raw);
+
+    if (raw == formatted) return;
+
     _isFormattingFullName = true;
     final selection = _fullNameController.selection;
     _fullNameController.value = TextEditingValue(
-      text: upper,
+      text: formatted,
       selection: selection,
     );
     _isFormattingFullName = false;
+  }
+
+  String _capitalizeWords(String text) {
+    if (text.isEmpty) return text;
+
+    final words = text.split(' ');
+    final capitalizedWords = words.map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).toList();
+
+    return capitalizedWords.join(' ');
   }
 
   String _normalizePhoneDigits(String value) {
@@ -215,8 +230,9 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
       if (_pendingPhoneDigits != digits) return;
       final exists = response.clients.isNotEmpty;
       setState(() {
-        _phoneExistsError =
-            exists ? 'Клиент с таким номером телефона уже есть' : null;
+        _phoneExistsError = exists
+            ? 'Клиент с таким номером телефона уже есть'
+            : null;
       });
       _handleFormChanged();
     } catch (_) {
