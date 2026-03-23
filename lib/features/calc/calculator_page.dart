@@ -731,11 +731,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(
-                  children: [
-                    _buildInputSection(),
-                    const SizedBox(height: 20),
-                    _buildResultSection(),
-                  ],
+                  children: [_buildInputSection(), _buildResultSection()],
                 ),
               ),
             ),
@@ -790,7 +786,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           },
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 1),
           child: Row(
             children: [
               Expanded(

@@ -79,13 +79,18 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     if (isOffline == null) {
       return const MaterialApp(
+        debugShowCheckedModeBanner: false,
         home: Scaffold(body: Center(child: CircularProgressIndicator())),
       );
     }
 
     final app = isOffline!
-        ? const MaterialApp(home: NetworkErrorScreen())
+        ? const MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: NetworkErrorScreen(),
+          )
         : MaterialApp.router(
+            debugShowCheckedModeBanner: false,
             title: 'waypay_mobile',
             routerConfig: AppRouter.router,
             theme: ThemeData(
