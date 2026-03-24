@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 
@@ -39,7 +38,7 @@ class InvestorsHubScreen extends StatelessWidget {
               const SizedBox(height: 16),
               _InvestorsCard(
                 icon: Icons.account_balance_outlined,
-                label: 'Пул инвесторов',
+                label: 'Пулы инвесторов',
                 onTap: () => _openInvestorsPool(context),
               ),
             ],

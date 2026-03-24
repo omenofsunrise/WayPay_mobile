@@ -393,7 +393,7 @@ class _PoolInvestorCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              investor.nickname,
+              investor.fullName,
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -401,22 +401,9 @@ class _PoolInvestorCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _InfoColumn(
-                    label: 'Касса',
-                    value: _formatCurrency(investor.balance),
-                  ),
-                ),
-                const SizedBox(width: 24),
-                Expanded(
-                  child: _InfoColumn(
-                    label: 'Инвестиции',
-                    value: _formatCurrency(investor.investmentAmount),
-                  ),
-                ),
-              ],
+            _InfoColumn(
+              label: 'Инвестиции',
+              value: _formatCurrency(investor.investmentAmount),
             ),
           ],
         ),
