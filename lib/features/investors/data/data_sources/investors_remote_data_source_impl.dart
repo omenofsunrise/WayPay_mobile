@@ -20,6 +20,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
     String? sortBy,
     String? sortDirection,
     String? search,
+    int? poolId,
   }) async {
     try {
       final queryParams = <String, dynamic>{};
@@ -32,6 +33,9 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       }
       if (search != null && search.isNotEmpty) {
         queryParams['search'] = search;
+      }
+      if (poolId != null) {
+        queryParams['poolId'] = poolId;
       }
 
       final response = await dio.get(
@@ -174,9 +178,16 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   }
 
   @override
-  Future<void> addInvestment({required int id, required double amount}) async {
+  Future<void> addInvestment({
+    required int id,
+    required double amount,
+    DateTime? date,
+  }) async {
     try {
-      final payload = {'amount': amount};
+      final payload = {
+        'amount': amount,
+        'date': (date ?? DateTime.now()).toUtc().toIso8601String(),
+      };
 
       final response = await dio.put(
         'Investor/$id/add-investment',

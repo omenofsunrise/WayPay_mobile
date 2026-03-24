@@ -108,11 +108,7 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
     try {
       await dio.post('Credit', data: request.toJson());
     } on DioException catch (e) {
-      final serverMessage = _extractServerError(e);
-      if (serverMessage != null) {
-        throw Exception(serverMessage);
-      }
-      throw Exception(_mapGenericCreateError(e.response?.statusCode));
+      throw Exception(_formatCreateCreditError(e));
     }
   }
 
@@ -158,6 +154,10 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
     if (data is String && data.trim().isNotEmpty) {
       return data;
     }
+    if (data is List) {
+      final joined = data.map((e) => e.toString()).join('\n');
+      return joined.trim().isNotEmpty ? joined : null;
+    }
     if (data is Map<String, dynamic>) {
       final title = data['title']?.toString();
       final detail = data['message']?.toString() ?? data['detail']?.toString();
@@ -166,8 +166,13 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
       if (errors is Map<String, dynamic>) {
         formattedErrors = errors.entries
             .map(
-              (entry) =>
-                  '${entry.key}: ${(entry.value as List<dynamic>).join(', ')}',
+              (entry) {
+                final value = entry.value;
+                if (value is List) {
+                  return '${entry.key}: ${value.join(', ')}';
+                }
+                return '${entry.key}: ${value.toString()}';
+              },
             )
             .join('\n');
       }
@@ -178,6 +183,31 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
       ].whereType<String>().join('\n');
     }
     return null;
+  }
+
+  String _formatCreateCreditError(DioException e) {
+    final statusCode = e.response?.statusCode;
+    final serverMessage = _extractServerError(e);
+    if (serverMessage != null && serverMessage.trim().isNotEmpty) {
+      return statusCode == null
+          ? serverMessage
+          : '$serverMessage (Код ошибки: $statusCode)';
+    }
+
+    final responseData = e.response?.data;
+    if (responseData != null) {
+      final text = _truncate(responseData.toString(), 500);
+      return statusCode == null
+          ? 'Ошибка создания договора. Ответ сервера: $text'
+          : 'Ошибка создания договора. Ответ сервера: $text (Код ошибки: $statusCode)';
+    }
+
+    return _mapGenericCreateError(statusCode);
+  }
+
+  String _truncate(String value, int maxLength) {
+    if (value.length <= maxLength) return value;
+    return '${value.substring(0, maxLength)}...';
   }
 
   String _mapGenericCreateError(int? statusCode) {

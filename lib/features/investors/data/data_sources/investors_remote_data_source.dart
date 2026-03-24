@@ -11,6 +11,7 @@ abstract class InvestorsRemoteDataSource {
     String? sortBy,
     String? sortDirection,
     String? search,
+    int? poolId,
   });
   Future<InvestorPoolResponseModel> getInvestorPools({
     int? page,
@@ -35,7 +36,11 @@ abstract class InvestorsRemoteDataSource {
     String? phoneNumber,
     required int investorPie,
   });
-  Future<void> addInvestment({required int id, required double amount});
+  Future<void> addInvestment({
+    required int id,
+    required double amount,
+    DateTime? date,
+  });
   Future<void> toggleBlockInvestor(int id);
   Future<void> clearInvestor(int id);
   Future<Map<String, dynamic>> getInvestorReport(int id);

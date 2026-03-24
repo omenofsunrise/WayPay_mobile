@@ -173,9 +173,17 @@ class AppRouter {
       GoRoute(
         path: Routes.investorPoolScreen.toPath,
         name: Routes.investorPoolScreen.toName,
-        builder: (context, state) => BlocProvider(
-          create: (_) =>
-              InvestorPoolBloc()..add(LoadInvestorPool(refresh: true)),
+        builder: (context, state) => MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) =>
+                  InvestorPoolBloc()..add(LoadInvestorPool(refresh: true)),
+            ),
+            BlocProvider(
+              create: (_) =>
+                  InvestorsBloc()..add(LoadInvestorsEvent(refresh: true)),
+            ),
+          ],
           child: const InvestorPoolScreen(),
         ),
       ),
