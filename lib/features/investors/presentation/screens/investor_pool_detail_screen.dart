@@ -87,6 +87,39 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
     ]);
   }
 
+  Future<void> _handleAddInvestment(InvestorsModel investor) async {
+    final amount = await showDialog<double>(
+      context: context,
+      builder: (_) => _AddInvestmentDialog(name: investor.fullName),
+    );
+    if (!mounted || amount == null) return;
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await getIt<InvestorsRemoteDataSource>().addInvestment(
+        id: investor.id,
+        amount: amount,
+      );
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Инвестиция добавлена')),
+      );
+      await _loadInvestors();
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка: $e')),
+      );
+    }
+  }
+
   double _asDouble(dynamic value) {
     if (value is num) return value.toDouble();
     if (value is String) return double.tryParse(value) ?? 0;
@@ -255,6 +288,8 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
                                           ),
                                           child: _PoolInvestorCard(
                                             investor: investor,
+                                            onAddInvestment: () =>
+                                                _handleAddInvestment(investor),
                                           ),
                                         ),
                                       )
@@ -330,9 +365,13 @@ class _PoolNameCard extends StatelessWidget {
 }
 
 class _PoolInvestorCard extends StatelessWidget {
-  const _PoolInvestorCard({required this.investor});
+  const _PoolInvestorCard({
+    required this.investor,
+    required this.onAddInvestment,
+  });
 
   final InvestorsModel investor;
+  final VoidCallback onAddInvestment;
 
   String _formatCurrency(num value) {
     final formatter = NumberFormat.currency(
@@ -405,7 +444,113 @@ class _PoolInvestorCard extends StatelessWidget {
               label: 'Инвестиции',
               value: _formatCurrency(investor.investmentAmount),
             ),
+            const SizedBox(height: 12),
+            DefaultButton(
+              text: 'Добавить инвестицию',
+              isPrimary: true,
+              onPressed: onAddInvestment,
+            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AddInvestmentDialog extends StatefulWidget {
+  const _AddInvestmentDialog({required this.name});
+
+  final String name;
+
+  @override
+  State<_AddInvestmentDialog> createState() => _AddInvestmentDialogState();
+}
+
+class _AddInvestmentDialogState extends State<_AddInvestmentDialog> {
+  final _controller = TextEditingController();
+  String? _errorText;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final raw = _controller.text.trim().replaceAll(',', '.');
+    final value = double.tryParse(raw);
+    if (value == null || value <= 0) {
+      setState(() => _errorText = 'Введите корректную сумму');
+      return;
+    }
+    Navigator.pop(context, value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Добавить инвестицию',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                widget.name,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(AppColors.uiBorder),
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _controller,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Введите сумму',
+                  errorText: _errorText,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: DefaultButton(
+                      text: 'Отмена',
+                      isPrimary: false,
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DefaultButton(
+                      text: 'Добавить',
+                      isPrimary: true,
+                      onPressed: _submit,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
