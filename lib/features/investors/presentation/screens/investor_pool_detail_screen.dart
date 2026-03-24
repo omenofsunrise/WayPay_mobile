@@ -6,7 +6,7 @@ import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 
 class InvestorPoolDetailScreen extends StatefulWidget {
   const InvestorPoolDetailScreen({super.key, required this.pool});
@@ -20,13 +20,17 @@ class InvestorPoolDetailScreen extends StatefulWidget {
 
 class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
   Map<String, dynamic>? _reportData;
+  List<InvestorsModel> _investors = [];
   String? _error;
+  String? _investorsError;
   bool _isLoading = false;
+  bool _isInvestorsLoading = false;
 
   @override
   void initState() {
     super.initState();
     _loadReport();
+    _loadInvestors();
   }
 
   Future<void> _loadReport() async {
@@ -49,6 +53,38 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _loadInvestors() async {
+    setState(() {
+      _isInvestorsLoading = true;
+      _investorsError = null;
+    });
+    try {
+      final response = await getIt<InvestorsRemoteDataSource>().getInvestors(
+        page: 1,
+        pageSize: 50,
+        poolId: widget.pool.id,
+      );
+      if (!mounted) return;
+      setState(() {
+        _investors = response.investors;
+        _isInvestorsLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _investorsError = 'Ошибка загрузки инвесторов: $e';
+        _isInvestorsLoading = false;
+      });
+    }
+  }
+
+  Future<void> _refreshAll() async {
+    await Future.wait([
+      _loadReport(),
+      _loadInvestors(),
+    ]);
   }
 
   double _asDouble(dynamic value) {
@@ -159,20 +195,71 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
                         ),
                       )
                     : RefreshIndicator(
-                        onRefresh: _loadReport,
+                        onRefresh: _refreshAll,
                         child: SingleChildScrollView(
                           physics: const AlwaysScrollableScrollPhysics(),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _NicknameCard(
-                                name:
-                                    (_reportData?['nickName'] ??
-                                            widget.pool.name)
-                                        .toString(),
+                              _PoolNameCard(
+                                name: (_reportData?['name'] ??
+                                        widget.pool.name)
+                                    .toString(),
                               ),
                               const SizedBox(height: 16),
                               _AnalyticsGrid(metrics: _buildMetrics()),
+                              const SizedBox(height: 20),
+                              const Text(
+                                'Инвесторы',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(AppColors.uiBorder),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              if (_isInvestorsLoading)
+                                const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              else if (_investorsError != null)
+                                Center(
+                                  child: Text(
+                                    _investorsError!,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Color(AppColors.uiBorder),
+                                    ),
+                                  ),
+                                )
+                              else if (_investors.isEmpty)
+                                const Center(
+                                  child: Text(
+                                    'Инвесторы не найдены',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Color(AppColors.uiBorder),
+                                    ),
+                                  ),
+                                )
+                              else
+                                Column(
+                                  children: _investors
+                                      .map(
+                                        (investor) => Padding(
+                                          padding: const EdgeInsets.only(
+                                            bottom: 12,
+                                          ),
+                                          child: _PoolInvestorCard(
+                                            investor: investor,
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
                             ],
                           ),
                         ),
@@ -186,8 +273,8 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
   }
 }
 
-class _NicknameCard extends StatelessWidget {
-  const _NicknameCard({required this.name});
+class _PoolNameCard extends StatelessWidget {
+  const _PoolNameCard({required this.name});
 
   final String name;
 
@@ -216,7 +303,7 @@ class _NicknameCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Никнейм',
+            'Название пула',
             style: TextStyle(
               fontFamily: 'Manrope',
               fontWeight: FontWeight.w400,
@@ -237,6 +324,102 @@ class _NicknameCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PoolInvestorCard extends StatelessWidget {
+  const _PoolInvestorCard({required this.investor});
+
+  final InvestorsModel investor;
+
+  String _formatCurrency(num value) {
+    final formatter = NumberFormat.currency(
+      locale: 'ru_RU',
+      symbol: '₽',
+      decimalDigits: 0,
+    );
+    return formatter.format(value);
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return '—';
+    return DateFormat('dd.MM.yyyy').format(date);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x14000809),
+            offset: Offset(2, 2),
+            blurRadius: 4,
+          ),
+          BoxShadow(
+            color: Color(0x05000809),
+            offset: Offset(0, 0),
+            blurRadius: 6,
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'ID: ${investor.id}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(AppColors.uiBorder),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  _formatDate(investor.createdAt),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(AppColors.uiBorder),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              investor.nickname,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _InfoColumn(
+                    label: 'Касса',
+                    value: _formatCurrency(investor.balance),
+                  ),
+                ),
+                const SizedBox(width: 24),
+                Expanded(
+                  child: _InfoColumn(
+                    label: 'Инвестиции',
+                    value: _formatCurrency(investor.investmentAmount),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -360,6 +543,38 @@ class _MetricCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _InfoColumn extends StatelessWidget {
+  const _InfoColumn({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            color: Color(AppColors.uiBorder),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Color(AppColors.black),
+          ),
+        ),
+      ],
     );
   }
 }
