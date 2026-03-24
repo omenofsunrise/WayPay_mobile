@@ -224,13 +224,15 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
                 borderRadius: BorderRadius.circular(16),
               ),
               backgroundColor: Color(AppColors.background),
-              child: SizedBox(
-                height: 320,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 360),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                       Row(
                         children: [
                           Padding(
@@ -358,7 +360,7 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
                           ),
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(height: 24),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 33),
                         child: Row(
@@ -398,7 +400,9 @@ class _PeriodDropdownState extends State<PeriodDropdown> {
                           ],
                         ),
                       ),
+                      const SizedBox(height: 8),
                     ],
+                    ),
                   ),
                 ),
               ),

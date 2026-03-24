@@ -131,88 +131,93 @@ class PeriodAppBarAction extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
           backgroundColor: const Color(AppColors.background),
-          child: SizedBox(
-            height: 320,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 360),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const SizedBox(width: 33),
-                      Text(
-                        'Выбор периода',
-                        style: AppStyle.manrope(
-                          size: 20,
-                          weight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        icon: const Icon(Icons.close),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 33),
-                    child: GestureDetector(
-                      onTap: () async {
-                        await pick(true);
-                        setState(() {});
-                      },
-                      child: _dateField(label: 'с', value: fmt(start)),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 33),
-                    child: GestureDetector(
-                      onTap: () async {
-                        await pick(false);
-                        setState(() {});
-                      },
-                      child: _dateField(label: 'по', value: fmt(end)),
-                    ),
-                  ),
-
-                  const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 33),
-                    child: Row(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Expanded(
-                          child: DefaultButton(
-                            text: 'Отменить',
-                            isPrimary: false,
-                            onPressed: () => Navigator.pop(ctx),
+                        const SizedBox(width: 33),
+                        Text(
+                          'Выбор периода',
+                          style: AppStyle.manrope(
+                            size: 20,
+                            weight: FontWeight.w600,
+                            color: Colors.black,
                           ),
                         ),
-                        const SizedBox(width: 20),
-                        Expanded(
-                          child: DefaultButton(
-                            text: 'Выбрать',
-                            color: const Color(AppColors.primary),
-                            // ✅ всегда ненулевой колбэк, как в твоём рабочем примере
-                            onPressed: (start != null && end != null)
-                                ? () {
-                                    Navigator.pop(ctx);
-                                    onChanged(
-                                      null,
-                                      DateTimeRange(start: start!, end: end!),
-                                    );
-                                  }
-                                : () {}, // пустая функция вместо null
-                          ),
+                        const Spacer(),
+                        IconButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(Icons.close),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 33),
+                      child: GestureDetector(
+                        onTap: () async {
+                          await pick(true);
+                          setState(() {});
+                        },
+                        child: _dateField(label: 'с', value: fmt(start)),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 33),
+                      child: GestureDetector(
+                        onTap: () async {
+                          await pick(false);
+                          setState(() {});
+                        },
+                        child: _dateField(label: 'по', value: fmt(end)),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 33),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: DefaultButton(
+                              text: 'Отменить',
+                              isPrimary: false,
+                              onPressed: () => Navigator.pop(ctx),
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: DefaultButton(
+                              text: 'Выбрать',
+                              color: const Color(AppColors.primary),
+                              // ✅ всегда ненулевой колбэк, как в твоём рабочем примере
+                              onPressed: (start != null && end != null)
+                                  ? () {
+                                      Navigator.pop(ctx);
+                                      onChanged(
+                                        null,
+                                        DateTimeRange(
+                                          start: start!,
+                                          end: end!,
+                                        ),
+                                      );
+                                    }
+                                  : () {}, // пустая функция вместо null
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
               ),
             ),
           ),
