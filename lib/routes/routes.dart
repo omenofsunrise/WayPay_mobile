@@ -25,7 +25,6 @@ enum Routes {
   clientListScreen,
   clientDetailScreen,
   blacklistScreen,
-  blackCatalogScreen,
   clientCreateScreen,
   clientApplicationDetailScreen,
   clientApplicationsScreen,
@@ -100,8 +99,6 @@ extension RoutesExtension on Routes {
         return '/client_detail_screen';
       case Routes.blacklistScreen:
         return '/blacklist_screen';
-      case Routes.blackCatalogScreen:
-        return '/black_catalog_screen';
       case Routes.clientCreateScreen:
         return '/client_create_screen';
       case Routes.clientApplicationDetailScreen:
@@ -193,8 +190,6 @@ extension RoutesExtension on Routes {
         return 'CLIENT_DETAIL_SCREEN';
       case Routes.blacklistScreen:
         return 'BLACKLIST_SCREEN';
-      case Routes.blackCatalogScreen:
-        return 'BLACK_CATALOG_SCREEN';
       case Routes.clientCreateScreen:
         return 'CLIENT_CREATE_SCREEN';
       case Routes.clientApplicationDetailScreen:

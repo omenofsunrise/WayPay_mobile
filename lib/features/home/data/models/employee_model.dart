@@ -20,7 +20,6 @@ class EmployeeModel {
   final int? queuesCount;
   final int? creditsCount;
   final int? blacklistCount;
-  final int? blackCatalogCount;
 
   // investors
   final num? balance;
@@ -48,7 +47,6 @@ class EmployeeModel {
     this.queuesCount,
     this.creditsCount,
     this.blacklistCount,
-    this.blackCatalogCount,
     this.balance,
     this.investment,
     this.budgetIncome,
@@ -72,7 +70,6 @@ class EmployeeModel {
       queuesCount: (json['queuesCount'] as num?)?.toInt(),
       creditsCount: (json['creditsCount'] as num?)?.toInt(),
       blacklistCount: (json['blacklistCount'] as num?)?.toInt(),
-      blackCatalogCount: (json['blackCatalogCount'] as num?)?.toInt(),
       balance: json['balance'] as num?,
       investment: json['investment'] as num?,
       budgetIncome: json['budgetIncome'] as num?,
@@ -97,7 +94,6 @@ class EmployeeModel {
       'queuesCount': queuesCount,
       'creditsCount': creditsCount,
       'blacklistCount': blacklistCount,
-      'blackCatalogCount': blackCatalogCount,
       'balance': balance,
       'investment': investment,
       'budgetIncome': budgetIncome,
@@ -121,7 +117,6 @@ class EmployeeModel {
     int? queuesCount,
     int? creditsCount,
     int? blacklistCount,
-    int? blackCatalogCount,
     num? balance,
     num? investment,
     num? budgetIncome,
@@ -146,7 +141,6 @@ class EmployeeModel {
       queuesCount: queuesCount ?? this.queuesCount,
       creditsCount: creditsCount ?? this.creditsCount,
       blacklistCount: blacklistCount ?? this.blacklistCount,
-      blackCatalogCount: blackCatalogCount ?? this.blackCatalogCount,
       balance: balance ?? this.balance,
       investment: investment ?? this.investment,
       budgetIncome: budgetIncome ?? this.budgetIncome,

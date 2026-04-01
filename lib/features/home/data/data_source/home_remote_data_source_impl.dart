@@ -26,7 +26,6 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
             queuesCount: stats.queuesCount,
             creditsCount: stats.creditsCount,
             blacklistCount: stats.blacklistCount,
-            blackCatalogCount: stats.blackCatalogCount,
           );
         } else {
           throw Exception('Неожиданный формат ответа: ожидался JSON объект');
@@ -54,7 +53,6 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   Future<MainClientStatsModel> _fetchMainClientStats() async {
     const query = '''
       query MainClientStats {
-        getBlackCatalogCount
         getBlacklistCount
         getClientsCount
         getCreditApplicationsCount

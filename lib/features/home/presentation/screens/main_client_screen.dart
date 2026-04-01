@@ -138,15 +138,6 @@ class _MainClientScreenState extends State<MainClientScreen> {
                           context.pushNamed(Routes.blacklistScreen.toName),
                     ),
                   ),
-                  SliverToBoxAdapter(
-                    child: MainClientCard(
-                      icon: Icons.inventory_2_outlined,
-                      title: 'Черный каталог',
-                      value: _formatCount(employeeData.blackCatalogCount),
-                      onTap: () =>
-                          context.pushNamed(Routes.blackCatalogScreen.toName),
-                    ),
-                  ),
                 ],
               );
             },

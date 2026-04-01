@@ -35,13 +35,20 @@ class TokenStorage {
     final access = prefs.getString(_accessKey);
     final expiryStr = prefs.getString(_accessExpiryKey);
     if (access == null || expiryStr == null) {
+      if (access != null) {
+        return await _refreshAccessToken();
+      }
       return null;
     }
 
     final expiry = DateTime.tryParse(expiryStr);
     final now = DateTime.now();
 
-    if (expiry != null && now.isAfter(expiry.subtract(skew))) {
+    if (expiry == null) {
+      return await _refreshAccessToken();
+    }
+
+    if (now.isAfter(expiry.subtract(skew))) {
       return await _refreshAccessToken();
     }
     return access;

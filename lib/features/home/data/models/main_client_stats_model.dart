@@ -4,7 +4,6 @@ class MainClientStatsModel {
   final int? creditApplicationsCount;
   final int? creditsCount;
   final int? blacklistCount;
-  final int? blackCatalogCount;
 
   const MainClientStatsModel({
     this.clientsCount,
@@ -12,7 +11,6 @@ class MainClientStatsModel {
     this.creditApplicationsCount,
     this.creditsCount,
     this.blacklistCount,
-    this.blackCatalogCount,
   });
 
   factory MainClientStatsModel.fromJson(Map<String, dynamic> json) {
@@ -23,7 +21,6 @@ class MainClientStatsModel {
           (json['getCreditApplicationsCount'] as num?)?.toInt(),
       creditsCount: (json['getCreditsCount'] as num?)?.toInt(),
       blacklistCount: (json['getBlacklistCount'] as num?)?.toInt(),
-      blackCatalogCount: (json['getBlackCatalogCount'] as num?)?.toInt(),
     );
   }
 }

@@ -64,11 +64,6 @@ List<SearchDestination> getDefaultSearchDestinations() {
       keywords: ['черный список', 'blacklist', 'stop', 'ban'],
     ),
     SearchDestination(
-      title: 'Черный каталог',
-      route: Routes.blackCatalogScreen,
-      keywords: ['черный каталог', 'black catalog', 'stoplist'],
-    ),
-    SearchDestination(
       title: 'Заявки',
       route: Routes.clientApplicationsScreen,
       keywords: ['заявки', 'applications', 'lead', 'request'],

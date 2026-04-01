@@ -28,11 +28,8 @@ import 'package:waypay_mobile/features/chat/data/data_source/message/message_rem
 import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/chat/data/service/chat_hub_service.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
-import 'package:waypay_mobile/features/clients/data/data_sources/black_catalog/black_catalog_remote_data_source.dart';
-import 'package:waypay_mobile/features/clients/data/data_sources/black_catalog/black_catalog_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources_impl.dart';
-import 'package:waypay_mobile/features/clients/presentation/cubit/black_catalog/black_catalog_cubit.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source_impl.dart';
@@ -167,9 +164,6 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton<SoldProductRemoteDataSource>(
     () => SoldProductRemoteDataSourceImpl(getIt<Dio>()),
   );
-  getIt.registerLazySingleton<BlackCatalogRemoteDataSource>(
-    () => BlackCatalogRemoteDataSourceImpl(getIt<Dio>()),
-  );
   getIt.registerLazySingleton<CreditApplicationRemoteDataSource>(
     () => CreditApplicationRemoteDataSourceImpl(getIt<Dio>()),
   );
@@ -183,7 +177,6 @@ Future<void> initDependencies() async {
   getIt.registerFactory(() => AuthCubit());
   getIt.registerFactory(() => InvestorsBloc());
   getIt.registerFactory(() => ClientsBloc());
-  getIt.registerFactory(() => BlackCatalogCubit());
   getIt.registerFactory(() => ClientApplicationsCubit());
   getIt.registerFactory(() => BlacklistBloc());
   getIt.registerFactory(() => BudgetIncomeBloc());

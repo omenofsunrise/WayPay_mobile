@@ -24,7 +24,6 @@ import 'package:waypay_mobile/features/home/presentation/screens/client_applicat
 import 'package:waypay_mobile/features/home/presentation/screens/client_create_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/client_detail_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/client_list_screen.dart';
-import 'package:waypay_mobile/features/home/presentation/screens/client_black_catalog_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/client_blacklist_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/main_client_screen.dart';
@@ -65,7 +64,6 @@ import 'package:waypay_mobile/features/todo/presentation/screens/todo_screen.dar
 
 import 'package:waypay_mobile/routes/routes.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
-import 'package:waypay_mobile/features/clients/presentation/cubit/black_catalog/black_catalog_cubit.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 
@@ -75,11 +73,19 @@ class AppRouter {
     debugLogDiagnostics: true,
     redirect: (context, state) async {
       final tokenStorage = TokenStorage();
-      final isAuthenticated = await tokenStorage.isAuthenticated();
+      var isAuthenticated = await tokenStorage.isAuthenticated();
       final privacyAccepted = await tokenStorage.isPrivacyAccepted();
       final hasPinCode = await tokenStorage.getPinCode() != null;
 
       final here = state.uri.toString();
+
+      if (isAuthenticated) {
+        final access = await tokenStorage.getAccessToken();
+        if (access == null) {
+          await tokenStorage.setAuthenticated(false);
+          isAuthenticated = false;
+        }
+      }
 
       if (!privacyAccepted) {
         final allowed = {
@@ -335,14 +341,6 @@ class AppRouter {
                     builder: (context, state) => BlocProvider(
                       create: (_) => BlacklistBloc(),
                       child: const ClientBlacklistScreen(),
-                    ),
-                  ),
-                  GoRoute(
-                    path: Routes.blackCatalogScreen.toPath,
-                    name: Routes.blackCatalogScreen.toName,
-                    builder: (context, state) => BlocProvider(
-                      create: (_) => BlackCatalogCubit(),
-                      child: const ClientBlackCatalogScreen(),
                     ),
                   ),
 
