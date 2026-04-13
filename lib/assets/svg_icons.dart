@@ -64,7 +64,6 @@ class SvgIcons {
   static const String shieldPerson = 'assets/icons/shield_person.svg';
   static const String sort = 'assets/icons/sort.svg';
   static const String statistics = 'assets/icons/statistics.svg';
-  static const String todoCopy = 'assets/icons/todo copy.svg';
   static const String todo = 'assets/icons/todo.svg';
   static const String users = 'assets/icons/users.svg';
   static const String vectorLogoBlack = 'assets/icons/vectorLogo_black.svg';

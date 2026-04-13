@@ -74,13 +74,11 @@ class CreateCreditRequest {
   }
 
   Map<String, dynamic> toJson() {
-    return {
+    final map = <String, dynamic>{
       'clientId': clientId,
       'name': name,
       'creditTypeId': creditTypeId,
       'creditTabTypeId': creditTabTypeId,
-      'guarantorClientId': guarantorClientId,
-      'guarantor': guarantor?.toJson(),
       'investorId': investorId,
       'poolId': poolId,
       'creditDate': creditDate.toIso8601String(),
@@ -91,6 +89,13 @@ class CreateCreditRequest {
       'debtComment': debtComment,
       'products': products.map((p) => p.toJson()).toList(),
     };
+    if (guarantorClientId != null) {
+      map['guarantorClientId'] = guarantorClientId;
+    }
+    if (guarantor != null && guarantorClientId == null) {
+      map['guarantor'] = guarantor!.toJson();
+    }
+    return map;
   }
 }
 

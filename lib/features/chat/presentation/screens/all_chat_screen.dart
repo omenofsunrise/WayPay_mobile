@@ -47,52 +47,63 @@ class _AllChatScreenState extends State<AllChatScreen> {
     return BlocProvider(
       create: (_) => getIt<ChatListBloc>()..add(const ChatListStarted()),
       child: Scaffold(
-        appBar: AppBar(
-          surfaceTintColor: Colors.transparent,
-          backgroundColor: const Color(AppColors.background),
-          elevation: 0,
-          iconTheme: const IconThemeData(color: Colors.white),
-          centerTitle: false,
-          titleSpacing: 16,
-          title: BlocBuilder<ChatListBloc, ChatListState>(
-            builder: (context, state) {
-              final badge = state.totalUnread;
-              return Row(
-                children: [
-                  Text(
-                    'Чаты',
-                    style: AppStyle.semiBold23.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: const Color(AppColors.black),
-                    ),
-                  ),
-                  if (badge > 0)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: DecoratedBox(
-                          decoration: const BoxDecoration(
-                            color: Color(AppColors.background),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              '$badge',
-                              style: AppStyle.manrope(
-                                size: 14,
-                                weight: FontWeight.w700,
-                                color: Color(AppColors.primary),
-                              ),
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(56),
+          child: SafeArea(
+            bottom: false,
+            child: Container(
+              color: const Color(AppColors.background),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: BlocBuilder<ChatListBloc, ChatListState>(
+                  builder: (context, state) {
+                    final badge = state.totalUnread;
+                    return Header(
+                      title: 'Чаты',
+                      showBackButton: Navigator.canPop(context),
+                      showNotifications: false,
+                      showAvatar: false,
+                      titleWidget: Row(
+                        children: [
+                          Text(
+                            'Чаты',
+                            style: AppStyle.semiBold23.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: const Color(AppColors.black),
                             ),
                           ),
-                        ),
+                          if (badge > 0)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                              child: SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: DecoratedBox(
+                                  decoration: const BoxDecoration(
+                                    color: Color(AppColors.background),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '$badge',
+                                      style: AppStyle.manrope(
+                                        size: 14,
+                                        weight: FontWeight.w700,
+                                        color: Color(AppColors.primary),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                    ),
-                ],
-              );
-            },
+                    );
+                  },
+                ),
+              ),
+            ),
           ),
         ),
 

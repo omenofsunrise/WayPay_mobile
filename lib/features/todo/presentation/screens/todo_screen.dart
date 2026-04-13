@@ -5,7 +5,6 @@ import 'package:waypay_mobile/features/todo/data/models/todo_model.dart';
 import 'package:waypay_mobile/features/todo/presentation/bloc/task_bloc.dart';
 import 'package:waypay_mobile/features/todo/presentation/widgets/task_comments_sheet.dart';
 import 'package:waypay_mobile/features/todo/presentation/widgets/task_create_sheet.dart';
-import 'package:waypay_mobile/features/todo/presentation/widgets/todo_add_button.dart';
 import 'package:waypay_mobile/features/todo/presentation/widgets/todo_error_state.dart';
 import 'package:waypay_mobile/features/todo/presentation/widgets/todo_section_card.dart';
 import 'package:waypay_mobile/features/todo/presentation/widgets/todo_utils.dart';
@@ -141,7 +140,7 @@ class _TodoScreenState extends State<TodoScreen> {
                     showAvatar: false,
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: [AddTodoButton(onTap: _openCreateTask)],
+                      children: [AddButton(onPressed: _openCreateTask)],
                     ),
                   ),
                 ),

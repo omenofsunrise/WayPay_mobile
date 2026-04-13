@@ -373,11 +373,18 @@ class AppRouter {
                     name: Routes.scheduleScreen.toName,
                     builder: (context, state) => BlocProvider(
                       create: (_) => ScheduleBloc(),
-                      child: ScheduleScreen(
-                        creditId: state.extra is int
-                            ? state.extra as int
-                            : null,
-                      ),
+                      child: () {
+                        final extra = state.extra;
+                        if (extra is ScheduleScreenArgs) {
+                          return ScheduleScreen(
+                            creditId: extra.creditId,
+                            clientPhone: extra.clientPhone,
+                          );
+                        }
+                        return ScheduleScreen(
+                          creditId: extra is int ? extra : null,
+                        );
+                      }(),
                     ),
                   ),
                   GoRoute(

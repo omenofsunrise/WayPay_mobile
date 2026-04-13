@@ -18,9 +18,11 @@ import 'package:waypay_mobile/features/note/data/data_sources/note_remote_data_s
 import 'package:waypay_mobile/features/note/data/models/note_model.dart';
 import 'package:waypay_mobile/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
 import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
+import 'package:waypay_mobile/features/payment/presentation/screen/schedule_screen.dart';
 import 'package:waypay_mobile/features/sold_products/data/data_sources/sold_product_remote_data_source.dart';
 import 'package:waypay_mobile/features/sold_products/data/models/sold_product_model.dart';
 import 'package:waypay_mobile/routes/routes.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CreditFullScreen extends StatefulWidget {
   final CreditModel credit;
@@ -225,6 +227,8 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildCreditInfoSection(),
+                    const SizedBox(height: 12),
+                    _buildContactButtons(),
                     const SizedBox(height: 24),
                     _buildPaymentsSection(context),
                     const SizedBox(height: 16),
@@ -314,6 +318,81 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  String _normalizePhone(String value) {
+    final digits = value.replaceAll(RegExp(r'\\D'), '');
+    if (digits.length == 11 &&
+        (digits.startsWith('7') || digits.startsWith('8'))) {
+      return digits.substring(1);
+    }
+    if (digits.length > 10) {
+      return digits.substring(digits.length - 10);
+    }
+    return digits;
+  }
+
+  bool _isCallable(String value) => _normalizePhone(value).length >= 10;
+
+  Future<void> _callPhone(BuildContext context, String value) async {
+    final digits = _normalizePhone(value);
+    if (digits.length < 10) return;
+    final uri = Uri.parse('tel:+7$digits');
+    final success = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!success && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Не удалось открыть телефон')),
+      );
+    }
+  }
+
+  Future<void> _openWhatsApp(BuildContext context, String value) async {
+    final digits = _normalizePhone(value);
+    if (digits.length < 10) return;
+    final uri = Uri.parse('https://wa.me/7$digits');
+    final success = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!success && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Не удалось открыть WhatsApp')),
+      );
+    }
+  }
+
+  Widget _buildContactButtons() {
+    final phone = widget.credit.clientPhone;
+    final canCall = _isCallable(phone);
+
+    return Row(
+      children: [
+        Expanded(
+          child: DefaultButton(
+            text: 'Звонок',
+            showIcon: true,
+            icon: Icons.phone,
+            color: const Color(AppColors.primary),
+            textColor: Colors.white,
+            onPressed: canCall ? () => _callPhone(context, phone) : null,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: DefaultButton(
+            text: 'WhatsApp',
+            showIcon: true,
+            icon: Icons.chat,
+            color: const Color(0xFF25D366),
+            textColor: Colors.white,
+            onPressed: canCall ? () => _openWhatsApp(context, phone) : null,
+          ),
+        ),
+      ],
     );
   }
 
@@ -590,7 +669,10 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
             TextButton(
               onPressed: () => context.pushNamed(
                 Routes.scheduleScreen.toName,
-                extra: widget.credit.id,
+                extra: ScheduleScreenArgs(
+                  creditId: widget.credit.id,
+                  clientPhone: widget.credit.clientPhone,
+                ),
               ),
               style: TextButton.styleFrom(
                 padding: EdgeInsets.zero,

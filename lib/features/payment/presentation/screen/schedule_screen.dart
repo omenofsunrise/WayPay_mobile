@@ -22,10 +22,18 @@ import 'package:waypay_mobile/features/payment/presentation/models/schedule_filt
 import 'package:waypay_mobile/features/payment/presentation/widgets/schedule_filters_sheet.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
+class ScheduleScreenArgs {
+  final int creditId;
+  final String? clientPhone;
+
+  const ScheduleScreenArgs({required this.creditId, this.clientPhone});
+}
+
 class ScheduleScreen extends StatefulWidget {
-  const ScheduleScreen({super.key, this.creditId});
+  const ScheduleScreen({super.key, this.creditId, this.clientPhone});
 
   final int? creditId;
+  final String? clientPhone;
 
   @override
   State<ScheduleScreen> createState() => _ScheduleScreenState();
@@ -190,7 +198,10 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   Future<void> _sendWhatsAppMessage(ScheduleModel schedule) async {
     final scheduleId = schedule.id;
     if (_whatsAppLoading.contains(scheduleId)) return;
-    final phone = _preparePhone(schedule.clientPhone);
+    final rawPhone = schedule.clientPhone.trim().isNotEmpty
+        ? schedule.clientPhone
+        : (widget.clientPhone ?? '');
+    final phone = _preparePhone(rawPhone);
     if (phone == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Не указан номер клиента')),

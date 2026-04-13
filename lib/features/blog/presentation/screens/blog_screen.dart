@@ -154,29 +154,27 @@ class _BlogScreenState extends State<BlogScreen> {
 
   Widget _buildSearchOrTitle() {
     if (_isSearching) {
-      return Expanded(
-        child: TextField(
-          controller: _searchController,
-          autofocus: true,
-          style: const TextStyle(color: Colors.black),
-          cursorColor: Colors.black,
-          decoration: const InputDecoration(
-            hintText: 'Поиск...',
-            hintStyle: TextStyle(color: Colors.black87),
-            border: InputBorder.none,
-            isDense: true,
-          ),
-          textInputAction: TextInputAction.search,
-          onChanged: (value) {
-            _searchDebounce?.cancel();
-            _searchDebounce = Timer(const Duration(milliseconds: 500), () {
-              setState(() {
-                _searchQuery = value;
-              });
-              _load();
-            });
-          },
+      return TextField(
+        controller: _searchController,
+        autofocus: true,
+        style: const TextStyle(color: Colors.black),
+        cursorColor: Colors.black,
+        decoration: const InputDecoration(
+          hintText: 'Поиск...',
+          hintStyle: TextStyle(color: Colors.black87),
+          border: InputBorder.none,
+          isDense: true,
         ),
+        textInputAction: TextInputAction.search,
+        onChanged: (value) {
+          _searchDebounce?.cancel();
+          _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+            setState(() {
+              _searchQuery = value;
+            });
+            _load();
+          });
+        },
       );
     }
 
@@ -190,9 +188,8 @@ class _BlogScreenState extends State<BlogScreen> {
       ],
       offset: const Offset(0, 40),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
+          Flexible(
             child: Text(
               _titleForFeed(_selectedFeed),
               style: AppStyle.semiBold23.copyWith(
@@ -222,48 +219,74 @@ class _BlogScreenState extends State<BlogScreen> {
     const lightBg = Color(0xFFF9FAFA);
 
     return Scaffold(
-      appBar: AppBar(
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        backgroundColor: const Color(AppColors.background),
-        iconTheme: const IconThemeData(color: Colors.white),
-        titleSpacing: 16,
-        title: _buildSearchOrTitle(),
-        actions: [
-          if (_isSearching)
-            IconButton(
-              icon: const Icon(Icons.close, color: Color(AppColors.grey)),
-              onPressed: () {
-                setState(() {
-                  _isSearching = false;
-                  _searchQuery = '';
-                  _searchController.clear();
-                });
-                _load();
-              },
-            )
-          else
-            IconButton(
-              icon: const Icon(Icons.search, color: Color(AppColors.grey)),
-              onPressed: () {
-                setState(() {
-                  _isSearching = true;
-                });
-              },
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: SafeArea(
+          bottom: false,
+          child: Container(
+            color: const Color(AppColors.background),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Header(
+                title: 'Вся лента',
+                showBackButton: Navigator.canPop(context),
+                showNotifications: false,
+                showAvatar: false,
+                titleWidget: _buildSearchOrTitle(),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_isSearching)
+                      IconButton(
+                        icon: const Icon(
+                          Icons.close,
+                          color: Color(AppColors.grey),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isSearching = false;
+                            _searchQuery = '';
+                            _searchController.clear();
+                          });
+                          _load();
+                        },
+                      )
+                    else
+                      IconButton(
+                        icon: const Icon(
+                          Icons.search,
+                          color: Color(AppColors.grey),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isSearching = true;
+                          });
+                        },
+                      ),
+                    PopupMenuButton<SortType>(
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      icon: const Icon(
+                        Icons.filter_list,
+                        color: Color(AppColors.grey),
+                      ),
+                      itemBuilder: (context) => [
+                        _buildSortItem(SortType.date, 'По дате публикации'),
+                        _buildSortItem(SortType.likes, 'По количеству лайков'),
+                        _buildSortItem(
+                          SortType.comments,
+                          'По количеству комментариев',
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
-          PopupMenuButton<SortType>(
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            icon: const Icon(Icons.filter_list, color: Color(AppColors.grey)),
-            itemBuilder: (context) => [
-              _buildSortItem(SortType.date, 'По дате публикации'),
-              _buildSortItem(SortType.likes, 'По количеству лайков'),
-              _buildSortItem(SortType.comments, 'По количеству комментариев'),
-            ],
           ),
-        ],
+        ),
       ),
 
       body: Container(

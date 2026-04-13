@@ -8,7 +8,6 @@ import 'package:waypay_mobile/features/profile/presentation/bloc/employees_event
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_state.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/add_employee_screen.dart';
 import 'package:waypay_mobile/routes/routes.dart';
-import 'package:waypay_styles/waypay_styles.dart';
 
 class EmployeesScreen extends StatefulWidget {
   const EmployeesScreen({super.key});
@@ -55,10 +54,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                 title: 'Профиль',
                 showBackButton: true,
                 showNotifications: false,
-                trailing: _ActionButton(
-                  icon: Icons.add,
-                  onTap: _openAddEmployeeScreen,
-                ),
+                trailing: AddButton(onPressed: _openAddEmployeeScreen),
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -234,37 +230,6 @@ class _InfoRow extends StatelessWidget {
         const SizedBox(height: 4),
         Text(value, style: AppStyle.manrope(size: 16, weight: FontWeight.w500)),
       ],
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _ActionButton({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: const Color(AppColors.primary),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x14000809),
-              offset: Offset(2, 2),
-              blurRadius: 4,
-            ),
-            BoxShadow(color: Color(0x05000809), blurRadius: 6),
-          ],
-        ),
-        child: Icon(icon, color: Colors.white),
-      ),
     );
   }
 }

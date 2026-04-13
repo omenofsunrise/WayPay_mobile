@@ -66,7 +66,6 @@ void main() {
     expect(File(SvgIcons.shieldPerson).existsSync(), isTrue);
     expect(File(SvgIcons.sort).existsSync(), isTrue);
     expect(File(SvgIcons.statistics).existsSync(), isTrue);
-    expect(File(SvgIcons.todoCopy).existsSync(), isTrue);
     expect(File(SvgIcons.todo).existsSync(), isTrue);
     expect(File(SvgIcons.users).existsSync(), isTrue);
     expect(File(SvgIcons.vectorLogoBlack).existsSync(), isTrue);
