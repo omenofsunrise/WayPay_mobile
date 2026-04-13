@@ -57,48 +57,11 @@ class _AllChatScreenState extends State<AllChatScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: BlocBuilder<ChatListBloc, ChatListState>(
                   builder: (context, state) {
-                    final badge = state.totalUnread;
                     return Header(
                       title: 'Чаты',
                       showBackButton: Navigator.canPop(context),
                       showNotifications: false,
                       showAvatar: false,
-                      titleWidget: Row(
-                        children: [
-                          Text(
-                            'Чаты',
-                            style: AppStyle.semiBold23.copyWith(
-                              fontWeight: FontWeight.w500,
-                              color: const Color(AppColors.black),
-                            ),
-                          ),
-                          if (badge > 0)
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
-                              child: SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: DecoratedBox(
-                                  decoration: const BoxDecoration(
-                                    color: Color(AppColors.background),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      '$badge',
-                                      style: AppStyle.manrope(
-                                        size: 14,
-                                        weight: FontWeight.w700,
-                                        color: Color(AppColors.primary),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
                     );
                   },
                 ),
