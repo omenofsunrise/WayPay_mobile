@@ -232,6 +232,7 @@ class _BlogScreenState extends State<BlogScreen> {
                 showBackButton: Navigator.canPop(context),
                 showNotifications: false,
                 showAvatar: false,
+                titleWidget: _buildSearchOrTitle(),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

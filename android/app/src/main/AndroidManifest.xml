@@ -9,7 +9,7 @@
     </queries>
 
     <application
-        android:label="WayPay CRM"
+        android:label="waypay_mobile"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
