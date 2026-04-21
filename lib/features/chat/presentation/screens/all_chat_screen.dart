@@ -48,13 +48,13 @@ class _AllChatScreenState extends State<AllChatScreen> {
       create: (_) => getIt<ChatListBloc>()..add(const ChatListStarted()),
       child: Scaffold(
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(56),
+          preferredSize: const Size.fromHeight(72),
           child: SafeArea(
             bottom: false,
             child: Container(
               color: const Color(AppColors.background),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                 child: BlocBuilder<ChatListBloc, ChatListState>(
                   builder: (context, state) {
                     final badge = state.totalUnread;
@@ -74,8 +74,9 @@ class _AllChatScreenState extends State<AllChatScreen> {
                           ),
                           if (badge > 0)
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                               child: SizedBox(
                                 width: 22,
                                 height: 22,

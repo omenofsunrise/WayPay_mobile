@@ -46,20 +46,29 @@ class PaymentItemModel {
   });
 
   factory PaymentItemModel.fromJson(Map<String, dynamic> json) {
+    final rawType = json['type']?.toString().toLowerCase();
     return PaymentItemModel(
-      id: json['id'] ?? 0,
-      creditId: json['creditId'] ?? 0,
+      id: _toInt(json['id']),
+      creditId: _toInt(
+        json['creditId'] ?? json['creditID'] ?? json['credit_id'],
+      ),
       paymentAmount: (json['paymentAmount'] as num?)?.toDouble() ?? 0,
       paymentDate: json['paymentDate'] ?? '',
-      type: json['type'] != null
-          ? paymentTypeFromString(json['type'])
-          : PaymentType.cash,
+      type: rawType == null || rawType.isEmpty
+          ? PaymentType.cash
+          : paymentTypeFromString(rawType),
       accepted: json['accepted'] ?? false,
       clientFullName: json['clientFullName'] ?? '',
       investorNickname: json['investorNickname'],
       employeeFullName: json['employeeFullName'],
       income: (json['income'] as num?)?.toDouble() ?? 0,
     );
+  }
+
+  static int _toInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
   }
 
   Map<String, dynamic> toJson() => {
@@ -104,7 +113,9 @@ class PaymentListResponseModel {
       totalCount: (json['totalCount'] as num?)?.toInt() ?? 0,
       totalPages: (json['totalPages'] as num?)?.toInt() ?? 0,
       items: (json['items'] as List? ?? [])
-          .map((item) => PaymentItemModel.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) => PaymentItemModel.fromJson(item as Map<String, dynamic>),
+          )
           .toList(),
     );
   }

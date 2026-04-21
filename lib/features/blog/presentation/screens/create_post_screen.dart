@@ -100,30 +100,26 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // зелёная шапка как на остальных экранах
       backgroundColor: const Color(AppColors.primary),
-      appBar: AppBar(
-        backgroundColor: const Color(AppColors.primary),
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        centerTitle: false,
-        iconTheme: const IconThemeData(color: Colors.white),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Создание поста',
-          style: AppStyle.medium20.copyWith(
-            color: const Color(AppColors.background),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: SafeArea(
+          bottom: false,
+          child: Container(
+            color: const Color(AppColors.primary),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: const Header(
+              title: 'Создание поста',
+              showBackButton: true,
+              showNotifications: false,
+              showAvatar: false,
+            ),
           ),
         ),
       ),
-
-      // бело/светлый контент со скруглением и без зелёной полосы снизу
       body: Container(
         decoration: const BoxDecoration(
-          color: Color(AppColors.background), // rgba(249,250,250,1)
+          color: Color(AppColors.background),
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: LayoutBuilder(
@@ -135,7 +131,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Кнопка загрузки
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton(
@@ -163,7 +158,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Превью изображений
                     if (_images.isNotEmpty)
                       SizedBox(
                         height: 180,
@@ -208,7 +202,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                         ),
                       ),
 
-                    // Файлы
                     if (_files.isNotEmpty) ...[
                       const SizedBox(height: 16),
                       Column(

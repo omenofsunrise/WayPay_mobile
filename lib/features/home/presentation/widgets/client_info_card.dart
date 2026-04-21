@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:waypay_mobile/core/utils/phone_utils.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -110,44 +111,27 @@ class ClientInfoCard extends StatelessWidget {
     );
   }
 
-  String _normalizePhone(String value) {
-    final digits = value.replaceAll(RegExp(r'\\D'), '');
-    if (digits.length == 11 &&
-        (digits.startsWith('7') || digits.startsWith('8'))) {
-      return digits.substring(1);
-    }
-    if (digits.length > 10) {
-      return digits.substring(digits.length - 10);
-    }
-    return digits;
-  }
-
   Future<void> _callPhone(String value) async {
-    final digits = _normalizePhone(value);
-    if (digits.length < 10) return;
-    final uri = Uri.parse('tel:+7$digits');
+    final phone = formatRussianPhoneForCall(value);
+    if (phone == null) return;
+    final uri = Uri(scheme: 'tel', path: phone);
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   Future<void> _openWhatsApp(String value) async {
-    final digits = _normalizePhone(value);
-    if (digits.length < 10) return;
-    final uri = Uri.parse('https://wa.me/7$digits');
+    final phone = formatRussianPhoneForWhatsApp(value);
+    if (phone == null) return;
+    final uri = Uri.parse('https://wa.me/$phone');
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   bool _isCallable(String value) {
-    final digits = _normalizePhone(value);
-    return digits.length >= 10;
+    return normalizeRussianPhone(value) != null;
   }
 }
 
 class _LabeledValue extends StatelessWidget {
-  const _LabeledValue({
-    required this.label,
-    required this.value,
-    this.onTap,
-  });
+  const _LabeledValue({required this.label, required this.value, this.onTap});
 
   final String label;
   final String value;

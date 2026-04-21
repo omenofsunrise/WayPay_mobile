@@ -52,13 +52,20 @@ class _BlacklistScreenState extends State<BlacklistScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(AppColors.primary),
-      appBar: AppBar(
-        backgroundColor: const Color(AppColors.primary),
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: const Text(
-          'Чёрный список',
-          style: TextStyle(color: Colors.white),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: SafeArea(
+          bottom: false,
+          child: Container(
+            color: const Color(AppColors.primary),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: const Header(
+              title: 'Чёрный список',
+              showBackButton: true,
+              showNotifications: false,
+              showAvatar: false,
+            ),
+          ),
         ),
       ),
       body: Column(

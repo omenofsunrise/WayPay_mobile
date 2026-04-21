@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:waypay_mobile/core/utils/phone_utils.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
@@ -42,6 +43,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
   List<NoteModel> _notes = [];
   List<SoldProductModel> _soldProducts = [];
   List<ScheduleModel> _paymentPreview = [];
+  final Set<int> _whatsAppLoading = <int>{};
   bool _isLoadingNotes = true;
   bool _isLoadingProducts = true;
   bool _isLoadingPayments = true;
@@ -321,28 +323,13 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
     );
   }
 
-  String _normalizePhone(String value) {
-    final digits = value.replaceAll(RegExp(r'\\D'), '');
-    if (digits.length == 11 &&
-        (digits.startsWith('7') || digits.startsWith('8'))) {
-      return digits.substring(1);
-    }
-    if (digits.length > 10) {
-      return digits.substring(digits.length - 10);
-    }
-    return digits;
-  }
-
-  bool _isCallable(String value) => _normalizePhone(value).length >= 10;
+  bool _isCallable(String value) => normalizeRussianPhone(value) != null;
 
   Future<void> _callPhone(BuildContext context, String value) async {
-    final digits = _normalizePhone(value);
-    if (digits.length < 10) return;
-    final uri = Uri.parse('tel:+7$digits');
-    final success = await launchUrl(
-      uri,
-      mode: LaunchMode.externalApplication,
-    );
+    final phone = formatRussianPhoneForCall(value);
+    if (phone == null) return;
+    final uri = Uri(scheme: 'tel', path: phone);
+    final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Не удалось открыть телефон')),
@@ -351,13 +338,10 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
   }
 
   Future<void> _openWhatsApp(BuildContext context, String value) async {
-    final digits = _normalizePhone(value);
-    if (digits.length < 10) return;
-    final uri = Uri.parse('https://wa.me/7$digits');
-    final success = await launchUrl(
-      uri,
-      mode: LaunchMode.externalApplication,
-    );
+    final phone = formatRussianPhoneForWhatsApp(value);
+    if (phone == null) return;
+    final uri = Uri.parse('https://wa.me/$phone');
+    final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Не удалось открыть WhatsApp')),
@@ -588,6 +572,44 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
     }
   }
 
+  Future<void> _sendWhatsAppMessage(ScheduleModel schedule) async {
+    final scheduleId = schedule.id;
+    if (_whatsAppLoading.contains(scheduleId)) return;
+
+    final phone = formatRussianPhoneForWhatsApp(widget.credit.clientPhone);
+    if (phone == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Не указан номер клиента')));
+      return;
+    }
+
+    setState(() => _whatsAppLoading.add(scheduleId));
+    try {
+      final remote = getIt<ScheduleRemoteDataSources>();
+      final message = await remote.getFilledSender(scheduleId);
+      final uri = Uri.parse(
+        'https://wa.me/$phone?text=${Uri.encodeComponent(message)}',
+      );
+      final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!opened) {
+        throw Exception('Не удалось открыть WhatsApp');
+      }
+      if (!schedule.notified) {
+        await remote.putSchedule(scheduleId);
+        await _loadPaymentPreview();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ошибка: $e')));
+    } finally {
+      if (!mounted) return;
+      setState(() => _whatsAppLoading.remove(scheduleId));
+    }
+  }
+
   String _formatCurrency(num amount) {
     final formatter = NumberFormat.currency(
       locale: 'ru_RU',
@@ -750,6 +772,8 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
   Widget _buildPaymentTile(ScheduleModel payment) {
     final date = DateTime.tryParse(payment.paymentDate);
     final isPaid = payment.payed;
+    final isNotified = payment.notified;
+    final isWhatsAppBusy = _whatsAppLoading.contains(payment.id);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -777,26 +801,59 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
             ],
           ),
         ),
-        Row(
-          children: [
-            Icon(
-              isPaid ? Icons.check : Icons.schedule,
-              color: isPaid ? const Color(0xFF0FA958) : const Color(0xFF6B7280),
-              size: 18,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              isPaid ? 'Оплачен' : 'Запланирован',
-              style: AppStyle.manrope(
-                size: 14,
-                weight: FontWeight.w500,
-                color: isPaid
-                    ? const Color(0xFF0FA958)
-                    : const Color(0xFF6B7280),
+        if (isPaid)
+          Row(
+            children: [
+              const Icon(Icons.check, color: Color(0xFF0FA958), size: 18),
+              const SizedBox(width: 6),
+              Text(
+                'Оплачен',
+                style: AppStyle.manrope(
+                  size: 14,
+                  weight: FontWeight.w500,
+                  color: const Color(0xFF0FA958),
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          )
+        else
+          Row(
+            children: [
+              Text(
+                isNotified ? 'Уведомлён' : 'Не уведомлён',
+                style: AppStyle.manrope(
+                  size: 14,
+                  weight: FontWeight.w500,
+                  color: isNotified
+                      ? const Color(0xFF9CA3AF)
+                      : const Color(0xFF0FA958),
+                ),
+              ),
+              const SizedBox(width: 8),
+              InkWell(
+                onTap: isWhatsAppBusy
+                    ? null
+                    : () => _sendWhatsAppMessage(payment),
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: isWhatsAppBusy
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : isNotified
+                      ? const Icon(
+                          Icons.check,
+                          size: 22,
+                          color: Color(0xFF0FA958),
+                        )
+                      : Image.asset(Images.whatsappLogo, width: 24, height: 24),
+                ),
+              ),
+            ],
+          ),
       ],
     );
   }

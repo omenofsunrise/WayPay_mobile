@@ -160,11 +160,21 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(AppColors.primary),
-      appBar: AppBar(
-        backgroundColor: Color(AppColors.primary),
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: const Text('Управление', style: TextStyle(color: Colors.white)),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: SafeArea(
+          bottom: false,
+          child: Container(
+            color: const Color(AppColors.primary),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: const Header(
+              title: 'Управление',
+              showBackButton: true,
+              showNotifications: false,
+              showAvatar: false,
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [

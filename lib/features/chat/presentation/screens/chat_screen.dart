@@ -1083,99 +1083,112 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Scaffold(
           resizeToAvoidBottomInset: true,
           backgroundColor: const Color(AppColors.lightGreyBackground),
-          appBar: AppBar(
-            surfaceTintColor: Colors.transparent,
-            backgroundColor: Color(AppColors.background),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-                widget.onChatUpdated?.call();
-              },
-            ),
-            iconTheme: const IconThemeData(color: Color(AppColors.uiBorder)),
-            // 🔻 убрали поиск, оставили меню с «Удалить чат»
-            actions: [
-              if (!widget.isGroup)
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert),
-                  onSelected: (value) async {
-                    if (value == 'delete') {
-                      await _confirmAndDeleteChat();
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem<String>(
-                      value: 'delete',
-                      child: Text('Удалить чат'),
-                    ),
-                  ],
-                ),
-            ],
-            title: BlocBuilder<ChatBloc, ChatState>(
-              builder: (context, state) {
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ChatInfoScreen(
-                          isGroup: widget.isGroup,
-                          chanName: widget.chatName!,
-                          avatarPath: widget.chatAvatarPath,
-                          id: widget.chatId,
-                          membersCount: _membersTitle(state.members.length),
-                          empId: (state.members.length > 1)
-                              ? (_currentEmployee!.id != state.members[1].id
-                                    ? state.members[1].id
-                                    : state.members[0].id)
-                              : (_currentEmployee?.id),
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(72),
+            child: SafeArea(
+              bottom: false,
+              child: Container(
+                color: const Color(AppColors.background),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                child: BlocBuilder<ChatBloc, ChatState>(
+                  builder: (context, state) {
+                    return Header(
+                      showBackButton: true,
+                      showNotifications: false,
+                      showAvatar: false,
+                      onBackPressed: () {
+                        Navigator.of(context).pop(true);
+                        widget.onChatUpdated?.call();
+                      },
+                      trailing: !widget.isGroup
+                          ? PopupMenuButton<String>(
+                              icon: const Icon(
+                                Icons.more_vert,
+                                color: Color(AppColors.uiBorder),
+                              ),
+                              onSelected: (value) async {
+                                if (value == 'delete') {
+                                  await _confirmAndDeleteChat();
+                                }
+                              },
+                              itemBuilder: (context) => [
+                                const PopupMenuItem<String>(
+                                  value: 'delete',
+                                  child: Text('Удалить чат'),
+                                ),
+                              ],
+                            )
+                          : null,
+                      titleWidget: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChatInfoScreen(
+                                isGroup: widget.isGroup,
+                                chanName: widget.chatName!,
+                                avatarPath: widget.chatAvatarPath,
+                                id: widget.chatId,
+                                membersCount: _membersTitle(
+                                  state.members.length,
+                                ),
+                                empId: (state.members.length > 1)
+                                    ? (_currentEmployee!.id !=
+                                              state.members[1].id
+                                          ? state.members[1].id
+                                          : state.members[0].id)
+                                    : (_currentEmployee?.id),
+                              ),
+                            ),
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            buildAvatar(
+                              fullName:
+                                  widget.chatName ??
+                                  (widget.isGroup ? 'Групповой чат' : 'Чат'),
+                              radius: 20,
+                              photoPath: widget.chatAvatarPath,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.chatName ??
+                                        (widget.isGroup
+                                            ? 'Групповой чат'
+                                            : 'Чат'),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppStyle.manrope(
+                                      size: 16,
+                                      weight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  if (widget.isGroup)
+                                    Text(
+                                      state.isMembersLoading
+                                          ? 'Загружаем участников…'
+                                          : _membersTitle(state.members.length),
+                                      style: AppStyle.manrope(
+                                        size: 12,
+                                        weight: FontWeight.w400,
+                                        color: const Color(AppColors.uiBorder),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     );
                   },
-                  child: Row(
-                    children: [
-                      buildAvatar(
-                        fullName:
-                            widget.chatName ??
-                            (widget.isGroup ? 'Групповой чат' : 'Чат'),
-                        radius: 20,
-                        photoPath: widget.chatAvatarPath,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.chatName ??
-                                  (widget.isGroup ? 'Групповой чат' : 'Чат'),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppStyle.manrope(
-                                size: 16,
-                                weight: FontWeight.w400,
-                              ),
-                            ),
-                            if (widget.isGroup)
-                              Text(
-                                state.isMembersLoading
-                                    ? 'Загружаем участников…'
-                                    : _membersTitle(state.members.length),
-                                style: AppStyle.manrope(
-                                  size: 12,
-                                  weight: FontWeight.w400,
-                                  color: const Color(AppColors.uiBorder),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                ),
+              ),
             ),
           ),
           body: Stack(

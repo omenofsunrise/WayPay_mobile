@@ -51,11 +51,21 @@ class _ClientsScreenState extends State<ClientsScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: const Color(AppColors.primary),
-      appBar: AppBar(
-        backgroundColor: const Color(AppColors.primary),
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: const Text('Клиенты', style: TextStyle(color: Colors.white)),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: SafeArea(
+          bottom: false,
+          child: Container(
+            color: const Color(AppColors.primary),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: const Header(
+              title: 'Клиенты',
+              showBackButton: true,
+              showNotifications: false,
+              showAvatar: false,
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [

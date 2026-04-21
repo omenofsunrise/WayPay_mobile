@@ -43,15 +43,19 @@ class _InfoScreenState extends State<InfoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(AppColors.primary),
-      appBar: AppBar(
-        surfaceTintColor: Colors.transparent,
-        backgroundColor: const Color(AppColors.primary),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          'О программе',
-          style: AppStyle.medium20.copyWith(
-            color: const Color(AppColors.background),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: SafeArea(
+          bottom: false,
+          child: Container(
+            color: const Color(AppColors.primary),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: const Header(
+              title: 'О программе',
+              showBackButton: true,
+              showNotifications: false,
+              showAvatar: false,
+            ),
           ),
         ),
       ),

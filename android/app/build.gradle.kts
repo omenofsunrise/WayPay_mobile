@@ -14,7 +14,7 @@ plugins {
 }
 
 android {
-    namespace = "com.blacklistmobile.plus"
+    namespace = "com.example.waypay_mobile"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -37,7 +37,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.blacklistmobile.plus"
+        applicationId = "com.example.waypay_mobile"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

@@ -8,10 +8,10 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:waypay_mobile/core/utils/phone_utils.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/passport_photo_type.dart';
@@ -24,7 +24,6 @@ import 'package:waypay_mobile/features/home/presentation/widgets/upload_photo_pl
 import 'package:waypay_mobile/features/note/data/data_sources/note_remote_data_source.dart';
 import 'package:waypay_mobile/features/note/data/models/note_create_request.dart';
 import 'package:waypay_mobile/features/note/data/models/note_model.dart';
-import 'package:waypay_styles/waypay_styles.dart';
 
 class ClientDetailScreen extends StatefulWidget {
   const ClientDetailScreen({super.key, this.client});
@@ -176,29 +175,17 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
     return widget.client?.phone ?? '-';
   }
 
-  String _normalizePhone(String value) {
-    final digits = value.replaceAll(RegExp(r'\\D'), '');
-    if (digits.length == 11 &&
-        (digits.startsWith('7') || digits.startsWith('8'))) {
-      return digits.substring(1);
-    }
-    if (digits.length > 10) {
-      return digits.substring(digits.length - 10);
-    }
-    return digits;
-  }
-
   Future<void> _callPhone(String value) async {
-    final digits = _normalizePhone(value);
-    if (digits.length < 10) return;
-    final uri = Uri.parse('tel:+7$digits');
+    final phone = formatRussianPhoneForCall(value);
+    if (phone == null) return;
+    final uri = Uri(scheme: 'tel', path: phone);
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   Future<void> _openWhatsApp(String value) async {
-    final digits = _normalizePhone(value);
-    if (digits.length < 10) return;
-    final uri = Uri.parse('https://wa.me/7$digits');
+    final phone = formatRussianPhoneForWhatsApp(value);
+    if (phone == null) return;
+    final uri = Uri.parse('https://wa.me/$phone');
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
@@ -432,8 +419,9 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
                       label: 'WhatsApp',
                       value: _whatsApp,
                       valueTextAlign: TextAlign.end,
-                      onTap:
-                          _whatsApp == '-' ? null : () => _openWhatsApp(_whatsApp),
+                      onTap: _whatsApp == '-'
+                          ? null
+                          : () => _openWhatsApp(_whatsApp),
                     ),
                   ],
                 ),

@@ -220,13 +220,13 @@ class _BlogScreenState extends State<BlogScreen> {
 
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
+        preferredSize: const Size.fromHeight(72),
         child: SafeArea(
           bottom: false,
           child: Container(
             color: const Color(AppColors.background),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
               child: Header(
                 title: 'Вся лента',
                 showBackButton: Navigator.canPop(context),

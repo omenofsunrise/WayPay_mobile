@@ -366,32 +366,27 @@ class _CommentsScreenState extends State<CommentsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // зелёная шапка
       backgroundColor: const Color(AppColors.primary),
-      appBar: AppBar(
-        backgroundColor: const Color(AppColors.primary),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context, true);
-          },
-        ),
-        surfaceTintColor: Colors.transparent,
-        centerTitle: false,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          'Комментарии',
-          style: AppStyle.medium20.copyWith(
-            color: const Color(AppColors.background),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: SafeArea(
+          bottom: false,
+          child: Container(
+            color: const Color(AppColors.primary),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Header(
+              title: 'Комментарии',
+              showBackButton: true,
+              showNotifications: false,
+              showAvatar: false,
+              onBackPressed: () => Navigator.pop(context, true),
+            ),
           ),
         ),
       ),
-
-      // контент — светлый фон со скруглением
       body: Container(
         decoration: const BoxDecoration(
-          color: Color(AppColors.background), // #F9FAFA
+          color: Color(AppColors.background),
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(

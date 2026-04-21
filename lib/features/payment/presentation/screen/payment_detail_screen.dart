@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/utils/phone_utils.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
+import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
 import 'package:waypay_mobile/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
@@ -22,8 +24,10 @@ class PaymentDetailScreen extends StatefulWidget {
 
 class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
   final _creditSource = getIt<CreditRemoteDataSource>();
+  final _paymentSource = getIt<PaymentRemoteDataSources>();
   final _scheduleSource = getIt<ScheduleRemoteDataSources>();
   CreditModel? _credit;
+  int? _resolvedCreditId;
   bool _isLoading = true;
   late bool _isNotified;
   bool _notifyLoading = false;
@@ -33,7 +37,8 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
   PaymentItemModel? get _payment => widget.payment;
   String get _clientName =>
       _schedule?.clientName ?? _payment?.clientFullName ?? '';
-  int get _creditId => _schedule?.creditId ?? _payment?.creditId ?? 0;
+  int get _creditId =>
+      _resolvedCreditId ?? _schedule?.creditId ?? _payment?.creditId ?? 0;
   double get _paymentAmount =>
       _schedule?.paymentAmount ?? _payment?.paymentAmount ?? 0;
   String get _paymentDateRaw =>
@@ -54,9 +59,19 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
       _error = null;
     });
     try {
-      final credit = await _creditSource.getCreditById(_creditId);
+      final creditId = await _resolveCreditId();
+      if (creditId == null || creditId <= 0) {
+        if (!mounted) return;
+        setState(() {
+          _error = 'Не удалось определить договор для этого платежа';
+          _isLoading = false;
+        });
+        return;
+      }
+      final credit = await _creditSource.getCreditById(creditId);
       if (!mounted) return;
       setState(() {
+        _resolvedCreditId = creditId;
         _credit = credit;
         _isLoading = false;
       });
@@ -67,6 +82,29 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  Future<int?> _resolveCreditId() async {
+    final scheduleCreditId = _schedule?.creditId;
+    if (scheduleCreditId != null && scheduleCreditId > 0) {
+      return scheduleCreditId;
+    }
+
+    final paymentCreditId = _payment?.creditId;
+    if (paymentCreditId != null && paymentCreditId > 0) {
+      return paymentCreditId;
+    }
+
+    final paymentId = _payment?.id;
+    if (paymentId == null || paymentId <= 0) {
+      return null;
+    }
+
+    final freshPayment = await _paymentSource.getPaymentById(paymentId);
+    if (freshPayment.creditId > 0) {
+      return freshPayment.creditId;
+    }
+    return null;
   }
 
   Future<void> _contactClient() async {
@@ -107,14 +145,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
   }
 
   String? _preparePhone(String raw) {
-    var digits = raw.replaceAll(RegExp(r'\D'), '');
-    if (digits.isEmpty) return null;
-    if (digits.startsWith('8')) {
-      digits = '7${digits.substring(1)}';
-    } else if (!digits.startsWith('7')) {
-      digits = '7$digits';
-    }
-    return digits;
+    return formatRussianPhoneForWhatsApp(raw);
   }
 
   String _formatCurrency(num? value) {

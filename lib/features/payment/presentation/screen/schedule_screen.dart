@@ -7,10 +7,9 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_mobile/core/utils/phone_utils.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
-import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
@@ -203,9 +202,9 @@ class _ScheduleScreenState extends State<ScheduleScreen>
         : (widget.clientPhone ?? '');
     final phone = _preparePhone(rawPhone);
     if (phone == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не указан номер клиента')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Не указан номер клиента')));
       return;
     }
     setState(() => _whatsAppLoading.add(scheduleId));
@@ -214,10 +213,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
       final uri = Uri.parse(
         'https://wa.me/$phone?text=${Uri.encodeComponent(message)}',
       );
-      final opened = await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
+      final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
       if (!opened) {
         throw Exception('Не удалось открыть WhatsApp');
       }
@@ -238,14 +234,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   }
 
   String? _preparePhone(String raw) {
-    var digits = raw.replaceAll(RegExp(r'\D'), '');
-    if (digits.isEmpty) return null;
-    if (digits.startsWith('8')) {
-      digits = '7${digits.substring(1)}';
-    } else if (!digits.startsWith('7')) {
-      digits = '7$digits';
-    }
-    return digits;
+    return formatRussianPhoneForWhatsApp(raw);
   }
 
   @override
@@ -332,19 +321,16 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                                       );
                                     }
                                     final schedule = state.schedules[index];
-                                    if (widget.creditId != null) {
-                                      return _ScheduleListTile(
-                                        schedule: schedule,
-                                        showPaid: _includePayedForCredit,
-                                      );
-                                    }
+                                    final showPaid = widget.creditId != null
+                                        ? _includePayedForCredit
+                                        : false;
                                     return _ScheduleListTile(
                                       schedule: schedule,
-                                      showPaid: false,
-                                      onTap: () =>
-                                          _openPaymentDetail(schedule),
-                                      onWhatsAppTap: () =>
-                                          _sendWhatsAppMessage(schedule),
+                                      showPaid: showPaid,
+                                      onTap: () => _openPaymentDetail(schedule),
+                                      onWhatsAppTap: showPaid
+                                          ? null
+                                          : () => _sendWhatsAppMessage(schedule),
                                       isWhatsAppLoading: _whatsAppLoading
                                           .contains(schedule.id),
                                     );
@@ -594,11 +580,7 @@ class _ScheduleListTile extends StatelessWidget {
               if (showPaid)
                 Row(
                   children: [
-                    const Icon(
-                      Icons.check,
-                      color: Color(0xFF0FA958),
-                      size: 18,
-                    ),
+                    const Icon(Icons.check, color: Color(0xFF0FA958), size: 18),
                     const SizedBox(width: 6),
                     Text(
                       'Оплачен',
@@ -633,7 +615,9 @@ class _ScheduleListTile extends StatelessWidget {
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : isNotified
                             ? const Icon(
