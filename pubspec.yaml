@@ -1,7 +1,7 @@
 name: waypay_mobile
 description: "A new Flutter project."
 publish_to: "none"
-version: 5.0.0+5
+version: 5.0.0+1
 
 environment:
   sdk: ^3.8.1

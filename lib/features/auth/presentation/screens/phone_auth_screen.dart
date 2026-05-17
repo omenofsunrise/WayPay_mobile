@@ -89,9 +89,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
             }
 
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              context.pushReplacementNamed(
-                Routes.pinCodeScreen.toName,
-              );
+              context.pushReplacementNamed(Routes.pinCodeScreen.toName);
             });
           }
 
@@ -200,9 +198,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(
-                                  color: Colors.red,
-                                ),
+                                borderSide: const BorderSide(color: Colors.red),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -213,8 +209,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                               ),
                             ),
                             validator: (value) {
-                              final digits = _phoneFormatter
-                                  .getUnmaskedText();
+                              final digits = _phoneFormatter.getUnmaskedText();
                               if (digits.isEmpty) {
                                 return 'Введите номер телефона';
                               }
@@ -226,9 +221,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                           ),
                           const SizedBox(height: 18),
                           isLoading
-                              ? const Center(
-                                  child: CircularProgressIndicator(),
-                                )
+                              ? const Center(child: CircularProgressIndicator())
                               : DefaultButton(
                                   text: 'Подтвердить',
                                   isPrimary: true,

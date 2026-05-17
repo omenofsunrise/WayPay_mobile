@@ -79,4 +79,22 @@ class ScheduleRemoteDataSourcesImpl implements ScheduleRemoteDataSources {
       throw Exception('Ошибка при получении сообщения: ${e.message}');
     }
   }
+
+  @override
+  Future<String> getFilledPaymentsByCredit(int creditId) async {
+    try {
+      final response = await dio.get(
+        'SenderSettings/filled/payments/$creditId',
+      );
+      final data = response.data;
+      if (data is String) {
+        return data;
+      }
+      throw Exception('Неверный формат ответа');
+    } on DioException catch (e) {
+      throw Exception(
+        'Ошибка при получении истории платежей: ${e.message}',
+      );
+    }
+  }
 }

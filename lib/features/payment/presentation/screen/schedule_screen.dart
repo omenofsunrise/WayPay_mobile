@@ -491,153 +491,243 @@ class _ScheduleListTile extends StatelessWidget {
   final VoidCallback? onWhatsAppTap;
   final bool isWhatsAppLoading;
 
-  String _formatDate(String isoDate) {
+  String get _formattedDate {
     try {
-      final date = DateTime.parse(isoDate);
-      return DateFormat('dd.MM').format(date);
+      final date = DateTime.parse(schedule.paymentDate);
+      return DateFormat('dd.MM.yyyy').format(date);
     } catch (_) {
-      return isoDate;
+      return schedule.paymentDate;
     }
   }
 
-  String _formatCurrency(num amount) {
+  String get _formattedAmount {
     final formatter = NumberFormat.currency(
       locale: 'ru_RU',
       symbol: '₽',
       decimalDigits: 0,
     );
-    return formatter.format(amount);
+    return formatter.format(schedule.paymentAmount);
+  }
+
+  String get _formattedClientName {
+    final raw = schedule.clientName.trim();
+    if (raw.isEmpty) return 'Договор № ${schedule.creditId}';
+    final parts = raw
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .toList();
+    if (parts.isEmpty) return raw;
+    if (parts.length == 1) return parts.first;
+    if (parts.length == 2) {
+      return '${parts.first}\n${parts.last}';
+    }
+    final firstLine = '${parts[0]} ${parts[1]}';
+    final secondLine = parts.sublist(2).join(' ');
+    return '$firstLine\n$secondLine';
   }
 
   @override
   Widget build(BuildContext context) {
-    final dateLabel = _formatDate(schedule.paymentDate);
-    final isNotified = schedule.notified;
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(
             color: Color(0x14000809),
             offset: Offset(2, 2),
             blurRadius: 4,
           ),
-          BoxShadow(color: Color(0x05000809), blurRadius: 6),
+          BoxShadow(
+            color: Color(0x05000809),
+            offset: Offset(0, 0),
+            blurRadius: 6,
+          ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(18),
           onTap: onTap,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFD1D5DB),
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  dateLabel,
-                  style: AppStyle.manrope(
-                    size: 14,
-                    weight: FontWeight.w600,
-                    color: const Color(0xFF4B5563),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Договор № ${schedule.creditId}',
-                      style: AppStyle.manrope(
-                        size: 16,
-                        weight: FontWeight.w500,
-                        color: const Color(AppColors.uiBorder),
+                    Expanded(
+                      child: Text(
+                        _formattedClientName,
+                        maxLines: 2,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          height: 24 / 16,
+                          color: Color(AppColors.black),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _formatCurrency(schedule.paymentAmount),
-                      style: AppStyle.manrope(
-                        size: 16,
-                        weight: FontWeight.w500,
-                        color: const Color(AppColors.black),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '№ ${schedule.creditId}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            height: 24 / 14,
+                            color: Color(AppColors.uiBorder),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildStatusWidget(),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _ScheduleInfoColumn(
+                        label: 'Дата платежа',
+                        value: _formattedDate,
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: _ScheduleInfoColumn(
+                          label: 'Платеж',
+                          value: _formattedAmount,
+                          valueColor: const Color(AppColors.primary),
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              if (showPaid)
-                Row(
-                  children: [
-                    const Icon(Icons.check, color: Color(0xFF0FA958), size: 18),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Оплачен',
-                      style: AppStyle.manrope(
-                        size: 14,
-                        weight: FontWeight.w500,
-                        color: const Color(0xFF0FA958),
-                      ),
-                    ),
-                  ],
-                )
-              else
-                Row(
-                  children: [
-                    Text(
-                      isNotified ? 'Уведомлён' : 'Не уведомлён',
-                      style: AppStyle.manrope(
-                        size: 14,
-                        weight: FontWeight.w500,
-                        color: isNotified
-                            ? const Color(0xFF9CA3AF)
-                            : const Color(0xFF0FA958),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    InkWell(
-                      onTap: isWhatsAppLoading ? null : onWhatsAppTap,
-                      borderRadius: BorderRadius.circular(20),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: isWhatsAppLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : isNotified
-                            ? const Icon(
-                                Icons.check,
-                                size: 22,
-                                color: Color(0xFF0FA958),
-                              )
-                            : Image.asset(
-                                Images.whatsappLogo,
-                                width: 24,
-                                height: 24,
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildStatusWidget() {
+    if (showPaid) {
+      return const _PaidBadge();
+    }
+    final isNotified = schedule.notified;
+    if (isNotified) {
+      return Text(
+        'Уведомлён',
+        style: AppStyle.manrope(
+          size: 14,
+          weight: FontWeight.w500,
+          color: const Color(0xFF9CA3AF),
+        ),
+      );
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'Не уведомлён',
+          style: AppStyle.manrope(
+            size: 14,
+            weight: FontWeight.w500,
+            color: const Color(0xFF0FA958),
+          ),
+        ),
+        const SizedBox(width: 8),
+        InkWell(
+          onTap: isWhatsAppLoading ? null : onWhatsAppTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: isWhatsAppLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Image.asset(
+                    Images.whatsappLogo,
+                    width: 24,
+                    height: 24,
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PaidBadge extends StatelessWidget {
+  const _PaidBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.check, color: Color(0xFF0FA958), size: 18),
+        const SizedBox(width: 6),
+        Text(
+          'Оплачен',
+          style: AppStyle.manrope(
+            size: 14,
+            weight: FontWeight.w500,
+            color: const Color(0xFF0FA958),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ScheduleInfoColumn extends StatelessWidget {
+  const _ScheduleInfoColumn({
+    required this.label,
+    required this.value,
+    this.valueColor = const Color(AppColors.black),
+  });
+
+  final String label;
+  final String value;
+  final Color valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            height: 24 / 14,
+            color: Color(AppColors.uiBorder),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w500,
+            height: 24 / 22,
+            color: valueColor,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -647,101 +737,122 @@ class _HistoryListTile extends StatelessWidget {
 
   final PaymentItemModel payment;
 
-  String _formatDate(String isoDate) {
+  String get _formattedDate {
     try {
-      final date = DateTime.parse(isoDate);
-      return DateFormat('dd.MM').format(date);
+      final date = DateTime.parse(payment.paymentDate);
+      return DateFormat('dd.MM.yyyy').format(date);
     } catch (_) {
-      return isoDate;
+      return payment.paymentDate;
     }
   }
 
-  String _formatCurrency(num amount) {
+  String get _formattedAmount {
     final formatter = NumberFormat.currency(
       locale: 'ru_RU',
       symbol: '₽',
       decimalDigits: 0,
     );
-    return formatter.format(amount);
+    return formatter.format(payment.paymentAmount);
+  }
+
+  String get _formattedClientName {
+    final raw = payment.clientFullName.trim();
+    if (raw.isEmpty) return 'Договор № ${payment.creditId}';
+    final parts = raw
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .toList();
+    if (parts.isEmpty) return raw;
+    if (parts.length == 1) return parts.first;
+    if (parts.length == 2) {
+      return '${parts.first}\n${parts.last}';
+    }
+    final firstLine = '${parts[0]} ${parts[1]}';
+    final secondLine = parts.sublist(2).join(' ');
+    return '$firstLine\n$secondLine';
   }
 
   @override
   Widget build(BuildContext context) {
-    final dateLabel = _formatDate(payment.paymentDate);
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(
             color: Color(0x14000809),
             offset: Offset(2, 2),
             blurRadius: 4,
           ),
-          BoxShadow(color: Color(0x05000809), blurRadius: 6),
+          BoxShadow(
+            color: Color(0x05000809),
+            offset: Offset(0, 0),
+            blurRadius: 6,
+          ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: const BoxDecoration(
-              color: Color(0xFFD1D5DB),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              dateLabel,
-              style: AppStyle.manrope(
-                size: 14,
-                weight: FontWeight.w600,
-                color: const Color(0xFF4B5563),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Договор № ${payment.creditId}',
-                  style: AppStyle.manrope(
-                    size: 16,
-                    weight: FontWeight.w500,
-                    color: const Color(AppColors.uiBorder),
+                Expanded(
+                  child: Text(
+                    _formattedClientName,
+                    maxLines: 2,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      height: 24 / 16,
+                      color: Color(AppColors.black),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  _formatCurrency(payment.paymentAmount),
-                  style: AppStyle.manrope(
-                    size: 16,
-                    weight: FontWeight.w500,
-                    color: const Color(AppColors.black),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '№ ${payment.creditId}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        height: 24 / 14,
+                        color: Color(AppColors.uiBorder),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const _PaidBadge(),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _ScheduleInfoColumn(
+                    label: 'Дата платежа',
+                    value: _formattedDate,
+                  ),
+                ),
+                const SizedBox(width: 24),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: _ScheduleInfoColumn(
+                      label: 'Платеж',
+                      value: _formattedAmount,
+                      valueColor: const Color(AppColors.primary),
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
-          Row(
-            children: [
-              Icon(Icons.check, color: const Color(0xFF0FA958), size: 18),
-              const SizedBox(width: 6),
-              Text(
-                'Оплачен',
-                style: AppStyle.manrope(
-                  size: 14,
-                  weight: FontWeight.w500,
-                  color: const Color(0xFF0FA958),
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

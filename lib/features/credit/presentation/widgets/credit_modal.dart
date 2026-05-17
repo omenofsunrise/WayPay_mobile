@@ -75,10 +75,33 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
             title: 'Договор №${widget.credit.id}',
             showBackButton: true,
             showNotifications: false,
-            trailing: _buildMenuButton(context),
+            trailing: _buildTrailingActions(context),
           ),
         ),
       ),
+    );
+  }
+
+  Widget? _buildTrailingActions(BuildContext context) {
+    final shareButton = _buildShareButton(context);
+    final deleteButton = _buildMenuButton(context);
+    final actions = <Widget>[
+      shareButton,
+      if (deleteButton != null) deleteButton,
+    ];
+    return Row(mainAxisSize: MainAxisSize.min, children: actions);
+  }
+
+  Widget _buildShareButton(BuildContext context) {
+    return IconButton(
+      icon: SvgPicture.asset(
+        SvgIcons.share,
+        package: 'waypay_styles',
+        width: 24,
+        height: 24,
+      ),
+      tooltip: 'Поделиться',
+      onPressed: () => _showShareSheet(context),
     );
   }
 
@@ -347,6 +370,147 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
         const SnackBar(content: Text('Не удалось открыть WhatsApp')),
       );
     }
+  }
+
+  void _showShareSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (sheetCtx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE5E7EB),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Text(
+                  'Поделиться в WhatsApp',
+                  textAlign: TextAlign.center,
+                  style: AppStyle.manrope(
+                    size: 18,
+                    weight: FontWeight.w600,
+                    color: const Color(AppColors.black),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DefaultButton(
+                  text: 'Данные по договору',
+                  showIcon: true,
+                  icon: Icons.description_outlined,
+                  color: const Color(AppColors.primary),
+                  textColor: Colors.white,
+                  onPressed: () {
+                    Navigator.of(sheetCtx).pop();
+                    _shareContractData();
+                  },
+                ),
+                const SizedBox(height: 12),
+                DefaultButton(
+                  text: 'История платежей',
+                  showIcon: true,
+                  icon: Icons.event_note_outlined,
+                  color: const Color(0xFF25D366),
+                  textColor: Colors.white,
+                  onPressed: () {
+                    Navigator.of(sheetCtx).pop();
+                    _sharePaymentsHistory();
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _shareContractData() async {
+    final phone = formatRussianPhoneForWhatsApp(widget.credit.clientPhone);
+    if (phone == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Не указан номер клиента')));
+      return;
+    }
+    final message = _buildContractMessage();
+    await _launchWhatsApp(phone, message);
+  }
+
+  Future<void> _sharePaymentsHistory() async {
+    final phone = formatRussianPhoneForWhatsApp(widget.credit.clientPhone);
+    if (phone == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Не указан номер клиента')));
+      return;
+    }
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    String message;
+    try {
+      final remote = getIt<ScheduleRemoteDataSources>();
+      message = await remote.getFilledPaymentsByCredit(widget.credit.id);
+    } catch (e) {
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка загрузки истории платежей: $e')),
+      );
+      return;
+    }
+    if (mounted) Navigator.of(context, rootNavigator: true).pop();
+
+    await _launchWhatsApp(phone, message);
+  }
+
+  Future<void> _launchWhatsApp(String phone, String message) async {
+    final uri = Uri.parse(
+      'https://wa.me/$phone?text=${Uri.encodeComponent(message)}',
+    );
+    final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Не удалось открыть WhatsApp')),
+      );
+    }
+  }
+
+  String _buildContractMessage() {
+    final credit = widget.credit;
+    final buffer = StringBuffer()
+      ..writeln('Здравствуйте, ${credit.clientFullName}!')
+      ..writeln()
+      ..writeln('Информация по договору №${credit.id}')
+      ..writeln('Дата подписания: ${_formatDate(credit.creditDate)}')
+      ..writeln('Срок рассрочки: ${credit.termMonths} мес.')
+      ..writeln('Общий долг: ${_formatCurrency(credit.totalAmount)}')
+      ..writeln(
+        'Первоначальный взнос: ${_formatCurrency(credit.firstPayment)}',
+      )
+      ..writeln('Начислено %: ${_formatCurrency(credit.accured)}')
+      ..writeln('Уплачено: ${_formatCurrency(credit.payed)}')
+      ..write('Остаток: ${_formatCurrency(credit.rest)}');
+    return buffer.toString();
   }
 
   Widget _buildContactButtons() {
