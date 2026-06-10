@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/sold_products/data/data_sources/sold_product_remote_data_source.dart';
 import 'package:waypay_mobile/features/sold_products/data/models/sold_product_model.dart';
 
@@ -17,7 +18,7 @@ class SoldProductRemoteDataSourceImpl implements SoldProductRemoteDataSource {
       final data = response.data as List;
       return data.map((e) => SoldProductModel.fromJson(e)).toList();
     } else {
-      throw Exception('Ошибка при загрузке проданных товаров');
+      throw const ApiError('Не удалось загрузить проданные товары.');
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/todo/data/data_soucres/task_note_remote_data_source.dart';
 import 'package:waypay_mobile/features/todo/data/models/task_note_model.dart';
 
@@ -19,7 +20,7 @@ class TaskNoteRemoteDataSourceImpl implements TaskNoteRemoteDataSource {
       }
       return [];
     } catch (e) {
-      throw Exception('Ошибка загрузки комментариев: $e');
+      throw mapApiError(e, fallback: 'Не удалось загрузить комментарии.');
     }
   }
 
@@ -29,7 +30,7 @@ class TaskNoteRemoteDataSourceImpl implements TaskNoteRemoteDataSource {
       final response = await dio.get('TaskNote/$id');
       return TaskNote.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
-      throw Exception('Ошибка загрузки комментария: $e');
+      throw mapApiError(e, fallback: 'Не удалось загрузить комментарий.');
     }
   }
 
@@ -46,7 +47,7 @@ class TaskNoteRemoteDataSourceImpl implements TaskNoteRemoteDataSource {
       );
       return TaskNote.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
-      throw Exception('Ошибка создания комментария: $e');
+      throw mapApiError(e, fallback: 'Не удалось создать комментарий.');
     }
   }
 
@@ -63,7 +64,7 @@ class TaskNoteRemoteDataSourceImpl implements TaskNoteRemoteDataSource {
       }
       return await getTaskNote(id);
     } catch (e) {
-      throw Exception('Ошибка обновления комментария: $e');
+      throw mapApiError(e, fallback: 'Не удалось обновить комментарий.');
     }
   }
 
@@ -72,7 +73,7 @@ class TaskNoteRemoteDataSourceImpl implements TaskNoteRemoteDataSource {
     try {
       await dio.delete('TaskNote/$id');
     } catch (e) {
-      throw Exception('Ошибка удаления комментария: $e');
+      throw mapApiError(e, fallback: 'Не удалось удалить комментарий.');
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_request.dart';
@@ -45,17 +46,10 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
 
       return InvestorsResponseModel.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw Exception('Ошибка авторизации: ${e.response?.data}');
-      } else if (e.response?.statusCode == 404) {
-        throw Exception('API не найден: /api/Investor');
-      } else if (e.response?.statusCode == 500) {
-        throw Exception('Ошибка сервера: ${e.response?.data}');
-      } else {
-        throw Exception('Ошибка сети: ${e.message}');
-      }
+      throw mapApiError(e, fallback: 'Не удалось загрузить инвесторов.');
     } catch (e) {
-      throw Exception('Неизвестная ошибка: $e');
+      if (e is ApiError) rethrow;
+      throw mapApiError(e, fallback: 'Не удалось загрузить инвесторов.');
     }
   }
 
@@ -97,7 +91,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
     } on DioException catch (e) {
       // ignore: avoid_print
       print('❌ Ошибка списка пулов: ${e.response?.data ?? e.message}');
-      throw Exception('Ошибка загрузки пула инвесторов: ${e.response?.data ?? e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить пулы инвесторов.');
     }
   }
 
@@ -111,7 +105,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       return InvestorsModel.fromJson(response.data);
     } on DioException catch (e) {
       print('❌ Ошибка при загрузке инвестора по ID: ${e.response?.data}');
-      throw Exception('Не удалось загрузить данные инвестора');
+      throw mapApiError(e, fallback: 'Не удалось загрузить инвестора.');
     }
   }
 
@@ -137,7 +131,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       print('✅ Инвестор создан: ${response.statusCode}');
     } on DioException catch (e) {
       print('❌ Ошибка создания инвестора: ${e.response?.data}');
-      throw Exception('Не удалось создать инвестора');
+      throw mapApiError(e, fallback: 'Не удалось создать инвестора.');
     }
   }
 
@@ -148,7 +142,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       print('✅ Инвестор удалён: ${response.statusCode}');
     } on DioException catch (e) {
       print('❌ Ошибка удаления инвестора: ${e.response?.data}');
-      throw Exception('Не удалось удалить инвестора');
+      throw mapApiError(e, fallback: 'Не удалось удалить инвестора.');
     }
   }
 
@@ -173,7 +167,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       print('✅ Инвестор обновлён: ${response.statusCode}');
     } on DioException catch (e) {
       print('❌ Ошибка обновления инвестора: ${e.response?.data}');
-      throw Exception('Не удалось обновить инвестора');
+      throw mapApiError(e, fallback: 'Не удалось обновить инвестора.');
     }
   }
 
@@ -197,7 +191,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       print('✅ Инвестиция добавлена: ${response.statusCode}');
     } on DioException catch (e) {
       print('❌ Ошибка добавления инвестиций: ${e.response?.data}');
-      throw Exception('Не удалось добавить инвестицию');
+      throw mapApiError(e, fallback: 'Не удалось добавить инвестицию.');
     }
   }
 
@@ -208,7 +202,10 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       print('✅ Статус блокировки изменён: ${response.statusCode}');
     } on DioException catch (e) {
       print('❌ Ошибка смены блокировки: ${e.response?.data}');
-      throw Exception('Не удалось сменить статус блокировки инвестора');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось изменить статус блокировки.',
+      );
     }
   }
 
@@ -217,9 +214,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
     try {
       await dio.patch('Investor/clear/$id');
     } on DioException catch (e) {
-      throw Exception(
-        'Не удалось аннулировать инвестора.\n${e.response?.data}',
-      );
+      throw mapApiError(e, fallback: 'Не удалось аннулировать инвестора.');
     }
   }
 
@@ -230,7 +225,10 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
 
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
-      throw Exception('Ошибка получения отчета инвестора: ${e.message}');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить отчёт инвестора.',
+      );
     }
   }
 
@@ -249,7 +247,10 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
     } on DioException catch (e) {
       // ignore: avoid_print
       print('❌ Ошибка отчета пула $id: ${e.response?.data ?? e.message}');
-      throw Exception('Ошибка получения отчета пула инвесторов: ${e.message}');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить отчёт пула инвесторов.',
+      );
     }
   }
 
@@ -269,7 +270,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
 
       return InvestorPayoutResponse.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception('Ошибка выплаты: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось создать выплату.');
     }
   }
 
@@ -287,10 +288,13 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
             .map((e) => InvestorPayoutModel.fromJson(e))
             .toList();
       } else {
-        throw Exception('Неожиданный формат ответа API');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка получения выплат инвестора: ${e.message}');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить выплаты инвестора.',
+      );
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/blog/data/data_sources/profile_blog_remote_data_sources.dart';
 import 'package:waypay_mobile/features/blog/data/models/profile_blog_model.dart';
 
@@ -16,10 +17,10 @@ class ProfileBlogRemoteDataSourcesImpl implements ProfileBlogRemoteDataSources {
       if (response.data is Map<String, dynamic>) {
         return ProfileBlogModel.fromJson(response.data);
       } else {
-        throw Exception('Непредвиденный формат данных');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка получения профиля: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить профиль.');
     }
   }
 
@@ -36,7 +37,7 @@ class ProfileBlogRemoteDataSourcesImpl implements ProfileBlogRemoteDataSources {
         ),
       );
     } on DioException catch (e) {
-      throw Exception('Ошибка обновления профиля: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось обновить профиль.');
     }
   }
 }

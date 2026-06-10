@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/todo/data/data_soucres/task_remote_data_source.dart';
 import 'package:waypay_mobile/features/todo/data/models/get_active_task_query.dart';
 import 'package:waypay_mobile/features/todo/data/models/task_request.dart';
@@ -19,10 +20,10 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception('Ошибка при создании задачи: ${response.statusCode}');
+        throw const ApiError('Не удалось создать задачу.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка при создании задачи: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось создать задачу.');
     }
   }
 
@@ -39,10 +40,11 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
             .map((json) => TodoTask.fromJson(json))
             .toList();
       } else {
-        throw Exception('Ошибка получения задач: ${response.statusCode}');
+        throw const ApiError('Не удалось загрузить задачи.');
       }
     } catch (e) {
-      throw Exception('Ошибка получения задач: $e');
+      if (e is ApiError) rethrow;
+      throw mapApiError(e, fallback: 'Не удалось загрузить задачи.');
     }
   }
 
@@ -71,10 +73,11 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
     try {
       final response = await dio.delete('Task/$id');
       if (response.statusCode != 200 && response.statusCode != 204) {
-        throw Exception('Ошибка при удалении задачи: ${response.statusCode}');
+        throw const ApiError('Не удалось удалить задачу.');
       }
     } catch (e) {
-      throw Exception('Ошибка при удалении задачи $id: $e');
+      if (e is ApiError) rethrow;
+      throw mapApiError(e, fallback: 'Не удалось удалить задачу.');
     }
   }
 
@@ -82,12 +85,11 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
     try {
       final response = await dio.patch('Task/$id/$status');
       if (response.statusCode != 200) {
-        throw Exception('Ошибка PATCH запроса: ${response.statusCode}');
+        throw const ApiError('Не удалось обновить статус задачи.');
       }
     } catch (e) {
-      throw Exception(
-        'Ошибка при обновлении статуса "$status" у задачи $id: $e',
-      );
+      if (e is ApiError) rethrow;
+      throw mapApiError(e, fallback: 'Не удалось обновить статус задачи.');
     }
   }
 
@@ -101,10 +103,10 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Ошибка при обновлении задачи: ${response.statusCode}');
+        throw const ApiError('Не удалось обновить задачу.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка при обновлении задачи: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось обновить задачу.');
     }
   }
 
@@ -123,12 +125,16 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
           if (parsed != null) return parsed;
         }
 
-        throw Exception('Некорректный тип данных: ${data.runtimeType}');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       } else {
-        throw Exception('Ошибка запроса: ${response.statusCode}');
+        throw const ApiError('Не удалось загрузить количество задач.');
       }
     } catch (e) {
-      throw Exception('Ошибка при получении количества активных задач: $e');
+      if (e is ApiError) rethrow;
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить количество активных задач.',
+      );
     }
   }
 }

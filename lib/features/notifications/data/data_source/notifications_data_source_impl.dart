@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/notifications/data/data_source/notifications_data_source.dart';
 import 'package:waypay_mobile/features/notifications/data/models/notification_page.dart';
 
@@ -31,12 +32,9 @@ class NotificationsDataSourceImpl implements NotificationsDataSource {
         );
         return pageData;
       }
-      throw const FormatException('Некорректный формат ответа');
+      throw const ApiError('Сервер вернул некорректный ответ.');
     } on DioException catch (e) {
-      final details = e.response?.data;
-      throw Exception(
-        'Не удалось получить уведомления: ${e.message} | $details',
-      );
+      throw mapApiError(e, fallback: 'Не удалось загрузить уведомления.');
     }
   }
 
@@ -47,9 +45,9 @@ class NotificationsDataSourceImpl implements NotificationsDataSource {
       // ignore: avoid_print
       print('📨 Notification $id помечено как прочитанное');
     } on DioException catch (e) {
-      final details = e.response?.data;
-      throw Exception(
-        'Не удалось обновить статус уведомления: ${e.message} | $details',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось обновить статус уведомления.',
       );
     }
   }

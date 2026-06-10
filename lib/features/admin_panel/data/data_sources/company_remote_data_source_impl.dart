@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/admin_panel/data/data_sources/company_remote_data_source.dart';
 import 'package:waypay_mobile/features/admin_panel/data/models/company_model.dart';
 import 'package:waypay_mobile/features/admin_panel/data/models/post_company_model.dart';
@@ -19,7 +20,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
 
       return data.map((json) => CompanyModel.fromJson(json)).toList();
     } on DioException catch (e) {
-      throw Exception('Ошибка при загрузке компаний: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить компании.');
     }
   }
 
@@ -30,7 +31,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
       final data = response.data as Map<String, dynamic>;
       return CompanyModel.fromJson(data);
     } on DioException catch (e) {
-      throw Exception('Ошибка при загрузке компании: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить компанию.');
     }
   }
 
@@ -39,7 +40,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
     try {
       await dio.post('Company', data: request.toJson());
     } on DioException catch (e) {
-      throw Exception('Ошибка при создании компании: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось создать компанию.');
     }
   }
 
@@ -52,7 +53,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
         options: Options(contentType: Headers.jsonContentType),
       );
     } on DioException catch (e) {
-      throw Exception('Ошибка при обновлении даты лицензии: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось обновить дату лицензии.');
     }
   }
 
@@ -65,7 +66,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
         options: Options(contentType: Headers.jsonContentType),
       );
     } on DioException catch (e) {
-      throw Exception('Ошибка при обновлении телефона: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось обновить телефон.');
     }
   }
 
@@ -75,10 +76,10 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
       final response = await dio.delete('Company/$id');
 
       if (response.statusCode != 200 && response.statusCode != 204) {
-        throw Exception('Ошибка при удалении компании');
+        throw const ApiError('Не удалось удалить компанию.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка при удалении компании: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось удалить компанию.');
     }
   }
 
@@ -99,7 +100,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
 
       await dio.patch('Company/photo', data: formData);
     } on DioException catch (e) {
-      throw Exception('Ошибка при загрузке логотипа: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить логотип.');
     }
   }
 
@@ -109,7 +110,7 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
       final data = company.toUpdateJson();
       await dio.put('Company', data: data);
     } on DioException catch (e) {
-      throw Exception('Ошибка при обновлении данных компании: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось обновить данные компании.');
     }
   }
 
@@ -124,8 +125,9 @@ class CompanyRemoteDataSourceImpl implements CompanyRemoteDataSource {
 
       return CompanyCommonInfo.fromJson(data);
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка при загрузке общей информации компании: ${e.message}',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить общую информацию компании.',
       );
     }
   }

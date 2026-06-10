@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/blog/data/models/blog_post_response.dart';
 import 'package:waypay_mobile/features/blog/data/models/blog_post_response_paged_result.dart';
 import 'package:waypay_mobile/features/blog/data/data_sources/blog_remote_data_sources.dart';
@@ -36,12 +37,10 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
       if (data is Map<String, dynamic>) {
         return BlogPostResponsePagedResult.fromJson(data);
       } else {
-        throw Exception(
-          'Неожиданный формат данных: ожидается объект с пагинацией',
-        );
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка получения списка постов: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить список постов.');
     }
   }
 
@@ -74,7 +73,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
         options: Options(contentType: 'multipart/form-data'),
       );
     } on DioException catch (e) {
-      throw Exception('Ошибка при создании поста: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось создать пост.');
     }
   }
 
@@ -83,7 +82,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
     try {
       await dio.put('Blog/$id/publish');
     } on DioException catch (e) {
-      throw Exception('Ошибка публикации поста: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось опубликовать пост.');
     }
   }
 
@@ -92,9 +91,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
     try {
       await dio.delete('Blog/$postId/attachments/$attachmentId');
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка при удалении вложения (postId=$postId, attachmentId=$attachmentId): ${e.message}',
-      );
+      throw mapApiError(e, fallback: 'Не удалось удалить вложение.');
     }
   }
 
@@ -103,9 +100,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
     try {
       await dio.delete('Blog/$postId');
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка при удалении поста (postId=$postId): ${e.message}',
-      );
+      throw mapApiError(e, fallback: 'Не удалось удалить пост.');
     }
   }
 
@@ -114,9 +109,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
     try {
       await dio.post('Blog/$postId/like');
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка при добавлении лайка (postId=$postId): ${e.message}',
-      );
+      throw mapApiError(e, fallback: 'Не удалось поставить лайк.');
     }
   }
 
@@ -130,9 +123,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
 
       return response;
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка при скачивании вложения (attachmentId=$attachmentId): ${e.message}',
-      );
+      throw mapApiError(e, fallback: 'Не удалось скачать вложение.');
     }
   }
 
@@ -164,10 +155,10 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
       if (data is Map<String, dynamic>) {
         return CommentResponse.fromJson(data);
       } else {
-        throw Exception('Неверный формат ответа при создании комментария');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка создания комментария: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось создать комментарий.');
     }
   }
 
@@ -180,14 +171,10 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
       if (data is List) {
         return data.map((e) => CommentResponse.fromJson(e)).toList();
       } else {
-        throw Exception(
-          'Неверный формат ответа: ожидается список комментариев',
-        );
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка при получении комментариев для поста $postId: ${e.message}',
-      );
+      throw mapApiError(e, fallback: 'Не удалось загрузить комментарии.');
     }
   }
 
@@ -196,9 +183,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
     try {
       await dio.post('BlogComment/$commentId/like');
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка при добавлении лайка комментарию (id=$commentId): ${e.message}',
-      );
+      throw mapApiError(e, fallback: 'Не удалось поставить лайк комментарию.');
     }
   }
 
@@ -214,9 +199,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
         options: Options(contentType: Headers.jsonContentType),
       );
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка при обновлении текста комментария (id=$commentId): ${e.message}',
-      );
+      throw mapApiError(e, fallback: 'Не удалось обновить комментарий.');
     }
   }
 
@@ -225,9 +208,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
     try {
       await dio.delete('BlogComment/$commentId');
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка при удалении комментария (id=$commentId): ${e.message}',
-      );
+      throw mapApiError(e, fallback: 'Не удалось удалить комментарий.');
     }
   }
 
@@ -239,9 +220,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
     try {
       await dio.delete('BlogComment/$commentId/attachments/$attachmentId');
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка при удалении вложения (commentId=$commentId, attachmentId=$attachmentId): ${e.message}',
-      );
+      throw mapApiError(e, fallback: 'Не удалось удалить вложение.');
     }
   }
 
@@ -261,7 +240,7 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
     if (data is Map<String, dynamic>) {
       return CommentResponse.fromJson(data);
     } else {
-      throw Exception('Неверный ответ при добавлении вложения');
+      throw const ApiError('Сервер вернул некорректный ответ.');
     }
   }
 
@@ -274,10 +253,10 @@ class BlogRemoteDataSourcesImpl implements BlogRemoteDataSources {
       if (data is Map<String, dynamic>) {
         return BlogPostResponse.fromJson(data);
       } else {
-        throw Exception('Неверный формат ответа при получении поста $id');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка при получении поста (id=$id): ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить пост.');
     }
   }
 }

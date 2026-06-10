@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/home/data/data_source/credit_application_remote_data_source.dart';
 import 'package:waypay_mobile/features/home/data/models/credit_applications/credit_application_model.dart';
 import 'package:waypay_mobile/features/home/data/models/credit_applications/credit_application_paged_result.dart';
@@ -27,13 +28,9 @@ class CreditApplicationRemoteDataSourceImpl
         return CreditApplicationPagedResult.fromJson(data);
       }
 
-      throw Exception('Неожиданный формат ответа при загрузке заявок');
+      throw const ApiError('Сервер вернул некорректный ответ.');
     } on DioException catch (e) {
-      final message = e.response?.data is Map<String, dynamic>
-          ? (e.response?.data['message']?.toString() ??
-              e.response?.data['error']?.toString())
-          : e.message;
-      throw Exception('Ошибка при загрузке заявок: $message');
+      throw mapApiError(e, fallback: 'Не удалось загрузить заявки.');
     }
   }
 
@@ -53,13 +50,9 @@ class CreditApplicationRemoteDataSourceImpl
         return CreditApplicationModel.fromJson(data);
       }
 
-      throw Exception('Неожиданный формат ответа при создании заявки');
+      throw const ApiError('Сервер вернул некорректный ответ.');
     } on DioException catch (e) {
-      final message = e.response?.data is Map<String, dynamic>
-          ? (e.response?.data['message']?.toString() ??
-              e.response?.data['error']?.toString())
-          : e.message;
-      throw Exception('Ошибка при создании заявки: $message');
+      throw mapApiError(e, fallback: 'Не удалось создать заявку.');
     }
   }
 }

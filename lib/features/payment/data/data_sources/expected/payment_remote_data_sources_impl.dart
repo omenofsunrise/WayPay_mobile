@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/get_payment_query.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
@@ -20,13 +21,10 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
       if (data is Map<String, dynamic>) {
         return PaymentListResponseModel.fromJson(data);
       } else {
-        throw Exception('Не тот формат');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      final message = _extractServerMessage(e);
-      throw Exception(
-        message ?? 'Ошибка получения журнала платежей: ${e.message}',
-      );
+      throw mapApiError(e, fallback: 'Не удалось загрузить журнал платежей.');
     }
   }
 
@@ -48,12 +46,12 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
       if (data is Map<String, dynamic>) {
         return PaymentListResponseModel.fromJson(data);
       } else {
-        throw Exception('Не тот формат');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      final message = _extractServerMessage(e);
-      throw Exception(
-        message ?? 'Ошибка получения платежей по договору: ${e.message}',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить платежи по договору.',
       );
     }
   }
@@ -66,13 +64,10 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
       if (data is Map<String, dynamic>) {
         return PaymentItemModel.fromJson(data);
       } else {
-        throw Exception('Не тот формат');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      final message = _extractServerMessage(e);
-      throw Exception(
-        message ?? 'Ошибка получения журнала платежей по id: ${e.message}',
-      );
+      throw mapApiError(e, fallback: 'Не удалось загрузить платёж.');
     }
   }
 
@@ -97,8 +92,7 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
 
       await dio.post('Payment', data: payload);
     } on DioException catch (e) {
-      final message = _extractServerMessage(e);
-      throw Exception(message ?? 'Ошибка при создании платежа: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось создать платёж.');
     }
   }
 
@@ -107,10 +101,7 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
     try {
       await dio.patch('Payment/$id/confirm');
     } on DioException catch (e) {
-      final message = _extractServerMessage(e);
-      throw Exception(
-        message ?? 'Ошибка подтверждения платежа: ${e.message}',
-      );
+      throw mapApiError(e, fallback: 'Не удалось подтвердить платёж.');
     }
   }
 
@@ -119,37 +110,7 @@ class PaymentRemoteDataSourcesImpl implements PaymentRemoteDataSources {
     try {
       await dio.delete('Payment/$id');
     } on DioException catch (e) {
-      final message = _extractServerMessage(e);
-      throw Exception(
-        message ?? 'Ошибка при удалении платежа: ${e.message}',
-      );
+      throw mapApiError(e, fallback: 'Не удалось удалить платёж.');
     }
-  }
-
-  String? _extractServerMessage(DioException e) {
-    final data = e.response?.data;
-    if (data is String && data.trim().isNotEmpty) {
-      return data;
-    }
-    if (data is Map<String, dynamic>) {
-      final title = data['title']?.toString();
-      final detail = data['detail']?.toString() ?? data['message']?.toString();
-      final errors = data['errors'];
-      String? formattedErrors;
-      if (errors is Map<String, dynamic>) {
-        formattedErrors = errors.entries
-            .map(
-              (entry) =>
-                  '${entry.key}: ${(entry.value as List).join(', ')}',
-            )
-            .join('\n');
-      }
-      return [
-        title,
-        detail,
-        formattedErrors,
-      ].whereType<String>().where((value) => value.trim().isNotEmpty).join('\n');
-    }
-    return e.message;
   }
 }

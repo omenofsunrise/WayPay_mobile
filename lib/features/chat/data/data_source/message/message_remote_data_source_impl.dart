@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source.dart';
 import 'package:waypay_mobile/features/chat/data/models/message/message_response.dart';
 
@@ -33,10 +34,10 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
             .map(MessageResponse.fromJson)
             .toList();
       } else {
-        throw Exception('Неожиданный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка загрузки сообщений: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить сообщения.');
     }
   }
 
@@ -55,10 +56,11 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
       if (data is int) return data;
       if (data is String) return int.tryParse(data.trim()) ?? 0;
 
-      throw Exception('Неожиданный формат ответа: $data');
+      throw const ApiError('Сервер вернул некорректный ответ.');
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка загрузки количества непрочитанных сообщений: ${e.message}',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить количество непрочитанных сообщений.',
       );
     }
   }
@@ -68,10 +70,13 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
     try {
       final response = await dio.post('chats/$chatId/Messages/typing');
       if (response.statusCode != 200 && response.statusCode != 204) {
-        throw Exception('Ошибка отправки typing-события');
+        throw const ApiError('Не удалось отправить событие набора текста.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка отправки typing-события: ${e.message}');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось отправить событие набора текста.',
+      );
     }
   }
 
@@ -111,10 +116,10 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
       if (response.data is Map<String, dynamic>) {
         return MessageResponse.fromJson(response.data);
       } else {
-        throw Exception('Неожиданный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка при отправке сообщения: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось отправить сообщение.');
     }
   }
 
@@ -137,10 +142,10 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
       if (response.data is Map<String, dynamic>) {
         return MessageResponse.fromJson(response.data as Map<String, dynamic>);
       } else {
-        throw Exception('Неожиданный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка при редактировании сообщения: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось отредактировать сообщение.');
     }
   }
 
@@ -152,10 +157,10 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
       );
 
       if (response.statusCode != 200 && response.statusCode != 204) {
-        throw Exception('Ошибка при удалении сообщения');
+        throw const ApiError('Не удалось удалить сообщение.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка при удалении сообщения: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось удалить сообщение.');
     }
   }
 
@@ -165,11 +170,12 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
       final response = await dio.post('chats/$chatId/Messages/read');
 
       if (response.statusCode != 200 && response.statusCode != 204) {
-        throw Exception('Ошибка при отметке сообщений как прочитанных');
+        throw const ApiError('Не удалось отметить сообщения прочитанными.');
       }
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка при отметке сообщений как прочитанных: ${e.message}',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось отметить сообщения прочитанными.',
       );
     }
   }

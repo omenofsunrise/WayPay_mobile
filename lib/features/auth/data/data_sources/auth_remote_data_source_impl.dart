@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:waypay_mobile/features/auth/data/models/call_confirm_request_model.dart';
@@ -27,7 +28,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return StartAuthResponseModel.fromJson(response.data);
     } on DioException catch (e) {
       print('❌ Ошибка startAuth: ${e.response?.data}');
-      throw Exception(_extractErrorMessage(e, 'Не удалось начать авторизацию'));
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось начать авторизацию. Попробуйте ещё раз.',
+      );
     }
   }
 
@@ -61,7 +65,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
     } on DioException catch (e) {
       print('❌ Ошибка confirmCall: ${e.response?.data}');
-      throw Exception(_extractErrorMessage(e, 'Ошибка подтверждения звонка'));
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось подтвердить звонок. Попробуйте ещё раз.',
+      );
     }
   }
 
@@ -109,7 +116,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return RefreshTokenResponseModel.fromJson(data);
     } on DioException catch (e) {
       print('❌ Ошибка refreshToken: ${e.response?.data}');
-      throw Exception('Ошибка обновления токена: ${e.message}');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось обновить сессию. Войдите заново.',
+      );
     }
   }
 
@@ -122,11 +132,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
       print('❌ Ошибка getAuthInfo: ${e.response?.data}');
-      throw Exception(
-        _extractErrorMessage(
-          e,
-          'Ошибка получения информации о пользователе',
-        ),
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось получить данные пользователя.',
       );
     }
   }
@@ -170,83 +178,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         return;
       }
 
-      throw Exception('Неожиданный статус: ${response.statusCode}');
+      throw ApiError(
+        'Не удалось сохранить PIN. Попробуйте ещё раз.',
+        statusCode: response.statusCode,
+      );
     } on DioException catch (e) {
       print('❌ Ошибка setupPin: ${e.response?.data}');
-
-      if (e.response != null) {
-        final data = e.response?.data;
-        final status = e.response?.statusCode;
-
-        if (data is Map<String, dynamic>) {
-          final error = data['Error']?.toString() ?? '';
-
-          if (status == 401) {
-            final errorCode = data['ErrorCode']?.toString();
-            if (errorCode == 'ACCESS_TOKEN_EXPIRED') {
-              throw Exception('🔒 Токен устарел. Нужно перелогиниться.');
-            }
-            if (errorCode == 'REFRESH_TOKEN_INVALID') {
-              throw Exception('🔒 Refresh токен недействителен.');
-            }
-            if (errorCode == 'REFRESH_TOKEN_EXPIRED') {
-              throw Exception('🔒 Refresh токен истёк.');
-            }
-          }
-
-          if (status == 400) {
-            if (error.contains('PIN code is temporarily locked')) {
-              final minutesLeft = data['MinutesLeft'];
-              throw Exception(
-                '🚫 PIN временно заблокирован. Осталось минут: $minutesLeft',
-              );
-            }
-            if (data['ErrorCode'] == 'PIN_REQUIRED') {
-              throw Exception('📌 PIN обязателен.');
-            }
-            if (data['PinInvalid'] == true) {
-              final attemptsLeft = data['AttemptsLeft'];
-              throw Exception(
-                '❌ Неверный PIN. Осталось попыток: $attemptsLeft',
-              );
-            }
-            if (error.contains('Refresh token does not belong to this user')) {
-              throw Exception(
-                '🚫 Refresh токен не принадлежит этому пользователю.',
-              );
-            }
-          }
-        }
-      }
-
-      throw Exception(_extractErrorMessage(e, 'Ошибка установки PIN'));
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось сохранить PIN. Попробуйте ещё раз.',
+      );
     }
-  }
-
-  String _extractErrorMessage(DioException e, String fallback) {
-    final data = e.response?.data;
-    if (data is Map<String, dynamic>) {
-      final candidates = [
-        data['message'],
-        data['Message'],
-        data['error'],
-        data['Error'],
-        data['detail'],
-        data['title'],
-      ].whereType<String>();
-      for (final value in candidates) {
-        final trimmed = value.trim();
-        if (trimmed.isNotEmpty) return trimmed;
-      }
-    }
-    if (data is String && data.trim().isNotEmpty) {
-      return data.trim();
-    }
-    final message = e.message?.trim();
-    if (message != null && message.isNotEmpty) {
-      return message;
-    }
-    return fallback;
   }
 
   @override
@@ -274,10 +216,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         return result;
       }
 
-      throw Exception('Неожиданный формат ответа: ${data.runtimeType}');
+      throw const ApiError('Не удалось загрузить список сессий.');
     } on DioException catch (e) {
       print('❌ Ошибка getSessions: ${e.response?.data}');
-      throw Exception('Ошибка получения списка сессий: ${e.message}');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить список сессий.',
+      );
     }
   }
 
@@ -322,15 +267,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         } catch (_) {}
       }
 
-      if (code == 401) {
-        throw Exception('Авторизация истекла. Войдите заново.');
-      }
       if (code == 404) {
-        throw Exception('Сессия не найдена (id=$tokenId).');
+        throw const ApiError('Сессия уже завершена или не найдена.');
       }
 
-      throw Exception(
-        'Ошибка при отзыве сессии: code=$code, body=${e.response?.data}',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось завершить сессию. Попробуйте ещё раз.',
       );
     }
   }

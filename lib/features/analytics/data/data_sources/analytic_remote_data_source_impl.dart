@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/analytics/data/data_sources/analytic_remote_data_source.dart';
 import 'package:waypay_mobile/features/analytics/data/models/analytic_items_response.dart';
 import 'package:waypay_mobile/features/analytics/data/models/debt_dynamic_response.dart';
@@ -31,9 +32,7 @@ class AnalyticRemoteDataSourceImpl implements AnalyticRemoteDataSource {
 
       return AnalyticItemsResponse.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка получения аналитики: ${e.response?.data ?? e.message}',
-      );
+      throw mapApiError(e, fallback: 'Не удалось загрузить аналитику.');
     }
   }
 
@@ -55,8 +54,9 @@ class AnalyticRemoteDataSourceImpl implements AnalyticRemoteDataSource {
 
       return SellInfoResponse.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка получения sell-info: ${e.response?.data ?? e.message}',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить информацию о продажах.',
       );
     }
   }
@@ -79,8 +79,9 @@ class AnalyticRemoteDataSourceImpl implements AnalyticRemoteDataSource {
 
       return GraphData.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка получения InvestmentAmountDynamic: ${e.response?.data ?? e.message}',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить динамику инвестиций.',
       );
     }
   }
@@ -103,8 +104,9 @@ class AnalyticRemoteDataSourceImpl implements AnalyticRemoteDataSource {
 
       return DebtDynamicResponse.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка получения DebtDynamic: ${e.response?.data ?? e.message}',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить динамику задолженности.',
       );
     }
   }
@@ -127,14 +129,11 @@ class AnalyticRemoteDataSourceImpl implements AnalyticRemoteDataSource {
             )
             .toList();
       }
-      throw Exception('Неожиданный формат данных расписания платежей');
+      throw const ApiError('Сервер вернул некорректный ответ.');
     } on DioException catch (e) {
-      final status = e.response?.statusCode;
-      final body = e.response?.data;
-      final params = e.requestOptions.queryParameters;
-      throw Exception(
-        'Ошибка получения аналитики платежей '
-        '[status=$status, params=$params, body=$body]',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить аналитику платежей.',
       );
     }
   }

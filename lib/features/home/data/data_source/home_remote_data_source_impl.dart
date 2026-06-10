@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:waypay_mobile/core/config/api_config.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/home/data/data_source/home_remote_data_source.dart';
 import 'package:waypay_mobile/features/home/data/models/employee_model.dart';
 import 'package:waypay_mobile/features/home/data/models/main_client_stats_model.dart';
@@ -28,25 +29,19 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
             blacklistCount: stats.blacklistCount,
           );
         } else {
-          throw Exception('Неожиданный формат ответа: ожидался JSON объект');
+          throw const ApiError('Сервер вернул некорректный ответ.');
         }
       } else {
-        throw Exception('Ошибка сервера: ${response.statusCode}');
+        throw const ApiError('Сервер временно недоступен. Попробуйте позже.');
       }
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw Exception('Ошибка авторизации');
-      } else if (e.response?.statusCode == 404) {
-        throw Exception('Данные сотрудника не найдены');
-      } else if (e.type == DioExceptionType.connectionTimeout) {
-        throw Exception('Таймаут соединения');
-      } else if (e.type == DioExceptionType.receiveTimeout) {
-        throw Exception('Таймаут получения данных');
-      } else {
-        throw Exception('Ошибка загрузки данных сотрудника: ${e.message}');
-      }
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить данные сотрудника.',
+      );
     } catch (e) {
-      throw Exception('Неизвестная ошибка: $e');
+      if (e is ApiError) rethrow;
+      throw mapApiError(e, fallback: 'Не удалось загрузить данные сотрудника.');
     }
   }
 
@@ -68,12 +63,12 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Ошибка GraphQL: ${response.statusCode}');
+        throw const ApiError('Сервер временно недоступен. Попробуйте позже.');
       }
 
       final data = response.data;
       if (data is! Map<String, dynamic>) {
-        throw Exception('Неожиданный формат GraphQL ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
 
       final errors = data['errors'];
@@ -82,23 +77,17 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         final message = firstError is Map<String, dynamic>
             ? firstError['message']?.toString()
             : firstError.toString();
-        throw Exception('GraphQL ошибка: $message');
+        throw ApiError(message ?? 'Не удалось загрузить статистику.');
       }
 
       final statsPayload = data['data'];
       if (statsPayload is! Map<String, dynamic>) {
-        throw Exception('Данные GraphQL отсутствуют');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
 
       return MainClientStatsModel.fromJson(statsPayload);
     } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionTimeout) {
-        throw Exception('GraphQL: таймаут соединения');
-      } else if (e.type == DioExceptionType.receiveTimeout) {
-        throw Exception('GraphQL: таймаут получения данных');
-      } else {
-        throw Exception('GraphQL: ${e.message}');
-      }
+      throw mapApiError(e, fallback: 'Не удалось загрузить статистику.');
     }
   }
 }

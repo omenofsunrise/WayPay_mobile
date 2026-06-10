@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/objectType/data/models/get_object_types_query.dart';
 import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
 
@@ -31,10 +32,10 @@ class ObjectTypeRemoteDataSourceImpl implements ObjectTypeRemoteDataSource {
       if (response.data is Map<String, dynamic>) {
         return ObjectTypeResponseModel.fromJson(response.data);
       } else {
-        throw Exception('Неожиданный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка загрузки типов объектов: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить типы объектов.');
     }
   }
 
@@ -51,10 +52,10 @@ class ObjectTypeRemoteDataSourceImpl implements ObjectTypeRemoteDataSource {
       if (response.data is Map<String, dynamic>) {
         return ObjectTypeModel.fromJson(response.data);
       } else {
-        throw Exception('Неожиданный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка создания типа объекта: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось создать тип объекта.');
     }
   }
 
@@ -72,10 +73,10 @@ class ObjectTypeRemoteDataSourceImpl implements ObjectTypeRemoteDataSource {
       if (response.data is Map<String, dynamic>) {
         return ObjectTypeModel.fromJson(response.data);
       } else {
-        throw Exception('Неожиданный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка обновления типа объекта: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось обновить тип объекта.');
     }
   }
 
@@ -85,10 +86,10 @@ class ObjectTypeRemoteDataSourceImpl implements ObjectTypeRemoteDataSource {
       final response = await dio.delete('ObjectType/$id');
 
       if (response.statusCode != 200 && response.statusCode != 204) {
-        throw Exception('Ошибка при удалении типа объекта');
+        throw const ApiError('Не удалось удалить тип объекта.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка при удалении типа объекта: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось удалить тип объекта.');
     }
   }
 
@@ -102,8 +103,9 @@ class ObjectTypeRemoteDataSourceImpl implements ObjectTypeRemoteDataSource {
 
       return response.data as bool;
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка проверки существования типа объекта: ${e.message}',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось проверить наличие типа объекта.',
       );
     }
   }

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/note/data/data_sources/note_remote_data_source.dart';
 import 'package:waypay_mobile/features/note/data/models/note_create_request.dart';
 import 'package:waypay_mobile/features/note/data/models/note_model.dart';
@@ -28,7 +29,7 @@ class NoteRemoteDataSourceImpl implements NoteRemoteDataSource {
       final data = response.data as List;
       return data.map((e) => NoteModel.fromJson(e)).toList();
     } else {
-      throw Exception('Ошибка при загрузке заметок');
+      throw const ApiError('Не удалось загрузить заметки.');
     }
   }
 
@@ -36,7 +37,7 @@ class NoteRemoteDataSourceImpl implements NoteRemoteDataSource {
   Future<void> deleteNote(int id) async {
     final response = await dio.delete('Note/$id');
     if (response.statusCode != 200) {
-      throw Exception('Не удалось удалить заметку');
+      throw const ApiError('Не удалось удалить заметку.');
     }
   }
 
@@ -54,7 +55,7 @@ class NoteRemoteDataSourceImpl implements NoteRemoteDataSource {
     final response = await dio.post('Note', data: formData);
 
     if (response.statusCode != 200) {
-      throw Exception('Не удалось создать заметку');
+      throw const ApiError('Не удалось создать заметку.');
     }
   }
 }

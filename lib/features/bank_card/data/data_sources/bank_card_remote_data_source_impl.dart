@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/bank_card/data/data_sources/bank_card_remote_data_source.dart';
 import 'package:waypay_mobile/features/bank_card/data/models/bank_card_model.dart';
 import 'package:waypay_mobile/features/bank_card/data/models/bank_card_paged_result.dart';
@@ -26,9 +27,9 @@ class BankCardRemoteDataSourceImpl implements BankCardRemoteDataSource {
       if (data is Map<String, dynamic>) {
         return BankCardPagedResult.fromJson(data);
       }
-      throw Exception('Неверный формат ответа при получении карт');
+      throw const ApiError('Сервер вернул некорректный ответ.');
     } on DioException catch (e) {
-      throw Exception(_extractServerMessage(e) ?? 'Ошибка загрузки карт');
+      throw mapApiError(e, fallback: 'Не удалось загрузить карты.');
     }
   }
 
@@ -40,9 +41,9 @@ class BankCardRemoteDataSourceImpl implements BankCardRemoteDataSource {
       if (data is Map<String, dynamic>) {
         return BankCardModel.fromJson(data);
       }
-      throw Exception('Неверный формат ответа при создании карты');
+      throw const ApiError('Сервер вернул некорректный ответ.');
     } on DioException catch (e) {
-      throw Exception(_extractServerMessage(e) ?? 'Ошибка создания карты');
+      throw mapApiError(e, fallback: 'Не удалось создать карту.');
     }
   }
 
@@ -57,9 +58,9 @@ class BankCardRemoteDataSourceImpl implements BankCardRemoteDataSource {
       if (data is Map<String, dynamic>) {
         return BankCardModel.fromJson(data);
       }
-      throw Exception('Неверный формат ответа при обновлении карты');
+      throw const ApiError('Сервер вернул некорректный ответ.');
     } on DioException catch (e) {
-      throw Exception(_extractServerMessage(e) ?? 'Ошибка обновления карты');
+      throw mapApiError(e, fallback: 'Не удалось обновить карту.');
     }
   }
 
@@ -68,34 +69,7 @@ class BankCardRemoteDataSourceImpl implements BankCardRemoteDataSource {
     try {
       await dio.delete('BankCard/$id');
     } on DioException catch (e) {
-      throw Exception(_extractServerMessage(e) ?? 'Ошибка удаления карты');
+      throw mapApiError(e, fallback: 'Не удалось удалить карту.');
     }
-  }
-
-  String? _extractServerMessage(DioException e) {
-    final data = e.response?.data;
-    if (data is String && data.trim().isNotEmpty) {
-      return data;
-    }
-    if (data is Map<String, dynamic>) {
-      final title = data['title']?.toString();
-      final detail = data['detail']?.toString() ?? data['message']?.toString();
-      final errors = data['errors'];
-      String? formattedErrors;
-      if (errors is Map<String, dynamic>) {
-        formattedErrors = errors.entries
-            .map(
-              (entry) =>
-                  '${entry.key}: ${(entry.value as List).join(', ')}',
-            )
-            .join('\n');
-      }
-      return [
-        title,
-        detail,
-        formattedErrors,
-      ].whereType<String>().where((value) => value.trim().isNotEmpty).join('\n');
-    }
-    return e.message;
   }
 }

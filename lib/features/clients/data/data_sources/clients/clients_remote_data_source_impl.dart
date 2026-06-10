@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_response_model.dart';
@@ -30,12 +31,10 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
       if (data is Map<String, dynamic>) {
         return ClientsResponseModel.fromJson(data);
       } else {
-        throw Exception(
-          'Неожиданный формат данных: ожидается объект с пагинацией',
-        );
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка получения клиентов: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить клиентов.');
     }
   }
 
@@ -49,10 +48,10 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
       if (data is Map<String, dynamic>) {
         return ClientModel.fromJson(data);
       } else {
-        throw Exception('Неожиданный формат данных: ожидается объект клиента');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка получения клиента по ID: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить клиента.');
     }
   }
 
@@ -61,7 +60,7 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
     try {
       await dio.delete('Client/$id');
     } on DioException catch (e) {
-      throw Exception('Ошибка удаления клиента: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось удалить клиента.');
     }
   }
 
@@ -70,8 +69,9 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
     try {
       await dio.put('Client/$id', data: request.toJson());
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка обновления основных данных клиента: ${e.message}',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось обновить данные клиента.',
       );
     }
   }
@@ -81,7 +81,10 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
     try {
       await dio.put('Client/$id/doc', data: request.toJson());
     } on DioException catch (e) {
-      throw Exception('Ошибка обновления документа клиента: ${e.message}');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось обновить документ клиента.',
+      );
     }
   }
 
@@ -93,7 +96,10 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
     try {
       await dio.put('Client/$id/doc-issue-date', data: request.toJson());
     } on DioException catch (e) {
-      throw Exception('Ошибка обновления даты документа клиента: ${e.message}');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось обновить дату выдачи документа.',
+      );
     }
   }
 
@@ -103,9 +109,9 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
       await dio.post('Client', data: request.toJson());
     } on DioException catch (e) {
       if (e.response?.statusCode == 409) {
-        throw Exception('409 Клиент с такими данными уже существует');
+        throw const ApiError('Клиент с такими данными уже существует.');
       }
-      throw Exception('Ошибка создания клиента: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось создать клиента.');
     }
   }
 
@@ -122,7 +128,7 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
       });
       await dio.post('Client/$id/passport-photo', data: formData);
     } on DioException catch (e) {
-      throw Exception('Ошибка загрузки фото паспорта: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить фото паспорта.');
     }
   }
 
@@ -134,7 +140,7 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
         queryParameters: {'photoType': type.apiValue},
       );
     } on DioException catch (e) {
-      throw Exception('Ошибка удаления фото паспорта: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось удалить фото паспорта.');
     }
   }
 
@@ -157,7 +163,7 @@ class ClientRemoteDataSourceImpl implements ClientRemoteDataSource {
       if (e.response?.statusCode == 404) {
         return null;
       }
-      throw Exception('Ошибка получения фото паспорта: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить фото паспорта.');
     }
   }
 }

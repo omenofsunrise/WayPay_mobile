@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_response_model.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/get_clients_query.dart';
@@ -22,12 +23,10 @@ class BlacklistRemoteDataSourcesImpl implements BlacklistRemoteDataSources {
       if (data is Map<String, dynamic>) {
         return ClientsResponseModel.fromJson(data);
       } else {
-        throw Exception(
-          'Неожиданный формат данных: ожидается объект с пагинацией',
-        );
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка получения клиентов: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить клиентов.');
     }
   }
 
@@ -37,10 +36,11 @@ class BlacklistRemoteDataSourcesImpl implements BlacklistRemoteDataSources {
       await dio.put('Client/$id/from_blacklist');
     } on DioException catch (e) {
       if (e.response?.statusCode == 403) {
-        throw Exception('Недостваточно прав');
+        throw const ApiError('Недостаточно прав.');
       }
-      throw Exception(
-        'Ошибка удаления клиента из черного списка: ${e.message}',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось убрать клиента из чёрного списка.',
       );
     }
   }
@@ -50,8 +50,9 @@ class BlacklistRemoteDataSourcesImpl implements BlacklistRemoteDataSources {
     try {
       await dio.put('Client/$id/to_blacklist');
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка добавления клиента в черный список: ${e.message}',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось добавить клиента в чёрный список.',
       );
     }
   }

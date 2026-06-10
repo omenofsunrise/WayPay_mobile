@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:waypay_mobile/features/auth/data/models/start_auth_request_model.dart';
@@ -29,7 +30,7 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } catch (e) {
-      emit(AuthError(_mapAuthError(e, 'Не удалось начать авторизацию')));
+      emit(AuthError(mapApiError(e, fallback: 'Не удалось начать авторизацию.').message));
     }
   }
 
@@ -69,16 +70,7 @@ class AuthCubit extends Cubit<AuthState> {
 
       emit(AuthSuccess());
     } catch (e) {
-      emit(AuthError(_mapAuthError(e, 'Не удалось подтвердить звонок')));
+      emit(AuthError(mapApiError(e, fallback: 'Не удалось подтвердить звонок.').message));
     }
-  }
-
-  String _mapAuthError(Object error, String fallback) {
-    final raw = error.toString();
-    if (raw.startsWith('Exception:')) {
-      final message = raw.replaceFirst('Exception:', '').trim();
-      if (message.isNotEmpty) return message;
-    }
-    return fallback;
   }
 }

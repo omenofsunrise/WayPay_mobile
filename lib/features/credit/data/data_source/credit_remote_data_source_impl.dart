@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_response_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
@@ -37,10 +38,10 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
 
         return creditResponse;
       } else {
-        throw Exception('Неожиданный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка загрузки договоров: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить договоры.');
     }
   }
 
@@ -52,10 +53,10 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
       if (response.data is Map<String, dynamic>) {
         return CreditModel.fromJson(response.data);
       } else {
-        throw Exception('Неожиданный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка загрузки договора по id: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить договор.');
     }
   }
 
@@ -65,10 +66,10 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
       final response = await dio.put('Credit/$creditId/toggle-favourite');
 
       if (response.statusCode != 200) {
-        throw Exception('Ошибка при обновлении избранного');
+        throw const ApiError('Не удалось обновить избранное.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка при обновлении избранного: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось обновить избранное.');
     }
   }
 
@@ -80,10 +81,10 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
         '📬 Ответ от сервера: ${response.statusCode} ${response.statusMessage}',
       );
       if (response.statusCode != 200 && response.statusCode != 204) {
-        throw Exception('Ошибка при удалении договора');
+        throw const ApiError('Не удалось удалить договор.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка при удалении договора: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось удалить договор.');
     }
   }
 
@@ -99,7 +100,10 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
       );
       return CreditResponseModel.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception('Ошибка загрузки кредитов инвестора: ${e.message}');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить договоры инвестора.',
+      );
     }
   }
 
@@ -108,7 +112,7 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
     try {
       await dio.post('Credit', data: request.toJson());
     } on DioException catch (e) {
-      throw Exception(_formatCreateCreditError(e));
+      throw ApiError(_formatCreateCreditError(e));
     }
   }
 
@@ -138,14 +142,13 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
             .map((item) => SchedulePreviewModel.fromJson(item))
             .toList();
       } else {
-        throw Exception('Неожиданный формат ответа для preview платежей');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      final serverMessage = _extractServerError(e);
-      if (serverMessage != null) {
-        throw Exception(serverMessage);
-      }
-      throw Exception('Ошибка загрузки preview платежей: ${e.message}');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить предпросмотр платежей.',
+      );
     }
   }
 

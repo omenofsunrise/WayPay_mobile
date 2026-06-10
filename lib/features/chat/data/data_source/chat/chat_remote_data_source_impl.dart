@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source.dart';
 import 'package:waypay_mobile/features/chat/data/models/chat/chat_link_response.dart';
 import 'package:waypay_mobile/features/chat/data/models/chat/chat_member_response.dart';
@@ -23,9 +24,12 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         final v = int.tryParse(data.trim());
         if (v != null) return v;
       }
-      throw Exception('Неожиданный формат ответа');
+      throw const ApiError('Сервер вернул некорректный ответ.');
     } on DioException catch (e) {
-      throw Exception('Ошибка загрузки количества непрочитанных: ${e.message}');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить количество непрочитанных.',
+      );
     }
   }
 
@@ -45,10 +49,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
             .map(ChatResponse.fromJson)
             .toList();
       } else {
-        throw Exception('Неожиданный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка загрузки чатов: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить чаты.');
     }
   }
 
@@ -63,10 +67,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
             .map(ChatMemberResponse.fromJson)
             .toList();
       } else {
-        throw Exception('Неожиданный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка загрузки участников чата: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить участников чата.');
     }
   }
 
@@ -77,16 +81,16 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
       final data = response.data;
       if (data == null) {
-        throw Exception('Пустой ответ от сервера');
+        throw const ApiError('Сервер вернул пустой ответ.');
       }
 
       if (data is Map<String, dynamic>) {
         return ChatResponse.fromJson(data);
       } else {
-        throw Exception('Неожиданный формат ответа: ${data.runtimeType}');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка открытия приватного чата: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось открыть приватный чат.');
     }
   }
 
@@ -112,10 +116,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
             .map(MessageAttachmentResponse.fromJson)
             .toList();
       } else {
-        throw Exception('Неожиданный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка загрузки фото чата: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить фото чата.');
     }
   }
 
@@ -141,10 +145,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
             .map(MessageAttachmentResponse.fromJson)
             .toList();
       } else {
-        throw Exception('Неожиданный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка загрузки файлов чата: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить файлы чата.');
     }
   }
 
@@ -170,10 +174,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
             .map(MessageAttachmentResponse.fromJson)
             .toList();
       } else {
-        throw Exception('Неожиданный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка загрузки видео чата: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить видео чата.');
     }
   }
 
@@ -199,10 +203,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
             .map(ChatLinkResponse.fromJson)
             .toList();
       } else {
-        throw Exception('Неожиданный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка загрузки ссылок чата: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить ссылки чата.');
     }
   }
 
@@ -211,10 +215,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     try {
       final response = await dio.post('Chats/refresh-chats');
       if (response.statusCode != 200) {
-        throw Exception('Ошибка обновления чатов');
+        throw const ApiError('Не удалось обновить чаты.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка обновления чатов: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось обновить чаты.');
     }
   }
 
@@ -224,10 +228,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       final response = await dio.delete('Chats/private/$chatId');
 
       if (response.statusCode != 200 && response.statusCode != 204) {
-        throw Exception('Ошибка при удалении приватного чата');
+        throw const ApiError('Не удалось удалить приватный чат.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка при удалении приватного чата: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось удалить приватный чат.');
     }
   }
 }

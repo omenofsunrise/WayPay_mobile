@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
 import 'package:waypay_mobile/features/payment/data/models/schedule/get_schedule_query.dart';
 import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
@@ -20,10 +21,13 @@ class ScheduleRemoteDataSourcesImpl implements ScheduleRemoteDataSources {
       if (data is Map<String, dynamic>) {
         return ScheduleResponseModel.fromJson(data);
       } else {
-        throw Exception('Неверный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка при получении ожидаемых платежей: ${e.message}');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить ожидаемые платежи.',
+      );
     }
   }
 
@@ -48,11 +52,12 @@ class ScheduleRemoteDataSourcesImpl implements ScheduleRemoteDataSources {
       if (data is Map<String, dynamic>) {
         return ScheduleResponseModel.fromJson(data);
       } else {
-        throw Exception('Неверный формат ответа');
+        throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка при получении ожидаемых платежей по договору: ${e.message}',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить ожидаемые платежи по договору.',
       );
     }
   }
@@ -62,7 +67,10 @@ class ScheduleRemoteDataSourcesImpl implements ScheduleRemoteDataSources {
     try {
       await dio.put('Schedule/$id');
     } on DioException catch (e) {
-      throw Exception('Ошибка обновления статуса уведомления: ${e.message}');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось обновить статус уведомления.',
+      );
     }
   }
 
@@ -74,9 +82,9 @@ class ScheduleRemoteDataSourcesImpl implements ScheduleRemoteDataSources {
       if (data is String) {
         return data;
       }
-      throw Exception('Неверный формат ответа');
+      throw const ApiError('Сервер вернул некорректный ответ.');
     } on DioException catch (e) {
-      throw Exception('Ошибка при получении сообщения: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить сообщение.');
     }
   }
 
@@ -90,10 +98,11 @@ class ScheduleRemoteDataSourcesImpl implements ScheduleRemoteDataSources {
       if (data is String) {
         return data;
       }
-      throw Exception('Неверный формат ответа');
+      throw const ApiError('Сервер вернул некорректный ответ.');
     } on DioException catch (e) {
-      throw Exception(
-        'Ошибка при получении истории платежей: ${e.message}',
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить историю платежей.',
       );
     }
   }

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 
+import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
 import 'package:waypay_mobile/features/profile/data/models/credit_stat.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
@@ -32,7 +33,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
 
       await dio.put('Employee/photo', data: formData);
     } on DioException catch (e) {
-      throw Exception('Ошибка загрузки фото: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить фото.');
     }
   }
 
@@ -55,7 +56,10 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
         options: Options(contentType: 'multipart/form-data'),
       );
     } on DioException catch (e) {
-      throw Exception('Ошибка обновления профиля сотрудника: ${e.message}');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось обновить профиль сотрудника.',
+      );
     }
   }
 
@@ -64,7 +68,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
     try {
       await dio.delete('Employee/photo');
     } on DioException catch (e) {
-      throw Exception('Ошибка удаления фото: ${e.message}');
+      throw mapApiError(e, fallback: 'Не удалось удалить фото.');
     }
   }
 
@@ -96,9 +100,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
     if (response.statusCode == 200) {
       return EmployeesResponse.fromJson(response.data);
     } else {
-      throw Exception(
-        'Ошибка при загрузке сотрудников: ${response.statusCode}',
-      );
+      throw const ApiError('Не удалось загрузить сотрудников.');
     }
   }
 
@@ -114,10 +116,11 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
       print('Ответ от PATCH /api/Employee/role/$id: ${response.statusCode}');
 
       if (response.statusCode != 200) {
-        throw Exception('Ошибка обновления роли: ${response.statusCode}');
+        throw const ApiError('Не удалось обновить роль сотрудника.');
       }
     } catch (e) {
-      throw Exception('Ошибка при PATCH /role/$id: $e');
+      if (e is ApiError) rethrow;
+      throw mapApiError(e, fallback: 'Не удалось обновить роль сотрудника.');
     }
   }
 
@@ -129,7 +132,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
       options: Options(headers: {'Content-Type': 'application/json'}),
     );
     if (response.statusCode != 200) {
-      throw Exception('Не удалось обновить телефон: ${response.statusCode}');
+      throw const ApiError('Не удалось обновить телефон.');
     }
   }
 
@@ -141,7 +144,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
       options: Options(headers: {'Content-Type': 'application/json'}),
     );
     if (response.statusCode != 200) {
-      throw Exception('Не удалось обновить надбавку: ${response.statusCode}');
+      throw const ApiError('Не удалось обновить надбавку.');
     }
   }
 
@@ -179,13 +182,12 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
       print('Ответ от POST /api/Employee: ${response.statusCode}');
 
       if (response.statusCode != 200) {
-        throw Exception(
-          'Ошибка при создании сотрудника: ${response.statusCode}',
-        );
+        throw const ApiError('Не удалось создать сотрудника.');
       }
     } catch (e) {
       print('Ошибка при создании сотрудника: $e');
-      rethrow;
+      if (e is ApiError) rethrow;
+      throw mapApiError(e, fallback: 'Не удалось создать сотрудника.');
     }
   }
 
@@ -195,7 +197,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
     if (response.statusCode == 200) {
       return response.data;
     } else {
-      throw Exception('Ошибка загрузки пользователя: ${response.statusCode}');
+      throw const ApiError('Не удалось загрузить пользователя.');
     }
   }
 
@@ -207,7 +209,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
     if (response.statusCode == 200 || response.statusCode == 204) {
       return;
     } else {
-      throw Exception('Ошибка удаления: ${response.statusCode}');
+      throw const ApiError('Не удалось удалить сотрудника.');
     }
   }
 
@@ -222,7 +224,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
       final List list = response.data;
       return list.map((e) => CreditStat.fromJson(e)).toList();
     } else {
-      throw Exception('Ошибка загрузки статистики по договорам');
+      throw const ApiError('Не удалось загрузить статистику по договорам.');
     }
   }
 
@@ -237,7 +239,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
           .map((e) => PaymentStat.fromJson(e))
           .toList();
     } else {
-      throw Exception('Ошибка загрузки статистики по платежам');
+      throw const ApiError('Не удалось загрузить статистику по платежам.');
     }
   }
 
@@ -258,7 +260,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
       print('📦 [Data] Loaded ${data.length} records');
       return data.map((e) => PaymentStat.fromJson(e)).toList();
     } else {
-      throw Exception('Ошибка загрузки статистики по платежам');
+      throw const ApiError('Не удалось загрузить статистику по платежам.');
     }
   }
 
@@ -282,12 +284,16 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
         return data.map((e) => CreditStat.fromJson(e)).toList();
       } else {
         print('❌ [Error] Status code: ${response.statusCode}');
-        throw Exception('Ошибка загрузки статистики по договорам');
+        throw const ApiError('Не удалось загрузить статистику по договорам.');
       }
     } catch (e, stackTrace) {
       print('❌ [Exception] $e');
       print(stackTrace);
-      rethrow;
+      if (e is ApiError) rethrow;
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить статистику по договорам.',
+      );
     }
   }
 
@@ -304,10 +310,13 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
             .map((e) => EmployeeName.fromJson(e as Map<String, dynamic>))
             .toList();
       } else {
-        throw Exception('Ошибка получения списка полных имён');
+        throw const ApiError('Не удалось загрузить список сотрудников.');
       }
     } on DioException catch (e) {
-      throw Exception('Ошибка запроса /api/Employee/fullnames: ${e.message}');
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить список сотрудников.',
+      );
     }
   }
 }
