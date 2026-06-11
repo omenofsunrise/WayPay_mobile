@@ -37,6 +37,14 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
     if (mounted) setState(() {});
   }
 
+  void _submit(BuildContext context) {
+    if (_formKey.currentState!.validate()) {
+      final formattedPhone = '8${_phoneFormatter.getUnmaskedText()}';
+      debugPrint('🔐 Начинаем авторизацию для: $formattedPhone');
+      context.read<AuthCubit>().startAuth(formattedPhone, widget.userType);
+    }
+  }
+
   @override
   void dispose() {
     _phoneFocus.removeListener(_onFocusChanged);
@@ -132,13 +140,29 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                                   color: const Color(0xFFFFCCC7),
                                 ),
                               ),
-                              child: Text(
-                                errorMessage,
-                                style: AppStyle.inter(
-                                  size: 14,
-                                  weight: FontWeight.w500,
-                                  color: const Color(0xFFCF1322),
-                                ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    errorMessage,
+                                    style: AppStyle.inter(
+                                      size: 14,
+                                      weight: FontWeight.w500,
+                                      color: const Color(0xFFCF1322),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  DefaultButton(
+                                    text: 'Повторить',
+                                    isPrimary: true,
+                                    showIcon: true,
+                                    icon: Icons.refresh,
+                                    onPressed: isLoading
+                                        ? null
+                                        : () => _submit(context),
+                                  ),
+                                ],
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -225,19 +249,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                               : DefaultButton(
                                   text: 'Подтвердить',
                                   isPrimary: true,
-                                  onPressed: () {
-                                    if (_formKey.currentState!.validate()) {
-                                      final formattedPhone =
-                                          '8${_phoneFormatter.getUnmaskedText()}';
-                                      debugPrint(
-                                        '🔐 Начинаем авторизацию для: $formattedPhone',
-                                      );
-                                      context.read<AuthCubit>().startAuth(
-                                        formattedPhone,
-                                        widget.userType,
-                                      );
-                                    }
-                                  },
+                                  onPressed: () => _submit(context),
                                 ),
                         ],
                       ),
