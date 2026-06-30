@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:waypay_mobile/core/utils/phone_utils.dart';
+import 'package:waypay_mobile/core/utils/price_formatter.dart';
 import 'package:waypay_styles/waypay_styles.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -11,6 +12,7 @@ class ClientInfoCard extends StatelessWidget {
     required this.birthDate,
     required this.phone,
     required this.whatsApp,
+    this.debt = 0,
     this.onTap,
   });
 
@@ -19,6 +21,7 @@ class ClientInfoCard extends StatelessWidget {
   final String birthDate;
   final String phone;
   final String whatsApp;
+  final double debt;
   final VoidCallback? onTap;
 
   @override
@@ -78,7 +81,26 @@ class ClientInfoCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 20),
-                _LabeledValue(label: 'Дата рождения', value: birthDate),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _LabeledValue(
+                        label: 'Дата рождения',
+                        value: birthDate,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _LabeledValue(
+                        label: 'Долг',
+                        value: PriceFormatter.formatPrice(debt),
+                        valueColor: debt > 0
+                            ? const Color(AppColors.red)
+                            : null,
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 20),
                 Row(
                   children: [
@@ -131,11 +153,17 @@ class ClientInfoCard extends StatelessWidget {
 }
 
 class _LabeledValue extends StatelessWidget {
-  const _LabeledValue({required this.label, required this.value, this.onTap});
+  const _LabeledValue({
+    required this.label,
+    required this.value,
+    this.onTap,
+    this.valueColor,
+  });
 
   final String label;
   final String value;
   final VoidCallback? onTap;
+  final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
@@ -167,10 +195,10 @@ class _LabeledValue extends StatelessWidget {
         else
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(AppColors.black),
+              color: valueColor ?? const Color(AppColors.black),
             ),
           ),
       ],

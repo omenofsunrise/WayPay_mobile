@@ -7,6 +7,7 @@ import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:waypay_mobile/features/credit/presentation/widgets/credit_card.dart';
+import 'package:waypay_mobile/features/credit/presentation/widgets/credit_tab.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
 
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
@@ -27,6 +28,7 @@ class CreditsScreen extends StatefulWidget {
 class _CreditsScreenState extends State<CreditsScreen> {
   final _searchController = TextEditingController();
   Timer? _debounce;
+  CreditTab _selectedTab = CreditTab.all;
 
   @override
   void initState() {
@@ -54,7 +56,16 @@ class _CreditsScreenState extends State<CreditsScreen> {
       clientFullname: parsed.clientFullname,
       search: null,
       page: page,
+      isFavourite: _selectedTab == CreditTab.favourite ? true : null,
+      isActive: _selectedTab == CreditTab.archived ? false : null,
+      debt: _selectedTab == CreditTab.debtors ? true : null,
     );
+  }
+
+  void _onTabSelected(CreditTab tab) {
+    if (tab == _selectedTab) return;
+    setState(() => _selectedTab = tab);
+    _loadCredits();
   }
 
   _ParsedSearch _parseSearch(String? value) {
@@ -180,6 +191,11 @@ class _CreditsScreenState extends State<CreditsScreen> {
             onChanged: _onSearchChanged,
             onSubmitted: _onSearchChanged,
           ),
+        ),
+        const SizedBox(width: 8),
+        CreditTabDropdown(
+          selectedTab: _selectedTab,
+          onTabSelected: _onTabSelected,
         ),
       ],
     );

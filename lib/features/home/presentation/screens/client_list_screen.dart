@@ -220,6 +220,7 @@ class _ClientListScreenState extends State<ClientListScreen> {
             birthDate: _formatDate(client.birthdate),
             phone: client.phone,
             whatsApp: whatsApp,
+            debt: client.debt,
             onTap: () => context.pushNamed(
               Routes.clientDetailScreen.toName,
               extra: client,
