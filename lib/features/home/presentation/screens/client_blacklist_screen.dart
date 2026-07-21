@@ -2,11 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 import 'package:waypay_mobile/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
 import 'package:waypay_mobile/features/clients/presentation/widgets/blacklist_client_card.dart';
-import 'package:waypay_styles/waypay_styles.dart';
 
 class ClientBlacklistScreen extends StatefulWidget {
   const ClientBlacklistScreen({super.key});

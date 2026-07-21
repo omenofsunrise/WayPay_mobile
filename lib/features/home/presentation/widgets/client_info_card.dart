@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:waypay_mobile/core/utils/phone_utils.dart';
 import 'package:waypay_mobile/core/utils/price_formatter.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ClientInfoCard extends StatelessWidget {

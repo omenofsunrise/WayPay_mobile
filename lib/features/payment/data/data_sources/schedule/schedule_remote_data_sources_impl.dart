@@ -24,10 +24,7 @@ class ScheduleRemoteDataSourcesImpl implements ScheduleRemoteDataSources {
         throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw mapApiError(
-        e,
-        fallback: 'Не удалось загрузить ожидаемые платежи.',
-      );
+      throw mapApiError(e, fallback: 'Не удалось загрузить ожидаемые платежи.');
     }
   }
 
@@ -67,10 +64,7 @@ class ScheduleRemoteDataSourcesImpl implements ScheduleRemoteDataSources {
     try {
       await dio.put('Schedule/$id');
     } on DioException catch (e) {
-      throw mapApiError(
-        e,
-        fallback: 'Не удалось обновить статус уведомления.',
-      );
+      throw mapApiError(e, fallback: 'Не удалось обновить статус уведомления.');
     }
   }
 
@@ -85,25 +79,6 @@ class ScheduleRemoteDataSourcesImpl implements ScheduleRemoteDataSources {
       throw const ApiError('Сервер вернул некорректный ответ.');
     } on DioException catch (e) {
       throw mapApiError(e, fallback: 'Не удалось загрузить сообщение.');
-    }
-  }
-
-  @override
-  Future<String> getFilledPaymentsByCredit(int creditId) async {
-    try {
-      final response = await dio.get(
-        'SenderSettings/filled/payments/$creditId',
-      );
-      final data = response.data;
-      if (data is String) {
-        return data;
-      }
-      throw const ApiError('Сервер вернул некорректный ответ.');
-    } on DioException catch (e) {
-      throw mapApiError(
-        e,
-        fallback: 'Не удалось загрузить историю платежей.',
-      );
     }
   }
 }

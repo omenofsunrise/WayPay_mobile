@@ -3,8 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 
-import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/payment/presentation/models/payment_history_filters.dart';
 
 class PaymentHistoryFiltersSheet extends StatelessWidget {
@@ -177,7 +176,10 @@ class _PaymentHistoryFiltersFormState
                     SvgIcons.calendar,
                     width: 20,
                     height: 20,
-                    color: const Color(0xFF6B717C),
+                    colorFilter: ColorFilter.mode(
+                      const Color(0xFF6B717C),
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
               ),
@@ -196,7 +198,10 @@ class _PaymentHistoryFiltersFormState
                     SvgIcons.calendar,
                     width: 20,
                     height: 20,
-                    color: const Color(0xFF6B717C),
+                    colorFilter: ColorFilter.mode(
+                      const Color(0xFF6B717C),
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
               ),
@@ -238,7 +243,6 @@ class _PaymentHistoryFiltersFormState
 
   Widget _buildStatusChip(String label, bool value) {
     final bool selected = _confirmed == value;
-    final fillColor = selected ? const Color(AppColors.primary) : Colors.white;
     final borderColor = selected
         ? const Color(AppColors.primary)
         : const Color(0xFFD9DDE5);

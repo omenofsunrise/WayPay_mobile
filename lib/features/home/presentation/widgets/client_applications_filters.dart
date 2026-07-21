@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/home/domain/entities/client_application_filters.dart';
 
 class ClientApplicationsFiltersSheet extends StatelessWidget {

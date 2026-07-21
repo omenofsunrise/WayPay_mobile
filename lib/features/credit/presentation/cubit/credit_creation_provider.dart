@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
-import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
@@ -408,7 +408,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
         'currentMonthStart': params.currentMonthStart,
         'nextMonthStart': params.nextMonthStart,
       };
-      print('Schedule preview payload: ${jsonEncode(requestData)}');
+      debugPrint('Schedule preview payload: ${jsonEncode(requestData)}');
 
       final preview = await _dataSource.getSchedulePreview(
         totalAmount: state.totalAmountWithSurcharge,
@@ -452,7 +452,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
       ..['selectedClient'] = state.selectedClient?.id
       ..['selectedInvestor'] = state.selectedInvestor?.id
       ..['selectedPool'] = state.selectedPool?.id;
-    print('[$stage] ${jsonEncode(payload)}');
+    debugPrint('[$stage] ${jsonEncode(payload)}');
   }
 
   Future createCredit() async {
@@ -493,8 +493,9 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
         throw Exception('Срок договора должен быть больше 0 месяцев');
       }
 
-      if (state.creditRequest.startPaymentDay
-          .isBefore(state.creditRequest.creditDate)) {
+      if (state.creditRequest.startPaymentDay.isBefore(
+        state.creditRequest.creditDate,
+      )) {
         throw Exception('Начало выплат не может быть раньше даты договора');
       }
 
@@ -535,7 +536,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
       );
 
       final requestJson = jsonEncode(createRequest.toJson());
-      print('Create credit payload: $requestJson');
+      debugPrint('Create credit payload: $requestJson');
 
       await _dataSource.createCredit(createRequest);
 
@@ -543,7 +544,7 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
 
       return;
     } catch (e) {
-      print('Ошибка создания договора: $e');
+      debugPrint('Ошибка создания договора: $e');
       rethrow;
     }
   }

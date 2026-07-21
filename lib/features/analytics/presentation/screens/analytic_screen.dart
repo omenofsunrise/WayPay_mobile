@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 import 'package:waypay_mobile/features/analytics/presentation/widgets/contract_count_pie.dart';
 import 'package:waypay_mobile/features/analytics/presentation/widgets/dashboard_info_card.dart';
@@ -26,7 +26,6 @@ class AnalyticsScreen extends StatefulWidget {
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
   PeriodOption _selected = PeriodOption.thisMonth;
-  DateTimeRange? _customRange;
 
   void _reloadData({String? predefinedPeriod, DateTimeRange? range}) {
     final itemsCubit = context.read<AnalyticItemsCubit>();
@@ -75,11 +74,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   selected: _selected,
                   onChanged: (option, range) {
                     setState(() {
-                      if (range != null) {
-                        _customRange = range;
-                      } else if (option != null) {
+                      if (range == null && option != null) {
                         _selected = option;
-                        _customRange = null;
                       }
                     });
                     _reloadData(predefinedPeriod: option?.name, range: range);

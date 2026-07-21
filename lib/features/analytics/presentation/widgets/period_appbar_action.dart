@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/analytics/presentation/widgets/dropdown.dart';
 
 class PeriodAppBarAction extends StatelessWidget {

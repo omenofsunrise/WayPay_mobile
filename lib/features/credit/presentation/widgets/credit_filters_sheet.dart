@@ -3,8 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
 import 'package:waypay_mobile/features/objectType/data/models/get_object_types_query.dart';
 import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
@@ -207,7 +206,10 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
           SvgIcons.calendar,
           width: 20,
           height: 20,
-          color: const Color(0xFF6B717C),
+          colorFilter: ColorFilter.mode(
+            const Color(0xFF6B717C),
+            BlendMode.srcIn,
+          ),
         ),
       ),
     );
@@ -270,7 +272,7 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
                   border: Border.all(color: const Color(0xFFD9DDE5)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -338,18 +340,6 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
         );
       },
     );
-  }
-
-  void _clearAll() {
-    for (final controller in _controllers) {
-      controller.clear();
-    }
-    setState(() {
-      _dateFrom = null;
-      _dateTo = null;
-      _selectedCatalog = null;
-      _showCatalogOptions = false;
-    });
   }
 
   @override

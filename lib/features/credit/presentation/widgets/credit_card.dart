@@ -4,7 +4,7 @@ import 'package:waypay_mobile/core/utils/phone_utils.dart';
 import 'package:waypay_mobile/core/utils/price_formatter.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/widgets/credit_modal.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CreditCardWidget extends StatelessWidget {

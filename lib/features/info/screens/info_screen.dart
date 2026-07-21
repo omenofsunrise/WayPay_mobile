@@ -3,7 +3,7 @@ import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/admin_panel/data/data_sources/company_remote_data_source.dart';
 import 'package:waypay_mobile/features/info/privacy_policy_screen.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class InfoScreen extends StatefulWidget {
   const InfoScreen({super.key});

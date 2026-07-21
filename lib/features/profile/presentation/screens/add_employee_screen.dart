@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_bloc.dart';
@@ -160,39 +158,6 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  Widget _buildDropdownSuffix({
-    bool showClear = false,
-    VoidCallback? onClear,
-    Widget? customIcon,
-  }) {
-    const arrow = Icon(
-      Icons.keyboard_arrow_down_rounded,
-      color: Color(AppColors.uiBorder),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 4),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (showClear && onClear != null)
-            GestureDetector(
-              onTap: onClear,
-              child: const Padding(
-                padding: EdgeInsets.only(right: 4),
-                child: Icon(
-                  Icons.close,
-                  size: 16,
-                  color: Color(AppColors.uiBorder),
-                ),
-              ),
-            ),
-          customIcon ?? arrow,
-        ],
-      ),
-    );
   }
 
   Widget _buildPickerField({

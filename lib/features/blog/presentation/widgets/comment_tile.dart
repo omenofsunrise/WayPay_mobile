@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -98,7 +99,12 @@ class _CommentTileState extends State<CommentTile> {
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(6),
-                child: Image.network(url, height: 120, fit: BoxFit.cover),
+                child: CachedNetworkImage(
+                  imageUrl: url,
+                  height: 120,
+                  fit: BoxFit.cover,
+                  memCacheHeight: 240,
+                ),
               ),
             );
           } else {

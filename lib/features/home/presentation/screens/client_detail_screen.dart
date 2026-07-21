@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/utils/phone_utils.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
@@ -835,7 +835,7 @@ class _CommentsTabState extends State<_CommentsTab> {
                 border: InputBorder.none,
                 hintText: 'Добавьте комментарий о клиенте...',
                 hintStyle: TextStyle(
-                  color: const Color(AppColors.uiBorder).withOpacity(.7),
+                  color: const Color(AppColors.uiBorder).withValues(alpha: .7),
                 ),
               ),
             ),
@@ -857,7 +857,7 @@ class _CommentsTabState extends State<_CommentsTab> {
                       style: TextStyle(
                         color: const Color(
                           AppColors.primary,
-                        ).withOpacity(_attachedFile == null ? .8 : 1),
+                        ).withValues(alpha: _attachedFile == null ? .8 : 1),
                         fontSize: 14,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -963,7 +963,7 @@ class _CommentCard extends StatelessWidget {
                   CircleAvatar(
                     backgroundColor: const Color(
                       AppColors.primary,
-                    ).withOpacity(.15),
+                    ).withValues(alpha: .15),
                     radius: 18,
                     child: Text(
                       _initials,

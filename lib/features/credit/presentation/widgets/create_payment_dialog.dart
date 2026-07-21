@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/bank_card/data/data_sources/bank_card_remote_data_source.dart';
 import 'package:waypay_mobile/features/bank_card/data/models/bank_card_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
@@ -181,24 +181,6 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
     );
   }
 
-  Widget _buildLabeledField(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Expanded(child: Text(label)),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              value,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildPaymentTypeSelector() {
     return Row(
       children: [
@@ -333,7 +315,10 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
           SvgIcons.calendar,
           width: 20,
           height: 20,
-          color: const Color(0xFF6B717C),
+          colorFilter: ColorFilter.mode(
+            const Color(0xFF6B717C),
+            BlendMode.srcIn,
+          ),
         ),
       ),
       suffixIconConstraints: const BoxConstraints(

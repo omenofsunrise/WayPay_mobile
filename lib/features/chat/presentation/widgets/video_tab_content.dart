@@ -11,7 +11,7 @@ import 'package:waypay_mobile/core/config/api_config.dart';
 import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/chat_video_bloc.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/paged_bloc.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class VideosTabContent extends StatefulWidget {
   final int chatId;
@@ -173,7 +173,7 @@ class _VideosTabContentState extends State<VideosTabContent> {
     if (!mounted) return;
     await showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.9),
+      barrierColor: Colors.black.withValues(alpha: 0.9),
       builder: (_) => GestureDetector(
         onTap: () => Navigator.pop(context),
         child: Container(

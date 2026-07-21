@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/note/data/data_sources/note_remote_data_source.dart';
 import 'package:waypay_mobile/features/note/data/models/note_create_request.dart';
 
@@ -186,7 +186,7 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 4,
                         ),
                       ],

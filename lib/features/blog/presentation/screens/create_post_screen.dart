@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/blog/data/data_sources/blog_remote_data_sources.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -21,6 +21,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   final List<PlatformFile> _files = [];
 
   bool _loading = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickImages() async {
     final picker = ImagePicker();

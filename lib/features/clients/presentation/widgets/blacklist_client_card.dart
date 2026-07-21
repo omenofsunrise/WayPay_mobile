@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class BlacklistClientCard extends StatelessWidget {
   const BlacklistClientCard({super.key, required this.client});

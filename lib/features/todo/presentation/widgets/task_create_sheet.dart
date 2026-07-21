@@ -9,7 +9,7 @@ import 'package:waypay_mobile/features/profile/presentation/bloc/employees_event
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_state.dart';
 import 'package:waypay_mobile/features/todo/data/models/task_request.dart';
 import 'package:waypay_mobile/features/todo/data/models/todo_model.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class TaskCreateSheet extends StatefulWidget {
   const TaskCreateSheet({super.key, required this.onSubmit});
@@ -146,7 +146,10 @@ class _TaskCreateSheetState extends State<TaskCreateSheet> {
                 SvgIcons.calendar,
                 width: 20,
                 height: 20,
-                color: const Color(0xFF6B717C),
+                colorFilter: ColorFilter.mode(
+                  const Color(0xFF6B717C),
+                  BlendMode.srcIn,
+                ),
               ),
             ),
           ),
@@ -260,8 +263,10 @@ class _TaskCreateSelector<T> extends StatelessWidget {
             children: [
               Text(
                 title,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 12),
               Expanded(
@@ -346,8 +351,7 @@ class _EmployeeSelector extends StatelessWidget {
                               onTap: () => Navigator.of(context).pop(null),
                             );
                           }
-                          final employeeIndex =
-                              index - (allowEmpty ? 1 : 0);
+                          final employeeIndex = index - (allowEmpty ? 1 : 0);
                           final employee = items[employeeIndex];
                           return ListTile(
                             title: Text(employee.fullName),

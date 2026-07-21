@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/investment_dynamic_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/investment_dynamic_state.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class InvestitionTable extends StatefulWidget {
   const InvestitionTable({super.key});
@@ -74,7 +74,7 @@ class _InvestitionTableState extends State<InvestitionTable> {
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         hoverColor: Colors.transparent,
-                        overlayColor: MaterialStateProperty.all(
+                        overlayColor: WidgetStateProperty.all(
                           Colors.transparent,
                         ),
                         child: Padding(
@@ -116,8 +116,9 @@ class _InvestitionTableState extends State<InvestitionTable> {
                             1: FlexColumnWidth(1),
                           },
                           border: const TableBorder(
-                            horizontalInside:
-                                BorderSide(color: Color(0xFFE6E9EE)),
+                            horizontalInside: BorderSide(
+                              color: Color(0xFFE6E9EE),
+                            ),
                             top: BorderSide(color: Color(0xFFE6E9EE)),
                             bottom: BorderSide(color: Color(0xFFE6E9EE)),
                           ),

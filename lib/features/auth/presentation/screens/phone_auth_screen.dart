@@ -5,7 +5,8 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 import 'package:waypay_mobile/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:waypay_mobile/features/auth/presentation/widgets/call_confirmation_dialog.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart'
+    hide CallConfirmationDialog;
 import 'package:waypay_mobile/routes/routes.dart';
 
 class PhoneAuthScreen extends StatefulWidget {
@@ -201,7 +202,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                                   ).copyWith(
                                     color: const Color(
                                       AppColors.black,
-                                    ).withOpacity(0.35),
+                                    ).withValues(alpha: 0.35),
                                   ),
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 12,

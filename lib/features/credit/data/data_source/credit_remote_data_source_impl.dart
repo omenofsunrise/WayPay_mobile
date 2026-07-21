@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_response_model.dart';
@@ -168,15 +167,13 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
       String formattedErrors = '';
       if (errors is Map<String, dynamic>) {
         formattedErrors = errors.entries
-            .map(
-              (entry) {
-                final value = entry.value;
-                if (value is List) {
-                  return '${entry.key}: ${value.join(', ')}';
-                }
-                return '${entry.key}: ${value.toString()}';
-              },
-            )
+            .map((entry) {
+              final value = entry.value;
+              if (value is List) {
+                return '${entry.key}: ${value.join(', ')}';
+              }
+              return '${entry.key}: ${value.toString()}';
+            })
             .join('\n');
       }
       return [

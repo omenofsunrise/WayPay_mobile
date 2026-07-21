@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -25,7 +25,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final _initialController = TextEditingController();
   final _percentController = TextEditingController();
   final _roundController = TextEditingController();
+  final _dateController = TextEditingController();
   final FocusNode _monthsFocusNode = FocusNode();
+
+  static final DateFormat _dateFormat = DateFormat('dd.MM.yyyy');
 
   DateTime _startDate = DateTime.now().add(const Duration(days: 31));
 
@@ -49,6 +52,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _initialController.addListener(_calculate);
     _percentController.addListener(_calculate);
     _roundController.addListener(_calculate);
+    _dateController.text = _dateFormat.format(_startDate);
   }
 
   void _showCalculationModeMenu(BuildContext context) {
@@ -199,6 +203,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _initialController.dispose();
     _percentController.dispose();
     _roundController.dispose();
+    _dateController.dispose();
     _monthsFocusNode.dispose();
     super.dispose();
   }
@@ -213,7 +218,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       final file = File('${dir.path}/$filename');
       await file.writeAsBytes(bytes, flush: true);
 
-      await Share.shareXFiles([XFile(file.path)], subject: 'Расчёт рассрочки');
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(file.path)], subject: 'Расчёт рассрочки'),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -260,7 +267,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     final displayTotal = money(total);
     final displayDebt = money(debt);
-    final displayOver = money(overpayment);
     final displayMonthly = money(monthlyPayment);
     final displayLastMonth = DateFormat(
       'LLLL yyyy',
@@ -896,12 +902,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildDatePickerField() {
-    final controller = TextEditingController(
-      text: DateFormat('dd.MM.yyyy').format(_startDate),
-    );
-
     return _buildPickerField(
-      controller: controller,
+      controller: _dateController,
       label: 'Начало выплат',
       onTap: () async {
         final picked = await showDialog<DateTime>(
@@ -917,7 +919,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
         if (picked != null) {
           setState(() => _startDate = picked);
-          controller.text = DateFormat('dd.MM.yyyy').format(_startDate);
+          _dateController.text = _dateFormat.format(_startDate);
           _calculate();
         }
       },
@@ -927,7 +929,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           SvgIcons.calendar,
           width: 20,
           height: 20,
-          color: const Color(0xFF6B717C),
+          colorFilter: ColorFilter.mode(
+            const Color(0xFF6B717C),
+            BlendMode.srcIn,
+          ),
         ),
       ),
     );
@@ -940,7 +945,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),

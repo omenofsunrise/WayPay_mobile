@@ -3,7 +3,7 @@ import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investor_report_screen.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class InvestorCard extends StatefulWidget {
   final InvestorsModel investor;
@@ -38,12 +38,12 @@ class _InvestorCardState extends State<InvestorCard> {
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
               color: widget.investor.isBlocked
-                  ? Colors.red.withOpacity(0.1)
+                  ? Colors.red.withValues(alpha: 0.1)
                   : Colors.white,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),

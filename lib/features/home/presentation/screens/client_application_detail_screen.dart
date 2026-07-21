@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/features/home/data/models/credit_applications/credit_application_model.dart';
 import 'package:waypay_mobile/routes/routes.dart';
@@ -91,7 +91,10 @@ class ClientApplicationDetailScreen extends StatelessWidget {
                         showIcon: true,
                         iconWidget: SvgPicture.asset(
                           SvgIcons.chat2,
-                          color: Colors.white,
+                          colorFilter: ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
                         ),
                         color: const Color(AppColors.primary),
                         textColor: Colors.white,
@@ -107,7 +110,10 @@ class ClientApplicationDetailScreen extends StatelessWidget {
                         showIcon: true,
                         iconWidget: SvgPicture.asset(
                           SvgIcons.add,
-                          color: Colors.white,
+                          colorFilter: ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
                         ),
                         color: const Color(AppColors.primary),
                         textColor: Colors.white,

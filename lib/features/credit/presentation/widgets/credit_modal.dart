@@ -4,7 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/utils/phone_utils.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/credit/presentation/widgets/add_note_dialog.dart';
@@ -20,8 +20,6 @@ import 'package:waypay_mobile/features/note/data/models/note_model.dart';
 import 'package:waypay_mobile/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
 import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
 import 'package:waypay_mobile/features/payment/presentation/screen/schedule_screen.dart';
-import 'package:waypay_mobile/features/sold_products/data/data_sources/sold_product_remote_data_source.dart';
-import 'package:waypay_mobile/features/sold_products/data/models/sold_product_model.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -41,11 +39,9 @@ class CreditFullScreen extends StatefulWidget {
 
 class _CreditFullScreenState extends State<CreditFullScreen> {
   List<NoteModel> _notes = [];
-  List<SoldProductModel> _soldProducts = [];
   List<ScheduleModel> _paymentPreview = [];
   final Set<int> _whatsAppLoading = <int>{};
   bool _isLoadingNotes = true;
-  bool _isLoadingProducts = true;
   bool _isLoadingPayments = true;
   String? _paymentsError;
   UserStorage userStorage = UserStorage();
@@ -59,7 +55,6 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
   void initState() {
     super.initState();
     _loadNotes();
-    _loadSoldProducts();
     _loadPaymentPreview();
   }
 
@@ -94,12 +89,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
 
   Widget _buildShareButton(BuildContext context) {
     return IconButton(
-      icon: SvgPicture.asset(
-        SvgIcons.share,
-        package: 'waypay_styles',
-        width: 24,
-        height: 24,
-      ),
+      icon: SvgPicture.asset(SvgIcons.share, width: 24, height: 24),
       tooltip: 'Поделиться',
       onPressed: () => _showShareSheet(context),
     );
@@ -238,7 +228,6 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userStorage = UserStorage();
     return Scaffold(
       backgroundColor: Color(AppColors.background),
       appBar: _buildAppBar(context),
@@ -272,10 +261,6 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
         ),
       ),
     );
-  }
-
-  double _calculateTotalAmount() {
-    return _soldProducts.fold(0.0, (sum, product) => sum + product.totalAmount);
   }
 
   Widget _buildCreditInfoSection() {
@@ -421,7 +406,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
                 ),
                 const SizedBox(height: 12),
                 DefaultButton(
-                  text: 'История платежей',
+                  text: 'История платежей с остатком',
                   showIcon: true,
                   icon: Icons.event_note_outlined,
                   color: const Color(0xFF25D366),
@@ -468,8 +453,8 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
 
     String message;
     try {
-      final remote = getIt<ScheduleRemoteDataSources>();
-      message = await remote.getFilledPaymentsByCredit(widget.credit.id);
+      final schedule = await _loadFullSchedule();
+      message = _buildPaymentsHistoryMessage(schedule);
     } catch (e) {
       if (mounted) Navigator.of(context, rootNavigator: true).pop();
       if (!mounted) return;
@@ -481,6 +466,67 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
     if (mounted) Navigator.of(context, rootNavigator: true).pop();
 
     await _launchWhatsApp(phone, message);
+  }
+
+  Future<List<ScheduleModel>> _loadFullSchedule() async {
+    final remote = getIt<ScheduleRemoteDataSources>();
+    const pageSize = 100;
+    final first = await remote.getScheduleByCredit(
+      creditId: widget.credit.id,
+      includePayed: true,
+      page: 1,
+      pageSize: pageSize,
+    );
+    final items = <ScheduleModel>[...first.items];
+    for (int page = 2; page <= first.totalPages; page++) {
+      final next = await remote.getScheduleByCredit(
+        creditId: widget.credit.id,
+        includePayed: true,
+        page: page,
+        pageSize: pageSize,
+      );
+      items.addAll(next.items);
+    }
+    return items;
+  }
+
+  String _buildPaymentsHistoryMessage(List<ScheduleModel> schedule) {
+    final credit = widget.credit;
+    final sorted = [...schedule]
+      ..sort((a, b) {
+        final da = DateTime.tryParse(a.paymentDate);
+        final db = DateTime.tryParse(b.paymentDate);
+        if (da == null && db == null) return 0;
+        if (da == null) return 1;
+        if (db == null) return -1;
+        return da.compareTo(db);
+      });
+
+    final buffer = StringBuffer()
+      ..writeln('Здравствуйте, ${credit.clientFullName}!')
+      ..writeln()
+      ..writeln('История платежей по договору №${credit.id}')
+      ..writeln();
+
+    if (sorted.isEmpty) {
+      buffer.write('Платежи ещё не внесены.');
+      return buffer.toString();
+    }
+
+    for (final item in sorted) {
+      final date = DateTime.tryParse(item.paymentDate);
+      final dateLabel = date != null ? _formatDate(date) : item.paymentDate;
+      final status = item.payed ? 'оплачен' : 'ожидается';
+      buffer.writeln(
+        '$dateLabel — ${_formatCurrency(item.paymentAmount)} '
+        '($status), остаток: ${_formatCurrency(item.rest)}',
+      );
+    }
+
+    buffer
+      ..writeln()
+      ..write('Итоговый остаток по договору: ${_formatCurrency(credit.rest)}');
+    return buffer.toString();
   }
 
   Future<void> _launchWhatsApp(String phone, String message) async {
@@ -504,9 +550,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
       ..writeln('Дата подписания: ${_formatDate(credit.creditDate)}')
       ..writeln('Срок рассрочки: ${credit.termMonths} мес.')
       ..writeln('Общий долг: ${_formatCurrency(credit.totalAmount)}')
-      ..writeln(
-        'Первоначальный взнос: ${_formatCurrency(credit.firstPayment)}',
-      )
+      ..writeln('Первоначальный взнос: ${_formatCurrency(credit.firstPayment)}')
       ..writeln('Начислено %: ${_formatCurrency(credit.accured)}')
       ..writeln('Уплачено: ${_formatCurrency(credit.payed)}')
       ..write('Остаток: ${_formatCurrency(credit.rest)}');
@@ -561,7 +605,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -774,18 +818,17 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
     }
   }
 
-  String _formatCurrency(num amount) {
-    final formatter = NumberFormat.currency(
-      locale: 'ru_RU',
-      symbol: '₽',
-      decimalDigits: 0,
-    );
-    return formatter.format(amount);
-  }
+  static final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'ru_RU',
+    symbol: '₽',
+    decimalDigits: 0,
+  );
+  static final DateFormat _dateFormat = DateFormat('dd MMMM yyyy', 'ru');
+  static final DateFormat _shortDateFormat = DateFormat('dd.MM');
 
-  String _formatDate(DateTime date) {
-    return DateFormat('dd MMMM yyyy', 'ru').format(date);
-  }
+  String _formatCurrency(num amount) => _currencyFormat.format(amount);
+
+  String _formatDate(DateTime date) => _dateFormat.format(date);
 
   Future<void> _loadNotes() async {
     try {
@@ -809,34 +852,6 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Ошибка загрузки заметок: $e')));
-      }
-    }
-  }
-
-  Future<void> _loadSoldProducts() async {
-    try {
-      final creditId = widget.credit.id;
-      debugPrint('🛍️ Загружаем проданные товары для creditId = $creditId');
-
-      final productDataSource = getIt<SoldProductRemoteDataSource>();
-      final data = await productDataSource.fetchSoldProductsByCreditId(
-        creditId,
-      );
-
-      setState(() {
-        _soldProducts = data;
-        _isLoadingProducts = false;
-      });
-    } catch (e, stack) {
-      debugPrint('❌ Ошибка при загрузке проданных товаров: $e');
-      debugPrintStack(stackTrace: stack);
-
-      setState(() => _isLoadingProducts = false);
-
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Ошибка загрузки товаров: $e')));
       }
     }
   }
@@ -1023,7 +1038,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
   }
 
   Widget _buildPaymentDateBadge(DateTime? date) {
-    final label = date != null ? DateFormat('dd.MM').format(date) : '--.--';
+    final label = date != null ? _shortDateFormat.format(date) : '--.--';
     return Container(
       width: 48,
       height: 48,

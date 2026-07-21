@@ -3,7 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';

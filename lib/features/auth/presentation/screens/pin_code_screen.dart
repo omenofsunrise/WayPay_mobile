@@ -10,7 +10,7 @@ import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_s
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/routes/routes.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class PinCodeScreen extends StatefulWidget {
   const PinCodeScreen({super.key});

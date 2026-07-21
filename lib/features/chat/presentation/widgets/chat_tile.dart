@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class ChatTile extends StatelessWidget {
   final String chatName;

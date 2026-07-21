@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source.dart';
 import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source.dart';
@@ -166,6 +166,7 @@ class _AllChatScreenState extends State<AllChatScreen> {
                             ),
                           );
                           if (result == true) {
+                            if (!mounted) return;
                             context.read<ChatListBloc>().add(
                               const ChatListRefreshed(),
                             );

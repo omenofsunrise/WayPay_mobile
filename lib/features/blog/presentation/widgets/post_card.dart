@@ -13,7 +13,7 @@ import 'package:waypay_mobile/features/blog/presentation/widgets/image_modal_vie
 import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source.dart';
 import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source.dart';
 import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class PostCard extends StatefulWidget {
   final int id;
@@ -238,11 +238,13 @@ class _PostCardState extends State<PostCard> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        _resolveUrl(widget.fileThumbnail),
+                      child: CachedNetworkImage(
+                        imageUrl: _resolveUrl(widget.fileThumbnail),
                         width: 50,
                         height: 50,
                         fit: BoxFit.cover,
+                        memCacheWidth: 100,
+                        memCacheHeight: 100,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -445,7 +447,9 @@ class _ImagesBlockCachedState extends State<_ImagesBlockCached> {
               height: 8,
               margin: const EdgeInsets.symmetric(horizontal: 3),
               decoration: BoxDecoration(
-                color: active ? Colors.teal : Colors.teal.withOpacity(0.3),
+                color: active
+                    ? Colors.teal
+                    : Colors.teal.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
             );
@@ -480,7 +484,6 @@ class _SharePostDialogState extends State<_SharePostDialog> {
   late final ChatRemoteDataSource _chatApi = getIt<ChatRemoteDataSource>();
   late final MessageRemoteDataSource _msgApi = getIt<MessageRemoteDataSource>();
 
-  List<ChatResponse> _all = [];
   List<ChatResponse> _filtered = [];
   bool _loading = true;
   bool _sending = false;
@@ -506,7 +509,6 @@ class _SharePostDialogState extends State<_SharePostDialog> {
     try {
       final data = await _chatApi.getMyChats(search: q);
       setState(() {
-        _all = data;
         _filtered = data;
         _loading = false;
       });

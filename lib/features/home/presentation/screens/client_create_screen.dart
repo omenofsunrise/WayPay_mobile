@@ -4,13 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/create_clients_requests.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/get_clients_query.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class ClientCreateScreen extends StatefulWidget {
   const ClientCreateScreen({super.key});

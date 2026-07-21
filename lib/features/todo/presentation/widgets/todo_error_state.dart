@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class TodoErrorState extends StatelessWidget {
   const TodoErrorState({super.key, required this.message, required this.onRetry});

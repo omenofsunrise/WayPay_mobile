@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
 import 'package:waypay_mobile/features/credit/data/models/schedule_preview_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
-import 'package:waypay_styles/waypay_styles.dart';
 
 class Step3SchedulesContent extends StatefulWidget {
   final double firstPayment;

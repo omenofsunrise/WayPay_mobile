@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/features/payment/data/models/payment_schedule_summary.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class PaymentScheduleCard extends StatelessWidget {
   const PaymentScheduleCard({super.key, required this.summary});

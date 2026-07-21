@@ -7,7 +7,7 @@ import 'package:waypay_mobile/core/widgets/refresh.dart';
 import 'package:waypay_mobile/features/admin_panel/data/models/post_company_model.dart';
 import 'package:waypay_mobile/features/admin_panel/presentation/cubit/company_cubit.dart';
 import 'package:waypay_mobile/routes/routes.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});

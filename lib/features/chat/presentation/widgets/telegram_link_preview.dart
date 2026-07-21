@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
@@ -94,11 +95,13 @@ class _TelegramLinkPreviewState extends State<TelegramLinkPreview> {
             ClipRRect(
               borderRadius: BorderRadius.circular(6),
               child: image != null
-                  ? Image.network(
-                      image!,
+                  ? CachedNetworkImage(
+                      imageUrl: image!,
                       width: 60,
                       height: 60,
                       fit: BoxFit.contain, // помещаем полностью в 60x60
+                      memCacheWidth: 120,
+                      memCacheHeight: 120,
                     )
                   : Container(
                       width: 60,

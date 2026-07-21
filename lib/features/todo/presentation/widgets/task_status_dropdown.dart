@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:waypay_mobile/features/todo/data/models/todo_model.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class TaskStatusDropdown extends StatelessWidget {
   final TodoTask task;

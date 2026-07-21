@@ -1,5 +1,3 @@
-import 'dart:developer' as developer;
-
 import 'package:dio/dio.dart';
 import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/analytics/data/data_sources/analytic_remote_data_source.dart';
@@ -116,9 +114,7 @@ class AnalyticRemoteDataSourceImpl implements AnalyticRemoteDataSource {
     try {
       final response = await dio.get(
         'Analytic/schedules',
-        queryParameters: {
-          if (year != null) 'year': year,
-        },
+        queryParameters: {if (year != null) 'year': year},
       );
       final data = response.data;
       if (data is List) {

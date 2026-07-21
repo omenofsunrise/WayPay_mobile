@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_styles/waypay_styles.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 
@@ -28,7 +25,6 @@ class _InvestorSelectorModalContentState
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _commentController = TextEditingController();
   Timer? _debounce;
-  InvestorsModel? _selectedInvestor;
 
   final ValueNotifier<String?> amountError = ValueNotifier(null);
   final ValueNotifier<String?> investorError = ValueNotifier(null);
@@ -46,13 +42,6 @@ class _InvestorSelectorModalContentState
     _commentController.dispose();
     _debounce?.cancel();
     super.dispose();
-  }
-
-  void _onInvestorTap(InvestorsModel investor) {
-    setState(() {
-      _selectedInvestor = investor;
-      investorError.value = null;
-    });
   }
 
   @override

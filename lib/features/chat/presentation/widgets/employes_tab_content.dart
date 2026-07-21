@@ -11,7 +11,7 @@ import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/chat_mem
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
 import 'package:waypay_mobile/features/chat/presentation/screens/chat_screen.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class EmployesTabContent extends StatefulWidget {
   final int chatId;

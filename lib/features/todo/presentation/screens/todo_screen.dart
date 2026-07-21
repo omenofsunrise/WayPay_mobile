@@ -8,7 +8,7 @@ import 'package:waypay_mobile/features/todo/presentation/widgets/task_create_she
 import 'package:waypay_mobile/features/todo/presentation/widgets/todo_error_state.dart';
 import 'package:waypay_mobile/features/todo/presentation/widgets/todo_section_card.dart';
 import 'package:waypay_mobile/features/todo/presentation/widgets/todo_utils.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class TodoScreen extends StatefulWidget {
   const TodoScreen({super.key});
@@ -54,7 +54,7 @@ class _TodoScreenState extends State<TodoScreen> {
       isScrollControlled: true,
       useRootNavigator: true,
       clipBehavior: Clip.antiAlias,
-      barrierColor: Colors.black.withOpacity(0.4),
+      barrierColor: Colors.black.withValues(alpha: 0.4),
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -76,7 +76,7 @@ class _TodoScreenState extends State<TodoScreen> {
       isScrollControlled: true,
       useRootNavigator: true,
       clipBehavior: Clip.antiAlias,
-      barrierColor: Colors.black.withOpacity(0.4),
+      barrierColor: Colors.black.withValues(alpha: 0.4),
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),

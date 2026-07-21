@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
@@ -37,7 +38,7 @@ import 'package:waypay_mobile/features/chat/presentation/widgets/chat_text_field
 import 'package:waypay_mobile/features/chat/presentation/widgets/telegram_link_preview.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/features/todo/presentation/widgets/task_action_dropdown.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class ChatScreen extends StatefulWidget {
   final int chatId;
@@ -70,6 +71,16 @@ class _ChatScreenState extends State<ChatScreen> {
   Employee? _currentEmployee;
   final _imagePicker = ImagePicker();
   final _timeFmt = DateFormat('HH:mm');
+
+  static final RegExp _urlRe = RegExp(r'(https?:\/\/[^\s]+)');
+  static final RegExp _imageNameRe = RegExp(
+    r'\.(png|jpe?g|gif|webp|heic|heif)$',
+    caseSensitive: false,
+  );
+  static final RegExp _videoNameRe = RegExp(
+    r'\.(mp4|mov|avi|mkv|webm|m4v)$',
+    caseSensitive: false,
+  );
 
   bool _showScrollDownBtn = false;
   Timer? _typingDebounce;
@@ -157,14 +168,8 @@ class _ChatScreenState extends State<ChatScreen> {
       ct != null && ct.toLowerCase().startsWith('image/');
   bool _isVideoCt(String? ct) =>
       ct != null && ct.toLowerCase().startsWith('video/');
-  bool _isImageName(String v) => RegExp(
-    r'\.(png|jpe?g|gif|webp|heic|heif)$',
-    caseSensitive: false,
-  ).hasMatch(v);
-  bool _isVideoName(String v) => RegExp(
-    r'\.(mp4|mov|avi|mkv|webm|m4v)$',
-    caseSensitive: false,
-  ).hasMatch(v);
+  bool _isImageName(String v) => _imageNameRe.hasMatch(v);
+  bool _isVideoName(String v) => _videoNameRe.hasMatch(v);
 
   Future<Uint8List?> _thumbFromLocalVideo(File file) async {
     try {
@@ -385,7 +390,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _openUrlFullscreenImage(String url) async {
     showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.9),
+      barrierColor: Colors.black.withValues(alpha: 0.9),
       builder: (_) => GestureDetector(
         onTap: () => Navigator.pop(context),
         child: Container(
@@ -394,10 +399,10 @@ class _ChatScreenState extends State<ChatScreen> {
           child: InteractiveViewer(
             minScale: 0.5,
             maxScale: 5,
-            child: Image.network(
-              url,
+            child: CachedNetworkImage(
+              imageUrl: url,
               fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) =>
+              errorWidget: (context, url, error) =>
                   const Icon(Icons.broken_image, color: Colors.white, size: 48),
             ),
           ),
@@ -434,7 +439,7 @@ class _ChatScreenState extends State<ChatScreen> {
     if (!mounted) return;
     await showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.9),
+      barrierColor: Colors.black.withValues(alpha: 0.9),
       builder: (_) => GestureDetector(
         onTap: () => Navigator.pop(context),
         child: Container(
@@ -666,12 +671,14 @@ class _ChatScreenState extends State<ChatScreen> {
           onTap: () => _openUrlFullscreenImage(url),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              url,
+            child: CachedNetworkImage(
+              imageUrl: url,
               width: 220,
               height: 220,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
+              memCacheWidth: 440,
+              memCacheHeight: 440,
+              errorWidget: (context, url, error) => Container(
                 width: 220,
                 height: 220,
                 color: Colors.black12,
@@ -825,6 +832,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
     if (ok != true) return;
 
+    if (!mounted) return;
     // прогресс
     showDialog(
       context: context,
@@ -872,8 +880,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     String? urlFromText;
     if (m.text != null && m.text!.isNotEmpty) {
-      final regex = RegExp(r'(https?:\/\/[^\s]+)');
-      final match = regex.firstMatch(m.text!);
+      final match = _urlRe.firstMatch(m.text!);
       if (match != null) urlFromText = match.group(0);
     }
 
@@ -1073,10 +1080,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
         widget.onChatUpdated?.call();
-        return true;
       },
       child: BlocProvider.value(
         value: _chatBloc,

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investor_pool_bloc.dart';

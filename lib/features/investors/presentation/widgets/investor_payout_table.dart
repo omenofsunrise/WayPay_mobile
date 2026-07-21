@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_model.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class InvestorPayoutTable extends StatefulWidget {
   final int investorId;

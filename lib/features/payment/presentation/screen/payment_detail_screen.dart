@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/utils/phone_utils.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
-import 'package:waypay_mobile/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
 
@@ -25,12 +22,10 @@ class PaymentDetailScreen extends StatefulWidget {
 class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
   final _creditSource = getIt<CreditRemoteDataSource>();
   final _paymentSource = getIt<PaymentRemoteDataSources>();
-  final _scheduleSource = getIt<ScheduleRemoteDataSources>();
   CreditModel? _credit;
   int? _resolvedCreditId;
   bool _isLoading = true;
   late bool _isNotified;
-  bool _notifyLoading = false;
   String? _error;
 
   ScheduleModel? get _schedule => widget.schedule;
@@ -43,7 +38,6 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
       _schedule?.paymentAmount ?? _payment?.paymentAmount ?? 0;
   String get _paymentDateRaw =>
       _schedule?.paymentDate ?? _payment?.paymentDate ?? '';
-  String? get _clientPhone => _schedule?.clientPhone ?? _credit?.clientPhone;
   bool get _isPaid => _payment?.accepted == true || _isNotified;
 
   @override
@@ -107,47 +101,6 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
     return null;
   }
 
-  Future<void> _contactClient() async {
-    final phoneRaw = _clientPhone;
-    if (phoneRaw == null || phoneRaw.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Не указан номер клиента')));
-      return;
-    }
-    if (_notifyLoading) return;
-    setState(() => _notifyLoading = true);
-    try {
-      final scheduleId = _schedule?.id ?? _payment?.id ?? 0;
-      if (scheduleId == 0) {
-        throw Exception('Не удалось определить график платежа');
-      }
-      final phone = _preparePhone(phoneRaw);
-      if (phone == null) {
-        throw Exception('Неверный номер клиента');
-      }
-      final message = await _scheduleSource.getFilledSender(scheduleId);
-      final opened = await _openWhatsApp(phone, message);
-      if (opened && !_isNotified) {
-        await _scheduleSource.putSchedule(scheduleId);
-        _isNotified = true;
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка: $e')));
-    } finally {
-      if (mounted) {
-        setState(() => _notifyLoading = false);
-      }
-    }
-  }
-
-  String? _preparePhone(String raw) {
-    return formatRussianPhoneForWhatsApp(raw);
-  }
-
   String _formatCurrency(num? value) {
     final formatter = NumberFormat.currency(
       locale: 'ru_RU',
@@ -166,19 +119,6 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
     } catch (_) {
       return iso;
     }
-  }
-
-  Future<bool> _openWhatsApp(String phone, String message) async {
-    final uri = Uri.parse(
-      'https://wa.me/$phone?text=${Uri.encodeComponent(message)}',
-    );
-    final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не удалось открыть WhatsApp')),
-      );
-    }
-    return success;
   }
 
   @override

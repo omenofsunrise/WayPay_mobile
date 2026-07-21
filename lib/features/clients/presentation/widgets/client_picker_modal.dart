@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/routes/routes.dart';

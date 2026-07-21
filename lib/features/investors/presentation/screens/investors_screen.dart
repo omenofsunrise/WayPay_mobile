@@ -5,11 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investor_report_screen.dart';
-import 'package:waypay_styles/waypay_styles.dart';
 
 class InvestorsScreen extends StatefulWidget {
   const InvestorsScreen({super.key});
@@ -74,16 +73,16 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
       );
       if (!mounted) return;
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Инвестиция добавлена')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Инвестиция добавлена')));
       context.read<InvestorsBloc>().add(LoadInvestorsEvent(refresh: true));
     } catch (e) {
       if (!mounted) return;
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ошибка: $e')));
     }
   }
 
@@ -185,10 +184,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
 }
 
 class _InvestorCard extends StatelessWidget {
-  const _InvestorCard({
-    required this.investor,
-    required this.onAddInvestment,
-  });
+  const _InvestorCard({required this.investor, required this.onAddInvestment});
 
   final InvestorsModel investor;
   final VoidCallback onAddInvestment;

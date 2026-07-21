@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/notifications/data/models/notification_model.dart';
 import 'package:waypay_mobile/features/notifications/presentation/cubit/notifications_cubit.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class NotificationsSheet extends StatelessWidget {
   const NotificationsSheet({super.key});

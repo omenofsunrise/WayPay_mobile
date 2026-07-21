@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:waypay_mobile/core/network/connectivity_checker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/admin_panel/presentation/cubit/company_cubit.dart';
@@ -29,7 +30,7 @@ import 'package:waypay_mobile/features/todo/presentation/bloc/task_bloc.dart';
 import 'package:waypay_mobile/features/network_error/screens/network_error_screen.dart';
 import 'package:waypay_mobile/routes/app_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,8 +54,11 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _checkInitial();
-    _subscription = Connectivity().onConnectivityChanged.listen((results) {
-      final hasConnection = results.any((r) => r != ConnectivityResult.none);
+    _subscription = Connectivity().onConnectivityChanged.listen((
+      results,
+    ) async {
+      final hasConnection = await hasWorkingConnection(results);
+      if (!mounted) return;
       setState(() {
         isOffline = !hasConnection;
       });
@@ -63,7 +67,8 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _checkInitial() async {
     final results = await Connectivity().checkConnectivity();
-    final hasConnection = results.any((r) => r != ConnectivityResult.none);
+    final hasConnection = await hasWorkingConnection(results);
+    if (!mounted) return;
     setState(() {
       isOffline = !hasConnection;
     });

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ import 'package:waypay_mobile/features/blog/presentation/bloc/comment_event.dart
 import 'package:waypay_mobile/features/blog/presentation/bloc/comment_state.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class CommentsScreen extends StatefulWidget {
   final int postId;
@@ -53,6 +54,13 @@ class _CommentsScreenState extends State<CommentsScreen> {
     super.initState();
     _loadEmployee();
     context.read<CommentBloc>().add(LoadComments(widget.postId));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _loadEmployee() async {
@@ -95,6 +103,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
       );
 
       if (_editingCommentId != null) {
+        if (!mounted) return;
         context.read<CommentBloc>().add(
           AddCommentAttachment(
             commentId: _editingCommentId!,
@@ -134,6 +143,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
       );
 
       if (_editingCommentId != null) {
+        if (!mounted) return;
         context.read<CommentBloc>().add(
           AddCommentAttachment(
             commentId: _editingCommentId!,
@@ -252,7 +262,12 @@ class _CommentsScreenState extends State<CommentsScreen> {
                   child: att.isImage
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: Image.network(url, fit: BoxFit.cover),
+                          child: CachedNetworkImage(
+                            imageUrl: url,
+                            fit: BoxFit.cover,
+                            memCacheWidth: 120,
+                            memCacheHeight: 120,
+                          ),
                         )
                       : const Icon(Icons.insert_drive_file),
                 ),
@@ -261,13 +276,14 @@ class _CommentsScreenState extends State<CommentsScreen> {
                     final removed = _serverAttachments.removeAt(index);
                     setState(() {});
                     if (_editingCommentId != null) {
+                      final messenger = ScaffoldMessenger.of(context);
                       getIt<BlogRemoteDataSources>()
                           .deleteCommentAttachment(
                             commentId: _editingCommentId!,
                             attachmentId: removed.id,
                           )
                           .catchError((e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               SnackBar(
                                 content: Text('Ошибка удаления файла: $e'),
                               ),

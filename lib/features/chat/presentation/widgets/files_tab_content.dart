@@ -13,7 +13,7 @@ import 'package:waypay_mobile/core/widgets/helpers.dart';
 import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/chat_files_bloc.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/paged_bloc.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class FilesTabContent extends StatefulWidget {
   final int chatId;

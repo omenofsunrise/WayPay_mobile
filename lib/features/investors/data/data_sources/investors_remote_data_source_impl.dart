@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_request.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_response.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
-import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
 import '../models/investors_response_model.dart';
 import '../models/investor_pool_response_model.dart';
 
@@ -39,10 +39,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
         queryParams['poolId'] = poolId;
       }
 
-      final response = await dio.get(
-        'Investor',
-        queryParameters: queryParams,
-      );
+      final response = await dio.get('Investor', queryParameters: queryParams);
 
       return InvestorsResponseModel.fromJson(response.data);
     } on DioException catch (e) {
@@ -100,11 +97,11 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
     try {
       final response = await dio.get('Investor/$id');
 
-      print('✅ Загружен инвестор по ID: ${response.data}');
+      debugPrint('✅ Загружен инвестор по ID: ${response.data}');
 
       return InvestorsModel.fromJson(response.data);
     } on DioException catch (e) {
-      print('❌ Ошибка при загрузке инвестора по ID: ${e.response?.data}');
+      debugPrint('❌ Ошибка при загрузке инвестора по ID: ${e.response?.data}');
       throw mapApiError(e, fallback: 'Не удалось загрузить инвестора.');
     }
   }
@@ -128,9 +125,9 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
 
       final response = await dio.post('Investor', data: payload);
 
-      print('✅ Инвестор создан: ${response.statusCode}');
+      debugPrint('✅ Инвестор создан: ${response.statusCode}');
     } on DioException catch (e) {
-      print('❌ Ошибка создания инвестора: ${e.response?.data}');
+      debugPrint('❌ Ошибка создания инвестора: ${e.response?.data}');
       throw mapApiError(e, fallback: 'Не удалось создать инвестора.');
     }
   }
@@ -139,9 +136,9 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   Future<void> deleteInvestor(int id) async {
     try {
       final response = await dio.delete('Investor/$id');
-      print('✅ Инвестор удалён: ${response.statusCode}');
+      debugPrint('✅ Инвестор удалён: ${response.statusCode}');
     } on DioException catch (e) {
-      print('❌ Ошибка удаления инвестора: ${e.response?.data}');
+      debugPrint('❌ Ошибка удаления инвестора: ${e.response?.data}');
       throw mapApiError(e, fallback: 'Не удалось удалить инвестора.');
     }
   }
@@ -164,9 +161,9 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
 
       final response = await dio.put('Investor/$id', data: payload);
 
-      print('✅ Инвестор обновлён: ${response.statusCode}');
+      debugPrint('✅ Инвестор обновлён: ${response.statusCode}');
     } on DioException catch (e) {
-      print('❌ Ошибка обновления инвестора: ${e.response?.data}');
+      debugPrint('❌ Ошибка обновления инвестора: ${e.response?.data}');
       throw mapApiError(e, fallback: 'Не удалось обновить инвестора.');
     }
   }
@@ -188,9 +185,9 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
         data: payload,
       );
 
-      print('✅ Инвестиция добавлена: ${response.statusCode}');
+      debugPrint('✅ Инвестиция добавлена: ${response.statusCode}');
     } on DioException catch (e) {
-      print('❌ Ошибка добавления инвестиций: ${e.response?.data}');
+      debugPrint('❌ Ошибка добавления инвестиций: ${e.response?.data}');
       throw mapApiError(e, fallback: 'Не удалось добавить инвестицию.');
     }
   }
@@ -199,13 +196,10 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   Future<void> toggleBlockInvestor(int id) async {
     try {
       final response = await dio.patch('Investor/toggle-block/$id');
-      print('✅ Статус блокировки изменён: ${response.statusCode}');
+      debugPrint('✅ Статус блокировки изменён: ${response.statusCode}');
     } on DioException catch (e) {
-      print('❌ Ошибка смены блокировки: ${e.response?.data}');
-      throw mapApiError(
-        e,
-        fallback: 'Не удалось изменить статус блокировки.',
-      );
+      debugPrint('❌ Ошибка смены блокировки: ${e.response?.data}');
+      throw mapApiError(e, fallback: 'Не удалось изменить статус блокировки.');
     }
   }
 
@@ -225,10 +219,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
 
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
-      throw mapApiError(
-        e,
-        fallback: 'Не удалось загрузить отчёт инвестора.',
-      );
+      throw mapApiError(e, fallback: 'Не удалось загрузить отчёт инвестора.');
     }
   }
 
@@ -279,9 +270,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
     int investorId,
   ) async {
     try {
-      final response = await dio.get(
-        'InvestorPayouts/investor/$investorId',
-      );
+      final response = await dio.get('InvestorPayouts/investor/$investorId');
 
       if (response.data is List) {
         return (response.data as List)
@@ -291,10 +280,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
         throw const ApiError('Сервер вернул некорректный ответ.');
       }
     } on DioException catch (e) {
-      throw mapApiError(
-        e,
-        fallback: 'Не удалось загрузить выплаты инвестора.',
-      );
+      throw mapApiError(e, fallback: 'Не удалось загрузить выплаты инвестора.');
     }
   }
 }

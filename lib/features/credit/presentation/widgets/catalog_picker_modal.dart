@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 import 'package:waypay_mobile/features/objectType/data/models/get_object_types_query.dart';
 import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';

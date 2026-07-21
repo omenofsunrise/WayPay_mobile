@@ -10,7 +10,7 @@ import 'package:waypay_mobile/core/widgets/refresh.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:waypay_mobile/routes/routes.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class MyProfileScreen extends StatefulWidget {
   final int? employeeId;
@@ -42,6 +42,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         filePath: picked.path,
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Не удалось загрузить фото: $e')));
@@ -68,8 +69,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     );
 
     if (confirmed == true) {
+      if (!mounted) return;
+      final cubit = context.read<ProfileCubit>();
       try {
-        await context.read<ProfileCubit>().deleteEmployeePhoto();
+        await cubit.deleteEmployeePhoto();
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(
@@ -454,82 +457,6 @@ class _InfoCard extends StatelessWidget {
             )
             .toList(),
       ),
-    );
-  }
-}
-
-class _PermissionsCard extends StatelessWidget {
-  final Employee employee;
-  const _PermissionsCard({required this.employee});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000809),
-            offset: Offset(2, 2),
-            blurRadius: 4,
-          ),
-          BoxShadow(color: Color(0x05000809), blurRadius: 6),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Права пользователя',
-            style: AppStyle.manrope(size: 16, weight: FontWeight.w600),
-          ),
-          const SizedBox(height: 16),
-          ...Permission.values.map(
-            (permission) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: _PermissionRow(
-                label: permission.toLabel(),
-                isGranted: employee.permissions.contains(permission),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PermissionRow extends StatelessWidget {
-  final String label;
-  final bool isGranted;
-  const _PermissionRow({required this.label, required this.isGranted});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 22,
-          height: 22,
-          decoration: BoxDecoration(
-            color: isGranted ? const Color(AppColors.primary) : Colors.white,
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: const Color(AppColors.borderColor)),
-          ),
-          child: isGranted
-              ? const Icon(Icons.check, size: 14, color: Colors.white)
-              : null,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label,
-            style: AppStyle.manrope(size: 15, weight: FontWeight.w400),
-          ),
-        ),
-      ],
     );
   }
 }

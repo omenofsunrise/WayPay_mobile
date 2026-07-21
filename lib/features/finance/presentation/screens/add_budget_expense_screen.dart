@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/finance/data/data_source/budget_remote_data_source.dart';
 import 'package:waypay_mobile/features/finance/data/models/create_budget_outcome_dto.dart';

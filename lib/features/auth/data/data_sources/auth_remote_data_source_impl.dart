@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
@@ -19,15 +20,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     StartAuthRequestModel request,
   ) async {
     try {
-      print('➡️ Старт авторизации: ${request.toJson()}');
-      final response = await dio.post(
-        'Auth/start',
-        data: request.toJson(),
-      );
-      print('✅ Успешный ответ startAuth: ${response.data}');
+      debugPrint('➡️ Старт авторизации: ${request.toJson()}');
+      final response = await dio.post('Auth/start', data: request.toJson());
+      debugPrint('✅ Успешный ответ startAuth: ${response.data}');
       return StartAuthResponseModel.fromJson(response.data);
     } on DioException catch (e) {
-      print('❌ Ошибка startAuth: ${e.response?.data}');
+      debugPrint('❌ Ошибка startAuth: ${e.response?.data}');
       throw mapApiError(
         e,
         fallback: 'Не удалось начать авторизацию. Попробуйте ещё раз.',
@@ -38,13 +36,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> confirmCall(CallConfirmRequestModel request) async {
     try {
-      print('➡️ Подтверждение звонка: ${request.toJson()}');
-      final response = await dio.post(
-        'Auth/confirm',
-        data: request.toJson(),
-      );
-
-      print('✅ Ответ confirmCall: ${response.data}');
+      debugPrint('➡️ Подтверждение звонка: ${request.toJson()}');
+      final response = await dio.post('Auth/confirm', data: request.toJson());
 
       if (response.data is Map<String, dynamic>) {
         final data = response.data as Map<String, dynamic>;
@@ -58,13 +51,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           );
           await tokenStorage.setAuthenticated(true);
 
-          print('🔐 Токены сохранены после confirmCall');
+          debugPrint('🔐 Токены сохранены после confirmCall');
         } else {
-          print('⚠️ Токены не найдены в ответе confirmCall');
+          debugPrint('⚠️ Токены не найдены в ответе confirmCall');
         }
       }
     } on DioException catch (e) {
-      print('❌ Ошибка confirmCall: ${e.response?.data}');
+      debugPrint('❌ Ошибка confirmCall: ${e.response?.data}');
       throw mapApiError(
         e,
         fallback: 'Не удалось подтвердить звонок. Попробуйте ещё раз.',
@@ -89,8 +82,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         body['pinCode'] = savedPin;
       }
 
-      print('🔄 Запрос на обновление токена: $body');
-
       final response = await dio.post(
         'Auth/refresh',
         data: body,
@@ -109,13 +100,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         refreshToken: newRefreshToken,
       );
 
-      print(
-        '✅ Токены обновлены: accessToken=${newAccessToken.substring(0, 10)}...',
-      );
-
       return RefreshTokenResponseModel.fromJson(data);
     } on DioException catch (e) {
-      print('❌ Ошибка refreshToken: ${e.response?.data}');
+      debugPrint('❌ Ошибка refreshToken: ${e.response?.data}');
       throw mapApiError(
         e,
         fallback: 'Не удалось обновить сессию. Войдите заново.',
@@ -126,12 +113,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<Map<String, dynamic>> getAuthInfo() async {
     try {
-      print('📥 Получение информации о пользователе...');
+      debugPrint('📥 Получение информации о пользователе...');
       final response = await dio.get('Auth/info');
-      print('✅ Информация получена: ${response.data}');
+      debugPrint('✅ Информация получена: ${response.data}');
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
-      print('❌ Ошибка getAuthInfo: ${e.response?.data}');
+      debugPrint('❌ Ошибка getAuthInfo: ${e.response?.data}');
       throw mapApiError(
         e,
         fallback: 'Не удалось получить данные пользователя.',
@@ -145,9 +132,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final tokenStorage = TokenStorage();
       final accessToken = await tokenStorage.getAccessToken();
 
-      print('📌 Установка PIN: $pinCode');
-      print('🛡️ AccessToken: ${accessToken?.substring(0, 10)}...');
-
       final response = await dio.post(
         'Auth/setup-pin',
         data: {'pinCode': pinCode},
@@ -158,8 +142,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           },
         ),
       );
-
-      print('✅ Ответ setup-pin: ${response.data}');
 
       if (response.statusCode == 200) {
         if (response.data is Map<String, dynamic>) {
@@ -172,7 +154,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
               refreshToken: data['refreshToken'] as String,
             );
             await tokenStorage.setAuthenticated(true);
-            print('✅ Токены сохранены после setupPin');
+            debugPrint('✅ Токены сохранены после setupPin');
           }
         }
         return;
@@ -183,7 +165,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         statusCode: response.statusCode,
       );
     } on DioException catch (e) {
-      print('❌ Ошибка setupPin: ${e.response?.data}');
+      debugPrint('❌ Ошибка setupPin: ${e.response?.data}');
       throw mapApiError(
         e,
         fallback: 'Не удалось сохранить PIN. Попробуйте ещё раз.',
@@ -194,7 +176,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<List<SessionModel>> getSessions() async {
     try {
-      print('📥 Получение списка сессий...');
+      debugPrint('📥 Получение списка сессий...');
       final tokenStorage = TokenStorage();
       final access = await tokenStorage.getAccessToken();
 
@@ -212,17 +194,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
               (e) => SessionModel.fromJson(Map<String, dynamic>.from(e as Map)),
             )
             .toList();
-        print('✅ Сессий: ${result.length}');
+        debugPrint('✅ Сессий: ${result.length}');
         return result;
       }
 
       throw const ApiError('Не удалось загрузить список сессий.');
     } on DioException catch (e) {
-      print('❌ Ошибка getSessions: ${e.response?.data}');
-      throw mapApiError(
-        e,
-        fallback: 'Не удалось загрузить список сессий.',
-      );
+      debugPrint('❌ Ошибка getSessions: ${e.response?.data}');
+      throw mapApiError(e, fallback: 'Не удалось загрузить список сессий.');
     }
   }
 

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investor_pool_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/widgets/investor_picker_modal.dart';
@@ -102,7 +102,7 @@ class _PaymentIncomeScreenState extends State<PaymentIncomeScreen> {
     final result = await showModalBottomSheet<_PaymentFilterResult>(
       context: context,
       isScrollControlled: true,
-      barrierColor: Colors.white.withOpacity(0.7),
+      barrierColor: Colors.white.withValues(alpha: 0.7),
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),

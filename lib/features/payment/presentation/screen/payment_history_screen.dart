@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 import 'package:waypay_mobile/features/payment/presentation/bloc/expected/payment_bloc.dart';
@@ -101,7 +100,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       isScrollControlled: true,
       useRootNavigator: true,
       clipBehavior: Clip.antiAlias,
-      barrierColor: Colors.white.withOpacity(0.7),
+      barrierColor: Colors.white.withValues(alpha: 0.7),
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -122,7 +121,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       context: context,
       useRootNavigator: true,
       clipBehavior: Clip.antiAlias,
-      barrierColor: Colors.white.withOpacity(0.7),
+      barrierColor: Colors.white.withValues(alpha: 0.7),
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),

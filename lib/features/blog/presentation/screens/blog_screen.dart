@@ -11,7 +11,7 @@ import 'package:waypay_mobile/features/blog/presentation/widgets/post_card.dart'
 import 'package:waypay_mobile/features/blog/presentation/bloc/blog_bloc.dart';
 import 'package:waypay_mobile/features/blog/presentation/bloc/blog_event.dart';
 import 'package:waypay_mobile/features/blog/presentation/bloc/blog_state.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 enum FeedType { all, myBlog, liked }
 

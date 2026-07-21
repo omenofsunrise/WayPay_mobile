@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
 import 'package:waypay_mobile/features/clients/presentation/widgets/blacklist_client_card.dart';
 import 'package:waypay_mobile/routes/routes.dart';

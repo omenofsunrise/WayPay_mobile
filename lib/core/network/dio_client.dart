@@ -17,6 +17,8 @@ Dio createDio({String baseUrl = ApiConfig.apiBaseUrl}) {
     ),
   );
 
+  dio.transformer = BackgroundTransformer();
+
   bool isRefreshing = false;
   final List<Completer<void>> waiters = [];
 

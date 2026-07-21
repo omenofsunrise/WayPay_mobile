@@ -15,7 +15,7 @@ import 'package:waypay_mobile/features/investors/presentation/widgets/investor_p
 import 'package:waypay_mobile/features/objectType/data/models/object_type_model.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
 import 'package:waypay_mobile/features/credit/presentation/widgets/catalog_picker_modal.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class Step1DetailsContent extends StatefulWidget {
   final TextEditingController firstPaymentController;
@@ -128,6 +128,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
 
     BottomNavController.instance.show();
 
+    if (!mounted) return;
     if (result?.investor != null) {
       final investor = result!.investor!;
       debugPrint(
@@ -171,6 +172,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
 
     BottomNavController.instance.show();
 
+    if (!mounted) return;
     if (client != null) {
       debugPrint('[STEP1] Готово: клиент ${client.id} ${client.fullName}');
       context.read<CreditCreationCubit>().updateBasicInfo(
@@ -200,6 +202,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
 
     BottomNavController.instance.show();
 
+    if (!mounted) return;
     if (client != null) {
       context.read<CreditCreationCubit>().updateBasicInfo(
         guarantorClientId: client.id,
@@ -404,7 +407,10 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
                 SvgIcons.calendar,
                 width: 20,
                 height: 20,
-                color: const Color(0xFF6B717C),
+                colorFilter: ColorFilter.mode(
+                  const Color(0xFF6B717C),
+                  BlendMode.srcIn,
+                ),
               ),
             ),
 

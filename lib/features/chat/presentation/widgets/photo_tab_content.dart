@@ -7,7 +7,7 @@ import 'package:waypay_mobile/core/config/api_config.dart';
 import 'package:waypay_mobile/features/chat/data/models/chat/chat_response.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/chat_photo_bloc.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_info/paged_bloc.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class PhotosTabContent extends StatefulWidget {
   final int chatId;

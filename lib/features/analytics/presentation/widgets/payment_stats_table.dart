@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/debt_dynamic_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/debt_dynamic_state.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class PaymentStatsTable extends StatefulWidget {
   const PaymentStatsTable({super.key});
@@ -81,7 +81,7 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         hoverColor: Colors.transparent,
-                        overlayColor: MaterialStateProperty.all(
+                        overlayColor: WidgetStateProperty.all(
                           Colors.transparent,
                         ),
                         child: Padding(
@@ -124,8 +124,9 @@ class _PaymentStatsTableState extends State<PaymentStatsTable> {
                             2: FlexColumnWidth(1),
                           },
                           border: const TableBorder(
-                            horizontalInside:
-                                BorderSide(color: Color(0xFFE6E9EE)),
+                            horizontalInside: BorderSide(
+                              color: Color(0xFFE6E9EE),
+                            ),
                             top: BorderSide(color: Color(0xFFE6E9EE)),
                             bottom: BorderSide(color: Color(0xFFE6E9EE)),
                           ),

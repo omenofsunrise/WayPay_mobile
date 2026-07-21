@@ -30,7 +30,11 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } catch (e) {
-      emit(AuthError(mapApiError(e, fallback: 'Не удалось начать авторизацию.').message));
+      emit(
+        AuthError(
+          mapApiError(e, fallback: 'Не удалось начать авторизацию.').message,
+        ),
+      );
     }
   }
 
@@ -70,7 +74,11 @@ class AuthCubit extends Cubit<AuthState> {
 
       emit(AuthSuccess());
     } catch (e) {
-      emit(AuthError(mapApiError(e, fallback: 'Не удалось подтвердить звонок.').message));
+      emit(
+        AuthError(
+          mapApiError(e, fallback: 'Не удалось подтвердить звонок.').message,
+        ),
+      );
     }
   }
 }

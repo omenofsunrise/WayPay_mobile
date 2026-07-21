@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
-import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
@@ -40,6 +39,7 @@ class _QueueListViewState extends State<_QueueListView> {
     locale: 'ru_RU',
     symbol: '₽',
   );
+  final DateFormat _dateFormat = DateFormat('dd.MM.yyyy');
   Timer? _debounce;
   bool _showSearchHint = false;
   String _lastSubmittedQuery = '';
@@ -244,7 +244,7 @@ class _QueueListViewState extends State<_QueueListView> {
         final client = item.client;
 
         final number = '№ ${item.positionInQueue}';
-        final date = 'от ${DateFormat('dd.MM.yyyy').format(item.createdAt)}';
+        final date = 'от ${_dateFormat.format(item.createdAt)}';
         final amount = _currencyFormat.format(item.sum);
         final phone = client?.phone ?? '-';
         final fullName = client?.fullName ?? 'Клиент ${item.clientId}';

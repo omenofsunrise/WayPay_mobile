@@ -16,7 +16,7 @@ import 'package:waypay_mobile/features/blog/presentation/screens/create_post_scr
 import 'package:waypay_mobile/features/blog/presentation/widgets/post_card.dart';
 import 'package:waypay_mobile/features/blog/presentation/widgets/profile_blog_card.dart';
 import 'package:waypay_mobile/routes/routes.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class ProfileBlogScreen extends StatefulWidget {
   final int id;

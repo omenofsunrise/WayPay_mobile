@@ -10,7 +10,7 @@ import 'package:waypay_mobile/features/chat/data/service/chat_hub_service.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat/chat_bloc.dart';
 import 'package:waypay_mobile/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
 import 'package:waypay_mobile/features/chat/presentation/screens/chat_screen.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class ProfileBlogCard extends StatefulWidget {
   final ProfileBlogModel user;
@@ -156,32 +156,32 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                   ],
                 ),
               ),
-                          if (_isEditing)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Column(
-                                children: [
-                                  const SizedBox(height: 16),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: TextField(
-                                          controller: _controller,
-                                          decoration: const InputDecoration(
-                                            hintText: 'Введите описание',
-                                          ),
-                                          onSubmitted: (_) => _saveDescription(),
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.send),
-                                        onPressed: _saveDescription,
-                                      ),
-                                    ],
-                                  ),
-                                ],
+              if (_isEditing)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _controller,
+                              decoration: const InputDecoration(
+                                hintText: 'Введите описание',
                               ),
+                              onSubmitted: (_) => _saveDescription(),
                             ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.send),
+                            onPressed: _saveDescription,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -285,6 +285,7 @@ class _ProfileBlogCardState extends State<ProfileBlogCard> {
                           ),
                         );
                       } catch (e) {
+                        if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('Ошибка при открытии чата: $e'),

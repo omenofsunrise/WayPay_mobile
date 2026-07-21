@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class MainLayout extends StatelessWidget {
   const MainLayout({super.key, required this.navigationShell});
@@ -78,7 +78,10 @@ class _AppBottomNavBar extends StatelessWidget {
           color: _barBg,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
           border: Border(
-            top: BorderSide(color: Colors.black.withOpacity(0.06), width: 1),
+            top: BorderSide(
+              color: Colors.black.withValues(alpha: 0.06),
+              width: 1,
+            ),
           ),
         ),
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),

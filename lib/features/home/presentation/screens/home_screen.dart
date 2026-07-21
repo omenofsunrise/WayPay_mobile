@@ -6,8 +6,7 @@ import 'package:waypay_mobile/core/widgets/search/search_destinations.dart';
 import 'package:waypay_mobile/core/widgets/search/search_suggester.dart';
 import 'package:waypay_mobile/features/home/domain/repositories/home_repository_impl.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
-import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/home/presentation/widgets/dashboard_card.dart';
 import 'package:waypay_mobile/features/home/presentation/widgets/section_title.dart';
 import 'package:waypay_mobile/features/home/data/models/employee_model.dart';
@@ -74,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
       useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withOpacity(0.35),
+      barrierColor: Colors.black.withValues(alpha: 0.35),
       builder: (ctx) {
         return Padding(
           padding: EdgeInsets.only(
@@ -314,17 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const SectionTitle(text: 'Компании'),
-              const Spacer(),
-              MoreDetailsButton(
-                onPressed: () {
-                  // Навигация к компаниям
-                },
-              ),
-            ],
-          ),
+          const SectionTitle(text: 'Компании'),
           Row(
             children: [
               Expanded(

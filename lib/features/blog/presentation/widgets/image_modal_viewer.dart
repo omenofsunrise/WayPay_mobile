@@ -7,7 +7,7 @@ class ImageModalViewer {
       context: context,
       barrierDismissible: true,
       barrierLabel: 'Image Viewer',
-      barrierColor: Colors.black.withOpacity(0.5),
+      barrierColor: Colors.black.withValues(alpha: 0.5),
       transitionDuration: const Duration(milliseconds: 200),
       pageBuilder: (ctx, animation, secondaryAnimation) {
         return SafeArea(

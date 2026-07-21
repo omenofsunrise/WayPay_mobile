@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
 
 import 'package:waypay_mobile/features/home/data/models/credit_applications/credit_application_model.dart';
@@ -289,7 +289,6 @@ class _ApplicationsTabContent extends StatelessWidget {
     symbol: '₽',
     decimalDigits: 0,
   );
-  static final DateFormat _dateFormat = DateFormat('dd.MM.yyyy');
 
   String _formatCurrency(double? value) {
     if (value == null) return '—';
@@ -299,11 +298,6 @@ class _ApplicationsTabContent extends StatelessWidget {
   String _formatTerm(int? months) {
     if (months == null || months <= 0) return '—';
     return '$months мес.';
-  }
-
-  String _formatDate(DateTime? date) {
-    if (date == null) return '—';
-    return _dateFormat.format(date);
   }
 
   @override

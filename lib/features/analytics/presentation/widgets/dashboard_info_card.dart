@@ -5,7 +5,7 @@ import 'package:waypay_mobile/core/widgets/dashboard_info_mini_card.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/analytic_items_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/analytic_items_state.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class DashboardInfoCard extends StatelessWidget {
   const DashboardInfoCard({super.key});

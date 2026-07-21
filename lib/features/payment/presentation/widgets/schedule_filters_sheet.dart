@@ -3,8 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 
-import 'package:waypay_styles/waypay_styles.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/payment/presentation/models/schedule_filters.dart';
 
 class ScheduleFiltersSheet extends StatelessWidget {
@@ -153,7 +152,10 @@ class _ScheduleFiltersFormState extends State<_ScheduleFiltersForm> {
           SvgIcons.calendar,
           width: 20,
           height: 20,
-          color: const Color(0xFF6B717C),
+          colorFilter: ColorFilter.mode(
+            const Color(0xFF6B717C),
+            BlendMode.srcIn,
+          ),
         ),
       ),
     );

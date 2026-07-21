@@ -5,7 +5,7 @@ import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/core/widgets/dashboard_info_mini_card.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class InvestorReportScreen extends StatefulWidget {
   const InvestorReportScreen({super.key, required this.initialInvestor});

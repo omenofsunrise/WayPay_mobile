@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
@@ -113,6 +113,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           await context.read<SchedulePreviewCubit>().load(
                             limit: 2,
                           );
+                          if (!context.mounted) return;
                           await context.read<PaymentHistoryCubit>().load(
                             limit: 2,
                           );

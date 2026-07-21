@@ -206,7 +206,7 @@ class ObjectTypeBloc extends Bloc<ObjectTypeEvent, ObjectTypeState> {
     Emitter<ObjectTypeState> emit,
   ) async {
     try {
-      final exists = await _dataSource.checkObjectTypeExists(
+      await _dataSource.checkObjectTypeExists(
         CheckObjectTypeExistsQuery(
           name: event.name,
           entityType: event.entityType,

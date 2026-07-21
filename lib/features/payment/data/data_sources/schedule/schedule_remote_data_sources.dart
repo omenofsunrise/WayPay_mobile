@@ -5,7 +5,6 @@ abstract class ScheduleRemoteDataSources {
   Future<ScheduleResponseModel> getSchedule(GetScheduleQuery query);
   Future<void> putSchedule(int id);
   Future<String> getFilledSender(int scheduleId);
-  Future<String> getFilledPaymentsByCredit(int creditId);
   Future<ScheduleResponseModel> getScheduleByCredit({
     required int creditId,
     int page = 1,

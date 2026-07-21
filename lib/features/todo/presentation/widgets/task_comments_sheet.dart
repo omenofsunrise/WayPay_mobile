@@ -5,7 +5,7 @@ import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_s
 import 'package:waypay_mobile/features/todo/data/data_soucres/task_note_remote_data_source.dart';
 import 'package:waypay_mobile/features/todo/data/models/task_note_model.dart';
 import 'package:waypay_mobile/features/todo/data/models/todo_model.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class TaskCommentsSheet extends StatefulWidget {
   const TaskCommentsSheet({super.key, required this.task, required this.onCountChanged});

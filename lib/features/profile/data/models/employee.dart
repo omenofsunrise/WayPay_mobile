@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 enum EmployeeRole { accountant, employee, admin, superAdmin, director }
 
 extension EmployeeRoleMapper on EmployeeRole {
@@ -194,11 +196,11 @@ class Employee {
               } else if (p is Map<String, dynamic> && p.containsKey('code')) {
                 return PermissionMapper.fromApi(p['code'] as String);
               } else {
-                print('⚠️ Неверный формат permission: $p');
+                debugPrint('⚠️ Неверный формат permission: $p');
                 return null;
               }
             } catch (e) {
-              print('⚠️ Неизвестное разрешение: $p, ошибка: $e');
+              debugPrint('⚠️ Неизвестное разрешение: $p, ошибка: $e');
               return null;
             }
           })

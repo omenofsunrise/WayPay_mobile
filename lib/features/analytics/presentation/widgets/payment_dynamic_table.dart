@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/sell_info_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/sell_info_state.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class PaymentDynamicTable extends StatefulWidget {
   const PaymentDynamicTable({super.key});
@@ -131,7 +131,7 @@ class _PaymentDynamicTableState extends State<PaymentDynamicTable> {
                 splashColor: Colors.transparent,
                 highlightColor: Colors.transparent,
                 hoverColor: Colors.transparent,
-                overlayColor: MaterialStateProperty.all(Colors.transparent),
+                overlayColor: WidgetStateProperty.all(Colors.transparent),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
                   child: Row(
@@ -187,11 +187,7 @@ class _PaymentDynamicTableState extends State<PaymentDynamicTable> {
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
     child: Text(
       text,
-      style: AppStyle.manrope(
-        size: 14,
-        weight: FontWeight.w400,
-        color: color,
-      ),
+      style: AppStyle.manrope(size: 14, weight: FontWeight.w400, color: color),
       textAlign: TextAlign.right,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,

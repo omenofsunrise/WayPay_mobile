@@ -9,7 +9,7 @@ import 'package:waypay_mobile/features/chat/presentation/widgets/photo_tab_conte
 import 'package:waypay_mobile/features/chat/presentation/widgets/video_tab_content.dart';
 import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class ChatInfoScreen extends StatefulWidget {
   final bool isGroup;
@@ -36,8 +36,6 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
   final List<_ChatTabItem> _tabItems = [];
   Employee? _currentEmployee;
   Employee? _employee;
-
-  bool _isLoadingEmployee = false;
 
   int _selectedIndex = 0;
   @override
@@ -78,8 +76,6 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
   }
 
   Future<void> _loadEmployee() async {
-    setState(() => _isLoadingEmployee = true);
-
     try {
       final dataSource = getIt<EmployeeRemoteDataSource>();
       final dataSourceAuth = getIt<AuthRemoteDataSource>();
@@ -94,8 +90,6 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
       });
     } catch (e) {
       throw Exception(e);
-    } finally {
-      setState(() => _isLoadingEmployee = false);
     }
   }
 

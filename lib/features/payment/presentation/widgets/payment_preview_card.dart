@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class PaymentPreviewCard extends StatelessWidget {
   const PaymentPreviewCard({

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
 import 'package:waypay_mobile/features/payment/presentation/cubit/payment_schedule_cubit.dart';
 import 'package:waypay_mobile/features/payment/presentation/widgets/payment_schedule_card.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
-import 'package:waypay_styles/waypay_styles.dart';
 
 class PaymentAnalyticsScreen extends StatelessWidget {
   const PaymentAnalyticsScreen({super.key});

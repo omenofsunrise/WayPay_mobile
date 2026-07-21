@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 
@@ -56,10 +57,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
         options: Options(contentType: 'multipart/form-data'),
       );
     } on DioException catch (e) {
-      throw mapApiError(
-        e,
-        fallback: 'Не удалось обновить профиль сотрудника.',
-      );
+      throw mapApiError(e, fallback: 'Не удалось обновить профиль сотрудника.');
     }
   }
 
@@ -90,12 +88,9 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
     if (sortBy != null) queryParams['sortBy'] = sortBy;
     if (sortDirection != null) queryParams['sortDirection'] = sortDirection;
 
-    final response = await dio.get(
-      'Employee',
-      queryParameters: queryParams,
-    );
+    final response = await dio.get('Employee', queryParameters: queryParams);
 
-    print('Ответ от API /api/Employee: ${response.data}');
+    debugPrint('Ответ от API /api/Employee: ${response.data}');
 
     if (response.statusCode == 200) {
       return EmployeesResponse.fromJson(response.data);
@@ -113,7 +108,9 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
 
-      print('Ответ от PATCH /api/Employee/role/$id: ${response.statusCode}');
+      debugPrint(
+        'Ответ от PATCH /api/Employee/role/$id: ${response.statusCode}',
+      );
 
       if (response.statusCode != 200) {
         throw const ApiError('Не удалось обновить роль сотрудника.');
@@ -156,13 +153,13 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
     required int minSurcharge,
     required String role,
   }) async {
-    print('=== Создание сотрудника ===');
-    print('FullName: $fullName');
-    print('Phone: $phone');
-    print('Address: $address');
-    print('MinSurcharge: $minSurcharge');
-    print('Role: $role');
-    print('===========================');
+    debugPrint('=== Создание сотрудника ===');
+    debugPrint('FullName: $fullName');
+    debugPrint('Phone: $phone');
+    debugPrint('Address: $address');
+    debugPrint('MinSurcharge: $minSurcharge');
+    debugPrint('Role: $role');
+    debugPrint('===========================');
 
     final formData = FormData.fromMap({
       'FullName': fullName,
@@ -179,13 +176,13 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
         options: Options(contentType: 'multipart/form-data'),
       );
 
-      print('Ответ от POST /api/Employee: ${response.statusCode}');
+      debugPrint('Ответ от POST /api/Employee: ${response.statusCode}');
 
       if (response.statusCode != 200) {
         throw const ApiError('Не удалось создать сотрудника.');
       }
     } catch (e) {
-      print('Ошибка при создании сотрудника: $e');
+      debugPrint('Ошибка при создании сотрудника: $e');
       if (e is ApiError) rethrow;
       throw mapApiError(e, fallback: 'Не удалось создать сотрудника.');
     }
@@ -249,21 +246,22 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
     int months = 12,
   }) async {
     final url = 'Employee/payments-stats$employeeId';
-    print('📡 [Request] GET $url?months=$months');
+    debugPrint('📡 [Request] GET $url?months=$months');
 
     final response = await dio.get(url, queryParameters: {'months': months});
 
-    print('✅ [Response ${response.statusCode}] $url');
+    debugPrint('✅ [Response ${response.statusCode}] $url');
 
     if (response.statusCode == 200) {
       final List data = response.data;
-      print('📦 [Data] Loaded ${data.length} records');
+      debugPrint('📦 [Data] Loaded ${data.length} records');
       return data.map((e) => PaymentStat.fromJson(e)).toList();
     } else {
       throw const ApiError('Не удалось загрузить статистику по платежам.');
     }
   }
 
+  @override
   Future<List<CreditStat>> getCreditsStatsById({
     required int employeeId,
     int months = 12,
@@ -272,23 +270,23 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
       final url = 'Employee/credits-stats$employeeId';
       final query = {'months': months};
 
-      print('📡 [Request] GET $url?months=$months');
+      debugPrint('📡 [Request] GET $url?months=$months');
 
       final response = await dio.get(url, queryParameters: query);
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
 
-        print('✅ [Response] ${data.length} items loaded');
+        debugPrint('✅ [Response] ${data.length} items loaded');
 
         return data.map((e) => CreditStat.fromJson(e)).toList();
       } else {
-        print('❌ [Error] Status code: ${response.statusCode}');
+        debugPrint('❌ [Error] Status code: ${response.statusCode}');
         throw const ApiError('Не удалось загрузить статистику по договорам.');
       }
     } catch (e, stackTrace) {
-      print('❌ [Exception] $e');
-      print(stackTrace);
+      debugPrint('❌ [Exception] $e');
+      debugPrint('$stackTrace');
       if (e is ApiError) rethrow;
       throw mapApiError(
         e,
@@ -302,8 +300,8 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
     try {
       final response = await dio.get('Employee/fullnames');
 
-      print('📡 [Request] GET /api/Employee/fullnames');
-      print('✅ [Response ${response.statusCode}] ${response.data}');
+      debugPrint('📡 [Request] GET /api/Employee/fullnames');
+      debugPrint('✅ [Response ${response.statusCode}] ${response.data}');
 
       if (response.statusCode == 200 && response.data is List) {
         return (response.data as List)

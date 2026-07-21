@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
@@ -605,35 +605,5 @@ class _BudgetEntryData {
       return 'Нет комментария';
     }
     return comment!;
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _DetailRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: AppStyle.manrope16.copyWith(color: const Color(0xFF9DA2A7)),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: AppStyle.medium16.copyWith(
-              color: const Color(AppColors.black),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

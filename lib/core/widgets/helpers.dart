@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 Future<bool> showConfirmDialog({
   required BuildContext context,
@@ -117,7 +117,11 @@ Widget _buildAvatarWidget(String fullName, String? photoPath, double radius) {
   if (resolvedUrl != null) {
     return CircleAvatar(
       radius: radius,
-      backgroundImage: NetworkImage(resolvedUrl),
+      backgroundImage: ResizeImage(
+        NetworkImage(resolvedUrl),
+        width: 80,
+        height: 80,
+      ),
     );
   }
 

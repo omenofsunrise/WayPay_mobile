@@ -3,7 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/analytic_items_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/analytic_items_state.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class SalesPurchasesPieChart extends StatelessWidget {
   const SalesPurchasesPieChart({super.key});

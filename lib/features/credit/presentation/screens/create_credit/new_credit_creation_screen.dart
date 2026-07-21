@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_creation_state.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 import 'package:waypay_mobile/features/credit/presentation/cubit/credit_creation_provider.dart';
@@ -56,10 +56,6 @@ class _NewCreditCreationScreenState extends State<NewCreditCreationScreen> {
       _firstPaymentPercentController.text = '';
       _firstPaymentAmountController.text = '';
     }
-  }
-
-  void _updateFirstPayment(double amount) {
-    context.read<CreditCreationCubit>().updatePaymentInfo(firstPayment: amount);
   }
 
   void _updateTermMonths(int termMonths) {

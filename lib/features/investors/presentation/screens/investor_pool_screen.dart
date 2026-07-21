@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investor_pool_bloc.dart';
 import 'package:waypay_mobile/routes/routes.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class InvestorPoolScreen extends StatefulWidget {
   const InvestorPoolScreen({super.key});

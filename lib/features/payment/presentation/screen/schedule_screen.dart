@@ -8,7 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/network/token_storage.dart';
 import 'package:waypay_mobile/core/utils/phone_utils.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
@@ -20,6 +20,14 @@ import 'package:waypay_mobile/features/payment/presentation/models/payment_sort_
 import 'package:waypay_mobile/features/payment/presentation/models/schedule_filters.dart';
 import 'package:waypay_mobile/features/payment/presentation/widgets/schedule_filters_sheet.dart';
 import 'package:waypay_mobile/routes/routes.dart';
+
+final DateFormat _kScheduleDateFmt = DateFormat('dd.MM.yyyy');
+final NumberFormat _kScheduleCurrencyFmt = NumberFormat.currency(
+  locale: 'ru_RU',
+  symbol: '₽',
+  decimalDigits: 0,
+);
+final RegExp _kWhitespaceRe = RegExp(r'\s+');
 
 class ScheduleScreenArgs {
   final int creditId;
@@ -153,7 +161,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
       isScrollControlled: true,
       useRootNavigator: true,
       clipBehavior: Clip.antiAlias,
-      barrierColor: Colors.white.withOpacity(0.7),
+      barrierColor: Colors.white.withValues(alpha: 0.7),
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -173,7 +181,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
       context: context,
       useRootNavigator: true,
       clipBehavior: Clip.antiAlias,
-      barrierColor: Colors.white.withOpacity(0.7),
+      barrierColor: Colors.white.withValues(alpha: 0.7),
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -330,7 +338,8 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                                       onTap: () => _openPaymentDetail(schedule),
                                       onWhatsAppTap: showPaid
                                           ? null
-                                          : () => _sendWhatsAppMessage(schedule),
+                                          : () =>
+                                                _sendWhatsAppMessage(schedule),
                                       isWhatsAppLoading: _whatsAppLoading
                                           .contains(schedule.id),
                                     );
@@ -494,26 +503,21 @@ class _ScheduleListTile extends StatelessWidget {
   String get _formattedDate {
     try {
       final date = DateTime.parse(schedule.paymentDate);
-      return DateFormat('dd.MM.yyyy').format(date);
+      return _kScheduleDateFmt.format(date);
     } catch (_) {
       return schedule.paymentDate;
     }
   }
 
   String get _formattedAmount {
-    final formatter = NumberFormat.currency(
-      locale: 'ru_RU',
-      symbol: '₽',
-      decimalDigits: 0,
-    );
-    return formatter.format(schedule.paymentAmount);
+    return _kScheduleCurrencyFmt.format(schedule.paymentAmount);
   }
 
   String get _formattedClientName {
     final raw = schedule.clientName.trim();
     if (raw.isEmpty) return 'Договор № ${schedule.creditId}';
     final parts = raw
-        .split(RegExp(r'\s+'))
+        .split(_kWhitespaceRe)
         .where((part) => part.isNotEmpty)
         .toList();
     if (parts.isEmpty) return raw;
@@ -657,11 +661,7 @@ class _ScheduleListTile extends StatelessWidget {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Image.asset(
-                    Images.whatsappLogo,
-                    width: 24,
-                    height: 24,
-                  ),
+                : Image.asset(Images.whatsappLogo, width: 24, height: 24),
           ),
         ),
       ],
@@ -740,26 +740,21 @@ class _HistoryListTile extends StatelessWidget {
   String get _formattedDate {
     try {
       final date = DateTime.parse(payment.paymentDate);
-      return DateFormat('dd.MM.yyyy').format(date);
+      return _kScheduleDateFmt.format(date);
     } catch (_) {
       return payment.paymentDate;
     }
   }
 
   String get _formattedAmount {
-    final formatter = NumberFormat.currency(
-      locale: 'ru_RU',
-      symbol: '₽',
-      decimalDigits: 0,
-    );
-    return formatter.format(payment.paymentAmount);
+    return _kScheduleCurrencyFmt.format(payment.paymentAmount);
   }
 
   String get _formattedClientName {
     final raw = payment.clientFullName.trim();
     if (raw.isEmpty) return 'Договор № ${payment.creditId}';
     final parts = raw
-        .split(RegExp(r'\s+'))
+        .split(_kWhitespaceRe)
         .where((part) => part.isNotEmpty)
         .toList();
     if (parts.isEmpty) return raw;

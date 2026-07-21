@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 enum PeriodOption {
   last7Days('За последние 7 дней'),

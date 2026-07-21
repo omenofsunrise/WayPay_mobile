@@ -9,7 +9,7 @@ import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/note/data/data_sources/note_remote_data_source.dart';
 import 'package:waypay_mobile/features/note/data/models/note_model.dart';
 import 'dart:convert';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class Note extends StatelessWidget {
   final NoteModel note;
@@ -27,7 +27,7 @@ class Note extends StatelessWidget {
           color: Color(AppColors.white),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 4,
               offset: Offset(0, 2),
             ),
@@ -483,6 +483,7 @@ class Note extends StatelessWidget {
 
       final result = await OpenFilex.open(tempFile.path);
 
+      if (!context.mounted) return;
       switch (result.type) {
         case ResultType.done:
           break;
