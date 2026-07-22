@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:waypay_styles/waypay_styles.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:waypay_mobile/features/credit/presentation/widgets/credit_card.dart';
 import 'package:waypay_mobile/features/credit/presentation/widgets/credit_tab.dart';
