@@ -251,49 +251,63 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Column(
-                children: [
-                  const SizedBox(height: 32),
-                  Image.asset(Images.backgroundLogo, height: 84, width: 84),
-                  const SizedBox(height: 20),
-                  Text(
-                    title,
-                    style: AppStyle.medium20.copyWith(
-                      fontSize: 22,
-                      color: const Color(AppColors.black),
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildPinDots(),
-                  if (_errorMessage != null) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      _errorMessage!,
-                      style: AppStyle.regular14.copyWith(
-                        color: const Color(AppColors.red),
-                      ),
-                      textAlign: TextAlign.center,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 32),
+                        Image.asset(
+                          Images.backgroundLogo,
+                          height: 84,
+                          width: 84,
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          title,
+                          style: AppStyle.medium20.copyWith(
+                            fontSize: 22,
+                            color: const Color(AppColors.black),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildPinDots(),
+                        if (_errorMessage != null) ...[
+                          const SizedBox(height: 12),
+                          Text(
+                            _errorMessage!,
+                            style: AppStyle.regular14.copyWith(
+                              color: const Color(AppColors.red),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                        const Spacer(),
+                        Column(
+                          children: keys.map((row) {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: row.map((key) {
+                                if (key == 'empty') {
+                                  return const SizedBox(width: 72, height: 72);
+                                }
+                                return _buildKey(key);
+                              }).toList(),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
                     ),
-                  ],
-                  const Spacer(),
-                  Column(
-                    children: keys.map((row) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: row.map((key) {
-                          if (key == 'empty') {
-                            return const SizedBox(width: 72, height: 72);
-                          }
-                          return _buildKey(key);
-                        }).toList(),
-                      );
-                    }).toList(),
                   ),
-                  const SizedBox(height: 24),
-                ],
+                ),
               ),
             );
           },

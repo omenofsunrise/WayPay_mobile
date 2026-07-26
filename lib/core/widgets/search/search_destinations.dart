@@ -36,7 +36,7 @@ List<SearchDestination> getDefaultSearchDestinations() {
     SearchDestination(
       title: 'Очередь заявок',
       route: Routes.clientApplicationsScreen,
-      keywords: ['заявки', 'applications', 'lead'],
+      keywords: ['заявки', 'applications', 'lead', 'request'],
     ),
     SearchDestination(
       title: 'Финансы',
@@ -64,9 +64,19 @@ List<SearchDestination> getDefaultSearchDestinations() {
       keywords: ['черный список', 'blacklist', 'stop', 'ban'],
     ),
     SearchDestination(
-      title: 'Заявки',
-      route: Routes.clientApplicationsScreen,
-      keywords: ['заявки', 'applications', 'lead', 'request'],
+      title: 'Аналитика',
+      route: Routes.analyticsScreen,
+      keywords: ['аналитика', 'статистика', 'отчёты', 'analytics', 'dashboard'],
+    ),
+    SearchDestination(
+      title: 'Калькулятор',
+      route: Routes.calculatorScreen,
+      keywords: ['калькулятор', 'расчёт', 'рассрочка', 'calculator'],
+    ),
+    SearchDestination(
+      title: 'Профиль',
+      route: Routes.profileScreen,
+      keywords: ['профиль', 'аккаунт', 'сотрудник', 'profile'],
     ),
   ];
 }

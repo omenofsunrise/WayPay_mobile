@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/features/home/data/models/credit_applications/credit_application_model.dart';
-import 'package:waypay_mobile/routes/routes.dart';
 
 class ClientApplicationDetailScreen extends StatelessWidget {
   ClientApplicationDetailScreen({super.key, required this.application});
@@ -85,25 +83,6 @@ class ClientApplicationDetailScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 Row(
                   children: [
-                    Expanded(
-                      child: DefaultButton(
-                        text: 'Написать',
-                        showIcon: true,
-                        iconWidget: SvgPicture.asset(
-                          SvgIcons.chat2,
-                          colorFilter: ColorFilter.mode(
-                            Colors.white,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                        color: const Color(AppColors.primary),
-                        textColor: Colors.white,
-                        onPressed: () {
-                          context.go(Routes.chatScreen.toPath);
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
                     Expanded(
                       child: DefaultButton(
                         text: 'Оформить',

@@ -241,58 +241,61 @@ class _HomeScreenState extends State<HomeScreen> {
 
               final employeeData = snapshot.data!;
 
-              return CustomScrollView(
-                physics: const ClampingScrollPhysics(),
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Header(
-                      onAvatarTap: () {
-                        context.pushNamed(Routes.profileScreen.toName);
-                      },
-                      fullName: _getFullName(employeeData),
-                      photoPath: _getAvatar(employeeData),
-                      showBackButton: false,
-                      trailing: AddButton(onPressed: _openAddBottomSheet),
-                      showNotifications: false,
-                    ),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Header(
+                    onAvatarTap: () {
+                      context.pushNamed(Routes.profileScreen.toName);
+                    },
+                    fullName: _getFullName(employeeData),
+                    photoPath: _getAvatar(employeeData),
+                    showBackButton: false,
+                    trailing: AddButton(onPressed: _openAddBottomSheet),
+                    showNotifications: false,
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
-                  SliverToBoxAdapter(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: SearchSuggester(destinations: _destinations),
-                        ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SearchSuggester(destinations: _destinations),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 13),
+                  Expanded(
+                    child: CustomScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      slivers: [
+                        _buildCompaniesSection(employeeData),
+                        const SliverToBoxAdapter(child: SizedBox(height: 13)),
+
+                        if (_canSeeAnalyticsSection())
+                          _buildAnalyticsSection(employeeData),
+                        if (_canSeeAnalyticsSection())
+                          const SliverToBoxAdapter(child: SizedBox(height: 13)),
+
+                        if (canManageAccounting)
+                          _buildFinanceSection(employeeData),
+                        if (canManageAccounting)
+                          const SliverToBoxAdapter(child: SizedBox(height: 13)),
+
+                        _buildPaymentsSection(employeeData),
+                        const SliverToBoxAdapter(child: SizedBox(height: 13)),
+
+                        _buildCreditsSection(employeeData),
+                        const SliverToBoxAdapter(child: SizedBox(height: 13)),
+
+                        _buildClientsSection(employeeData),
+                        const SliverToBoxAdapter(child: SizedBox(height: 13)),
+
+                        if (_canSeeInvestorsSection())
+                          _buildInvestorsSection(employeeData),
+                        if (_canSeeInvestorsSection())
+                          const SliverToBoxAdapter(child: SizedBox(height: 20)),
                       ],
                     ),
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 13)),
-
-                  _buildCompaniesSection(employeeData),
-                  const SliverToBoxAdapter(child: SizedBox(height: 13)),
-
-                  if (_canSeeAnalyticsSection())
-                    _buildAnalyticsSection(employeeData),
-                  if (_canSeeAnalyticsSection())
-                    const SliverToBoxAdapter(child: SizedBox(height: 13)),
-
-                  if (canManageAccounting) _buildFinanceSection(employeeData),
-                  if (canManageAccounting)
-                    const SliverToBoxAdapter(child: SizedBox(height: 13)),
-
-                  _buildPaymentsSection(employeeData),
-                  const SliverToBoxAdapter(child: SizedBox(height: 13)),
-
-                  _buildCreditsSection(employeeData),
-                  const SliverToBoxAdapter(child: SizedBox(height: 13)),
-
-                  _buildClientsSection(employeeData),
-                  const SliverToBoxAdapter(child: SizedBox(height: 13)),
-
-                  if (_canSeeInvestorsSection())
-                    _buildInvestorsSection(employeeData),
-                  if (_canSeeInvestorsSection())
-                    const SliverToBoxAdapter(child: SizedBox(height: 20)),
                 ],
               );
             },

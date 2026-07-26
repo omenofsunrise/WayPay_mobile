@@ -223,20 +223,11 @@ class _PaymentIncomeScreenState extends State<PaymentIncomeScreen> {
     return Row(
       children: [
         Expanded(
-          child: TextField(
+          child: SearchField(
             controller: _searchController,
+            hintText: 'Поиск',
             onChanged: _onSearchChanged,
-            decoration: InputDecoration(
-              hintText: 'Поиск',
-              filled: true,
-              fillColor: Colors.white,
-              prefixIcon: const Icon(Icons.search),
-              contentPadding: EdgeInsets.zero,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
+            onSubmitted: _onSearchChanged,
           ),
         ),
         const SizedBox(width: 12),

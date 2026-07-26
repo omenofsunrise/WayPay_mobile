@@ -12,7 +12,6 @@ import 'package:waypay_mobile/features/admin_panel/presentation/screen/company_d
 import 'package:waypay_mobile/features/auth/presentation/screens/phone_auth_screen.dart';
 import 'package:waypay_mobile/features/auth/presentation/screens/pin_code_screen.dart';
 import 'package:waypay_mobile/features/bottom_navigation_bar/main_layout.dart';
-import 'package:waypay_mobile/features/blog/presentation/screens/blog_screen.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/create_credit/new_credit_creation_screen.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/credit_screen.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
@@ -45,7 +44,6 @@ import 'package:waypay_mobile/features/profile/presentation/screens/active_sessi
 import 'package:waypay_mobile/features/profile/presentation/screens/employees_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/add_employee_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_bloc.dart';
-import 'package:waypay_mobile/features/chat/presentation/screens/all_chat_screen.dart';
 import 'package:waypay_mobile/features/calc/calculator_page.dart';
 import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
 import 'package:waypay_mobile/features/payment/presentation/bloc/expected/payment_bloc.dart';
@@ -60,7 +58,6 @@ import 'package:waypay_mobile/features/payment/presentation/screen/payment_incom
 import 'package:waypay_mobile/features/payment/presentation/screen/payment_screen.dart';
 import 'package:waypay_mobile/features/payment/presentation/screen/schedule_screen.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
-import 'package:waypay_mobile/features/todo/presentation/screens/todo_screen.dart';
 
 import 'package:waypay_mobile/routes/routes.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
@@ -109,8 +106,7 @@ class AppRouter {
         return null;
       }
       if (hasPinCode) {
-        if (here == '/' ||
-            here == Routes.phoneAuthScreen.toPath) {
+        if (here == '/' || here == Routes.phoneAuthScreen.toPath) {
           return Routes.pinCodeScreen.toPath;
         }
         return null;
@@ -461,36 +457,9 @@ class AppRouter {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: Routes.todoScreen.toPath,
-                name: Routes.todoScreen.toName,
-                builder: (context, state) => const TodoScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: Routes.chatScreen.toPath,
-                name: Routes.chatScreen.toName,
-                builder: (context, state) => const AllChatScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
                 path: Routes.newCreditDetailsScreen.toPath,
                 name: Routes.newCreditDetailsScreen.toName,
                 builder: (context, state) => const NewCreditCreationScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: Routes.blogScreen.toPath,
-                name: Routes.blogScreen.toName,
-                builder: (context, state) => const BlogScreen(),
               ),
             ],
           ),

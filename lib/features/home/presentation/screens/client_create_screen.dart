@@ -23,6 +23,7 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
   final _birthDateController = TextEditingController();
   final _passportNumberController = TextEditingController();
   final _registrationAddressController = TextEditingController();
+  final _actualAddressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _whatsAppController = TextEditingController();
   final _phoneMask = MaskTextInputFormatter(
@@ -89,6 +90,7 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
     for (final controller in _allControllers) {
       controller.dispose();
     }
+    _actualAddressController.dispose();
     super.dispose();
   }
 
@@ -122,6 +124,9 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
       birthdate: birthDate.toUtc().toIso8601String(),
       docIssueDate: null,
       registrationAddress: _registrationAddressController.text.trim(),
+      actualAddress: _actualAddressController.text.trim().isEmpty
+          ? null
+          : _actualAddressController.text.trim(),
       secondPhone: whatsappDigits.isNotEmpty ? '8$whatsappDigits' : null,
     );
 
@@ -359,6 +364,12 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
                       ModalTextField(
                         controller: _registrationAddressController,
                         label: 'Адрес регистрации',
+                        hintText: 'Введите адрес',
+                      ),
+                      const SizedBox(height: 12),
+                      ModalTextField(
+                        controller: _actualAddressController,
+                        label: 'Фактический адрес',
                         hintText: 'Введите адрес',
                       ),
                     ],

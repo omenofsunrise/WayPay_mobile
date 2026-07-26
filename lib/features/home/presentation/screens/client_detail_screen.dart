@@ -200,6 +200,12 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
     return value;
   }
 
+  String? get _actualAddress {
+    final value = widget.client?.actualAddress?.trim();
+    if (value == null || value.isEmpty) return null;
+    return value;
+  }
+
   String? get _passportNumber {
     final doc = widget.client?.doc;
     if (doc == null) return null;
@@ -209,7 +215,9 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
   }
 
   bool get _hasPassportSection =>
-      _passportNumber != null || _registrationAddress != null;
+      _passportNumber != null ||
+      _registrationAddress != null ||
+      _actualAddress != null;
 
   Future<void> _loadPassportPhotos() async {
     final clientId = widget.client?.id;
@@ -447,8 +455,13 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
                         ),
                       if (_registrationAddress != null)
                         InfoFieldData(
-                          label: 'Адрес',
+                          label: 'Адрес регистрации',
                           value: _registrationAddress!,
+                        ),
+                      if (_actualAddress != null)
+                        InfoFieldData(
+                          label: 'Фактический адрес',
+                          value: _actualAddress!,
                         ),
                     ],
                   ),

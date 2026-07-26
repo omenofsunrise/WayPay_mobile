@@ -7,6 +7,9 @@ import 'package:waypay_mobile/core/utils/phone_utils.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
+import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
+import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/presentation/widgets/add_note_dialog.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
@@ -20,6 +23,8 @@ import 'package:waypay_mobile/features/note/data/models/note_model.dart';
 import 'package:waypay_mobile/features/payment/data/data_sources/schedule/schedule_remote_data_sources.dart';
 import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
 import 'package:waypay_mobile/features/payment/presentation/screen/schedule_screen.dart';
+import 'package:waypay_mobile/features/sold_products/data/data_sources/sold_product_remote_data_source.dart';
+import 'package:waypay_mobile/features/sold_products/data/models/sold_product_model.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -44,6 +49,9 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
   bool _isLoadingNotes = true;
   bool _isLoadingPayments = true;
   String? _paymentsError;
+  ClientModel? _client;
+  List<SoldProductModel> _soldProducts = [];
+  List<CreditModel> _clientCredits = [];
   UserStorage userStorage = UserStorage();
 
   static const List<BoxShadow> _cardShadows = [
@@ -56,6 +64,47 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
     super.initState();
     _loadNotes();
     _loadPaymentPreview();
+    _loadClient();
+    _loadSoldProducts();
+    _loadClientCredits();
+  }
+
+  Future<void> _loadClientCredits() async {
+    try {
+      final credits = await getIt<CreditRemoteDataSource>()
+          .getCreditsByClientId(widget.credit.clientId);
+      if (!mounted) return;
+      setState(() {
+        _clientCredits = credits
+            .where((c) => c.id != widget.credit.id)
+            .toList();
+      });
+    } catch (e) {
+      debugPrint('Не удалось загрузить договоры клиента: $e');
+    }
+  }
+
+  Future<void> _loadSoldProducts() async {
+    try {
+      final products = await getIt<SoldProductRemoteDataSource>()
+          .fetchSoldProductsByCreditId(widget.credit.id);
+      if (!mounted) return;
+      setState(() => _soldProducts = products);
+    } catch (e) {
+      debugPrint('Не удалось загрузить товары: $e');
+    }
+  }
+
+  Future<void> _loadClient() async {
+    try {
+      final client = await getIt<ClientRemoteDataSource>().getClientById(
+        widget.credit.clientId,
+      );
+      if (!mounted) return;
+      setState(() => _client = client);
+    } catch (e) {
+      debugPrint('Не удалось загрузить клиента: $e');
+    }
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
@@ -241,6 +290,9 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildCreditInfoSection(),
+                    _buildGuarantorSection(),
+                    _buildProductsSection(),
+                    _buildClientCreditsSection(),
                     const SizedBox(height: 12),
                     _buildContactButtons(),
                     const SizedBox(height: 24),
@@ -274,11 +326,27 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
           Text('ФИО клиента', style: _labelTextStyle),
           const SizedBox(height: 4),
           Text(widget.credit.clientFullName, style: _valueTextStyle),
+          if (widget.credit.clientPhone.trim().isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _buildInfoRow('Телефон', widget.credit.clientPhone),
+          ],
+          if ((_client?.registrationAddress ?? '').trim().isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _buildInfoRow('Адрес регистрации', _client!.registrationAddress!),
+          ],
+          if ((_client?.actualAddress ?? '').trim().isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _buildInfoRow('Фактический адрес', _client!.actualAddress!),
+          ],
           const SizedBox(height: 16),
           _buildInfoRow(
             'Дата подписания',
             _formatDate(widget.credit.creditDate),
           ),
+          if (widget.credit.investorNickname.trim().isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _buildInfoRow('Инвестор', widget.credit.investorNickname),
+          ],
           const SizedBox(height: 16),
           Row(
             children: [
@@ -326,7 +394,246 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _buildSummaryMetric(
+                'Текущий долг',
+                _formatCurrency(widget.credit.debt),
+                padding: const EdgeInsets.only(right: 12),
+                highlight: true,
+              ),
+              _buildSummaryMetric(
+                'Долг за месяц',
+                _formatCurrency(widget.credit.currentMonthDebt),
+                highlight: true,
+              ),
+            ],
+          ),
+          if (widget.credit.debtDays != null &&
+              widget.credit.debtDays! > 0) ...[
+            const SizedBox(height: 16),
+            _buildInfoRow('Просрочка', '${widget.credit.debtDays} дн.'),
+          ],
+          if ((widget.credit.debtComment ?? '').trim().isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _buildInfoRow('Комментарий к долгу', widget.credit.debtComment!),
+          ],
+          if (widget.credit.terminated) ...[
+            const SizedBox(height: 16),
+            _buildInfoRow('Статус', 'Договор расторгнут'),
+          ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildGuarantorSection() {
+    final c = widget.credit;
+    final hasGuarantor =
+        (c.guarantorFullName ?? '').trim().isNotEmpty ||
+        (c.guarantorPhone ?? '').trim().isNotEmpty ||
+        (c.guarantorAddress ?? '').trim().isNotEmpty;
+    if (!hasGuarantor) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 24),
+      padding: const EdgeInsets.all(16),
+      decoration: _cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Поручитель',
+            style: AppStyle.manrope(size: 16, weight: FontWeight.w600),
+          ),
+          const SizedBox(height: 12),
+          if ((c.guarantorFullName ?? '').trim().isNotEmpty)
+            _buildInfoRow('ФИО', c.guarantorFullName!),
+          if ((c.guarantorPhone ?? '').trim().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _buildInfoRow('Телефон', c.guarantorPhone!),
+          ],
+          if ((c.guarantorAddress ?? '').trim().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _buildInfoRow('Адрес', c.guarantorAddress!),
+          ],
+          if ((c.guarantorBirthdate ?? '').trim().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _buildInfoRow(
+              'Дата рождения',
+              _formatIsoDate(c.guarantorBirthdate!),
+            ),
+          ],
+          if ((c.guarantorDoc ?? '').trim().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _buildInfoRow('Паспорт', c.guarantorDoc!),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductsSection() {
+    if (_soldProducts.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 24),
+      padding: const EdgeInsets.all(16),
+      decoration: _cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Товары',
+            style: AppStyle.manrope(size: 16, weight: FontWeight.w600),
+          ),
+          const SizedBox(height: 12),
+          for (int i = 0; i < _soldProducts.length; i++) ...[
+            if (i != 0)
+              Divider(height: 20, thickness: 1, color: Colors.grey[200]),
+            _buildProductRow(_soldProducts[i]),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductRow(SoldProductModel product) {
+    final surchargeMoney =
+        product.surchargeAmount ??
+        (product.surcharge != null
+            ? product.price * product.surcharge! / 100
+            : 0.0);
+    final total = product.price + surchargeMoney;
+    final surchargeLabel = product.surchargeAmount != null
+        ? _formatCurrency(product.surchargeAmount!)
+        : product.surcharge != null
+        ? '${product.surcharge}%'
+        : '—';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(product.name, style: _valueTextStyle),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            _buildProductMetric('Стоимость', _formatCurrency(product.price)),
+            _buildProductMetric('Надбавка', surchargeLabel),
+            _buildProductMetric('Цена', _formatCurrency(total)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProductMetric(String label, String value) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: _labelTextStyle),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: AppStyle.manrope(size: 14, weight: FontWeight.w500),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClientCreditsSection() {
+    if (_clientCredits.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 24),
+      padding: const EdgeInsets.all(16),
+      decoration: _cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Договоры клиента',
+            style: AppStyle.manrope(size: 16, weight: FontWeight.w600),
+          ),
+          const SizedBox(height: 12),
+          for (int i = 0; i < _clientCredits.length; i++) ...[
+            if (i != 0)
+              Divider(height: 20, thickness: 1, color: Colors.grey[200]),
+            _buildClientCreditRow(_clientCredits[i]),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClientCreditRow(CreditModel c) {
+    // Эндпоинт Credit/list/{clientId} отдаёт только id/статус/дату — сумма и
+    // остаток тут пустые, поэтому показываем лишь то, что реально есть.
+    final statusLabel = (c.status != null && c.status!.trim().isNotEmpty)
+        ? c.status!.trim()
+        : (c.isActive ? 'активен' : 'архив');
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: () => _openClientCredit(c.id),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Договор № ${c.id}', style: _valueTextStyle),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${_formatDate(c.creditDate)} · $statusLabel',
+                    style: _labelTextStyle,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, size: 18, color: Color(0xFF9CA3AF)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Договор из списка неполный (только id/статус/дата), поэтому перед открытием
+  // догружаем полную карточку по id.
+  Future<void> _openClientCredit(int creditId) async {
+    // showDialog показывает индикатор на root-навигаторе, поэтому и закрывать
+    // его нужно им же (иначе ближайший навигатор ветки → бесконечная загрузка).
+    final rootNavigator = Navigator.of(context, rootNavigator: true);
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+    CreditModel? full;
+    try {
+      full = await getIt<CreditRemoteDataSource>().getCreditById(creditId);
+    } catch (_) {
+      full = null;
+    }
+    if (!mounted) return;
+    rootNavigator.pop(); // закрываем индикатор загрузки
+    if (full == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Не удалось загрузить договор')),
+      );
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            CreditFullScreen(credit: full!, isControl: widget.isControl),
       ),
     );
   }
@@ -627,6 +934,20 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
                 'Доход в рублях',
                 _formatCurrency(widget.credit.incomeRubles),
               ),
+              if (widget.credit.totalClean != null) ...[
+                const SizedBox(height: 12),
+                _buildInfoRow(
+                  'Сумма без наценки',
+                  _formatCurrency(widget.credit.totalClean!),
+                ),
+              ],
+              if (widget.credit.defferedIncome != null) ...[
+                const SizedBox(height: 12),
+                _buildInfoRow(
+                  'Отложенный доход',
+                  _formatCurrency(widget.credit.defferedIncome!),
+                ),
+              ],
             ],
           ),
         ),
@@ -829,6 +1150,11 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
   String _formatCurrency(num amount) => _currencyFormat.format(amount);
 
   String _formatDate(DateTime date) => _dateFormat.format(date);
+
+  String _formatIsoDate(String raw) {
+    final parsed = DateTime.tryParse(raw);
+    return parsed != null ? _dateFormat.format(parsed) : raw;
+  }
 
   Future<void> _loadNotes() async {
     try {

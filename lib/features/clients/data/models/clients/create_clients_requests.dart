@@ -6,6 +6,7 @@ class CreateClientRequest {
   final String birthdate;
   final String? docIssueDate;
   final String? registrationAddress;
+  final String? actualAddress;
 
   CreateClientRequest({
     required this.fullName,
@@ -15,6 +16,7 @@ class CreateClientRequest {
     required this.birthdate,
     this.docIssueDate,
     this.registrationAddress,
+    this.actualAddress,
   });
 
   Map<String, dynamic> toJson() {
@@ -26,6 +28,7 @@ class CreateClientRequest {
       'birthdate': birthdate,
       'docIssueDate': docIssueDate,
       'registrationAddress': registrationAddress,
+      if (actualAddress != null) 'actualAddress': actualAddress,
     };
   }
 }

@@ -13,21 +13,8 @@ import 'package:waypay_mobile/features/analytics/presentation/cubit/sell_info_cu
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/auth/presentation/bloc/auth_cubit.dart';
-import 'package:waypay_mobile/features/blog/data/data_sources/blog_remote_data_sources.dart';
-import 'package:waypay_mobile/features/blog/data/data_sources/blog_remote_data_sources_impl.dart';
-import 'package:waypay_mobile/features/blog/data/data_sources/profile_blog_remote_data_sources.dart';
-import 'package:waypay_mobile/features/blog/data/data_sources/profile_blog_remote_data_sources_impl.dart';
-import 'package:waypay_mobile/features/blog/presentation/bloc/blog_bloc.dart';
-import 'package:waypay_mobile/features/blog/presentation/bloc/comment_bloc.dart';
-import 'package:waypay_mobile/features/blog/presentation/cubit/profile_blog_cubit.dart';
 import 'package:waypay_mobile/features/bank_card/data/data_sources/bank_card_remote_data_source.dart';
 import 'package:waypay_mobile/features/bank_card/data/data_sources/bank_card_remote_data_source_impl.dart';
-import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source.dart';
-import 'package:waypay_mobile/features/chat/data/data_source/chat/chat_remote_data_source_impl.dart';
-import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source.dart';
-import 'package:waypay_mobile/features/chat/data/data_source/message/message_remote_data_source_impl.dart';
-import 'package:waypay_mobile/features/chat/data/service/chat_hub_service.dart';
-import 'package:waypay_mobile/features/chat/presentation/bloc/chat_list/chat_list_bloc.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/blacklist/blacklist_remote_data_sources_impl.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/blacklist/blacklist_bloc.dart';
@@ -74,11 +61,6 @@ import 'package:waypay_mobile/features/profile/presentation/cubit/payment_stats_
 import 'package:waypay_mobile/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:waypay_mobile/features/sold_products/data/data_sources/sold_product_remote_data_source.dart';
 import 'package:waypay_mobile/features/sold_products/data/data_sources/sold_product_remote_data_source_impl.dart';
-import 'package:waypay_mobile/features/todo/data/data_soucres/task_remote_data_source.dart';
-import 'package:waypay_mobile/features/todo/data/data_soucres/task_remote_data_source_impl.dart';
-import 'package:waypay_mobile/features/todo/data/data_soucres/task_note_remote_data_source.dart';
-import 'package:waypay_mobile/features/todo/data/data_soucres/task_note_remote_data_source_impl.dart';
-import 'package:waypay_mobile/features/todo/presentation/bloc/task_bloc.dart';
 import '../config/api_config.dart';
 import '../network/dio_client.dart';
 import '../network/token_storage.dart';
@@ -140,24 +122,6 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton<AnalyticRemoteDataSource>(
     () => AnalyticRemoteDataSourceImpl(getIt<Dio>()),
   );
-  getIt.registerLazySingleton<TaskRemoteDataSource>(
-    () => TaskRemoteDataSourceImpl(getIt<Dio>(instanceName: 'second')),
-  );
-  getIt.registerLazySingleton<TaskNoteRemoteDataSource>(
-    () => TaskNoteRemoteDataSourceImpl(getIt<Dio>(instanceName: 'second')),
-  );
-  getIt.registerLazySingleton<BlogRemoteDataSources>(
-    () => BlogRemoteDataSourcesImpl(getIt<Dio>(instanceName: 'second')),
-  );
-  getIt.registerLazySingleton<ProfileBlogRemoteDataSources>(
-    () => ProfileBlogRemoteDataSourcesImpl(getIt<Dio>(instanceName: 'second')),
-  );
-  getIt.registerLazySingleton<ChatRemoteDataSource>(
-    () => ChatRemoteDataSourceImpl(getIt<Dio>(instanceName: 'second')),
-  );
-  getIt.registerLazySingleton<MessageRemoteDataSource>(
-    () => MessageRemoteDataSourceImpl(getIt<Dio>(instanceName: 'second')),
-  );
   getIt.registerLazySingleton<ObjectTypeRemoteDataSource>(
     () => ObjectTypeRemoteDataSourceImpl(getIt<Dio>()),
   );
@@ -166,12 +130,6 @@ Future<void> initDependencies() async {
   );
   getIt.registerLazySingleton<CreditApplicationRemoteDataSource>(
     () => CreditApplicationRemoteDataSourceImpl(getIt<Dio>()),
-  );
-  getIt.registerLazySingleton<ChatHubService>(
-    () => ChatHubService(
-      baseUrl: ApiConfig.filesBaseUrl,
-      tokenProvider: () async => await getIt<TokenStorage>().getAccessToken(),
-    ),
   );
 
   getIt.registerFactory(() => AuthCubit());
@@ -197,18 +155,8 @@ Future<void> initDependencies() async {
   getIt.registerFactory(() => DebtDynamicCubit());
   getIt.registerFactory(() => InvestmentDynamicCubit());
   getIt.registerFactory(() => SellInfoCubit());
-  getIt.registerFactory(() => TaskBloc());
-  getIt.registerFactory(() => BlogBloc());
-  getIt.registerFactory(() => CommentBloc());
-  getIt.registerFactory(() => ProfileBlogCubit());
   getIt.registerFactory<ObjectTypeBloc>(() => ObjectTypeBloc());
   getIt.registerFactory(
     () => NotificationsCubit(getIt<NotificationsDataSource>()),
-  );
-  getIt.registerFactory(
-    () => ChatListBloc(
-      api: getIt<ChatRemoteDataSource>(),
-      hub: getIt<ChatHubService>(),
-    ),
   );
 }

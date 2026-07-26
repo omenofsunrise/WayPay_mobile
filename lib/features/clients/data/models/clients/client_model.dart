@@ -7,6 +7,7 @@ class ClientModel {
   final DateTime birthdate;
   final int? docIssueYear;
   final String? registrationAddress;
+  final String? actualAddress;
   final List<int> creditIds;
   final List<int> creditRestTerms;
   final double debt;
@@ -23,6 +24,7 @@ class ClientModel {
     required this.birthdate,
     this.docIssueYear,
     this.registrationAddress,
+    this.actualAddress,
     required this.creditIds,
     required this.creditRestTerms,
     required this.debt,
@@ -61,6 +63,7 @@ class ClientModel {
       birthdate: DateTime.parse(json['birthdate']),
       docIssueYear: parseDocIssueYear(json['docIssueYear']),
       registrationAddress: json['registrationAddress'],
+      actualAddress: json['actualAddress'],
       creditIds: intList(json['creditIds']),
       creditRestTerms: intList(json['creditRestTerms']),
       debt: (json['debt'] as num).toDouble(),

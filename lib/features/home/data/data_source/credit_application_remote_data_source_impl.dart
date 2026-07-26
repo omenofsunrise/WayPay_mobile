@@ -24,11 +24,21 @@ class CreditApplicationRemoteDataSourceImpl
 
       final data = response.data;
 
-      if (data is Map<String, dynamic>) {
-        return CreditApplicationPagedResult.fromJson(data);
+      // Обычный ответ — объект с пагинацией {items, page, ...}
+      if (data is Map) {
+        return CreditApplicationPagedResult.fromJson(
+          Map<String, dynamic>.from(data),
+        );
       }
 
-      throw const ApiError('Сервер вернул некорректный ответ.');
+      // Сервер может вернуть голый массив заявок без обёртки пагинации
+      if (data is List) {
+        return CreditApplicationPagedResult.fromJson({'items': data});
+      }
+
+      throw ApiError(
+        'Сервер вернул некорректный ответ (тип: ${data.runtimeType}).',
+      );
     } on DioException catch (e) {
       throw mapApiError(e, fallback: 'Не удалось загрузить заявки.');
     }

@@ -14,6 +14,7 @@ abstract class CreditRemoteDataSource {
     int investorId,
     GetCreditsQuery query,
   );
+  Future<List<CreditModel>> getCreditsByClientId(int clientId);
   Future<List<SchedulePreviewModel>> getSchedulePreview({
     required double totalAmount,
     required double firstPayment,

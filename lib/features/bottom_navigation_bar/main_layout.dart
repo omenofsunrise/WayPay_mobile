@@ -12,10 +12,7 @@ class MainLayout extends StatelessWidget {
 
   static const _navConfigs = [
     _NavItemConfig(icon: SvgIcons.home),
-    _NavItemConfig(icon: SvgIcons.todo),
-    _NavItemConfig(icon: SvgIcons.chat),
     _NavItemConfig(icon: SvgIcons.add, activeIcon: SvgIcons.add),
-    _NavItemConfig(icon: SvgIcons.blog),
     _NavItemConfig(icon: SvgIcons.calculator),
   ];
   static const _newCreditPaths = {
@@ -28,7 +25,7 @@ class MainLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final locationPath = GoRouterState.of(context).uri.path;
     final highlightedIndex = _newCreditPaths.contains(locationPath)
-        ? 3
+        ? 1
         : navigationShell.currentIndex;
 
     return Scaffold(
@@ -86,14 +83,21 @@ class _AppBottomNavBar extends StatelessWidget {
         ),
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(items.length, (index) {
             final config = items[index];
             final selected = currentIndex == index;
-            return _NavItem(
-              icon: selected ? config.activeIcon ?? config.icon : config.icon,
-              selected: selected,
-              onTap: () => onTap(index),
+            return Expanded(
+              child: Align(
+                alignment: Alignment.center,
+                heightFactor: 1.0,
+                child: _NavItem(
+                  icon: selected
+                      ? config.activeIcon ?? config.icon
+                      : config.icon,
+                  selected: selected,
+                  onTap: () => onTap(index),
+                ),
+              ),
             );
           }),
         ),

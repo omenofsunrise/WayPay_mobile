@@ -14,12 +14,28 @@ class SearchDestination {
   final Routes route;
   final List<String> keywords;
 
-  bool matches(String query) {
-    final q = query.toLowerCase();
-    bool softMatch(String a, String b) => a.contains(b) || b.contains(a);
-    if (softMatch(title.toLowerCase(), q)) return true;
-    return keywords.any((kw) => softMatch(kw.toLowerCase(), q));
+  int matchScore(String query) {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return 0;
+    final t = title.toLowerCase();
+    if (t == q) return 100;
+    if (t.startsWith(q)) return 80;
+    if (t.contains(q)) return 60;
+    var best = 0;
+    for (final kw in keywords) {
+      final k = kw.toLowerCase();
+      if (k == q) {
+        if (best < 55) best = 55;
+      } else if (k.startsWith(q)) {
+        if (best < 45) best = 45;
+      } else if (k.contains(q)) {
+        if (best < 30) best = 30;
+      }
+    }
+    return best;
   }
+
+  bool matches(String query) => matchScore(query) > 0;
 }
 
 class SearchSuggester extends StatefulWidget {
@@ -81,33 +97,39 @@ class _SearchSuggesterState extends State<SearchSuggester> {
       return;
     }
     final variants = _expandQueryVariants(query);
-    final matches = widget.destinations
-        .where((d) => variants.any((variant) => d.matches(variant)))
-        .take(5)
-        .map((d) => d.title)
-        .toList();
-    setState(() => _results = matches);
-    if (_results.isNotEmpty) {
-      _showOverlay();
-    } else {
-      _hideOverlay();
+    final scored = <MapEntry<SearchDestination, int>>[];
+    for (final d in widget.destinations) {
+      var best = 0;
+      for (final variant in variants) {
+        final s = d.matchScore(variant);
+        if (s > best) best = s;
+      }
+      if (best > 0) scored.add(MapEntry(d, best));
     }
+    scored.sort((a, b) => b.value.compareTo(a.value));
+    setState(() {
+      _results = scored.take(6).map((e) => e.key.title).toList();
+    });
+    _showOverlay();
   }
 
   void _onSubmit(String raw) {
     final query = raw.trim().toLowerCase();
     if (query.isEmpty) return;
     final variants = _expandQueryVariants(query);
-    final match = widget.destinations.firstWhere(
-      (d) => variants.any((variant) => d.matches(variant)),
-      orElse: () => const SearchDestination(
-        title: '',
-        route: Routes.homeScreen,
-        keywords: [],
-      ),
-    );
-    if (match.title.isEmpty) return;
-    _goTo(match.title, match.route);
+    SearchDestination? best;
+    var bestScore = 0;
+    for (final d in widget.destinations) {
+      for (final variant in variants) {
+        final s = d.matchScore(variant);
+        if (s > bestScore) {
+          bestScore = s;
+          best = d;
+        }
+      }
+    }
+    if (best == null) return;
+    _goTo(best.title, best.route);
   }
 
   void _goTo(String title, Routes route) {
@@ -125,7 +147,8 @@ class _SearchSuggesterState extends State<SearchSuggester> {
   }
 
   void _showOverlay() {
-    if (_results.isEmpty) {
+    final hasQuery = _controller.text.trim().isNotEmpty;
+    if (_results.isEmpty && !hasQuery) {
       _hideOverlay();
       return;
     }
@@ -138,7 +161,7 @@ class _SearchSuggesterState extends State<SearchSuggester> {
         child: CompositedTransformFollower(
           link: _link,
           showWhenUnlinked: false,
-          offset: const Offset(0, 54),
+          offset: Offset(0, (_fieldSize?.height ?? 48) + 6),
           child: Material(
             color: Colors.transparent,
             child: Align(
@@ -177,28 +200,38 @@ class _SearchSuggesterState extends State<SearchSuggester> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: _results
-            .map(
-              (text) => ListTile(
-                dense: true,
-                title: Text(
-                  text,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Color(AppColors.black),
+        children: _results.isEmpty
+            ? const [
+                ListTile(
+                  dense: true,
+                  title: Text(
+                    'Ничего не найдено',
+                    style: TextStyle(fontSize: 15, color: Color(0xFF9CA3AF)),
                   ),
                 ),
-                onTap: () {
-                  final match = widget.destinations.firstWhere(
-                    (d) => d.title == text,
-                    orElse: () => widget.destinations.first,
-                  );
-                  _goTo(text, match.route);
-                },
-              ),
-            )
-            .toList(),
+              ]
+            : _results
+                  .map(
+                    (text) => ListTile(
+                      dense: true,
+                      title: Text(
+                        text,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Color(AppColors.black),
+                        ),
+                      ),
+                      onTap: () {
+                        final match = widget.destinations.firstWhere(
+                          (d) => d.title == text,
+                          orElse: () => widget.destinations.first,
+                        );
+                        _goTo(text, match.route);
+                      },
+                    ),
+                  )
+                  .toList(),
       ),
     );
   }

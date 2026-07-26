@@ -60,6 +60,25 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
   }
 
   @override
+  Future<List<CreditModel>> getCreditsByClientId(int clientId) async {
+    try {
+      final response = await dio.get('Credit/list/$clientId');
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        return CreditResponseModel.fromJson(data).items;
+      }
+      if (data is List) {
+        return data
+            .map((e) => CreditModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      throw const ApiError('Сервер вернул некорректный ответ.');
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось загрузить договоры клиента.');
+    }
+  }
+
+  @override
   Future<void> toggleFavourite(int creditId) async {
     try {
       final response = await dio.put('Credit/$creditId/toggle-favourite');
