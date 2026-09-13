@@ -117,9 +117,11 @@ class _CreateObjectTypeModalState extends State<CreateObjectTypeModal> {
                         setState(() {
                           _isCreating = false;
                         });
-                        ScaffoldMessenger.of(
+                        showAppMessage(
                           context,
-                        ).showSnackBar(SnackBar(content: Text(state.message)));
+                          state.message,
+                          type: AppMessageType.error,
+                        );
                       }
                     },
                     builder: (context, state) {

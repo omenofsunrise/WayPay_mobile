@@ -343,6 +343,10 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
             'Дата подписания',
             _formatDate(widget.credit.creditDate),
           ),
+          if ((widget.credit.creditTypeName ?? '').trim().isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _buildInfoRow('Категория', widget.credit.creditTypeName!),
+          ],
           if (widget.credit.investorNickname.trim().isNotEmpty) ...[
             const SizedBox(height: 16),
             _buildInfoRow('Инвестор', widget.credit.investorNickname),
@@ -625,8 +629,10 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
     if (!mounted) return;
     rootNavigator.pop(); // закрываем индикатор загрузки
     if (full == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не удалось загрузить договор')),
+      showAppMessage(
+        context,
+        'Не удалось загрузить договор',
+        type: AppMessageType.error,
       );
       return;
     }
@@ -646,8 +652,10 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
     final uri = Uri(scheme: 'tel', path: phone);
     final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!success && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не удалось открыть телефон')),
+      showAppMessage(
+        context,
+        'Не удалось открыть телефон',
+        type: AppMessageType.error,
       );
     }
   }
@@ -658,8 +666,10 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
     final uri = Uri.parse('https://wa.me/$phone');
     final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!success && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не удалось открыть WhatsApp')),
+      showAppMessage(
+        context,
+        'Не удалось открыть WhatsApp',
+        type: AppMessageType.error,
       );
     }
   }
@@ -734,9 +744,11 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
   Future<void> _shareContractData() async {
     final phone = formatRussianPhoneForWhatsApp(widget.credit.clientPhone);
     if (phone == null) {
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Не указан номер клиента')));
+        'Не указан номер клиента',
+        type: AppMessageType.error,
+      );
       return;
     }
     final message = _buildContractMessage();
@@ -746,9 +758,11 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
   Future<void> _sharePaymentsHistory() async {
     final phone = formatRussianPhoneForWhatsApp(widget.credit.clientPhone);
     if (phone == null) {
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Не указан номер клиента')));
+        'Не указан номер клиента',
+        type: AppMessageType.error,
+      );
       return;
     }
 
@@ -765,8 +779,10 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
     } catch (e) {
       if (mounted) Navigator.of(context, rootNavigator: true).pop();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка загрузки истории платежей: $e')),
+      showAppMessage(
+        context,
+        'Ошибка загрузки истории платежей: $e',
+        type: AppMessageType.error,
       );
       return;
     }
@@ -842,8 +858,10 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
     );
     final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не удалось открыть WhatsApp')),
+      showAppMessage(
+        context,
+        'Не удалось открыть WhatsApp',
+        type: AppMessageType.error,
       );
     }
   }
@@ -1094,10 +1112,11 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
         _paymentsError = 'Ошибка загрузки платежей';
       });
     } finally {
-      if (!mounted) return;
-      setState(() {
-        _isLoadingPayments = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoadingPayments = false;
+        });
+      }
     }
   }
 
@@ -1107,9 +1126,11 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
 
     final phone = formatRussianPhoneForWhatsApp(widget.credit.clientPhone);
     if (phone == null) {
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Не указан номер клиента')));
+        'Не указан номер клиента',
+        type: AppMessageType.error,
+      );
       return;
     }
 
@@ -1130,12 +1151,11 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка: $e')));
+      showAppMessage(context, 'Ошибка: $e', type: AppMessageType.error);
     } finally {
-      if (!mounted) return;
-      setState(() => _whatsAppLoading.remove(scheduleId));
+      if (mounted) {
+        setState(() => _whatsAppLoading.remove(scheduleId));
+      }
     }
   }
 
@@ -1175,9 +1195,11 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
       setState(() => _isLoadingNotes = false);
 
       if (mounted) {
-        ScaffoldMessenger.of(
+        showAppMessage(
           context,
-        ).showSnackBar(SnackBar(content: Text('Ошибка загрузки заметок: $e')));
+          'Ошибка загрузки заметок: $e',
+          type: AppMessageType.error,
+        );
       }
     }
   }

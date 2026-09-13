@@ -433,35 +433,29 @@ class Note extends StatelessWidget {
       onDelete();
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка удаления: $e')));
+        'Ошибка удаления: $e',
+        type: AppMessageType.error,
+      );
     }
   }
 
   Future<void> _openFile(BuildContext context) async {
     if (note.fileBase64 == null || note.fileBase64!.isEmpty) {
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Файл недоступен для открытия')));
+        'Файл недоступен для открытия',
+        type: AppMessageType.error,
+      );
       return;
     }
 
     try {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                strokeWidth: 2,
-              ),
-              SizedBox(width: 12),
-              Text('Подготовка файла...'),
-            ],
-          ),
-          duration: Duration(seconds: 30),
-        ),
+      showAppMessage(
+        context,
+        'Подготовка файла...',
+        duration: const Duration(seconds: 30),
       );
 
       final bytes = base64.decode(note.fileBase64!);
@@ -479,7 +473,7 @@ class Note extends StatelessWidget {
       await tempFile.writeAsBytes(bytes);
 
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      hideAppMessage();
 
       final result = await OpenFilex.open(tempFile.path);
 
@@ -488,27 +482,27 @@ class Note extends StatelessWidget {
         case ResultType.done:
           break;
         case ResultType.noAppToOpen:
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Не найдено приложение для открытия этого файла'),
-            ),
+          showAppMessage(
+            context,
+            'Не найдено приложение для открытия этого файла',
+            type: AppMessageType.error,
           );
           break;
         case ResultType.fileNotFound:
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Файл не найден')));
+          showAppMessage(context, 'Файл не найден', type: AppMessageType.error);
           break;
         case ResultType.permissionDenied:
-          ScaffoldMessenger.of(
+          showAppMessage(
             context,
-          ).showSnackBar(SnackBar(content: Text('В доступе отказано')));
+            'В доступе отказано',
+            type: AppMessageType.error,
+          );
           break;
         case ResultType.error:
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Ошибка при открытии файла: ${result.message}'),
-            ),
+          showAppMessage(
+            context,
+            'Ошибка при открытии файла: ${result.message}',
+            type: AppMessageType.error,
           );
           break;
       }
@@ -521,17 +515,21 @@ class Note extends StatelessWidget {
     } on PlatformException catch (e) {
       debugPrint('Ошибка платформы при открытии файла');
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(
+      hideAppMessage();
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка открытия: ${e.message}')));
+        'Ошибка открытия: ${e.message}',
+        type: AppMessageType.error,
+      );
     } catch (e) {
       debugPrint('Ошибка при открытии файла');
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(
+      hideAppMessage();
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка открытия файла: $e')));
+        'Ошибка открытия файла: $e',
+        type: AppMessageType.error,
+      );
     }
   }
 }

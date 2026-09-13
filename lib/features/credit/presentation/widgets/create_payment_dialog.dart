@@ -16,8 +16,17 @@ import 'package:waypay_mobile/features/payment/data/models/expected/payment_item
 
 class CreatePaymentDialog extends StatefulWidget {
   final CreditModel credit;
+  final DateTime? initialDate;
+  final double? initialAmount;
+  final VoidCallback? onPaymentCreated;
 
-  const CreatePaymentDialog({super.key, required this.credit});
+  const CreatePaymentDialog({
+    super.key,
+    required this.credit,
+    this.initialDate,
+    this.initialAmount,
+    this.onPaymentCreated,
+  });
 
   @override
   State<CreatePaymentDialog> createState() => _CreatePaymentDialogState();
@@ -46,6 +55,14 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
     _currentDebtController.text = _formatCurrency(widget.credit.debt);
     _restController.text = _formatCurrency(widget.credit.rest);
     _selectedType = PaymentType.cash;
+    _selectedDate = widget.initialDate;
+    if (_selectedDate != null) {
+      _dateController.text = DateFormat('dd.MM.yyyy').format(_selectedDate!);
+    }
+    final initialAmount = widget.initialAmount;
+    if (initialAmount != null && initialAmount > 0) {
+      _amountController.text = _formatAmountInput(initialAmount);
+    }
     _amountController.addListener(_onFieldChanged);
     _dateController.addListener(_onFieldChanged);
   }
@@ -207,9 +224,7 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
     final amount = double.tryParse(text);
 
     if (_selectedDate == null || amount == null || _selectedType == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Заполните все поля')));
+      showAppMessage(context, 'Заполните все поля', type: AppMessageType.error);
       return;
     }
 
@@ -227,22 +242,27 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
             : null,
       );
 
-      if (context.mounted) {
+      if (!mounted) return;
+      try {
         final creditBloc = context.read<CreditBloc>();
         creditBloc.add(
           LoadCreditsEvent(refresh: true, query: creditBloc.lastQuery),
         );
-        Navigator.pop(context);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Платёж успешно создан')));
-      }
+      } catch (_) {}
+      widget.onPaymentCreated?.call();
+      showAppMessage(
+        context,
+        'Платёж успешно создан',
+        type: AppMessageType.success,
+      );
+      Navigator.pop(context);
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка при создании платежа: $e')),
-        );
-      }
+      if (!mounted) return;
+      showAppMessage(
+        context,
+        'Ошибка при создании платежа: $e',
+        type: AppMessageType.error,
+      );
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -351,10 +371,11 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
         _cardsError = 'Не удалось загрузить карты: $e';
       });
     } finally {
-      if (!mounted) return;
-      setState(() {
-        _isLoadingCards = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoadingCards = false;
+        });
+      }
     }
   }
 
@@ -486,5 +507,10 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
       decimalDigits: 0,
     );
     return format.format(value);
+  }
+
+  String _formatAmountInput(num value) {
+    if (value % 1 == 0) return value.toInt().toString();
+    return value.toString();
   }
 }

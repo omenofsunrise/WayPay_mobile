@@ -4,6 +4,7 @@ import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
+import 'package:waypay_mobile/features/credit/presentation/widgets/create_payment_dialog.dart';
 import 'package:waypay_mobile/features/payment/data/data_sources/expected/payment_remote_data_sources.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 import 'package:waypay_mobile/features/payment/data/models/schedule/schedule_model.dart';
@@ -25,7 +26,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
   CreditModel? _credit;
   int? _resolvedCreditId;
   bool _isLoading = true;
-  late bool _isNotified;
+  late bool _paymentCreated;
   String? _error;
 
   ScheduleModel? get _schedule => widget.schedule;
@@ -38,12 +39,15 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
       _schedule?.paymentAmount ?? _payment?.paymentAmount ?? 0;
   String get _paymentDateRaw =>
       _schedule?.paymentDate ?? _payment?.paymentDate ?? '';
-  bool get _isPaid => _payment?.accepted == true || _isNotified;
+  bool get _isPaid =>
+      _payment?.accepted == true || _schedule?.payed == true || _paymentCreated;
+  bool get _canCreatePayment =>
+      _schedule != null && !_isPaid && _credit != null;
 
   @override
   void initState() {
     super.initState();
-    _isNotified = _schedule?.notified ?? _payment?.accepted ?? false;
+    _paymentCreated = _payment?.accepted ?? false;
     _loadCredit();
   }
 
@@ -119,6 +123,44 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
     } catch (_) {
       return iso;
     }
+  }
+
+  DateTime? _parsePaymentDate() {
+    if (_paymentDateRaw.isEmpty) return null;
+    try {
+      return DateTime.parse(_paymentDateRaw);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _showCreatePaymentModal() {
+    final credit = _credit;
+    if (!_canCreatePayment || credit == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(ctx).viewInsets.bottom,
+          ),
+          child: CreatePaymentDialog(
+            credit: credit,
+            initialDate: _parsePaymentDate(),
+            initialAmount: _paymentAmount,
+            onPaymentCreated: () {
+              if (!mounted) return;
+              setState(() => _paymentCreated = true);
+              _loadCredit();
+            },
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -239,6 +281,14 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
               label: 'Сумма платежа',
               value: _formatCurrency(_paymentAmount),
             ),
+            if (_canCreatePayment) ...[
+              const SizedBox(height: 20),
+              DefaultButton(
+                text: 'Добавить платёж',
+                isPrimary: true,
+                onPressed: _showCreatePaymentModal,
+              ),
+            ],
           ],
         ),
       ),

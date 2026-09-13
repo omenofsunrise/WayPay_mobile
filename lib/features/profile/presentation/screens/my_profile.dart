@@ -43,9 +43,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Не удалось загрузить фото: $e')));
+        'Не удалось загрузить фото: $e',
+        type: AppMessageType.error,
+      );
     }
   }
 
@@ -75,9 +77,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         await cubit.deleteEmployeePhoto();
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(
+        showAppMessage(
           context,
-        ).showSnackBar(SnackBar(content: Text('Не удалось удалить фото: $e')));
+          'Не удалось удалить фото: $e',
+          type: AppMessageType.error,
+        );
       }
     }
   }

@@ -38,7 +38,7 @@ Future<bool> showConfirmDialog({
 
 void showMessage(String message, BuildContext context) {
   if (!context.mounted) return;
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  showAppMessage(context, message);
 }
 
 final _avatarColors = [

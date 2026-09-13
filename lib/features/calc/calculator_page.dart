@@ -77,8 +77,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     }
 
     final double desiredLeft =
-        anchor!.dx +
-        (anchorSize!.width.isFinite ? (anchorSize.width - popupWidth) / 2 : 0);
+        anchor.dx +
+        (anchorSize.width.isFinite ? (anchorSize.width - popupWidth) / 2 : 0);
     final double clampedLeft = desiredLeft.clamp(
       16.0,
       overlay.size.width - popupWidth - 16.0,
@@ -223,9 +223,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Не удалось создать PDF: $e')));
+        'Не удалось создать PDF: $e',
+        type: AppMessageType.error,
+      );
     }
   }
 
@@ -537,7 +539,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     child: pw.Container(
                       height: 10,
                       width:
-                          pw.FractionColumnWidth(debtPct).value! *
+                          pw.FractionColumnWidth(debtPct).value *
                           PdfPageFormat.a4.availableWidth,
                       decoration: pw.BoxDecoration(
                         color: barDebt,

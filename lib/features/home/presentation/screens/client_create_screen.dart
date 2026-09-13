@@ -288,8 +288,10 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
           setState(() {
             _isSubmitting = false;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Клиент успешно создан')),
+          showAppMessage(
+            context,
+            'Клиент успешно создан',
+            type: AppMessageType.success,
           );
           Navigator.of(context).maybePop();
         } else if (state is ClientsError) {

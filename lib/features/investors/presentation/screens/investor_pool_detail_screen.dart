@@ -81,10 +81,7 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
   }
 
   Future<void> _refreshAll() async {
-    await Future.wait([
-      _loadReport(),
-      _loadInvestors(),
-    ]);
+    await Future.wait([_loadReport(), _loadInvestors()]);
   }
 
   Future<void> _handleAddInvestment(InvestorsModel investor) async {
@@ -107,16 +104,16 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
       );
       if (!mounted) return;
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Инвестиция добавлена')),
+      showAppMessage(
+        context,
+        'Инвестиция добавлена',
+        type: AppMessageType.success,
       );
       await _loadInvestors();
     } catch (e) {
       if (!mounted) return;
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка: $e')),
-      );
+      showAppMessage(context, 'Ошибка: $e', type: AppMessageType.error);
     }
   }
 
@@ -235,8 +232,7 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _PoolNameCard(
-                                name: (_reportData?['name'] ??
-                                        widget.pool.name)
+                                name: (_reportData?['name'] ?? widget.pool.name)
                                     .toString(),
                               ),
                               const SizedBox(height: 16),

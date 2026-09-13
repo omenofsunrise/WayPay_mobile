@@ -111,14 +111,18 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
       widget.employeesBloc.add(LoadEmployeesEvent(page: 1));
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Сотрудник добавлен')));
+        'Сотрудник добавлен',
+        type: AppMessageType.success,
+      );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка создания: $e')));
+        'Ошибка создания: $e',
+        type: AppMessageType.error,
+      );
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -155,9 +159,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    showAppMessage(context, message, type: AppMessageType.error);
   }
 
   Widget _buildPickerField({

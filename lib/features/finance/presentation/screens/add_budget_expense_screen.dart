@@ -91,9 +91,11 @@ class _AddBudgetExpenseScreenState extends State<AddBudgetExpenseScreen> {
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Не удалось сохранить: $e')));
+        'Не удалось сохранить: $e',
+        type: AppMessageType.error,
+      );
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);

@@ -90,16 +90,16 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
 
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Сессия завершена')));
+      showAppMessage(context, 'Сессия завершена', type: AppMessageType.success);
       _load();
     } catch (e) {
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка завершения: $e')));
+        'Ошибка завершения: $e',
+        type: AppMessageType.error,
+      );
     }
   }
 

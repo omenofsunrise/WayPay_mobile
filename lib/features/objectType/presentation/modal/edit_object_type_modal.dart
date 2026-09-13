@@ -71,9 +71,7 @@ class _EditObjectTypeModalState extends State<EditObjectTypeModal> {
           setState(() {
             _isUpdating = false;
           });
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          showAppMessage(context, state.message, type: AppMessageType.error);
         }
       },
       child: Container(

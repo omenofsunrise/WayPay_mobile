@@ -73,16 +73,16 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
       );
       if (!mounted) return;
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Инвестиция добавлена')));
+        'Инвестиция добавлена',
+        type: AppMessageType.success,
+      );
       context.read<InvestorsBloc>().add(LoadInvestorsEvent(refresh: true));
     } catch (e) {
       if (!mounted) return;
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка: $e')));
+      showAppMessage(context, 'Ошибка: $e', type: AppMessageType.error);
     }
   }
 

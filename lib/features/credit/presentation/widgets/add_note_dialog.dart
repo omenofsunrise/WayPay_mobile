@@ -43,9 +43,11 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        showAppMessage(
           context,
-        ).showSnackBar(SnackBar(content: Text('Ошибка при выборе файла: $e')));
+          'Ошибка при выборе файла: $e',
+          type: AppMessageType.error,
+        );
       }
     }
   }
@@ -66,8 +68,10 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка при добавлении фото: $e')),
+        showAppMessage(
+          context,
+          'Ошибка при добавлении фото: $e',
+          type: AppMessageType.error,
         );
       }
     }
@@ -81,9 +85,11 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
 
   Future<void> _createNote() async {
     if (_controller.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Введите текст заметки')));
+        'Введите текст заметки',
+        type: AppMessageType.error,
+      );
       return;
     }
 
@@ -107,14 +113,18 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Заметка успешно добавлена')),
+        showAppMessage(
+          context,
+          'Заметка успешно добавлена',
+          type: AppMessageType.success,
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка при добавлении заметки: $e')),
+        showAppMessage(
+          context,
+          'Ошибка при добавлении заметки: $e',
+          type: AppMessageType.error,
         );
       }
     } finally {

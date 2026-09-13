@@ -342,9 +342,11 @@ class _CreateQueueModalState extends State<_CreateQueueModal> {
     if (!_canSubmit || _selectedClient == null) return;
     final amount = _parseAmount();
     if (amount == null) {
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Введите корректную сумму')));
+        'Введите корректную сумму',
+        type: AppMessageType.error,
+      );
       return;
     }
     final request = QueueRequestModel(

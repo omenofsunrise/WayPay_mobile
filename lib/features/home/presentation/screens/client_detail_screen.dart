@@ -63,12 +63,10 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
     final type = _typeForNewPhoto();
     if (type == null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Оба фото загружены. Удалите одно, чтобы загрузить новое.',
-          ),
-        ),
+      showAppMessage(
+        context,
+        'Оба фото загружены. Удалите одно, чтобы загрузить новое.',
+        type: AppMessageType.error,
       );
       return;
     }
@@ -83,9 +81,11 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
     final clientId = widget.client?.id;
     if (clientId == null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(const SnackBar(content: Text('ID клиента недоступен')));
+        'ID клиента недоступен',
+        type: AppMessageType.error,
+      );
       return;
     }
 
@@ -97,14 +97,18 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
       await _cachePhotoBytes(clientId, type, bytes);
       if (!mounted) return;
       setState(() => _upsertPassportPhoto(type, MemoryImage(bytes)));
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Фото паспорта загружено')));
+        'Фото паспорта загружено',
+        type: AppMessageType.success,
+      );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        showAppMessage(
           context,
-        ).showSnackBar(SnackBar(content: Text('Ошибка загрузки фото: $e')));
+          'Ошибка загрузки фото: $e',
+          type: AppMessageType.error,
+        );
       }
     } finally {
       if (mounted) {
@@ -119,9 +123,11 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
     final clientId = widget.client?.id;
     if (clientId == null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(const SnackBar(content: Text('ID клиента недоступен')));
+        'ID клиента недоступен',
+        type: AppMessageType.error,
+      );
       return;
     }
 
@@ -133,14 +139,14 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
       setState(() {
         _photos.removeAt(index);
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Фото удалено')));
+      showAppMessage(context, 'Фото удалено', type: AppMessageType.success);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        showAppMessage(
           context,
-        ).showSnackBar(SnackBar(content: Text('Ошибка удаления фото: $e')));
+          'Ошибка удаления фото: $e',
+          type: AppMessageType.error,
+        );
       }
     } finally {
       if (mounted) {
@@ -685,9 +691,11 @@ class _CommentsTabState extends State<_CommentsTab> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка при выборе файла: $e')));
+        'Ошибка при выборе файла: $e',
+        type: AppMessageType.error,
+      );
     }
   }
 
@@ -701,8 +709,10 @@ class _CommentsTabState extends State<_CommentsTab> {
     if (widget.clientId == null) return;
     final text = _controller.text.trim();
     if (text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Добавьте текст комментария')),
+      showAppMessage(
+        context,
+        'Добавьте текст комментария',
+        type: AppMessageType.error,
       );
       return;
     }
@@ -726,15 +736,19 @@ class _CommentsTabState extends State<_CommentsTab> {
       await _loadNotes();
 
       if (mounted) {
-        ScaffoldMessenger.of(
+        showAppMessage(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Комментарий добавлен')));
+          'Комментарий добавлен',
+          type: AppMessageType.success,
+        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        showAppMessage(
           context,
-        ).showSnackBar(SnackBar(content: Text('Ошибка при отправке: $e')));
+          'Ошибка при отправке: $e',
+          type: AppMessageType.error,
+        );
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -749,18 +763,22 @@ class _CommentsTabState extends State<_CommentsTab> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка удаления: $e')));
+        'Ошибка удаления: $e',
+        type: AppMessageType.error,
+      );
     }
   }
 
   Future<void> _openAttachment(NoteModel note) async {
     final base64Data = note.fileBase64;
     if (base64Data == null || base64Data.isEmpty) {
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Вложение отсутствует')));
+        'Вложение отсутствует',
+        type: AppMessageType.error,
+      );
       return;
     }
 
@@ -778,9 +796,11 @@ class _CommentsTabState extends State<_CommentsTab> {
       await OpenFilex.open(file.path);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Не удалось открыть файл: $e')));
+        'Не удалось открыть файл: $e',
+        type: AppMessageType.error,
+      );
     }
   }
 

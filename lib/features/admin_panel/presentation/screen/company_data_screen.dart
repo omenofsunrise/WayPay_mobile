@@ -74,8 +74,10 @@ class _CompanyDataScreenState extends State<CompanyDataScreen> {
       _syncCardDisplay();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка загрузки данных компании: $e')),
+      showAppMessage(
+        context,
+        'Ошибка загрузки данных компании: $e',
+        type: AppMessageType.error,
       );
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -223,14 +225,18 @@ class _CompanyDataScreenState extends State<CompanyDataScreen> {
       );
       await getIt<CompanyRemoteDataSource>().updateCompany(updated);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Данные компании обновлены')),
+      showAppMessage(
+        context,
+        'Данные компании обновлены',
+        type: AppMessageType.success,
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка сохранения: $e')));
+        'Ошибка сохранения: $e',
+        type: AppMessageType.error,
+      );
     } finally {
       if (mounted) setState(() => _saving = false);
     }

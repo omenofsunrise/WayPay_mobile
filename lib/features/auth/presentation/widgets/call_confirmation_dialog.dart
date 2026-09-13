@@ -56,13 +56,12 @@ class _CallConfirmationDialogState extends State<CallConfirmationDialog> {
     final digits = widget.callPhone.replaceAll(RegExp(r'\\D'), '');
     if (digits.isEmpty) return;
     final uri = Uri(scheme: 'tel', path: digits);
-    final launched = await launchUrl(
-      uri,
-      mode: LaunchMode.externalApplication,
-    );
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не удалось открыть телефон')),
+      showAppMessage(
+        context,
+        'Не удалось открыть телефон',
+        type: AppMessageType.error,
       );
     }
   }

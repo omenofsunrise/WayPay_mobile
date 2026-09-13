@@ -210,9 +210,11 @@ class _ScheduleScreenState extends State<ScheduleScreen>
         : (widget.clientPhone ?? '');
     final phone = _preparePhone(rawPhone);
     if (phone == null) {
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Не указан номер клиента')));
+        'Не указан номер клиента',
+        type: AppMessageType.error,
+      );
       return;
     }
     setState(() => _whatsAppLoading.add(scheduleId));
@@ -231,9 +233,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка: $e')));
+      showAppMessage(context, 'Ошибка: $e', type: AppMessageType.error);
     } finally {
       if (mounted) {
         setState(() => _whatsAppLoading.remove(scheduleId));

@@ -181,7 +181,7 @@ class _AddBudgetIncomeScreenState extends State<AddBudgetIncomeScreen> {
     });
 
     final amountValue = _getTotalAmount();
-    if (amountValue == null || amountValue <= 0) {
+    if (amountValue <= 0) {
       setState(() => _amountError = 'Введите корректную сумму');
       return;
     }
@@ -206,9 +206,11 @@ class _AddBudgetIncomeScreenState extends State<AddBudgetIncomeScreen> {
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Не удалось сохранить: $e')));
+        'Не удалось сохранить: $e',
+        type: AppMessageType.error,
+      );
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);

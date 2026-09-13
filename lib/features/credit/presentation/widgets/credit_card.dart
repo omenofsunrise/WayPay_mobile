@@ -29,8 +29,10 @@ class CreditCardWidget extends StatelessWidget {
     final uri = Uri(scheme: 'tel', path: phone);
     final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!success && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не удалось открыть телефон')),
+      showAppMessage(
+        context,
+        'Не удалось открыть телефон',
+        type: AppMessageType.error,
       );
     }
   }
@@ -41,8 +43,10 @@ class CreditCardWidget extends StatelessWidget {
     final uri = Uri.parse('https://wa.me/$phone');
     final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!success && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не удалось открыть WhatsApp')),
+      showAppMessage(
+        context,
+        'Не удалось открыть WhatsApp',
+        type: AppMessageType.error,
       );
     }
   }
