@@ -84,10 +84,19 @@ class _CreditsScreenState extends State<CreditsScreen> {
   }
 
   Future<void> _openFilters() async {
+    // FilterSheet даёт только отступы и содержимое — ни фона, ни скруглений.
+    // Поверхность задаёт вызывающий, иначе лист выходит прозрачным на весь
+    // экран. Параметры те же, что у рабочего листа фильтров расписания.
     final result = await showModalBottomSheet<GetCreditsQuery>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      useRootNavigator: true,
+      clipBehavior: Clip.antiAlias,
+      barrierColor: Colors.white.withValues(alpha: 0.7),
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (_) => CreditFiltersSheet(initialFilters: _filters),
     );
 
