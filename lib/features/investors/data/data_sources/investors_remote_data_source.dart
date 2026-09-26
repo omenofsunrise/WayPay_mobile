@@ -1,4 +1,6 @@
+import 'package:waypay_mobile/features/investors/data/models/investor_cash_position_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/move_cash_position_request.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_response.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_response_model.dart';
@@ -52,4 +54,16 @@ abstract class InvestorsRemoteDataSource {
   Future<List<InvestorPayoutModel>> getInvestorPayoutsByInvestorId(
     int investorId,
   );
+
+  /// История переводов кассы инвестора (отдельная касса / пул).
+  Future<InvestorCashPositionHistoryResponse> getCashPositionHistory(
+    int investorId, {
+    int page,
+  });
+
+  /// Перевести кассу инвестора в пул или в отдельную кассу.
+  Future<void> moveCashPosition(MoveCashPositionRequest request);
+
+  /// Удалить запись из истории переводов кассы.
+  Future<void> deleteCashPosition(int id);
 }

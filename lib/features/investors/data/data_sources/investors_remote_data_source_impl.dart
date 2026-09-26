@@ -2,7 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
+import 'package:waypay_mobile/features/investors/data/models/investor_cash_position_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/move_cash_position_request.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_request.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_response.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
@@ -281,6 +283,72 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       }
     } on DioException catch (e) {
       throw mapApiError(e, fallback: 'Не удалось загрузить выплаты инвестора.');
+    }
+  }
+
+  @override
+  Future<InvestorCashPositionHistoryResponse> getCashPositionHistory(
+    int investorId, {
+    int page = 1,
+  }) async {
+    try {
+      final response = await dio.get(
+        'Investor/$investorId/cash/positions/history',
+        queryParameters: {'page': page},
+      );
+
+      final data = response.data;
+
+      if (data == null) {
+        return const InvestorCashPositionHistoryResponse(
+          items: [],
+          totalCount: 0,
+          page: 1,
+          pageSize: 10,
+        );
+      }
+
+      if (data is List) {
+        final items = data
+            .map(
+              (e) => InvestorCashPositionModel.fromJson(
+                e as Map<String, dynamic>,
+              ),
+            )
+            .toList();
+        return InvestorCashPositionHistoryResponse(
+          items: items,
+          totalCount: items.length,
+          page: page,
+          pageSize: items.isEmpty ? 10 : items.length,
+        );
+      }
+
+      if (data is Map<String, dynamic>) {
+        return InvestorCashPositionHistoryResponse.fromJson(data);
+      }
+
+      throw const ApiError('Сервер вернул некорректный ответ.');
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось загрузить историю кассы.');
+    }
+  }
+
+  @override
+  Future<void> moveCashPosition(MoveCashPositionRequest request) async {
+    try {
+      await dio.post('Investor/cash/positions/history', data: request.toJson());
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось перевести кассу инвестора.');
+    }
+  }
+
+  @override
+  Future<void> deleteCashPosition(int id) async {
+    try {
+      await dio.delete('Investor/cash/position/history/$id');
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось удалить запись из истории.');
     }
   }
 }
