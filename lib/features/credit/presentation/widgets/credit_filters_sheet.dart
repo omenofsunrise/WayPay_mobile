@@ -40,9 +40,19 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
   final _dateFromController = TextEditingController();
   final _dateToController = TextEditingController();
   final _catalogController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _createdFromController = TextEditingController();
+  final _createdToController = TextEditingController();
 
   DateTime? _dateFrom;
   DateTime? _dateTo;
+  DateTime? _createdFrom;
+  DateTime? _createdTo;
+  bool _isFavourite = false;
+  bool _debt = false;
+  bool _inDebt = false;
+  bool _terminated = false;
+  bool _myCredits = false;
   ObjectTypeModel? _selectedCatalog;
   bool _showCatalogOptions = false;
   int? _initialCatalogId;
@@ -56,6 +66,9 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
     _dateFromController,
     _dateToController,
     _catalogController,
+    _addressController,
+    _createdFromController,
+    _createdToController,
   ];
 
   @override
@@ -85,7 +98,12 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
 
   bool get _hasAnyValue =>
       _controllers.any((c) => c.text.trim().isNotEmpty) ||
-      _selectedCatalog != null;
+      _selectedCatalog != null ||
+      _isFavourite ||
+      _debt ||
+      _inDebt ||
+      _terminated ||
+      _myCredits;
 
   void _applyInitialValues() {
     final filters = widget.initialFilters;
@@ -101,10 +119,28 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
       _investorController.text = filters.investorNickname!;
     }
 
+    if ((filters.name ?? '').isNotEmpty) {
+      _contractController.text = filters.name!;
+    }
+    if ((filters.clientAddress ?? '').isNotEmpty) {
+      _addressController.text = filters.clientAddress!;
+    }
+
     _dateFrom = filters.dateFrom;
     _dateTo = filters.dateTo;
     _dateFromController.text = _formatDate(_dateFrom);
     _dateToController.text = _formatDate(_dateTo);
+
+    _createdFrom = filters.createdAt;
+    _createdTo = filters.createdTo;
+    _createdFromController.text = _formatDate(_createdFrom);
+    _createdToController.text = _formatDate(_createdTo);
+
+    _isFavourite = filters.isFavourite ?? false;
+    _debt = filters.debt ?? false;
+    _inDebt = filters.inDebt ?? false;
+    _terminated = filters.terminated ?? false;
+    _myCredits = filters.myCredits ?? false;
   }
 
   void _loadObjectTypes() {
@@ -120,7 +156,7 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
         query: GetObjectTypesQuery(
           page: 1,
           pageSize: 100,
-          entityType: 'CreditTab',
+          entityType: 'Credit',
         ),
       ),
     );
@@ -163,25 +199,86 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
     }
   }
 
+  Future<void> _pickCreatedDate({required bool isFrom}) async {
+    final initialDate = isFrom
+        ? _createdFrom ?? DateTime.now()
+        : _createdTo ?? _createdFrom ?? DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isFrom) {
+          _createdFrom = picked;
+          _createdFromController.text = _formatDate(picked);
+        } else {
+          _createdTo = picked;
+          _createdToController.text = _formatDate(picked);
+        }
+      });
+    }
+  }
+
   GetCreditsQuery _buildFilters() {
+    String? text(TextEditingController c) =>
+        c.text.trim().isEmpty ? null : c.text.trim();
+
     return GetCreditsQuery(
-      creditId: _parseContract(_contractController.text),
-      clientFullname: _clientController.text.trim().isEmpty
-          ? null
-          : _clientController.text.trim(),
-      investorNickname: _investorController.text.trim().isEmpty
-          ? null
-          : _investorController.text.trim(),
+      // Бэкенд в ApplyNameFilter ищет и по номеру, и по названию,
+      // поэтому числовой creditId отдельно не нужен.
+      name: text(_contractController),
+      clientFullname: text(_clientController),
+      investorNickname: text(_investorController),
+      clientAddress: text(_addressController),
       dateFrom: _dateFrom,
       dateTo: _dateTo,
+      createdAt: _createdFrom,
+      createdTo: _createdTo,
       creditTypeId: _selectedCatalog?.id,
+      isFavourite: _isFavourite ? true : null,
+      debt: _debt ? true : null,
+      inDebt: _inDebt ? true : null,
+      terminated: _terminated ? true : null,
+      myCredits: _myCredits ? true : null,
     );
   }
 
-  int? _parseContract(String value) {
-    final digits = value.replaceAll(RegExp(r'\D'), '');
-    if (digits.isEmpty) return null;
-    return int.tryParse(digits);
+  Widget _buildToggle({
+    required String label,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return InkWell(
+      onTap: () => onChanged(!value),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          children: [
+            Icon(
+              value ? Icons.check_box : Icons.check_box_outline_blank,
+              size: 22,
+              color: value
+                  ? const Color(AppColors.primary)
+                  : const Color(AppColors.uiBorder),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: Color(AppColors.black),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   String _formatDate(DateTime? date) {
@@ -357,10 +454,18 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
           ModalTextField(
             controller: _contractController,
             label: '№ договора',
-            hintText: 'Введите номер',
-            keyboardType: TextInputType.number,
+            hintText: 'Введите номер или название',
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          const Text(
+            'Дата договора',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(AppColors.uiBorder),
+            ),
+          ),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
@@ -393,7 +498,68 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
             hintText: 'Введите имя',
           ),
           const SizedBox(height: 12),
+          ModalTextField(
+            controller: _addressController,
+            label: 'Адрес клиента',
+            hintText: 'Введите адрес',
+          ),
+          const SizedBox(height: 12),
           _buildCatalogField(),
+          const SizedBox(height: 16),
+          const Text(
+            'Дата создания',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(AppColors.uiBorder),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _buildDateField(
+                  controller: _createdFromController,
+                  label: 'От',
+                  onTap: () => _pickCreatedDate(isFrom: true),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildDateField(
+                  controller: _createdToController,
+                  label: 'До',
+                  onTap: () => _pickCreatedDate(isFrom: false),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildToggle(
+            label: 'Только избранные',
+            value: _isFavourite,
+            onChanged: (v) => setState(() => _isFavourite = v),
+          ),
+          _buildToggle(
+            label: 'С просрочкой',
+            value: _debt,
+            onChanged: (v) => setState(() => _debt = v),
+          ),
+          _buildToggle(
+            label: 'В долг',
+            value: _inDebt,
+            onChanged: (v) => setState(() => _inDebt = v),
+          ),
+          _buildToggle(
+            label: 'Расторгнутые',
+            value: _terminated,
+            onChanged: (v) => setState(() => _terminated = v),
+          ),
+          _buildToggle(
+            label: 'Только мои',
+            value: _myCredits,
+            onChanged: (v) => setState(() => _myCredits = v),
+          ),
           const SizedBox(height: 24),
           Row(
             children: [
