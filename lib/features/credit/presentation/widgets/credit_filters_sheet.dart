@@ -19,6 +19,9 @@ class CreditFiltersSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FilterSheet(
+      // Фильтров много, поэтому шапку с крестиком закрепляем, а содержимое
+      // прокручиваем внутри — иначе крестик уезжает наверх.
+      keepHeaderPinned: true,
       child: _CreditFiltersForm(initialFilters: initialFilters),
     );
   }
