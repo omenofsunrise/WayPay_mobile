@@ -1,6 +1,5 @@
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,8 +28,6 @@ class CreditsScreen extends StatefulWidget {
 }
 
 class _CreditsScreenState extends State<CreditsScreen> {
-  final _searchController = TextEditingController();
-  Timer? _debounce;
   CreditTab _selectedTab = CreditTab.all;
   GetCreditsQuery? _filters;
 
@@ -40,27 +37,18 @@ class _CreditsScreenState extends State<CreditsScreen> {
     _loadCredits();
   }
 
-  void _loadCredits({bool refresh = true, int? page, String? search}) {
-    final query = _composeQuery(search: search, page: page);
+  void _loadCredits({bool refresh = true, int? page}) {
+    final query = _composeQuery(page: page);
     context.read<CreditBloc>().add(
       LoadCreditsEvent(refresh: refresh, query: query, page: page),
     );
   }
 
-  GetCreditsQuery _composeQuery({String? search, int? page}) {
-    final trimmedSearch =
-        search ??
-        (_searchController.text.trim().isEmpty
-            ? null
-            : _searchController.text.trim());
-    final parsed = _parseSearch(trimmedSearch);
-
+  GetCreditsQuery _composeQuery({int? page}) {
     final f = _filters;
 
     return GetCreditsQuery(
-      creditId: parsed.creditId,
-      clientFullname: parsed.clientFullname ?? f?.clientFullname,
-      search: null,
+      clientFullname: f?.clientFullname,
       page: page,
       // Значения из листа фильтров приоритетнее вкладки: вкладка задаёт
       // только то, что пользователь не выбрал вручную.
@@ -127,36 +115,13 @@ class _CreditsScreenState extends State<CreditsScreen> {
     _loadCredits();
   }
 
-  _ParsedSearch _parseSearch(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return const _ParsedSearch();
-    }
-    final trimmed = value.trim();
-    final digits = trimmed.replaceAll(RegExp(r'\\D'), '');
-    final hasLetters = RegExp(r'[A-Za-zА-Яа-я]').hasMatch(trimmed);
-    if (digits.isNotEmpty && !hasLetters) {
-      return _ParsedSearch(creditId: int.tryParse(digits));
-    }
-    return _ParsedSearch(clientFullname: trimmed);
-  }
-
   void _toggleFavourite(int creditId) {
     context.read<CreditBloc>().add(ToggleFavouriteEvent(creditId: creditId));
   }
 
   @override
   void dispose() {
-    _debounce?.cancel();
-    _searchController.dispose();
     super.dispose();
-  }
-
-  void _onSearchChanged(String value) {
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      final trimmed = value.trim();
-      _loadCredits(search: trimmed.isNotEmpty ? trimmed : null);
-    });
   }
 
   @override
@@ -242,17 +207,11 @@ class _CreditsScreenState extends State<CreditsScreen> {
   }
 
   Widget _buildSearchBar() {
+    // Поле поиска убрано: № договора и ФИО клиента есть в фильтрах,
+    // и два места ввода одного и того же только путали.
     return Row(
       children: [
-        Expanded(
-          child: SearchField(
-            controller: _searchController,
-            hintText: 'Поиск по № договора или ФИО',
-            onChanged: _onSearchChanged,
-            onSubmitted: _onSearchChanged,
-          ),
-        ),
-        const SizedBox(width: 8),
+        const Spacer(),
         _buildFiltersButton(),
         const SizedBox(width: 8),
         CreditTabDropdown(
@@ -392,9 +351,3 @@ class _CreditListState extends State<_CreditList> {
   }
 }
 
-class _ParsedSearch {
-  final int? creditId;
-  final String? clientFullname;
-
-  const _ParsedSearch({this.creditId, this.clientFullname});
-}
