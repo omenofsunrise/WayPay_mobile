@@ -5,6 +5,7 @@ class NoteModel {
   final int employeeId;
   final String content;
   final DateTime createdAt;
+  final DateTime? remindDate;
   final String? employeeName;
   final String? employeeAvatar;
   final String? fileBase64;
@@ -17,6 +18,7 @@ class NoteModel {
     required this.employeeId,
     required this.content,
     required this.createdAt,
+    this.remindDate,
     this.employeeName,
     this.employeeAvatar,
     this.fileBase64,
@@ -31,6 +33,9 @@ class NoteModel {
       employeeId: json['employeeId'],
       content: json['content'],
       createdAt: DateTime.parse(json['createdAt']),
+      remindDate: json['remindDate'] == null
+          ? null
+          : DateTime.parse(json['remindDate']),
       employeeName: json['employeeName'],
       employeeAvatar: json['employeeAvatar'],
       fileBase64: json['fileBase64'],

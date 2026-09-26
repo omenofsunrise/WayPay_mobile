@@ -5,6 +5,7 @@ import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/core/widgets/dashboard_info_mini_card.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
+import 'package:waypay_mobile/features/investors/presentation/screens/investor_cash_position_screen.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class InvestorReportScreen extends StatefulWidget {
@@ -119,6 +120,15 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
                               _NicknameCard(name: selectedInvestor.fullName),
                               const SizedBox(height: 16),
                               _AnalyticsGrid(metrics: _buildMetrics()),
+                              const SizedBox(height: 16),
+                              SizedBox(
+                                width: double.infinity,
+                                child: DefaultButton(
+                                  text: 'Управлять кассой',
+                                  isPrimary: false,
+                                  onPressed: _openCashPositions,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -129,6 +139,21 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _openCashPositions() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => InvestorCashPositionScreen(
+          investorId: selectedInvestor.id,
+          investorName: selectedInvestor.fullName,
+        ),
+      ),
+    );
+    if (!mounted) return;
+    // Перевод кассы меняет отчёт инвестора — перечитываем.
+    await _loadInvestorAndReport(selectedInvestor.id);
   }
 
   List<_MetricData> _buildMetrics() {
