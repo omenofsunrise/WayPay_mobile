@@ -20,6 +20,21 @@ class GetCreditsQuery {
   final double? percentsIncomeTo;
   final int? creditTypeId;
 
+  /// Номер или название договора — отдельный фильтр от search.
+  final String? name;
+  final String? clientAddress;
+
+  /// Дата создания договора, не дата подписания.
+  final DateTime? createdAt;
+  final DateTime? createdTo;
+
+  /// Источник инвестиций: пул.
+  final int? investorPoolId;
+  final int? objectTypeId;
+  final bool? inDebt;
+  final bool? terminated;
+  final bool? myCredits;
+
   GetCreditsQuery({
     this.page,
     this.pageSize,
@@ -41,6 +56,15 @@ class GetCreditsQuery {
     this.percentsIncomeFrom,
     this.percentsIncomeTo,
     this.creditTypeId,
+    this.name,
+    this.clientAddress,
+    this.createdAt,
+    this.createdTo,
+    this.investorPoolId,
+    this.objectTypeId,
+    this.inDebt,
+    this.terminated,
+    this.myCredits,
   });
 
   Map<String, dynamic> toQueryParams() {
@@ -65,6 +89,15 @@ class GetCreditsQuery {
       if (percentsIncomeFrom != null) 'percentsIncomeFrom': percentsIncomeFrom,
       if (percentsIncomeTo != null) 'percentsIncomeTo': percentsIncomeTo,
       if (creditTypeId != null) 'creditTypeId': creditTypeId,
+      if (name != null) 'name': name,
+      if (clientAddress != null) 'clientAddress': clientAddress,
+      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+      if (createdTo != null) 'createdTo': createdTo!.toIso8601String(),
+      if (investorPoolId != null) 'investorPoolId': investorPoolId,
+      if (objectTypeId != null) 'objectTypeId': objectTypeId,
+      if (inDebt != null) 'inDebt': inDebt,
+      if (terminated != null) 'terminated': terminated,
+      if (myCredits != null) 'myCredits': myCredits,
     };
   }
 
@@ -89,6 +122,15 @@ class GetCreditsQuery {
     double? percentsIncomeFrom,
     double? percentsIncomeTo,
     int? creditTypeId,
+    String? name,
+    String? clientAddress,
+    DateTime? createdAt,
+    DateTime? createdTo,
+    int? investorPoolId,
+    int? objectTypeId,
+    bool? inDebt,
+    bool? terminated,
+    bool? myCredits,
   }) {
     return GetCreditsQuery(
       page: page ?? this.page,
@@ -111,6 +153,15 @@ class GetCreditsQuery {
       percentsIncomeFrom: percentsIncomeFrom ?? this.percentsIncomeFrom,
       percentsIncomeTo: percentsIncomeTo ?? this.percentsIncomeTo,
       creditTypeId: creditTypeId ?? this.creditTypeId,
+      name: name ?? this.name,
+      clientAddress: clientAddress ?? this.clientAddress,
+      createdAt: createdAt ?? this.createdAt,
+      createdTo: createdTo ?? this.createdTo,
+      investorPoolId: investorPoolId ?? this.investorPoolId,
+      objectTypeId: objectTypeId ?? this.objectTypeId,
+      inDebt: inDebt ?? this.inDebt,
+      terminated: terminated ?? this.terminated,
+      myCredits: myCredits ?? this.myCredits,
     );
   }
 }

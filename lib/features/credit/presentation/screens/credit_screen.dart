@@ -1,3 +1,5 @@
+import 'package:waypay_mobile/assets/resources.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -30,6 +32,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
   final _searchController = TextEditingController();
   Timer? _debounce;
   CreditTab _selectedTab = CreditTab.all;
+  GetCreditsQuery? _filters;
 
   @override
   void initState() {
@@ -52,15 +55,56 @@ class _CreditsScreenState extends State<CreditsScreen> {
             : _searchController.text.trim());
     final parsed = _parseSearch(trimmedSearch);
 
+    final f = _filters;
+
     return GetCreditsQuery(
       creditId: parsed.creditId,
-      clientFullname: parsed.clientFullname,
+      clientFullname: parsed.clientFullname ?? f?.clientFullname,
       search: null,
       page: page,
-      isFavourite: _selectedTab == CreditTab.favourite ? true : null,
-      isActive: _selectedTab == CreditTab.archived ? false : null,
-      debt: _selectedTab == CreditTab.debtors ? true : null,
+      // Значения из листа фильтров приоритетнее вкладки: вкладка задаёт
+      // только то, что пользователь не выбрал вручную.
+      isFavourite:
+          f?.isFavourite ??
+          (_selectedTab == CreditTab.favourite ? true : null),
+      isActive: f?.isActive ?? (_selectedTab == CreditTab.archived ? false : null),
+      debt: f?.debt ?? (_selectedTab == CreditTab.debtors ? true : null),
+      name: f?.name,
+      investorNickname: f?.investorNickname,
+      clientAddress: f?.clientAddress,
+      dateFrom: f?.dateFrom,
+      dateTo: f?.dateTo,
+      createdAt: f?.createdAt,
+      createdTo: f?.createdTo,
+      creditTypeId: f?.creditTypeId,
+      inDebt: f?.inDebt,
+      terminated: f?.terminated,
+      myCredits: f?.myCredits,
     );
+  }
+
+  Future<void> _openFilters() async {
+    final result = await showModalBottomSheet<GetCreditsQuery>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => CreditFiltersSheet(initialFilters: _filters),
+    );
+
+    if (result == null) return;
+    setState(() => _filters = result);
+    _loadCredits();
+  }
+
+  void _resetFilters() {
+    setState(() => _filters = null);
+    _loadCredits();
+  }
+
+  bool get _hasFilters {
+    final f = _filters;
+    if (f == null) return false;
+    return f.toQueryParams().keys.any((k) => k != 'page' && k != 'pageSize');
   }
 
   void _onTabSelected(CreditTab tab) {
@@ -195,11 +239,65 @@ class _CreditsScreenState extends State<CreditsScreen> {
           ),
         ),
         const SizedBox(width: 8),
+        _buildFiltersButton(),
+        const SizedBox(width: 8),
         CreditTabDropdown(
           selectedTab: _selectedTab,
           onTabSelected: _onTabSelected,
         ),
       ],
+    );
+  }
+
+  Widget _buildFiltersButton() {
+    final active = _hasFilters;
+    return GestureDetector(
+      onTap: _openFilters,
+      onLongPress: active ? _resetFilters : null,
+      child: SizedBox(
+        height: 40,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: active ? const Color(0x1A18A0A5) : Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: active
+                  ? const Color(AppColors.primary)
+                  : Color(AppColors.borderColor),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SvgPicture.asset(
+                  SvgIcons.filter,
+                  width: 18,
+                  height: 18,
+                  colorFilter: ColorFilter.mode(
+                    active
+                        ? const Color(AppColors.primary)
+                        : const Color(0xFF6B717C),
+                    BlendMode.srcIn,
+                  ),
+                ),
+                if (active) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: Color(AppColors.primary),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
