@@ -68,6 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  // Кнопку «+» убрали с главного экрана, её место занял колокольчик.
+  // Метод оставлен, чтобы кнопку можно было вернуть одной строкой.
+  // ignore: unused_element
   void _openAddBottomSheet() {
     showModalBottomSheet(
       context: context,
@@ -252,11 +255,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     fullName: _getFullName(employeeData),
                     photoPath: _getAvatar(employeeData),
                     showBackButton: false,
-                    trailing: AddButton(onPressed: _openAddBottomSheet),
-                    // Иконка уведомлений в Header по умолчанию ничего не делает
-                    // (onPressed: () {}), поэтому подставляем рабочий колокольчик
-                    // со счётчиком непрочитанных и списком.
-                    notificationsButton: const NotificationsBellButton(),
+                    // Встроенная иконка уведомлений в Header ничего не делает
+                    // (onPressed: () {}), поэтому выключаем её и ставим рабочий
+                    // колокольчик со счётчиком непрочитанных и списком.
+                    showNotifications: false,
+                    trailing: const NotificationsBellButton(),
                   ),
                   const SizedBox(height: 16),
                   Row(
