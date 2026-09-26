@@ -211,12 +211,14 @@ class _CreditsScreenState extends State<CreditsScreen> {
     // и два места ввода одного и того же только путали. Вкладки слева,
     // фильтр справа — по краям, без пустоты посередине.
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        CreditTabDropdown(
-          selectedTab: _selectedTab,
-          onTabSelected: _onTabSelected,
+        Expanded(
+          child: CreditTabDropdown(
+            selectedTab: _selectedTab,
+            onTabSelected: _onTabSelected,
+          ),
         ),
+        const SizedBox(width: 8),
         _buildFiltersButton(),
       ],
     );

@@ -26,10 +26,20 @@ class CreditTabDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // child вместо icon: PopupMenuButton не оборачивает его в IconButton
+    // с фиксированным размером, поэтому кнопка может растянуться по ширине.
     return PopupMenuButton<CreditTab>(
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      icon: SizedBox(
+      padding: EdgeInsets.zero,
+      itemBuilder: (context) => [
+        _buildTabItem(context, CreditTab.all),
+        _buildTabItem(context, CreditTab.favourite),
+        _buildTabItem(context, CreditTab.debtors),
+        _buildTabItem(context, CreditTab.archived),
+      ],
+      onSelected: onTabSelected,
+      child: SizedBox(
         height: 40,
         child: DecoratedBox(
           decoration: BoxDecoration(
@@ -38,23 +48,18 @@ class CreditTabDropdown extends StatelessWidget {
             border: Border.all(color: Color(AppColors.borderColor)),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                // SvgPicture.asset(
-                //   selectedTab.iconPath,
-                //   width: 20,
-                //   height: 20,
-                //   color: Colors.black,
-                // ),
-                const SizedBox(width: 6),
-                Text(
-                  selectedTab.label,
-                  style: AppStyle.manrope(
-                    size: 14,
-                    weight: FontWeight.w400,
-                    color: Colors.black,
+                Expanded(
+                  child: Text(
+                    selectedTab.label,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppStyle.manrope(
+                      size: 14,
+                      weight: FontWeight.w400,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -64,13 +69,6 @@ class CreditTabDropdown extends StatelessWidget {
           ),
         ),
       ),
-      itemBuilder: (context) => [
-        _buildTabItem(context, CreditTab.all),
-        _buildTabItem(context, CreditTab.favourite),
-        _buildTabItem(context, CreditTab.debtors),
-        _buildTabItem(context, CreditTab.archived),
-      ],
-      onSelected: onTabSelected,
     );
   }
 
