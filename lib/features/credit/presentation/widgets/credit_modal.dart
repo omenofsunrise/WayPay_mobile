@@ -360,7 +360,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
                 padding: const EdgeInsets.only(right: 12),
               ),
               _buildSummaryMetric(
-                'Общий долг',
+                'Сумма договора',
                 _formatCurrency(widget.credit.totalAmount),
                 highlight: true,
               ),
@@ -407,11 +407,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
                 padding: const EdgeInsets.only(right: 12),
                 highlight: true,
               ),
-              _buildSummaryMetric(
-                'Долг за месяц',
-                _formatCurrency(widget.credit.currentMonthDebt),
-                highlight: true,
-              ),
+              const Expanded(child: SizedBox()),
             ],
           ),
           if (widget.credit.debtDays != null &&
@@ -874,7 +870,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
       ..writeln('Информация по договору №${credit.id}')
       ..writeln('Дата подписания: ${_formatDate(credit.creditDate)}')
       ..writeln('Срок рассрочки: ${credit.termMonths} мес.')
-      ..writeln('Общий долг: ${_formatCurrency(credit.totalAmount)}')
+      ..writeln('Сумма договора: ${_formatCurrency(credit.totalAmount)}')
       ..writeln('Первоначальный взнос: ${_formatCurrency(credit.firstPayment)}')
       ..writeln('Начислено %: ${_formatCurrency(credit.accured)}')
       ..writeln('Уплачено: ${_formatCurrency(credit.payed)}')
