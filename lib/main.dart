@@ -1,3 +1,4 @@
+import 'package:waypay_mobile/core/widgets/live_notifications.dart';
 import 'package:waypay_mobile/core/network/notification_socket.dart';
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -106,6 +107,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             debugShowCheckedModeBanner: false,
             title: 'waypay_mobile',
             routerConfig: AppRouter.router,
+            // Уведомления по сокету должны всплывать на любом экране.
+            builder: (context, child) =>
+                LiveNotifications(child: child ?? const SizedBox.shrink()),
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
               useMaterial3: true,
