@@ -1,7 +1,10 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:waypay_mobile/assets/resources.dart';
 import 'package:path/path.dart' as p;
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
@@ -20,14 +23,72 @@ class AddNoteDialog extends StatefulWidget {
 
 class _AddNoteDialogState extends State<AddNoteDialog> {
   final TextEditingController _controller = TextEditingController();
+  final TextEditingController _remindDateController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   File? _attachedFile;
+  DateTime? _remindDate;
   bool _isLoading = false;
 
   @override
   void dispose() {
     _controller.dispose();
+    _remindDateController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickRemindDate() async {
+    await showDialog(
+      context: context,
+      builder: (ctx) => CustomCalendar(
+        initialDate: _remindDate ?? DateTime.now(),
+        prefix: 'Напомнить:',
+        onDateSelected: (date) {
+          setState(() {
+            _remindDate = DateTime.utc(date.year, date.month, date.day);
+            _remindDateController.text = DateFormat(
+              'dd.MM.yyyy',
+            ).format(_remindDate!);
+          });
+        },
+      ),
+    );
+  }
+
+  void _clearRemindDate() {
+    setState(() {
+      _remindDate = null;
+      _remindDateController.clear();
+    });
+  }
+
+  Widget _buildRemindDateField() {
+    return ModalTextField(
+      controller: _remindDateController,
+      label: 'Дата напоминания',
+      hintText: 'Не напоминать',
+      readOnly: true,
+      onTap: _isLoading ? null : _pickRemindDate,
+      suffixIcon: _remindDate == null
+          ? Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: SvgPicture.asset(
+                SvgIcons.calendar,
+                width: 20,
+                height: 20,
+                colorFilter: const ColorFilter.mode(
+                  Color(0xFF6B717C),
+                  BlendMode.srcIn,
+                ),
+              ),
+            )
+          : IconButton(
+              onPressed: _isLoading ? null : _clearRemindDate,
+              icon: const Icon(Icons.close, size: 20, color: Color(0xFF6B717C)),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              tooltip: 'Убрать напоминание',
+            ),
+    );
   }
 
   Future<void> _attachFile() async {
@@ -101,7 +162,7 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
       final note = NoteCreateRequest(
         noteableId: widget.creditId,
         content: _controller.text.trim(),
-        remindDate: null,
+        remindDate: _remindDate,
         file: _attachedFile?.path,
       );
 
@@ -266,6 +327,8 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
                   maxLines: 5,
                   alignLabelWithHint: true,
                 ),
+                const SizedBox(height: 12),
+                _buildRemindDateField(),
                 const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,

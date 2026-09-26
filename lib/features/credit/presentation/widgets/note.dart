@@ -46,6 +46,11 @@ class Note extends StatelessWidget {
               style: AppStyle.manrope(size: 15, weight: FontWeight.w400),
             ),
 
+            if (note.remindDate != null) ...[
+              const SizedBox(height: 8),
+              _buildRemindBadge(),
+            ],
+
             const SizedBox(height: 8),
 
             if (_hasAttachment()) _buildAttachment(context),
@@ -53,6 +58,40 @@ class Note extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildRemindBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Color(AppColors.primary).withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            CupertinoIcons.bell,
+            size: 14,
+            color: Color(AppColors.primary),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            'Напомнить ${_formatDateOnly(note.remindDate!)}',
+            style: AppStyle.manrope(
+              size: 13,
+              weight: FontWeight.w500,
+              color: Color(AppColors.primary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDateOnly(DateTime date) {
+    final d = date.isUtc ? date : date.toUtc();
+    return '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
   }
 
   bool _hasAttachment() {
