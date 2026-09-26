@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:waypay_mobile/core/network/notification_socket.dart';
 import 'package:get_it/get_it.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:waypay_mobile/features/admin_panel/data/data_sources/company_remote_data_source.dart';
@@ -159,4 +160,7 @@ Future<void> initDependencies() async {
   getIt.registerFactory(
     () => NotificationsCubit(getIt<NotificationsDataSource>()),
   );
+
+  // Один сокет на приложение: живые уведомления, как в вебе.
+  getIt.registerLazySingleton<NotificationSocket>(() => NotificationSocket());
 }

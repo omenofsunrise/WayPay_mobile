@@ -1,3 +1,4 @@
+import 'package:waypay_mobile/core/network/notification_socket.dart';
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -41,13 +42,16 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   bool? isOffline;
   late final StreamSubscription _subscription;
 
   @override
   void initState() {
     super.initState();
+    // В вебе сокет оживает по visibilitychange; на телефоне аналог —
+    // возврат приложения из фона.
+    WidgetsBinding.instance.addObserver(this);
     _checkInitial();
     _subscription = Connectivity().onConnectivityChanged.listen((
       results,
@@ -71,8 +75,17 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _subscription.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      getIt<NotificationSocket>().reconnectNow();
+    }
   }
 
   @override
