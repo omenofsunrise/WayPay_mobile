@@ -1,3 +1,4 @@
+import 'package:waypay_mobile/core/network/notification_socket.dart';
 import 'package:flutter/material.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
@@ -31,6 +32,12 @@ class Refresher extends StatelessWidget {
           .map((p) => PermissionMapper.fromApi(p.toString()))
           .toList();
       await userStorage.savePermissions(permissions);
+
+      // Живые уведомления: тот же WebSocket, что держит веб.
+      final employeeId = (employee['id'] as num?)?.toInt();
+      if (employeeId != null) {
+        getIt<NotificationSocket>().connect(employeeId);
+      }
     } catch (e) {}
   }
 

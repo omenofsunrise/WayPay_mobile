@@ -1,3 +1,4 @@
+import 'package:waypay_mobile/core/network/notification_socket.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/assets/resources.dart' show Images;
@@ -84,6 +85,13 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
           .map((p) => PermissionMapper.fromApi(p.toString()))
           .toList();
       await userStorage.savePermissions(permissions);
+
+
+      // Живые уведомления: тот же WebSocket, что держит веб.
+      final employeeId = (employee['id'] as num?)?.toInt();
+      if (employeeId != null) {
+        getIt<NotificationSocket>().connect(employeeId);
+      }
 
       debugPrint('✅ Роль обновлена: $role, права: $permissions');
     } catch (e) {
