@@ -174,17 +174,11 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     );
 
     try {
-      final params = _derivePreviewParams(
-        state.creditRequest.creditDate,
-        state.creditRequest.startPaymentDay,
-      );
       final preview = await _dataSource.getSchedulePreview(
         totalAmount: state.totalAmountWithSurcharge,
         firstPayment: state.creditRequest.firstPayment,
         termMonths: state.creditRequest.termMonths,
-        paymentDay: params.paymentDay,
-        currentMonthStart: params.currentMonthStart,
-        nextMonthStart: params.nextMonthStart,
+        startDate: state.creditRequest.startPaymentDay,
       );
 
       emit(
@@ -257,27 +251,6 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
 
     _loadSchedulePreviewDebounced();
     _saveMarkupType(markupType);
-  }
-
-  _SchedulePreviewParams _derivePreviewParams(
-    DateTime creditDate,
-    DateTime startPaymentDay,
-  ) {
-    final paymentDay = startPaymentDay.day;
-    final sameMonth = _isSameMonth(creditDate, startPaymentDay);
-    final nextMonth = _isSameMonth(_addMonths(creditDate, 1), startPaymentDay);
-    return _SchedulePreviewParams(
-      paymentDay: paymentDay,
-      currentMonthStart: sameMonth,
-      nextMonthStart: !sameMonth && nextMonth,
-    );
-  }
-
-  bool _isSameMonth(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month;
-
-  DateTime _addMonths(DateTime date, int months) {
-    return DateTime(date.year, date.month + months, 1);
   }
 
   List<CreditProduct> _recalculateSurchargeAmounts(
@@ -396,27 +369,11 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
     );
 
     try {
-      final params = _derivePreviewParams(
-        state.creditRequest.creditDate,
-        state.creditRequest.startPaymentDay,
-      );
-      final requestData = {
-        'totalAmount': state.totalAmountWithSurcharge,
-        'firstPayment': state.creditRequest.firstPayment,
-        'termMonths': state.creditRequest.termMonths,
-        'paymentDay': params.paymentDay,
-        'currentMonthStart': params.currentMonthStart,
-        'nextMonthStart': params.nextMonthStart,
-      };
-      debugPrint('Schedule preview payload: ${jsonEncode(requestData)}');
-
       final preview = await _dataSource.getSchedulePreview(
         totalAmount: state.totalAmountWithSurcharge,
         firstPayment: state.creditRequest.firstPayment,
         termMonths: state.creditRequest.termMonths,
-        paymentDay: params.paymentDay,
-        currentMonthStart: params.currentMonthStart,
-        nextMonthStart: params.nextMonthStart,
+        startDate: state.creditRequest.startPaymentDay,
       );
 
       emit(
@@ -615,14 +572,3 @@ class CreditCreationCubit extends Cubit<CreditCreationState> {
   }
 }
 
-class _SchedulePreviewParams {
-  final int paymentDay;
-  final bool currentMonthStart;
-  final bool nextMonthStart;
-
-  const _SchedulePreviewParams({
-    required this.paymentDay,
-    required this.currentMonthStart,
-    required this.nextMonthStart,
-  });
-}

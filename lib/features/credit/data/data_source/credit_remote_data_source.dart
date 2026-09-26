@@ -19,8 +19,7 @@ abstract class CreditRemoteDataSource {
     required double totalAmount,
     required double firstPayment,
     required int termMonths,
-    required int paymentDay,
-    required bool currentMonthStart,
-    required bool nextMonthStart,
+    required DateTime startDate,
+    bool turnOfRounding,
   });
 }
