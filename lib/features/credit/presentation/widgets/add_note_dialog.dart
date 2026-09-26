@@ -68,10 +68,18 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
       hintText: 'Не напоминать',
       readOnly: true,
       onTap: _isLoading ? null : _pickRemindDate,
-      suffixIcon: _remindDate == null
-          ? Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: SvgPicture.asset(
+      // Бокс иконки по умолчанию 28px, иконка 20px — при отступе 4 она липнет
+      // к рамке. Расширяем бокс и отодвигаем иконку от края.
+      suffixIconConstraints: const BoxConstraints(
+        minHeight: 24,
+        minWidth: 36,
+        maxHeight: 28,
+        maxWidth: 36,
+      ),
+      suffixIcon: Padding(
+        padding: const EdgeInsets.only(right: 12),
+        child: _remindDate == null
+            ? SvgPicture.asset(
                 SvgIcons.calendar,
                 width: 20,
                 height: 20,
@@ -79,15 +87,17 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
                   Color(0xFF6B717C),
                   BlendMode.srcIn,
                 ),
+              )
+            : GestureDetector(
+                onTap: _isLoading ? null : _clearRemindDate,
+                behavior: HitTestBehavior.opaque,
+                child: const Icon(
+                  Icons.close,
+                  size: 20,
+                  color: Color(0xFF6B717C),
+                ),
               ),
-            )
-          : IconButton(
-              onPressed: _isLoading ? null : _clearRemindDate,
-              icon: const Icon(Icons.close, size: 20, color: Color(0xFF6B717C)),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              tooltip: 'Убрать напоминание',
-            ),
+      ),
     );
   }
 
