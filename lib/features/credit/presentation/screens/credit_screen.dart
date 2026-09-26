@@ -164,7 +164,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        _buildSearchBar(),
+                        _buildToolbar(),
                         const SizedBox(height: 4),
                       ],
                     );
@@ -206,18 +206,18 @@ class _CreditsScreenState extends State<CreditsScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildToolbar() {
     // Поле поиска убрано: № договора и ФИО клиента есть в фильтрах,
-    // и два места ввода одного и того же только путали.
+    // и два места ввода одного и того же только путали. Вкладки слева,
+    // фильтр справа — по краям, без пустоты посередине.
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Spacer(),
-        _buildFiltersButton(),
-        const SizedBox(width: 8),
         CreditTabDropdown(
           selectedTab: _selectedTab,
           onTabSelected: _onTabSelected,
         ),
+        _buildFiltersButton(),
       ],
     );
   }
