@@ -97,6 +97,11 @@ class _CreditsScreenState extends State<CreditsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
+      // Без ограничения лист с таким числом фильтров растягивается во весь
+      // экран. Три четверти высоты хватает, и видно, что под ним список.
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.75,
+      ),
       builder: (_) => CreditFiltersSheet(initialFilters: _filters),
     );
 
