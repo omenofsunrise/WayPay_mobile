@@ -1,3 +1,4 @@
+import 'package:waypay_mobile/features/notifications/presentation/widgets/notifications_bell_button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/core/network/dio_client.dart';
@@ -252,7 +253,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     photoPath: _getAvatar(employeeData),
                     showBackButton: false,
                     trailing: AddButton(onPressed: _openAddBottomSheet),
-                    showNotifications: false,
+                    // Иконка уведомлений в Header по умолчанию ничего не делает
+                    // (onPressed: () {}), поэтому подставляем рабочий колокольчик
+                    // со счётчиком непрочитанных и списком.
+                    notificationsButton: const NotificationsBellButton(),
                   ),
                   const SizedBox(height: 16),
                   Row(

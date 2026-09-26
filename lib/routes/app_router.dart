@@ -65,7 +65,12 @@ import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 
 class AppRouter {
+  /// Нужен, чтобы показывать сообщения из корня приложения: у контекста
+  /// внутри MaterialApp.builder нет Overlay, он лежит ниже, в Navigator.
+  static final navigatorKey = GlobalKey<NavigatorState>();
+
   static final router = GoRouter(
+    navigatorKey: navigatorKey,
     initialLocation: '/',
     debugLogDiagnostics: true,
     redirect: (context, state) async {
