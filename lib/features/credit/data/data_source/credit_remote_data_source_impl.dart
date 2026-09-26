@@ -7,6 +7,7 @@ import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/new_credit_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/schedule_preview_model.dart';
+import 'package:waypay_mobile/features/credit/data/models/schedule_preview_request.dart';
 
 class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
   final Dio dio;
@@ -139,21 +140,22 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
     required double totalAmount,
     required double firstPayment,
     required int termMonths,
-    required int paymentDay,
-    required bool currentMonthStart,
-    required bool nextMonthStart,
+    required DateTime startDate,
+    bool turnOfRounding = false,
   }) async {
     try {
-      final requestBody = {
-        'totalAmount': totalAmount,
-        'firstPayment': firstPayment,
-        'termMonths': termMonths,
-        'paymentDay': paymentDay,
-        'currentMonthStart': currentMonthStart,
-        'nextMonthStart': nextMonthStart,
-      };
+      final request = SchedulePreviewRequest(
+        totalAmount: totalAmount,
+        firstPayment: firstPayment,
+        termMonths: termMonths,
+        startDate: startDate,
+        turnOfRounding: turnOfRounding,
+      );
 
-      final response = await dio.post('Schedule/preview', data: requestBody);
+      final response = await dio.post(
+        'Schedule/preview',
+        data: request.toJson(),
+      );
 
       if (response.data is List) {
         return (response.data as List)
