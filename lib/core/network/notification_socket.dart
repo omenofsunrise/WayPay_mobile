@@ -66,6 +66,10 @@ class NotificationSocket {
       // соединение к сотруднику. Без него уведомления не придут.
       channel.sink.add(jsonEncode(SocketAuthMessage(employeeId: _employeeId!).toJson()));
 
+      debugPrint(
+        'WebSocket уведомлений: подключаюсь к $_url, сотрудник $_employeeId',
+      );
+
       _subscription = channel.stream.listen(
         _onData,
         onError: (Object error) {
@@ -90,7 +94,12 @@ class NotificationSocket {
     try {
       final decoded = jsonDecode(raw.toString());
       if (decoded is! Map<String, dynamic>) return;
-      _messages.add(SocketNotificationMessage.fromJson(decoded));
+      final message = SocketNotificationMessage.fromJson(decoded);
+      debugPrint(
+        'WebSocket уведомлений: получено «${message.title}» — ${message.body}'
+        '${message.route == null ? '' : ' (route ${message.route})'}',
+      );
+      _messages.add(message);
     } catch (e) {
       debugPrint('WebSocket уведомлений: не разобрал сообщение — $e');
     }
@@ -108,6 +117,10 @@ class NotificationSocket {
     _attempts++;
     // Та же выдержка, что в вебе: задержка удваивается с каждой попыткой.
     final delay = reconnectDelay * (1 << (_attempts - 1));
+    debugPrint(
+      'WebSocket уведомлений: переподключение через ${delay.inMilliseconds} мс '
+      '(попытка $_attempts из $maxReconnectAttempts)',
+    );
     _reconnectTimer = Timer(delay, _open);
   }
 
