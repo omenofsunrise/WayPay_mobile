@@ -344,8 +344,8 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
           children: [
             ModalTextField(
               controller: _catalogController,
-              label: 'Категория',
-              hintText: 'Выберите категорию',
+              label: 'Папка',
+              hintText: 'Выберите папку',
               readOnly: true,
               onTap: () {
                 if (types.isEmpty && !isLoading) {
@@ -353,13 +353,18 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
                 }
                 _toggleCatalogOptions();
               },
-              suffixIcon: Transform.rotate(
-                angle: _showCatalogOptions ? 3.1415 : 0,
-                child: const Icon(Icons.keyboard_arrow_down),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Transform.rotate(
+                  angle: _showCatalogOptions ? 3.1415 : 0,
+                  child: const Icon(Icons.keyboard_arrow_down),
+                ),
               ),
+              // Бокс по умолчанию впритык к иконке, стрелка липнет к рамке.
               suffixIconConstraints: const BoxConstraints(
                 minHeight: 24,
-                minWidth: 24,
+                minWidth: 40,
+                maxWidth: 40,
               ),
             ),
             if (_showCatalogOptions)
@@ -407,7 +412,7 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
       return const Padding(
         padding: EdgeInsets.symmetric(horizontal: 16),
         child: Text(
-          'Категории не найдены',
+          'Папки не найдены',
           style: TextStyle(color: Color(AppColors.uiBorder)),
         ),
       );
@@ -422,7 +427,7 @@ class _CreditFiltersFormState extends State<_CreditFiltersForm> {
         if (index == 0) {
           final isSelected = _selectedCatalog == null;
           return ListTile(
-            title: const Text('Без категории'),
+            title: const Text('Без папки'),
             onTap: () => _selectCatalog(null),
             trailing: isSelected
                 ? const Icon(Icons.check, color: Color(AppColors.primary))
