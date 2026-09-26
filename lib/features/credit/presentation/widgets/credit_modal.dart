@@ -404,10 +404,8 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
               _buildSummaryMetric(
                 'Текущий долг',
                 _formatCurrency(widget.credit.debt),
-                padding: const EdgeInsets.only(right: 12),
                 highlight: true,
               ),
-              const Expanded(child: SizedBox()),
             ],
           ),
           if (widget.credit.debtDays != null &&
