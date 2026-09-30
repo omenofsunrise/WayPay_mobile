@@ -5,8 +5,8 @@ import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/core/network/notification_socket.dart';
 import 'package:waypay_mobile/core/network/socket_notification_message.dart';
 import 'package:waypay_mobile/core/notifications/notification_sound.dart';
+import 'package:waypay_mobile/core/widgets/in_app_notification_banner.dart';
 import 'package:waypay_mobile/routes/app_router.dart';
-import 'package:waypay_flutter_library/waypay_styles.dart';
 
 /// Показывает уведомления, приходящие по WebSocket, поверх любого экрана —
 /// как тост в вебе (`NotificationHandler.tsx`).
@@ -41,29 +41,26 @@ class _LiveNotificationsState extends State<LiveNotifications> {
 
   void _onNotification(SocketNotificationMessage message) {
     // Свёрнутое приложение озвучивает и показывает уведомление системой, по
-    // самому пушу. Если сработать и здесь, человек получит два сигнала подряд
-    // и всплывашку, которая вынырнет только при возврате в приложение.
-    if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
+    // самому пушу. Состояние может быть ещё не выставлено — это не повод
+    // молчать, поэтому пустое значение считаем рабочим.
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    if (lifecycle != null && lifecycle != AppLifecycleState.resumed) {
+      debugPrint('Всплывашка пропущена: приложение не на переднем плане');
       return;
     }
 
-    final text = message.title.isEmpty
-        ? message.body
-        : '${message.title}: ${message.body}';
-    if (text.trim().isEmpty) return;
+    if (message.title.trim().isEmpty && message.body.trim().isEmpty) return;
+
+    // Слой берём у навигатора напрямую. Поиск по контексту здесь не работает:
+    // слой лежит ниже навигатора, а поиск идёт вверх.
+    final overlay = AppRouter.navigatorKey.currentState?.overlay;
+    if (overlay == null) {
+      debugPrint('Всплывашка пропущена: слой навигатора недоступен');
+      return;
+    }
 
     _sound.play();
-
-    // Свой контекст не подходит: он выше Navigator, и Overlay над ним нет —
-    // showAppMessage молча ничего не сделал бы. Берём контекст навигатора.
-    final navigatorContext = AppRouter.navigatorKey.currentContext;
-    if (navigatorContext == null) return;
-
-    showAppMessage(
-      navigatorContext,
-      text,
-      duration: const Duration(seconds: 5),
-    );
+    showInAppNotification(overlay, title: message.title, body: message.body);
   }
 
   @override
