@@ -75,7 +75,10 @@ class PushNotificationService {
       sound: true,
     );
 
-    await _captureToken();
+    // Не ждём здесь: на iOS токен APNs приходит через несколько секунд, а
+    // запуск приложения задерживать нельзя. Токен опубликуется сам, когда
+    // станет доступен.
+    unawaited(_captureToken());
 
     _refreshSubscription?.cancel();
     _refreshSubscription = _messaging.onTokenRefresh.listen(_publish);
@@ -83,18 +86,41 @@ class PushNotificationService {
 
   Future<void> _captureToken() async {
     try {
+      if (_needsApns && await _awaitApnsToken() == null) {
+        debugPrint('⏳ APNs не отдал токен, FCM недоступен');
+        return;
+      }
+
       final token = await _messaging.getToken();
       if (token != null) {
         _publish(token);
         return;
       }
-      // На iOS токен FCM появляется только после APNs, и в первые секунды
-      // после запуска его может ещё не быть. Это не ошибка: подписка
-      // onTokenRefresh отдаст его, как только он выдастся.
       debugPrint('⏳ Токен FCM пока не выдан');
     } on FirebaseException catch (e) {
       debugPrint('⚠️ Не удалось получить токен FCM: ${e.code}');
     }
+  }
+
+  bool get _needsApns =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS);
+
+  /// Пока APNs не выдал свой токен, запрос токена FCM падает с
+  /// apns-token-not-set. Регистрация занимает несколько секунд и события о
+  /// готовности нет, поэтому опрашиваем с паузами.
+  Future<String?> _awaitApnsToken({
+    Duration timeout = const Duration(seconds: 30),
+    Duration step = const Duration(milliseconds: 500),
+  }) async {
+    final deadline = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(deadline)) {
+      final apns = await _messaging.getAPNSToken();
+      if (apns != null) return apns;
+      await Future<void>.delayed(step);
+    }
+    return null;
   }
 
   void _publish(String token) {
