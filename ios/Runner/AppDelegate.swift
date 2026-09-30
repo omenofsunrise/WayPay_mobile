@@ -7,6 +7,12 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // Регистрацию в APNs запрашиваем сами. Полагаться на то, что её
+    // закажет плагин firebase_messaging, нельзя: без этого вызова iOS не
+    // дёргает ни одного из колбэков ниже, и токена устройства не появляется.
+    NSLog("📡 Запрашиваю регистрацию в APNs")
+    application.registerForRemoteNotifications()
+
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
