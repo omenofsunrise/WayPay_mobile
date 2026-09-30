@@ -3,14 +3,23 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:waypay_mobile/firebase_options.dart';
 
 /// Обработчик пуша, пришедшего когда приложение полностью закрыто.
 /// Обязан быть функцией верхнего уровня: Flutter поднимает под него
 /// отдельный изолят, и метод объекта туда передать нельзя.
 @pragma('vm:entry-point')
 Future<void> _onBackgroundMessage(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await _ensureFirebase();
   debugPrint('🔔 Пуш в фоне: ${message.messageId}');
+}
+
+/// Поднимает Firebase, если он ещё не поднят. Настройки передаются явно:
+/// на iOS GoogleService-Info.plist не входит в бандл, и без них
+/// initializeApp падает с core/not-initialized.
+Future<void> _ensureFirebase() async {
+  if (Firebase.apps.isNotEmpty) return;
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 }
 
 /// Пуш-уведомления: разрешение, токен устройства, входящие сообщения.
@@ -54,7 +63,7 @@ class PushNotificationService {
   Stream<RemoteMessage> get openedMessages => FirebaseMessaging.onMessageOpenedApp;
 
   Future<void> init() async {
-    await Firebase.initializeApp();
+    await _ensureFirebase();
     FirebaseMessaging.onBackgroundMessage(_onBackgroundMessage);
 
     final settings = await _messaging.requestPermission();
