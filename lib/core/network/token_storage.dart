@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:waypay_mobile/core/config/api_config.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/notifications/push_notification_service.dart';
 
 class TokenStorage {
   static const _accessKey = 'access_token';
@@ -124,10 +126,18 @@ class TokenStorage {
       return null;
     }
 
+    // Токен устройства сервер запоминает только при входе. Между входами он
+    // успевает смениться — при переустановке, переносе на другой телефон,
+    // иногда сам по себе, — и пуши уходят по старому адресу, в пустоту.
+    // Прикладываем текущий к каждому обновлению: своего запроса это не
+    // требует, а сервер получает шанс поправить запись.
+    final deviceId = _currentDeviceToken();
+
     final body = <String, dynamic>{
       'accessToken': access,
       'refreshToken': refresh,
       if (pin != null) 'pinCode': pin,
+      if (deviceId != null) 'deviceId': deviceId,
     };
 
     try {
@@ -158,6 +168,17 @@ class TokenStorage {
       }
     } catch (e) {
       await clearAll();
+      return null;
+    }
+  }
+
+  /// Токен устройства, если пуш-сервис успел его получить. Отсутствие токена
+  /// не должно мешать обновлению сессии, поэтому любая ошибка гасится.
+  static String? _currentDeviceToken() {
+    try {
+      if (!getIt.isRegistered<PushNotificationService>()) return null;
+      return getIt<PushNotificationService>().token;
+    } catch (_) {
       return null;
     }
   }
