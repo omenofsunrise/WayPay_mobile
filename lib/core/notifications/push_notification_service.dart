@@ -21,9 +21,15 @@ Future<void> _onBackgroundMessage(RemoteMessage message) async {
 /// обновлении, а кто его отправит на сервер — решает вызывающий код.
 class PushNotificationService {
   PushNotificationService({FirebaseMessaging? messaging})
-      : _messaging = messaging ?? FirebaseMessaging.instance;
+      : _injectedMessaging = messaging;
 
-  final FirebaseMessaging _messaging;
+  final FirebaseMessaging? _injectedMessaging;
+
+  /// Обращаться к Firebase можно только после Firebase.initializeApp(), а он
+  /// вызывается уже внутри init(). Поэтому ссылка берётся лениво: конструктор
+  /// обязан оставаться безопасным, его дёргает контейнер зависимостей.
+  FirebaseMessaging get _messaging =>
+      _injectedMessaging ?? FirebaseMessaging.instance;
 
   final _tokenController = StreamController<String>.broadcast();
   StreamSubscription<String>? _refreshSubscription;
