@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:waypay_mobile/assets/resources.dart';
+import 'dart:async';
+
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/network/notification_socket.dart';
 import 'package:waypay_mobile/features/notifications/presentation/cubit/notifications_cubit.dart';
 import 'package:waypay_mobile/features/notifications/presentation/widgets/notifications_sheet.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
@@ -35,7 +38,7 @@ class NotificationsBellButton extends StatelessWidget {
   }
 }
 
-class _NotificationsBellButtonBody extends StatelessWidget {
+class _NotificationsBellButtonBody extends StatefulWidget {
   const _NotificationsBellButtonBody({
     required this.iconSize,
     required this.iconColor,
@@ -49,7 +52,39 @@ class _NotificationsBellButtonBody extends StatelessWidget {
   final bool showBadge;
 
   @override
+  State<_NotificationsBellButtonBody> createState() =>
+      _NotificationsBellButtonBodyState();
+}
+
+class _NotificationsBellButtonBodyState
+    extends State<_NotificationsBellButtonBody> {
+  StreamSubscription<dynamic>? _socketSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    // Без этого счётчик оживает только при пересоздании виджета: список
+    // загружается один раз, а пришедшее уведомление его не трогает.
+    _socketSubscription = getIt<NotificationSocket>().messages.listen((_) {
+      if (!mounted) return;
+      // refresh: true — чтобы значок не мигал состоянием загрузки.
+      context.read<NotificationsCubit>().load(refresh: true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _socketSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final iconSize = widget.iconSize;
+    final iconColor = widget.iconColor;
+    final badgeColor = widget.badgeColor;
+    final showBadge = widget.showBadge;
+
     return BlocBuilder<NotificationsCubit, NotificationsState>(
       builder: (context, state) {
         final unread = state.unreadCount;
