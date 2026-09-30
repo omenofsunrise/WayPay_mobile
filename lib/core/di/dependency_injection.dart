@@ -1,3 +1,4 @@
+import 'package:waypay_mobile/core/notifications/push_notification_service.dart';
 import 'package:dio/dio.dart';
 import 'package:waypay_mobile/core/network/notification_socket.dart';
 import 'package:get_it/get_it.dart';
@@ -75,6 +76,9 @@ Future<void> initDependencies() async {
     instanceName: 'second',
   );
   getIt.registerLazySingleton(() => TokenStorage());
+  getIt.registerLazySingleton<PushNotificationService>(
+    () => PushNotificationService(),
+  );
   getIt.registerLazySingleton<UserStorage>(() => UserStorage());
 
   getIt.registerLazySingleton<AuthRemoteDataSource>(

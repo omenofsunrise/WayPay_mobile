@@ -1,3 +1,4 @@
+import 'package:waypay_mobile/core/notifications/push_notification_service.dart';
 import 'package:waypay_mobile/core/widgets/live_notifications.dart';
 import 'package:waypay_mobile/core/network/notification_socket.dart';
 import 'dart:async';
@@ -33,6 +34,15 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ru_RU', null);
   await initDependencies();
+
+  // Пуши не должны мешать запуску: если Firebase не настроен или разрешение
+  // не выдано, приложение обязано открыться как обычно.
+  try {
+    await getIt<PushNotificationService>().init();
+  } catch (e) {
+    debugPrint('⚠️ Пуш-уведомления не поднялись: $e');
+  }
+
   runApp(const MyApp());
 }
 

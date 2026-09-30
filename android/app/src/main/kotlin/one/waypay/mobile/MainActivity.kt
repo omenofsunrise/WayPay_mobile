@@ -1,4 +1,4 @@
-package com.example.waypay_mobile
+package one.waypay.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

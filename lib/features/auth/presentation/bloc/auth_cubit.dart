@@ -1,3 +1,4 @@
+import 'package:waypay_mobile/core/notifications/push_notification_service.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,7 +48,13 @@ class AuthCubit extends Cubit<AuthState> {
 
     try {
       await _authDataSource.confirmCall(
-        CallConfirmRequestModel(checkId: checkId, phone: phone),
+        CallConfirmRequestModel(
+          checkId: checkId,
+          phone: phone,
+          // Токен может быть ещё не выдан — на iOS он появляется только
+          // после APNs. Тогда уйдёт null, и вход не сломается.
+          deviceId: getIt<PushNotificationService>().token,
+        ),
       );
 
       final userInfo = await _authDataSource.getAuthInfo();

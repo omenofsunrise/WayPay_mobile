@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "436453303070",
+    "project_id": "waypayclient",
+    "storage_bucket": "waypayclient.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:436453303070:android:6217e9a4d384423777df0f",
+        "android_client_info": {
+          "package_name": "com.waypay.waypay_client"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1Ga57syCptMu5uqTjummqtqNnkcj8Ozo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:436453303070:android:535a868fc17c88ff77df0f",
+        "android_client_info": {
+          "package_name": "one.waypay.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1Ga57syCptMu5uqTjummqtqNnkcj8Ozo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
