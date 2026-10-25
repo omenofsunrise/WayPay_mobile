@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:waypay_mobile/core/utils/phone_input_formatter.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/admin_panel/data/data_sources/company_remote_data_source.dart';
@@ -365,7 +366,9 @@ class _CompanyDataScreenState extends State<CompanyDataScreen> {
                               label: 'Телефон',
                               hintText: '+7 (___) ___-__-__',
                               keyboardType: TextInputType.phone,
-                              inputFormatters: [_phoneMask],
+                              inputFormatters: [
+                                RussianPhoneInputFormatter(_phoneMask),
+                              ],
                               prefixText: '+7',
                               prefixStyle: AppStyle.manrope(
                                 size: 16,
@@ -379,7 +382,9 @@ class _CompanyDataScreenState extends State<CompanyDataScreen> {
                               label: 'Телефон поддержки',
                               hintText: '+7 (___) ___-__-__',
                               keyboardType: TextInputType.phone,
-                              inputFormatters: [_supportPhoneMask],
+                              inputFormatters: [
+                                RussianPhoneInputFormatter(_supportPhoneMask),
+                              ],
                               prefixText: '+7',
                               prefixStyle: AppStyle.manrope(
                                 size: 16,
