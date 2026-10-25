@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:waypay_mobile/core/utils/phone_input_formatter.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients_remote_data_source.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/create_clients_requests.dart';
@@ -332,7 +333,9 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
                         label: 'Телефон',
                         hintText: ' (___) ___-__-__',
                         keyboardType: TextInputType.phone,
-                        inputFormatters: [_phoneMask],
+                        inputFormatters: [
+                          RussianPhoneInputFormatter(_phoneMask),
+                        ],
                         prefixText: '8',
                         errorText: _phoneExistsError,
                       ),
@@ -387,7 +390,9 @@ class _ClientCreateScreenState extends State<ClientCreateScreen> {
                         label: 'Whatsapp',
                         hintText: ' (___) ___-__-__',
                         keyboardType: TextInputType.phone,
-                        inputFormatters: [_whatsAppMask],
+                        inputFormatters: [
+                          RussianPhoneInputFormatter(_whatsAppMask),
+                        ],
                         prefixText: '8',
                       ),
                     ],

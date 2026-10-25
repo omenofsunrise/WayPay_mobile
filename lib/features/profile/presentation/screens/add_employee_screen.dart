@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:waypay_mobile/core/utils/phone_input_formatter.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
@@ -237,7 +238,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
               controller: _phoneController,
               label: 'Телефон',
               keyboardType: TextInputType.phone,
-              inputFormatters: [phoneFormatter],
+              inputFormatters: [RussianPhoneInputFormatter(phoneFormatter)],
             ),
             const SizedBox(height: 12),
             _buildInputField(
