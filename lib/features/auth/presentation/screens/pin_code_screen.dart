@@ -85,7 +85,7 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
           .map((p) => PermissionMapper.fromApi(p.toString()))
           .toList();
       await userStorage.savePermissions(permissions);
-
+      await userStorage.saveCompanySettings(employee);
 
       // Живые уведомления: тот же WebSocket, что держит веб.
       final employeeId = (employee['id'] as num?)?.toInt();

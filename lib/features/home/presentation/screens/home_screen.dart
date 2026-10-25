@@ -420,17 +420,28 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          DashboardCard(
-            title: 'Подтверждённые платежи',
-            value: _formatCurrency(data.approvedPaymentsAmount),
-            additionalValue: '${_formatCount(approvedCount)} шт',
-          ),
-          DashboardCard(
-            title: 'Неподтверждённые платежи',
-            value: _formatCurrency(data.disapprovePaymentsAmount),
-            additionalValue: '${_formatCount(disapprovedCount)} шт',
-            valueColor: const Color(AppColors.red),
-          ),
+          // Подтверждение платежей выключено — делить их на подтверждённые
+          // и нет незачем, показываем общую сумму.
+          if (UserStorage().paymentAcceptance) ...[
+            DashboardCard(
+              title: 'Подтверждённые платежи',
+              value: _formatCurrency(data.approvedPaymentsAmount),
+              additionalValue: '${_formatCount(approvedCount)} шт',
+            ),
+            DashboardCard(
+              title: 'Неподтверждённые платежи',
+              value: _formatCurrency(data.disapprovePaymentsAmount),
+              additionalValue: '${_formatCount(disapprovedCount)} шт',
+              valueColor: const Color(AppColors.red),
+            ),
+          ] else
+            DashboardCard(
+              title: 'Платежи',
+              value: _formatCurrency(
+                (data.approvedPaymentsAmount ?? 0) +
+                    (data.disapprovePaymentsAmount ?? 0),
+              ),
+            ),
         ],
       ),
     );

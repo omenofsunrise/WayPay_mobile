@@ -72,6 +72,7 @@ class AuthCubit extends Cubit<AuthState> {
               .map((p) => PermissionMapper.fromApi(p.toString()))
               .toList();
           await _userStorage.savePermissions(permissions);
+          await _userStorage.saveCompanySettings(employee);
         } catch (e) {
           debugPrint('Ошибка парсинга данных пользователя: $e');
         }
