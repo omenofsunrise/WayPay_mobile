@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/features/payment/data/models/expected/payment_item_model.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
@@ -106,24 +107,35 @@ class PaymentPreviewCard extends StatelessWidget {
                             color: Color(AppColors.uiBorder),
                           ),
                         ),
-                        if (showStatus) ...[
+                        if (showStatus && UserStorage().paymentAcceptance) ...[
                           const SizedBox(height: 8),
                           SizedBox(
-                            width: 96,
                             height: 24,
                             child: DecoratedBox(
                               decoration: BoxDecoration(
-                                color: const Color(AppColors.primaryLight),
+                                color: payment.accepted
+                                    ? const Color(AppColors.primaryLight)
+                                    : const Color(0xFFFFD6D6),
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: Center(
-                                child: Text(
-                                  'Подтверждён',
-                                  style: TextStyle(
-                                    color: const Color(AppColors.black),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    height: 1.3,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
+                                child: Center(
+                                  widthFactor: 1,
+                                  child: Text(
+                                    payment.accepted
+                                        ? 'Подтверждён'
+                                        : 'Не подтверждён',
+                                    style: TextStyle(
+                                      color: payment.accepted
+                                          ? const Color(AppColors.black)
+                                          : const Color(0xFFB91C1C),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      height: 1.3,
+                                    ),
                                   ),
                                 ),
                               ),

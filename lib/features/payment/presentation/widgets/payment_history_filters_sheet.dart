@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/assets/resources.dart';
@@ -77,7 +78,7 @@ class _PaymentHistoryFiltersFormState
     _dateTo = filters.dateTo;
     _dateFromController.text = _formatDate(_dateFrom);
     _dateToController.text = _formatDate(_dateTo);
-    _confirmed = filters.confirmed;
+    _confirmed = UserStorage().paymentAcceptance ? filters.confirmed : null;
   }
 
   void _onFieldsChanged() => setState(() {});
@@ -136,19 +137,22 @@ class _PaymentHistoryFiltersFormState
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
-          'Статус платежа',
-          style: TextStyle(fontSize: 14, color: Color(AppColors.uiBorder)),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 12,
-          children: [
-            _buildStatusChip('Просрочен', false),
-            _buildStatusChip('Оплачен', true),
-          ],
-        ),
-        const SizedBox(height: 24),
+        // Подтверждение платежей выключено — делить по статусу незачем.
+        if (UserStorage().paymentAcceptance) ...[
+          const Text(
+            'Статус платежа',
+            style: TextStyle(fontSize: 14, color: Color(AppColors.uiBorder)),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 12,
+            children: [
+              _buildStatusChip('Просрочен', false),
+              _buildStatusChip('Оплачен', true),
+            ],
+          ),
+          const SizedBox(height: 24),
+        ],
         ModalTextField(
           controller: _clientController,
           label: 'ФИО клиента',

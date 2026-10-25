@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/assets/resources.dart';
@@ -80,7 +81,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         investorNickname: filters?.investor,
         dateFrom: filters?.dateFrom,
         dateTo: filters?.dateTo,
-        confirmed: filters?.confirmed,
+        confirmed: UserStorage().paymentAcceptance ? filters?.confirmed : null,
       ),
     );
   }

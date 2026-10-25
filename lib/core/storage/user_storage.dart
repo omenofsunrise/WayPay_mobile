@@ -13,12 +13,23 @@ class UserStorage {
 
   static const _roleKey = 'user_role';
   static const _permissionsKey = 'user_permissions';
+  static const _creditAcceptanceKey = 'company_credit_acceptance';
+  static const _paymentAcceptanceKey = 'company_payment_acceptance';
 
   final ValueNotifier<EmployeeRole?> roleNotifier =
       ValueNotifier<EmployeeRole?>(null);
 
   final ValueNotifier<Set<Permission>> permissionsNotifier =
       ValueNotifier<Set<Permission>>({});
+
+  /// Настройки компании «Подтверждение договоров» и «Подтверждение платежей».
+  /// Выключены — подтверждать нечего, статусы и счётчики подтверждения не нужны.
+  final ValueNotifier<bool> creditAcceptanceNotifier = ValueNotifier<bool>(
+    true,
+  );
+  final ValueNotifier<bool> paymentAcceptanceNotifier = ValueNotifier<bool>(
+    true,
+  );
 
   Future<void> _init() async {
     final prefs = await SharedPreferences.getInstance();
@@ -34,6 +45,10 @@ class UserStorage {
           .map((e) => Permission.values.firstWhere((p) => p.name == e))
           .toSet();
     }
+    creditAcceptanceNotifier.value =
+        prefs.getBool(_creditAcceptanceKey) ?? true;
+    paymentAcceptanceNotifier.value =
+        prefs.getBool(_paymentAcceptanceKey) ?? true;
   }
 
   Future<void> saveRole(EmployeeRole role) async {
@@ -53,6 +68,26 @@ class UserStorage {
     permissionsNotifier.value = permissions.toSet();
   }
 
+  /// Сохраняет настройки компании из `employee` ответа `Auth/info`.
+  Future<void> saveCompanySettings(Map<String, dynamic> employee) async {
+    final credit = employee['creditAcceptance'] as bool? ?? true;
+    final payment = employee['paymentAcceptance'] as bool? ?? true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_creditAcceptanceKey, credit);
+    await prefs.setBool(_paymentAcceptanceKey, payment);
+    creditAcceptanceNotifier.value = credit;
+    paymentAcceptanceNotifier.value = payment;
+  }
+
+  bool get paymentAcceptance => paymentAcceptanceNotifier.value;
+
+  /// То же, но прямо из хранилища: при старте приложения уведомитель
+  /// может ещё не успеть загрузиться.
+  Future<bool> getPaymentAcceptance() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_paymentAcceptanceKey) ?? true;
+  }
+
   Set<Permission> getPermissionsSync() {
     return permissionsNotifier.value;
   }
@@ -70,8 +105,12 @@ class UserStorage {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_roleKey);
     await prefs.remove(_permissionsKey);
+    await prefs.remove(_creditAcceptanceKey);
+    await prefs.remove(_paymentAcceptanceKey);
     roleNotifier.value = null;
     permissionsNotifier.value = {};
+    creditAcceptanceNotifier.value = true;
+    paymentAcceptanceNotifier.value = true;
   }
 
   bool hasRoleSync(List<EmployeeRole> roles) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
@@ -39,8 +40,13 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
       _schedule?.paymentAmount ?? _payment?.paymentAmount ?? 0;
   String get _paymentDateRaw =>
       _schedule?.paymentDate ?? _payment?.paymentDate ?? '';
+  // Подтверждение платежей выключено — внесённый платёж уже оплачен,
+  // ждать подтверждения ему не нужно.
   bool get _isPaid =>
-      _payment?.accepted == true || _schedule?.payed == true || _paymentCreated;
+      _payment?.accepted == true ||
+      (_payment != null && !UserStorage().paymentAcceptance) ||
+      _schedule?.payed == true ||
+      _paymentCreated;
   bool get _canCreatePayment =>
       _schedule != null && !_isPaid && _credit != null;
 

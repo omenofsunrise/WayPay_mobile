@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/features/profile/presentation/cubit/payment_stats_cubit.dart';
@@ -156,25 +157,38 @@ class _PaymentStatsProfileTableState extends State<PaymentStatsProfileTable> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _PaymentStatValue(
-                                    label: 'Подтверждённые',
-                                    value: _formatCurrency(stat.assumed),
-                                    valueColor: const Color(AppColors.uiBorder),
-                                  ),
+                            if (!UserStorage().paymentAcceptance)
+                              _PaymentStatValue(
+                                label: 'Платежи',
+                                value: _formatCurrency(
+                                  stat.assumed + stat.notAssumed,
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _PaymentStatValue(
-                                    label: 'Неподтверждённые',
-                                    value: _formatCurrency(stat.notAssumed),
-                                    valueColor: const Color(AppColors.primary),
+                                valueColor: const Color(AppColors.uiBorder),
+                              )
+                            else
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _PaymentStatValue(
+                                      label: 'Подтверждённые',
+                                      value: _formatCurrency(stat.assumed),
+                                      valueColor: const Color(
+                                        AppColors.uiBorder,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _PaymentStatValue(
+                                      label: 'Неподтверждённые',
+                                      value: _formatCurrency(stat.notAssumed),
+                                      valueColor: const Color(
+                                        AppColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                           ],
                         ),
                       ),
