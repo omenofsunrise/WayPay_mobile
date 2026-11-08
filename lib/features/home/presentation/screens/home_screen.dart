@@ -259,7 +259,23 @@ class _HomeScreenState extends State<HomeScreen> {
                     // (onPressed: () {}), поэтому выключаем её и ставим рабочий
                     // колокольчик со счётчиком непрочитанных и списком.
                     showNotifications: false,
-                    trailing: const NotificationsBellButton(),
+                    titleWidget: const SizedBox.shrink(),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          tooltip: 'Панель управления',
+                          onPressed: () => context.pushNamed(
+                            Routes.controlPanelScreen.toName,
+                          ),
+                          icon: const Icon(
+                            Icons.settings_outlined,
+                            color: Color(AppColors.uiBorder),
+                          ),
+                        ),
+                        const NotificationsBellButton(),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Row(

@@ -9,6 +9,7 @@ import 'package:waypay_mobile/features/analytics/presentation/cubit/investment_d
 import 'package:waypay_mobile/features/analytics/presentation/cubit/sell_info_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/screens/analytic_screen.dart';
 import 'package:waypay_mobile/features/admin_panel/presentation/screen/company_data_screen.dart';
+import 'package:waypay_mobile/features/admin_panel/presentation/screen/control_panel_screen.dart';
 import 'package:waypay_mobile/features/auth/presentation/screens/phone_auth_screen.dart';
 import 'package:waypay_mobile/features/auth/presentation/screens/pin_code_screen.dart';
 import 'package:waypay_mobile/features/bottom_navigation_bar/main_layout.dart';
@@ -218,6 +219,11 @@ class AppRouter {
         path: Routes.companyDataScreen.toPath,
         name: Routes.companyDataScreen.toName,
         builder: (context, state) => const CompanyDataScreen(),
+      ),
+      GoRoute(
+        path: Routes.controlPanelScreen.toPath,
+        name: Routes.controlPanelScreen.toName,
+        builder: (context, state) => const ControlPanelScreen(),
       ),
       GoRoute(
         path: Routes.profileActiveSessionsScreen.toPath,
