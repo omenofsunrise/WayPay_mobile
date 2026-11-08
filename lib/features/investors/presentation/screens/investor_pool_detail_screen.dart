@@ -434,17 +434,19 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
                               const SizedBox(height: 16),
                               _AnalyticsGrid(metrics: _buildMetrics()),
                               const SizedBox(height: 16),
-                              Row(
+                              Column(
                                 children: [
-                                  Expanded(
+                                  SizedBox(
+                                    width: double.infinity,
                                     child: DefaultButton(
                                       text: 'Добавить инвестора',
                                       isPrimary: true,
                                       onPressed: _createInvestor,
                                     ),
                                   ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
+                                  const SizedBox(height: 10),
+                                  SizedBox(
+                                    width: double.infinity,
                                     child: DefaultButton(
                                       text: 'Реинвестировать',
                                       isPrimary: false,
