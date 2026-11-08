@@ -189,19 +189,18 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                 showNotifications: false,
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: DefaultButton(
-                  text: 'Новый инвестор',
-                  isPrimary: true,
-                  onPressed: () => _openInvestorForm(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SearchField(
-                controller: _searchController,
-                hintText: 'Поиск',
-                onChanged: _onSearchChanged,
+              Row(
+                children: [
+                  Expanded(
+                    child: SearchField(
+                      controller: _searchController,
+                      hintText: 'Поиск инвестора',
+                      onChanged: _onSearchChanged,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  _AddInvestorButton(onTap: () => _openInvestorForm()),
+                ],
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -306,145 +305,223 @@ class _InvestorCard extends StatelessWidget {
     return DateFormat('dd.MM.yyyy').format(date);
   }
 
+  String get _initials {
+    final source = investor.nickname.trim().isNotEmpty
+        ? investor.nickname
+        : investor.fullName;
+    final parts = source.trim().split(RegExp(r'\s+'));
+    return parts
+        .where((part) => part.isNotEmpty)
+        .take(2)
+        .map((part) => part[0].toUpperCase())
+        .join();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final createdAtText = _formatDate(investor.createdAt);
     final endDateText = _formatDate(investor.contractEndDate);
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => InvestorReportScreen(initialInvestor: investor),
-            ),
-          );
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x14000809),
-                offset: Offset(2, 2),
-                blurRadius: 4,
-              ),
-              BoxShadow(
-                color: Color(0x05000809),
-                offset: Offset(0, 0),
-                blurRadius: 6,
-              ),
-            ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0F000000),
+            offset: Offset(0, 4),
+            blurRadius: 16,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+        ],
+      ),
+      child: Column(
+        children: [
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      InvestorReportScreen(initialInvestor: investor),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 8, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'ID: ${investor.id}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(AppColors.uiBorder),
-                      ),
-                    ),
-                    const Spacer(),
-                    if (investor.isBlocked)
-                      Container(
-                        margin: const EdgeInsets.only(right: 6),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFE8E8),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          'Заблокирован',
-                          style: TextStyle(fontSize: 11, color: Colors.red),
-                        ),
-                      ),
-                    PopupMenuButton<String>(
-                      onSelected: onAction,
-                      itemBuilder: (_) => [
-                        const PopupMenuItem(
-                          value: 'edit',
-                          child: Text('Редактировать'),
-                        ),
-                        PopupMenuItem(
-                          value: 'block',
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE6F5F3),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           child: Text(
-                            investor.isBlocked
-                                ? 'Разблокировать'
-                                : 'Заблокировать',
+                            _initials.isEmpty ? 'И' : _initials,
+                            style: const TextStyle(
+                              color: Color(AppColors.primary),
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                investor.nickname,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              if (investor.fullName.isNotEmpty) ...[
+                                const SizedBox(height: 3),
+                                Text(
+                                  investor.fullName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Color(AppColors.uiBorder),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                         if (investor.isBlocked)
-                          const PopupMenuItem(
-                            value: 'clear',
-                            child: Text('Аннулировать'),
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4),
+                            child: Icon(
+                              Icons.lock_outline,
+                              size: 18,
+                              color: Colors.red,
+                            ),
                           ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Text(
-                            'Удалить',
-                            style: TextStyle(color: Colors.red),
+                        PopupMenuButton<String>(
+                          padding: EdgeInsets.zero,
+                          onSelected: onAction,
+                          itemBuilder: (_) => [
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Text('Редактировать'),
+                            ),
+                            PopupMenuItem(
+                              value: 'block',
+                              child: Text(
+                                investor.isBlocked
+                                    ? 'Разблокировать'
+                                    : 'Заблокировать',
+                              ),
+                            ),
+                            if (investor.isBlocked)
+                              const PopupMenuItem(
+                                value: 'clear',
+                                child: Text('Аннулировать'),
+                              ),
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Text(
+                                'Удалить',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _InfoColumn(
+                            label: 'Касса',
+                            value: _formatCurrency(investor.balance),
+                          ),
+                        ),
+                        Container(
+                          width: 1,
+                          height: 36,
+                          color: const Color(0xFFEEF1F4),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _InfoColumn(
+                            label: 'Договор до',
+                            value: endDateText,
                           ),
                         ),
                       ],
                     ),
-                    Text(
-                      createdAtText == '—' ? '' : 'от $createdAtText',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(AppColors.uiBorder),
-                      ),
-                    ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  investor.nickname,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _InfoColumn(
-                        label: 'Касса',
-                        value: _formatCurrency(investor.balance),
-                      ),
-                    ),
-                    const SizedBox(width: 24),
-                    Expanded(
-                      child: _InfoColumn(
-                        label: 'Дата окончания договора',
-                        value: endDateText,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                DefaultButton(
-                  text: 'Добавить инвестицию',
-                  isPrimary: true,
-                  onPressed: onAddInvestment,
-                ),
-              ],
+              ),
             ),
           ),
+          const Divider(height: 1, color: Color(0xFFEEF1F4)),
+          InkWell(
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(16),
+            ),
+            onTap: onAddInvestment,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_circle_outline,
+                    size: 19,
+                    color: Color(AppColors.primary),
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'Добавить инвестицию',
+                    style: TextStyle(
+                      color: Color(AppColors.primary),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AddInvestorButton extends StatelessWidget {
+  const _AddInvestorButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(AppColors.primary),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: const SizedBox(
+          width: 48,
+          height: 48,
+          child: Icon(Icons.person_add_alt_1_outlined, color: Colors.white),
         ),
       ),
     );

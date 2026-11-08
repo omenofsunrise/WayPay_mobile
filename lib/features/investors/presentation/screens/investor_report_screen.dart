@@ -568,9 +568,12 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _NicknameCard(
-                                nickname: selectedInvestor.nickname,
-                                fullName: selectedInvestor.fullName,
+                              _InvestorHeroCard(
+                                investor: selectedInvestor,
+                                balance: _asDouble(
+                                  reportData?['balance'] ??
+                                      selectedInvestor.balance,
+                                ),
                               ),
                               const SizedBox(height: 12),
                               _InvestorActions(
@@ -579,18 +582,10 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
                                 onShare: _shareInvestor,
                                 onAgreement: _showAgreement,
                                 onExport: _shareReportPdf,
+                                onCash: _openCashPositions,
                               ),
                               const SizedBox(height: 16),
                               _AnalyticsGrid(metrics: _buildMetrics()),
-                              const SizedBox(height: 16),
-                              SizedBox(
-                                width: double.infinity,
-                                child: DefaultButton(
-                                  text: 'Управлять кассой',
-                                  isPrimary: false,
-                                  onPressed: _openCashPositions,
-                                ),
-                              ),
                               const SizedBox(height: 20),
                               const Text(
                                 'История операций',
@@ -810,11 +805,24 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
   }
 }
 
-class _NicknameCard extends StatelessWidget {
-  const _NicknameCard({required this.nickname, required this.fullName});
+class _InvestorHeroCard extends StatelessWidget {
+  const _InvestorHeroCard({required this.investor, required this.balance});
 
-  final String nickname;
-  final String fullName;
+  final InvestorsModel investor;
+  final double balance;
+
+  String get _initials {
+    final source = investor.nickname.trim().isNotEmpty
+        ? investor.nickname
+        : investor.fullName;
+    return source
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .take(2)
+        .map((part) => part[0].toUpperCase())
+        .join();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -822,52 +830,107 @@ class _NicknameCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF138C92), Color(0xFF0B6F76)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x14000809),
-            offset: Offset(2, 2),
-            blurRadius: 4,
-          ),
-          BoxShadow(
-            color: Color(0x05000809),
-            offset: Offset(0, 0),
-            blurRadius: 6,
+            color: Color(0x26138C92),
+            offset: Offset(0, 8),
+            blurRadius: 24,
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Никнейм',
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Text(
+                  _initials.isEmpty ? 'И' : _initials,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      investor.nickname,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (investor.fullName.isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        investor.fullName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.76),
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Доступно в кассе',
             style: TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w400,
-              fontSize: 14,
-              height: 24 / 14,
-              color: Color(AppColors.uiBorder),
+              color: Colors.white.withValues(alpha: 0.72),
+              fontSize: 13,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            nickname,
+            '${NumberFormat.decimalPattern('ru_RU').format(balance)} ₽',
             style: const TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w500,
-              fontSize: 16,
-              height: 24 / 16,
-              color: Color(AppColors.black),
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.5,
             ),
           ),
-          if (fullName.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(
-              fullName,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(AppColors.uiBorder),
+          if (investor.contractEndDate != null) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'Договор до ${DateFormat('dd.MM.yyyy').format(investor.contractEndDate!)}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ],
@@ -939,6 +1002,7 @@ class _InvestorActions extends StatelessWidget {
     required this.onShare,
     required this.onAgreement,
     required this.onExport,
+    required this.onCash,
   });
 
   final VoidCallback onEdit;
@@ -946,35 +1010,61 @@ class _InvestorActions extends StatelessWidget {
   final VoidCallback onShare;
   final VoidCallback onAgreement;
   final VoidCallback onExport;
+  final VoidCallback onCash;
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        _ActionButton(
-          icon: Icons.edit_outlined,
-          label: 'Редактировать',
-          onTap: onEdit,
-        ),
-        _ActionButton(
-          icon: Icons.payments_outlined,
-          label: 'Выплатить',
-          onTap: onPayout,
-        ),
-        _ActionButton(icon: Icons.link, label: 'Поделиться', onTap: onShare),
-        _ActionButton(
-          icon: Icons.description_outlined,
-          label: 'Договор',
-          onTap: onAgreement,
-        ),
-        _ActionButton(
-          icon: Icons.ios_share_outlined,
-          label: 'Экспорт PDF',
-          onTap: onExport,
-        ),
-      ],
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: DefaultButton(
+              text: 'Выплатить инвестору',
+              isPrimary: true,
+              onPressed: onPayout,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _ActionButton(
+                  icon: Icons.account_balance_wallet_outlined,
+                  label: 'Касса',
+                  onTap: onCash,
+                ),
+                _ActionButton(
+                  icon: Icons.edit_outlined,
+                  label: 'Изменить',
+                  onTap: onEdit,
+                ),
+                _ActionButton(
+                  icon: Icons.link,
+                  label: 'Ссылка',
+                  onTap: onShare,
+                ),
+                _ActionButton(
+                  icon: Icons.description_outlined,
+                  label: 'Договор',
+                  onTap: onAgreement,
+                ),
+                _ActionButton(
+                  icon: Icons.ios_share_outlined,
+                  label: 'PDF',
+                  onTap: onExport,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -992,12 +1082,27 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ActionChip(
-      avatar: Icon(icon, size: 18, color: const Color(AppColors.primary)),
-      label: Text(label),
-      backgroundColor: Colors.white,
-      side: const BorderSide(color: Color(0xFFD8DEE6)),
-      onPressed: onTap,
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Container(
+          width: 72,
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF4F7F8),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, size: 21, color: const Color(AppColors.primary)),
+              const SizedBox(height: 6),
+              Text(label, maxLines: 1, style: const TextStyle(fontSize: 11)),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

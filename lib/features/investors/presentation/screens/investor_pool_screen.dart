@@ -170,19 +170,33 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
                 showNotifications: false,
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: DefaultButton(
-                  text: 'Создать пул',
-                  isPrimary: true,
-                  onPressed: _createPool,
-                ),
-              ),
-              const SizedBox(height: 12),
-              SearchField(
-                controller: _searchController,
-                hintText: 'Поиск',
-                onChanged: _onSearchChanged,
+              Row(
+                children: [
+                  Expanded(
+                    child: SearchField(
+                      controller: _searchController,
+                      hintText: 'Поиск пула',
+                      onChanged: _onSearchChanged,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Material(
+                    color: const Color(AppColors.primary),
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: _createPool,
+                      child: const SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Icon(
+                          Icons.add_business_outlined,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -313,46 +327,72 @@ class _InvestorPoolCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      elevation: 0,
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         onTap: () => context.pushNamed(
           Routes.investorPoolDetailScreen.toName,
           extra: pool,
         ),
-        child: Container(
+        child: Ink(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(16),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x14000809),
-                offset: Offset(2, 2),
-                blurRadius: 4,
-              ),
-              BoxShadow(
-                color: Color(0x05000809),
-                offset: Offset(0, 0),
-                blurRadius: 6,
+                color: Color(0x0F000000),
+                offset: Offset(0, 4),
+                blurRadius: 16,
               ),
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Text(
-                      'ID: ${pool.id}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(AppColors.uiBorder),
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE6F5F3),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.account_balance_outlined,
+                        color: Color(AppColors.primary),
                       ),
                     ),
-                    const Spacer(),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            pool.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            'Создан ${_formatDate(pool.createdAt)}',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(AppColors.uiBorder),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     PopupMenuButton<String>(
+                      padding: EdgeInsets.zero,
                       onSelected: onAction,
                       itemBuilder: (_) => const [
                         PopupMenuItem(
@@ -368,41 +408,35 @@ class _InvestorPoolCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    Text(
-                      pool.activeUntil != null
-                          ? 'от ${_formatDate(pool.activeUntil)}'
-                          : '',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(AppColors.uiBorder),
-                      ),
-                    ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  pool.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: _InfoColumn(
-                        label: 'Дата создания',
-                        value: _formatDate(pool.createdAt),
+                        label: 'Касса пула',
+                        value: _formatCurrency(pool.balance),
                       ),
                     ),
-                    const SizedBox(width: 24),
+                    Container(
+                      width: 1,
+                      height: 36,
+                      color: const Color(0xFFEEF1F4),
+                    ),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: _InfoColumn(
-                        label: 'Касса',
-                        value: _formatCurrency(pool.balance),
+                        label: 'Активен до',
+                        value: _formatDate(pool.activeUntil),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8, right: 8),
+                      child: Icon(
+                        Icons.chevron_right,
+                        color: Color(AppColors.uiBorder),
                       ),
                     ),
                   ],

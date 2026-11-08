@@ -426,6 +426,10 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
                               _PoolNameCard(
                                 name: (_reportData?['name'] ?? widget.pool.name)
                                     .toString(),
+                                balance: _asDouble(
+                                  _reportData?['balance'] ??
+                                      widget.pool.balance,
+                                ),
                               ),
                               const SizedBox(height: 16),
                               _AnalyticsGrid(metrics: _buildMetrics()),
@@ -668,9 +672,10 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
 }
 
 class _PoolNameCard extends StatelessWidget {
-  const _PoolNameCard({required this.name});
+  const _PoolNameCard({required this.name, required this.balance});
 
   final String name;
+  final double balance;
 
   @override
   Widget build(BuildContext context) {
@@ -678,43 +683,81 @@ class _PoolNameCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF138C92), Color(0xFF0B6F76)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x14000809),
-            offset: Offset(2, 2),
-            blurRadius: 4,
-          ),
-          BoxShadow(
-            color: Color(0x05000809),
-            offset: Offset(0, 0),
-            blurRadius: 6,
+            color: Color(0x26138C92),
+            offset: Offset(0, 8),
+            blurRadius: 24,
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Название пула',
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.account_balance_outlined,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 19,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Инвестиционный пул',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.72),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Касса пула',
             style: TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w400,
-              fontSize: 14,
-              height: 24 / 14,
-              color: Color(AppColors.uiBorder),
+              color: Colors.white.withValues(alpha: 0.72),
+              fontSize: 13,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            name,
+            '${NumberFormat.decimalPattern('ru_RU').format(balance)} ₽',
             style: const TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w500,
-              fontSize: 16,
-              height: 24 / 16,
-              color: Color(AppColors.black),
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.5,
             ),
           ),
         ],
@@ -752,73 +795,118 @@ class _PoolInvestorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onOpen,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0F000000),
+            offset: Offset(0, 4),
+            blurRadius: 16,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            onTap: onOpen,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'ID: ${investor.id}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(AppColors.uiBorder),
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE6F5F3),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.person_outline,
+                          color: Color(AppColors.primary),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              investor.nickname,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            if (investor.fullName.isNotEmpty)
+                              Text(
+                                investor.fullName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Color(AppColors.uiBorder),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      const Icon(
+                        Icons.chevron_right,
+                        color: Color(AppColors.uiBorder),
+                      ),
+                    ],
                   ),
-                  const Spacer(),
-                  Text(
-                    _formatDate(investor.createdAt),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(AppColors.uiBorder),
-                    ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _InfoColumn(
+                          label: 'Инвестиции',
+                          value: _formatCurrency(investor.investmentAmount),
+                        ),
+                      ),
+                      Expanded(
+                        child: _InfoColumn(
+                          label: 'Добавлен',
+                          value: _formatDate(investor.createdAt),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                investor.fullName,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  height: 1.4,
+            ),
+          ),
+          const Divider(height: 1, color: Color(0xFFEEF1F4)),
+          Row(
+            children: [
+              Expanded(
+                child: TextButton.icon(
+                  onPressed: onAddInvestment,
+                  icon: const Icon(Icons.add_circle_outline, size: 18),
+                  label: const Text('Инвестиция'),
                 ),
               ),
-              const SizedBox(height: 12),
-              _InfoColumn(
-                label: 'Инвестиции',
-                value: _formatCurrency(investor.investmentAmount),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: DefaultButton(
-                      text: 'Инвестиция',
-                      isPrimary: true,
-                      onPressed: onAddInvestment,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: DefaultButton(
-                      text: 'Выплатить',
-                      isPrimary: false,
-                      onPressed: onPayout,
-                    ),
-                  ),
-                ],
+              Container(width: 1, height: 24, color: const Color(0xFFEEF1F4)),
+              Expanded(
+                child: TextButton.icon(
+                  onPressed: onPayout,
+                  icon: const Icon(Icons.payments_outlined, size: 18),
+                  label: const Text('Выплатить'),
+                ),
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
