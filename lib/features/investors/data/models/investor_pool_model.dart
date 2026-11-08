@@ -6,6 +6,7 @@ class InvestorPoolModel {
     required this.selfIncome,
     required this.createdAt,
     this.activeUntil,
+    this.isCompanyPool = false,
   });
 
   final int id;
@@ -14,6 +15,7 @@ class InvestorPoolModel {
   final double selfIncome;
   final DateTime createdAt;
   final DateTime? activeUntil;
+  final bool isCompanyPool;
 
   factory InvestorPoolModel.fromJson(Map<String, dynamic> json) {
     return InvestorPoolModel(
@@ -25,6 +27,7 @@ class InvestorPoolModel {
       activeUntil: json['activeUntil'] != null
           ? DateTime.tryParse(json['activeUntil'] as String)
           : null,
+      isCompanyPool: json['isCompanyPool'] as bool? ?? false,
     );
   }
 }

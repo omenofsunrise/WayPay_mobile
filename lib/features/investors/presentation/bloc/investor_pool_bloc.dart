@@ -8,8 +8,8 @@ part 'investor_pool_state.dart';
 
 class InvestorPoolBloc extends Bloc<InvestorPoolEvent, InvestorPoolState> {
   InvestorPoolBloc()
-      : _dataSource = getIt<InvestorsRemoteDataSource>(),
-        super(InvestorPoolInitial()) {
+    : _dataSource = getIt<InvestorsRemoteDataSource>(),
+      super(InvestorPoolInitial()) {
     on<LoadInvestorPool>(_onLoadPools);
     on<SearchInvestorPool>(_onSearch);
     on<ResetInvestorPool>(_onReset);
@@ -37,17 +37,27 @@ class InvestorPoolBloc extends Bloc<InvestorPoolEvent, InvestorPoolState> {
     }
 
     try {
+      final isSearching = _query?.trim().isNotEmpty == true;
       final response = await _dataSource.getInvestorPools(
         page: _currentPage,
-        pageSize: event.pageSize ?? 10,
+        pageSize: isSearching ? 100 : event.pageSize,
         search: _query,
       );
+      final loadedItems = isSearching
+          ? response.items
+                .where(
+                  (pool) => pool.name.toLowerCase().contains(
+                    _query!.trim().toLowerCase(),
+                  ),
+                )
+                .toList()
+          : response.items;
       if (event.refresh) {
-        _items = response.items;
+        _items = loadedItems;
       } else {
-        _items.addAll(response.items);
+        _items.addAll(loadedItems);
       }
-      _hasMore = _currentPage < response.totalPages;
+      _hasMore = !isSearching && _currentPage < response.totalPages;
       emit(
         InvestorPoolLoaded(
           items: List.from(_items),

@@ -47,7 +47,7 @@ class InvestorsBloc extends Bloc<InvestorsEvent, InvestorsState> {
 
       final response = await _investorDataSource.getInvestors(
         page: _currentPage,
-        pageSize: event.pageSize ?? 10,
+        pageSize: event.pageSize,
         search: _searchQuery,
       );
 

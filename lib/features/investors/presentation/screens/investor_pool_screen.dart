@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investor_pool_bloc.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
@@ -61,6 +63,97 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
     }
   }
 
+  void _reload() {
+    context.read<InvestorPoolBloc>().add(LoadInvestorPool(refresh: true));
+  }
+
+  Future<String?> _showNameDialog({
+    required String title,
+    String initialValue = '',
+  }) async {
+    final controller = TextEditingController(text: initialValue);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Название пула'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () =>
+                Navigator.pop(dialogContext, controller.text.trim()),
+            child: const Text('Сохранить'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    return result;
+  }
+
+  Future<void> _createPool() async {
+    final name = await _showNameDialog(title: 'Создать пул');
+    if (!mounted || name == null || name.isEmpty) return;
+    try {
+      await getIt<InvestorsRemoteDataSource>().createInvestorPool(name);
+      if (!mounted) return;
+      showAppMessage(context, 'Пул создан', type: AppMessageType.success);
+      _reload();
+    } catch (e) {
+      if (mounted) {
+        showAppMessage(context, 'Ошибка: $e', type: AppMessageType.error);
+      }
+    }
+  }
+
+  Future<void> _handlePoolAction(InvestorPoolModel pool, String action) async {
+    final source = getIt<InvestorsRemoteDataSource>();
+    try {
+      if (action == 'edit') {
+        final name = await _showNameDialog(
+          title: 'Переименовать пул',
+          initialValue: pool.name,
+        );
+        if (name == null || name.isEmpty || name == pool.name) return;
+        await source.updateInvestorPoolName(pool.id, name);
+      } else if (action == 'delete') {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Удалить пул?'),
+            content: Text('Пул «${pool.name}» будет удалён.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Отмена'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Удалить'),
+              ),
+            ],
+          ),
+        );
+        if (confirmed != true) return;
+        await source.deleteInvestorPool(pool.id);
+      }
+      if (!mounted) return;
+      showAppMessage(context, 'Готово', type: AppMessageType.success);
+      _reload();
+    } catch (e) {
+      if (mounted) {
+        showAppMessage(context, 'Ошибка: $e', type: AppMessageType.error);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,6 +170,15 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
                 showNotifications: false,
               ),
               const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: DefaultButton(
+                  text: 'Создать пул',
+                  isPrimary: true,
+                  onPressed: _createPool,
+                ),
+              ),
+              const SizedBox(height: 12),
               SearchField(
                 controller: _searchController,
                 hintText: 'Поиск',
@@ -120,8 +222,7 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
       );
     }
 
-    final hasMorePools =
-        poolState is InvestorPoolLoaded && poolState.hasMore;
+    final hasMorePools = poolState is InvestorPoolLoaded && poolState.hasMore;
     final poolsPage = poolState is InvestorPoolLoaded
         ? poolState.currentPage
         : 1;
@@ -148,7 +249,10 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
             ...pools.map(
               (pool) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: _InvestorPoolCard(pool: pool),
+                child: _InvestorPoolCard(
+                  pool: pool,
+                  onAction: (action) => _handlePoolAction(pool, action),
+                ),
               ),
             ),
           ],
@@ -187,9 +291,10 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _InvestorPoolCard extends StatelessWidget {
-  const _InvestorPoolCard({required this.pool});
+  const _InvestorPoolCard({required this.pool, required this.onAction});
 
   final InvestorPoolModel pool;
+  final ValueChanged<String> onAction;
 
   String _formatDate(DateTime? date) {
     if (date == null) return '—';
@@ -247,6 +352,22 @@ class _InvestorPoolCard extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
+                    PopupMenuButton<String>(
+                      onSelected: onAction,
+                      itemBuilder: (_) => const [
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Text('Переименовать'),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Text(
+                            'Удалить',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    ),
                     Text(
                       pool.activeUntil != null
                           ? 'от ${_formatDate(pool.activeUntil)}'

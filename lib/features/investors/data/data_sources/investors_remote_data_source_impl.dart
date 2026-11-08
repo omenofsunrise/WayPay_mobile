@@ -1,13 +1,18 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_cash_position_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/investor_contribution_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/move_cash_position_request.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_request.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_response.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/reinvestment_model.dart';
 import '../models/investors_response_model.dart';
 import '../models/investor_pool_response_model.dart';
 
@@ -115,6 +120,8 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
     required String? phoneNumber,
     required int investorPie,
     required double investmentAmount,
+    required DateTime activeUntil,
+    int? poolId,
   }) async {
     try {
       final payload = {
@@ -123,6 +130,8 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
         'phoneNumber': phoneNumber,
         'investorPie': investorPie,
         'investmentAmount': investmentAmount,
+        'activeUntil': activeUntil.toUtc().toIso8601String(),
+        if (poolId != null) 'poolId': poolId,
       };
 
       final response = await dio.post('Investor', data: payload);
@@ -152,6 +161,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
     required String fullName,
     String? phoneNumber,
     required int investorPie,
+    required DateTime activeUntil,
   }) async {
     try {
       final payload = {
@@ -159,6 +169,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
         'fullName': fullName,
         'phoneNumber': phoneNumber,
         'investorPie': investorPie,
+        'activeUntil': activeUntil.toUtc().toIso8601String(),
       };
 
       final response = await dio.put('Investor/$id', data: payload);
@@ -226,6 +237,58 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   }
 
   @override
+  Future<Map<String, dynamic>> getInvestorAgreement(int id) async {
+    try {
+      final response = await dio.get('Investor/agreement/$id');
+      return Map<String, dynamic>.from(response.data as Map);
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось загрузить договор инвестора.');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getDeletedInvestorInfo() async {
+    try {
+      final response = await dio.get('Investor/deleted/info');
+      return Map<String, dynamic>.from(response.data as Map);
+    } on DioException catch (e) {
+      throw mapApiError(
+        e,
+        fallback: 'Не удалось загрузить данные удалённых инвесторов.',
+      );
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> createInvestorShareLink(
+    int investorId, {
+    int? minutes,
+  }) async {
+    try {
+      final response = await dio.post(
+        'Investor/report/temporary-token',
+        data: {
+          'investorId': investorId,
+          if (minutes != null) 'minutes': minutes,
+        },
+      );
+      if (response.data is String) {
+        final raw = response.data as String;
+        try {
+          final decoded = jsonDecode(raw);
+          if (decoded is Map) return Map<String, dynamic>.from(decoded);
+        } catch (_) {
+          // Некоторые версии API возвращают только токен как text/plain.
+        }
+        return {'token': raw};
+      }
+      return Map<String, dynamic>.from(response.data as Map);
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось создать временную ссылку.');
+    }
+  }
+
+  @override
   Future<Map<String, dynamic>> getInvestorPoolReport(int id) async {
     try {
       // Log id to help diagnose server-side errors
@@ -251,6 +314,7 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
   Future<InvestorPayoutResponse> createInvestorPayout({
     required int investorId,
     required double amount,
+    String? payoutSource,
   }) async {
     try {
       final response = await dio.post(
@@ -258,12 +322,159 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
         data: InvestorPayoutRequest(
           investorId: investorId,
           amount: amount,
+          payoutSource: payoutSource,
         ).toJson(),
       );
 
       return InvestorPayoutResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw mapApiError(e, fallback: 'Не удалось создать выплату.');
+    }
+  }
+
+  @override
+  Future<List<InvestorPayoutModel>> getInvestorPayoutsByPoolId(
+    int poolId,
+  ) async {
+    try {
+      final response = await dio.get('InvestorPayouts/pool/$poolId');
+      return (response.data as List? ?? const [])
+          .whereType<Map>()
+          .map(
+            (item) =>
+                InvestorPayoutModel.fromJson(Map<String, dynamic>.from(item)),
+          )
+          .toList();
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось загрузить выплаты пула.');
+    }
+  }
+
+  @override
+  Future<void> deleteInvestorPayout(int id) async {
+    try {
+      await dio.delete('InvestorPayouts/$id');
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось удалить выплату.');
+    }
+  }
+
+  @override
+  Future<InvestorContributionsPage> getInvestorContributions({
+    int? investorId,
+    int? poolId,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    try {
+      final response = await dio.get(
+        'InvestmentContribution/',
+        queryParameters: {
+          'page': page,
+          'pageSize': pageSize,
+          if (investorId != null) 'investorId': investorId,
+          if (poolId != null) 'poolId': poolId,
+        },
+      );
+      return InvestorContributionsPage.fromJson(response.data);
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось загрузить инвестиции.');
+    }
+  }
+
+  @override
+  Future<void> updateInvestmentContribution({
+    required int id,
+    required double amount,
+    required DateTime date,
+  }) async {
+    try {
+      await dio.put(
+        'InvestmentContribution/$id',
+        data: {'amount': amount, 'date': date.toUtc().toIso8601String()},
+      );
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось изменить инвестицию.');
+    }
+  }
+
+  @override
+  Future<void> makeInvestmentContributionAction(int id, String action) async {
+    try {
+      await dio.patch('InvestmentContribution/action/$id', data: action);
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось изменить инвестицию.');
+    }
+  }
+
+  @override
+  Future<InvestorPoolModel> createInvestorPool(String name) async {
+    try {
+      final response = await dio.post('InvestorPool', data: {'name': name});
+      return InvestorPoolModel.fromJson(
+        Map<String, dynamic>.from(response.data as Map),
+      );
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось создать пул.');
+    }
+  }
+
+  @override
+  Future<void> updateInvestorPoolName(int id, String name) async {
+    try {
+      await dio.put('InvestorPool/$id/name', data: name);
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось переименовать пул.');
+    }
+  }
+
+  @override
+  Future<void> deleteInvestorPool(int id) async {
+    try {
+      await dio.delete('InvestorPool/$id');
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось удалить пул.');
+    }
+  }
+
+  @override
+  Future<void> reinvestInvestorPool(int id) async {
+    try {
+      await dio.patch('InvestorPool/reinvest/$id');
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось выполнить реинвестицию.');
+    }
+  }
+
+  @override
+  Future<List<ReinvestmentModel>> getReinvestments(
+    int poolId, {
+    int page = 1,
+    int pageSize = 20,
+    int? investorId,
+  }) async {
+    try {
+      final response = await dio.get(
+        'InvestorPool/$poolId/reinvestments',
+        queryParameters: {
+          'page': page,
+          'pageSize': pageSize,
+          if (investorId != null) 'investorId': investorId,
+        },
+      );
+      final data = response.data;
+      final items = data is List
+          ? data
+          : ((data as Map?)?['items'] as List? ?? const []);
+      return items
+          .whereType<Map>()
+          .map(
+            (item) =>
+                ReinvestmentModel.fromJson(Map<String, dynamic>.from(item)),
+          )
+          .toList();
+    } on DioException catch (e) {
+      throw mapApiError(e, fallback: 'Не удалось загрузить реинвестиции.');
     }
   }
 
@@ -311,9 +522,8 @@ class InvestorRemoteDataSourceImpl implements InvestorsRemoteDataSource {
       if (data is List) {
         final items = data
             .map(
-              (e) => InvestorCashPositionModel.fromJson(
-                e as Map<String, dynamic>,
-              ),
+              (e) =>
+                  InvestorCashPositionModel.fromJson(e as Map<String, dynamic>),
             )
             .toList();
         return InvestorCashPositionHistoryResponse(

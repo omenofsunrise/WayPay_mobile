@@ -7,6 +7,16 @@ import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_pool_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/investor_contribution_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/investor_payout_model.dart';
+import 'package:waypay_mobile/features/investors/data/models/reinvestment_model.dart';
+import 'package:waypay_mobile/features/investors/presentation/widgets/investor_form_sheet.dart';
+import 'package:waypay_mobile/features/investors/presentation/widgets/investor_payout_dialog.dart';
+import 'package:waypay_mobile/features/investors/presentation/screens/investor_report_screen.dart';
+import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_response_model.dart';
+import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
 
 class InvestorPoolDetailScreen extends StatefulWidget {
   const InvestorPoolDetailScreen({super.key, required this.pool});
@@ -21,16 +31,22 @@ class InvestorPoolDetailScreen extends StatefulWidget {
 class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
   Map<String, dynamic>? _reportData;
   List<InvestorsModel> _investors = [];
+  List<InvestorPayoutModel> _payouts = [];
+  List<InvestorContributionModel> _contributions = [];
+  List<ReinvestmentModel> _reinvestments = [];
+  List<CreditModel> _credits = [];
   String? _error;
   String? _investorsError;
   bool _isLoading = false;
   bool _isInvestorsLoading = false;
+  String _operationsTab = 'payouts';
 
   @override
   void initState() {
     super.initState();
     _loadReport();
     _loadInvestors();
+    _loadOperations();
   }
 
   Future<void> _loadReport() async {
@@ -81,15 +97,190 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
   }
 
   Future<void> _refreshAll() async {
-    await Future.wait([_loadReport(), _loadInvestors()]);
+    await Future.wait([_loadReport(), _loadInvestors(), _loadOperations()]);
+  }
+
+  Future<void> _loadOperations() async {
+    try {
+      final source = getIt<InvestorsRemoteDataSource>();
+      final results = await Future.wait<dynamic>([
+        source.getInvestorPayoutsByPoolId(widget.pool.id),
+        source.getInvestorContributions(
+          poolId: widget.pool.id,
+          page: 1,
+          pageSize: 100,
+        ),
+        source.getReinvestments(widget.pool.id, page: 1, pageSize: 100),
+        getIt<CreditRemoteDataSource>().getCredits(
+          GetCreditsQuery(
+            page: 1,
+            pageSize: 100,
+            investorPoolId: widget.pool.id,
+          ),
+        ),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _payouts = results[0] as List<InvestorPayoutModel>;
+        _contributions = (results[1] as InvestorContributionsPage).items;
+        _reinvestments = results[2] as List<ReinvestmentModel>;
+        _credits = (results[3] as CreditResponseModel).items;
+      });
+    } catch (_) {
+      // Основной отчёт остаётся доступным, даже если одна из историй временно
+      // не загрузилась.
+    }
+  }
+
+  Future<void> _createInvestor() async {
+    final saved = await showInvestorFormSheet(context, poolId: widget.pool.id);
+    if (!mounted || saved != true) return;
+    showAppMessage(
+      context,
+      'Инвестор добавлен в пул',
+      type: AppMessageType.success,
+    );
+    await _refreshAll();
+  }
+
+  Future<void> _reinvestPool() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Реинвестировать доход?'),
+        content: const Text(
+          'Текущий доход инвесторов пула будет добавлен к инвестициям.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Реинвестировать'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await getIt<InvestorsRemoteDataSource>().reinvestInvestorPool(
+        widget.pool.id,
+      );
+      if (!mounted) return;
+      showAppMessage(
+        context,
+        'Реинвестиция выполнена',
+        type: AppMessageType.success,
+      );
+      await _refreshAll();
+    } catch (e) {
+      if (mounted) {
+        showAppMessage(context, 'Ошибка: $e', type: AppMessageType.error);
+      }
+    }
+  }
+
+  Future<void> _payoutInvestor(InvestorsModel investor) async {
+    final income = investor.investorIncome ?? 0;
+    final balance = investor.balance;
+    final amount = await showDialog<double>(
+      context: context,
+      builder: (_) => InvestorPayoutDialog(
+        maxAmount: income > 0 ? income : balance,
+        income: income,
+        balance: balance,
+      ),
+    );
+    if (!mounted || amount == null) return;
+    try {
+      await getIt<InvestorsRemoteDataSource>().createInvestorPayout(
+        investorId: investor.id,
+        amount: amount,
+        payoutSource: income > 0 ? 'income' : 'investment',
+      );
+      if (!mounted) return;
+      showAppMessage(context, 'Выплата создана', type: AppMessageType.success);
+      await _refreshAll();
+    } catch (e) {
+      if (mounted) {
+        showAppMessage(context, 'Ошибка: $e', type: AppMessageType.error);
+      }
+    }
+  }
+
+  Future<void> _deletePayout(InvestorPayoutModel payout) async {
+    try {
+      await getIt<InvestorsRemoteDataSource>().deleteInvestorPayout(payout.id);
+      await _refreshAll();
+    } catch (e) {
+      if (mounted) {
+        showAppMessage(context, 'Ошибка: $e', type: AppMessageType.error);
+      }
+    }
+  }
+
+  Future<void> _contributionAction(
+    InvestorContributionModel contribution,
+    String action,
+  ) async {
+    try {
+      if (action == 'edit') {
+        final controller = TextEditingController(
+          text: contribution.amount.toStringAsFixed(0),
+        );
+        final saved = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Изменить инвестицию'),
+            content: TextField(
+              controller: controller,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: const InputDecoration(labelText: 'Сумма, ₽'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Отмена'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Сохранить'),
+              ),
+            ],
+          ),
+        );
+        final amount = double.tryParse(
+          controller.text.trim().replaceAll(',', '.'),
+        );
+        controller.dispose();
+        if (saved != true || amount == null || amount <= 0) return;
+        await getIt<InvestorsRemoteDataSource>().updateInvestmentContribution(
+          id: contribution.id,
+          amount: amount,
+          date: contribution.date,
+        );
+      } else {
+        await getIt<InvestorsRemoteDataSource>()
+            .makeInvestmentContributionAction(contribution.id, action);
+      }
+      await _refreshAll();
+    } catch (e) {
+      if (mounted) {
+        showAppMessage(context, 'Ошибка: $e', type: AppMessageType.error);
+      }
+    }
   }
 
   Future<void> _handleAddInvestment(InvestorsModel investor) async {
-    final amount = await showDialog<double>(
+    final investment = await showDialog<_PoolInvestmentDraft>(
       context: context,
       builder: (_) => _AddInvestmentDialog(name: investor.fullName),
     );
-    if (!mounted || amount == null) return;
+    if (!mounted || investment == null) return;
 
     showDialog<void>(
       context: context,
@@ -100,7 +291,8 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
     try {
       await getIt<InvestorsRemoteDataSource>().addInvestment(
         id: investor.id,
-        amount: amount,
+        amount: investment.amount,
+        date: investment.date,
       );
       if (!mounted) return;
       Navigator.of(context).pop();
@@ -237,6 +429,26 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
                               ),
                               const SizedBox(height: 16),
                               _AnalyticsGrid(metrics: _buildMetrics()),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: DefaultButton(
+                                      text: 'Добавить инвестора',
+                                      isPrimary: true,
+                                      onPressed: _createInvestor,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: DefaultButton(
+                                      text: 'Реинвестировать',
+                                      isPrimary: false,
+                                      onPressed: _reinvestPool,
+                                    ),
+                                  ),
+                                ],
+                              ),
                               const SizedBox(height: 20),
                               const Text(
                                 'Инвесторы',
@@ -286,11 +498,70 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
                                             investor: investor,
                                             onAddInvestment: () =>
                                                 _handleAddInvestment(investor),
+                                            onPayout: () =>
+                                                _payoutInvestor(investor),
+                                            onOpen: () => Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    InvestorReportScreen(
+                                                      initialInvestor: investor,
+                                                    ),
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       )
                                       .toList(),
                                 ),
+                              const SizedBox(height: 20),
+                              const Text(
+                                'История операций',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    _PoolOperationChip(
+                                      label: 'Выплаты',
+                                      selected: _operationsTab == 'payouts',
+                                      onTap: () => setState(
+                                        () => _operationsTab = 'payouts',
+                                      ),
+                                    ),
+                                    _PoolOperationChip(
+                                      label: 'Договоры',
+                                      selected: _operationsTab == 'credits',
+                                      onTap: () => setState(
+                                        () => _operationsTab = 'credits',
+                                      ),
+                                    ),
+                                    _PoolOperationChip(
+                                      label: 'Инвестиции',
+                                      selected:
+                                          _operationsTab == 'contributions',
+                                      onTap: () => setState(
+                                        () => _operationsTab = 'contributions',
+                                      ),
+                                    ),
+                                    _PoolOperationChip(
+                                      label: 'Реинвестиции',
+                                      selected:
+                                          _operationsTab == 'reinvestments',
+                                      onTap: () => setState(
+                                        () => _operationsTab = 'reinvestments',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              _buildOperations(),
                             ],
                           ),
                         ),
@@ -300,6 +571,98 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildOperations() {
+    if (_operationsTab == 'payouts') {
+      if (_payouts.isEmpty) {
+        return const _PoolEmptyOperations(text: 'Выплат нет');
+      }
+      return Column(
+        children: _payouts
+            .map(
+              (item) => _PoolOperationCard(
+                title: '${_formatNumber(item.amount)} ₽',
+                subtitle:
+                    '${DateFormat('dd.MM.yyyy').format(item.payoutDate)} · ${item.employeeFullName}',
+                trailing: IconButton(
+                  onPressed: () => _deletePayout(item),
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                ),
+              ),
+            )
+            .toList(),
+      );
+    }
+    if (_operationsTab == 'contributions') {
+      if (_contributions.isEmpty) {
+        return const _PoolEmptyOperations(text: 'Инвестиций нет');
+      }
+      return Column(
+        children: _contributions
+            .map(
+              (item) => _PoolOperationCard(
+                title: '${_formatNumber(item.amount)} ₽',
+                subtitle:
+                    '${DateFormat('dd.MM.yyyy').format(item.date)} · ${item.investorNickname ?? 'Инвестор'}',
+                trailing: PopupMenuButton<String>(
+                  onSelected: (action) => _contributionAction(item, action),
+                  itemBuilder: (_) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Text('Редактировать'),
+                    ),
+                    if (!item.confirmed)
+                      const PopupMenuItem(
+                        value: 'confirm',
+                        child: Text('Подтвердить'),
+                      ),
+                    const PopupMenuItem(
+                      value: 'reject',
+                      child: Text(
+                        'Удалить',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+            .toList(),
+      );
+    }
+    if (_operationsTab == 'credits') {
+      if (_credits.isEmpty) {
+        return const _PoolEmptyOperations(text: 'Договоров нет');
+      }
+      return Column(
+        children: _credits
+            .map(
+              (item) => _PoolOperationCard(
+                title: item.name?.isNotEmpty == true
+                    ? 'Договор №${item.name}'
+                    : 'Договор №${item.id}',
+                subtitle:
+                    '${item.clientFullName} · ${_formatNumber(item.rest)} ₽ остаток',
+              ),
+            )
+            .toList(),
+      );
+    }
+    if (_reinvestments.isEmpty) {
+      return const _PoolEmptyOperations(text: 'Реинвестиций нет');
+    }
+    return Column(
+      children: _reinvestments
+          .map(
+            (item) => _PoolOperationCard(
+              title: '${_formatNumber(item.amount)} ₽',
+              subtitle:
+                  '${DateFormat('dd.MM.yyyy').format(item.date)} · ${item.investorNickname}',
+            ),
+          )
+          .toList(),
     );
   }
 }
@@ -364,10 +727,14 @@ class _PoolInvestorCard extends StatelessWidget {
   const _PoolInvestorCard({
     required this.investor,
     required this.onAddInvestment,
+    required this.onPayout,
+    required this.onOpen,
   });
 
   final InvestorsModel investor;
   final VoidCallback onAddInvestment;
+  final VoidCallback onPayout;
+  final VoidCallback onOpen;
 
   String _formatCurrency(num value) {
     final formatter = NumberFormat.currency(
@@ -385,72 +752,83 @@ class _PoolInvestorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
         borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000809),
-            offset: Offset(2, 2),
-            blurRadius: 4,
-          ),
-          BoxShadow(
-            color: Color(0x05000809),
-            offset: Offset(0, 0),
-            blurRadius: 6,
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  'ID: ${investor.id}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(AppColors.uiBorder),
+        onTap: onOpen,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'ID: ${investor.id}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(AppColors.uiBorder),
+                    ),
                   ),
-                ),
-                const Spacer(),
-                Text(
-                  _formatDate(investor.createdAt),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(AppColors.uiBorder),
+                  const Spacer(),
+                  Text(
+                    _formatDate(investor.createdAt),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(AppColors.uiBorder),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              investor.fullName,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                height: 1.4,
+                ],
               ),
-            ),
-            const SizedBox(height: 12),
-            _InfoColumn(
-              label: 'Инвестиции',
-              value: _formatCurrency(investor.investmentAmount),
-            ),
-            const SizedBox(height: 12),
-            DefaultButton(
-              text: 'Добавить инвестицию',
-              isPrimary: true,
-              onPressed: onAddInvestment,
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                investor.fullName,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 12),
+              _InfoColumn(
+                label: 'Инвестиции',
+                value: _formatCurrency(investor.investmentAmount),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: DefaultButton(
+                      text: 'Инвестиция',
+                      isPrimary: true,
+                      onPressed: onAddInvestment,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DefaultButton(
+                      text: 'Выплатить',
+                      isPrimary: false,
+                      onPressed: onPayout,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+class _PoolInvestmentDraft {
+  const _PoolInvestmentDraft(this.amount, this.date);
+
+  final double amount;
+  final DateTime date;
 }
 
 class _AddInvestmentDialog extends StatefulWidget {
@@ -464,6 +842,7 @@ class _AddInvestmentDialog extends StatefulWidget {
 
 class _AddInvestmentDialogState extends State<_AddInvestmentDialog> {
   final _controller = TextEditingController();
+  DateTime _date = DateTime.now();
   String? _errorText;
 
   @override
@@ -479,7 +858,7 @@ class _AddInvestmentDialogState extends State<_AddInvestmentDialog> {
       setState(() => _errorText = 'Введите корректную сумму');
       return;
     }
-    Navigator.pop(context, value);
+    Navigator.pop(context, _PoolInvestmentDraft(value, _date));
   }
 
   @override
@@ -524,6 +903,25 @@ class _AddInvestmentDialogState extends State<_AddInvestmentDialog> {
                     vertical: 16,
                   ),
                 ),
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.calendar_today_outlined),
+                title: const Text('Дата инвестиции'),
+                subtitle: Text(DateFormat('dd.MM.yyyy').format(_date)),
+                onTap: () async {
+                  final selected = await showDatePicker(
+                    context: context,
+                    initialDate: _date,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now().add(const Duration(days: 3650)),
+                    locale: const Locale('ru', 'RU'),
+                  );
+                  if (selected != null && mounted) {
+                    setState(() => _date = selected);
+                  }
+                },
               ),
               const SizedBox(height: 20),
               Row(
@@ -703,6 +1101,103 @@ class _InfoColumn extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PoolOperationChip extends StatelessWidget {
+  const _PoolOperationChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ChoiceChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: (_) => onTap(),
+      ),
+    );
+  }
+}
+
+class _PoolOperationCard extends StatelessWidget {
+  const _PoolOperationCard({
+    required this.title,
+    required this.subtitle,
+    this.trailing,
+  });
+
+  final String title;
+  final String subtitle;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE8ECF1)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(AppColors.uiBorder),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (trailing != null) trailing!,
+        ],
+      ),
+    );
+  }
+}
+
+class _PoolEmptyOperations extends StatelessWidget {
+  const _PoolEmptyOperations({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(color: Color(AppColors.uiBorder)),
+      ),
     );
   }
 }

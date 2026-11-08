@@ -9,6 +9,7 @@ import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investor_report_screen.dart';
+import 'package:waypay_mobile/features/investors/presentation/widgets/investor_form_sheet.dart';
 
 class InvestorsScreen extends StatefulWidget {
   const InvestorsScreen({super.key});
@@ -54,11 +55,11 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
   }
 
   Future<void> _handleAddInvestment(InvestorsModel investor) async {
-    final amount = await showDialog<double>(
+    final investment = await showDialog<_InvestmentDraft>(
       context: context,
       builder: (_) => _AddInvestmentDialog(name: investor.fullName),
     );
-    if (!mounted || amount == null) return;
+    if (!mounted || investment == null) return;
 
     showDialog<void>(
       context: context,
@@ -69,7 +70,8 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
     try {
       await getIt<InvestorsRemoteDataSource>().addInvestment(
         id: investor.id,
-        amount: amount,
+        amount: investment.amount,
+        date: investment.date,
       );
       if (!mounted) return;
       Navigator.of(context).pop();
@@ -83,6 +85,91 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
       if (!mounted) return;
       Navigator.of(context).pop();
       showAppMessage(context, 'Ошибка: $e', type: AppMessageType.error);
+    }
+  }
+
+  void _reload() {
+    context.read<InvestorsBloc>().add(LoadInvestorsEvent(refresh: true));
+  }
+
+  Future<void> _openInvestorForm({InvestorsModel? investor}) async {
+    final saved = await showInvestorFormSheet(context, investor: investor);
+    if (!mounted || saved != true) return;
+    showAppMessage(
+      context,
+      investor == null ? 'Инвестор создан' : 'Инвестор обновлён',
+      type: AppMessageType.success,
+    );
+    _reload();
+  }
+
+  Future<bool> _confirm(String title, String message) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Отмена'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Подтвердить'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  Future<void> _runInvestorAction(
+    InvestorsModel investor,
+    String action,
+  ) async {
+    final source = getIt<InvestorsRemoteDataSource>();
+    try {
+      switch (action) {
+        case 'edit':
+          await _openInvestorForm(investor: investor);
+          return;
+        case 'block':
+          final verb = investor.isBlocked ? 'разблокировать' : 'заблокировать';
+          if (!await _confirm(
+            '${investor.isBlocked ? 'Разблокировка' : 'Блокировка'} инвестора',
+            'Вы уверены, что хотите $verb ${investor.fullName}?',
+          )) {
+            return;
+          }
+          await source.toggleBlockInvestor(investor.id);
+          break;
+        case 'clear':
+          if (!await _confirm(
+            'Аннулировать инвестора',
+            'Инвестиции и касса будут аннулированы. Продолжить?',
+          )) {
+            return;
+          }
+          await source.clearInvestor(investor.id);
+          break;
+        case 'delete':
+          if (!await _confirm(
+            'Удалить инвестора',
+            'Инвестор будет удалён. Это действие нельзя отменить.',
+          )) {
+            return;
+          }
+          await source.deleteInvestor(investor.id);
+          break;
+      }
+      if (!mounted) return;
+      showAppMessage(context, 'Готово', type: AppMessageType.success);
+      _reload();
+    } catch (e) {
+      if (mounted) {
+        showAppMessage(context, 'Ошибка: $e', type: AppMessageType.error);
+      }
     }
   }
 
@@ -102,6 +189,15 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                 showNotifications: false,
               ),
               const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: DefaultButton(
+                  text: 'Новый инвестор',
+                  isPrimary: true,
+                  onPressed: () => _openInvestorForm(),
+                ),
+              ),
+              const SizedBox(height: 12),
               SearchField(
                 controller: _searchController,
                 hintText: 'Поиск',
@@ -161,6 +257,8 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                               investor: investor,
                               onAddInvestment: () =>
                                   _handleAddInvestment(investor),
+                              onAction: (action) =>
+                                  _runInvestorAction(investor, action),
                             );
                           },
                           separatorBuilder: (_, __) =>
@@ -184,10 +282,15 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
 }
 
 class _InvestorCard extends StatelessWidget {
-  const _InvestorCard({required this.investor, required this.onAddInvestment});
+  const _InvestorCard({
+    required this.investor,
+    required this.onAddInvestment,
+    required this.onAction,
+  });
 
   final InvestorsModel investor;
   final VoidCallback onAddInvestment;
+  final ValueChanged<String> onAction;
 
   String _formatCurrency(num value) {
     final formatter = NumberFormat.currency(
@@ -203,15 +306,10 @@ class _InvestorCard extends StatelessWidget {
     return DateFormat('dd.MM.yyyy').format(date);
   }
 
-  String _estimateEndDate(DateTime? start) {
-    if (start == null) return '—';
-    return _formatDate(start.add(const Duration(days: 90)));
-  }
-
   @override
   Widget build(BuildContext context) {
     final createdAtText = _formatDate(investor.createdAt);
-    final endDateText = _estimateEndDate(investor.createdAt);
+    final endDateText = _formatDate(investor.contractEndDate);
 
     return Material(
       color: Colors.transparent,
@@ -257,6 +355,51 @@ class _InvestorCard extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
+                    if (investor.isBlocked)
+                      Container(
+                        margin: const EdgeInsets.only(right: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFE8E8),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          'Заблокирован',
+                          style: TextStyle(fontSize: 11, color: Colors.red),
+                        ),
+                      ),
+                    PopupMenuButton<String>(
+                      onSelected: onAction,
+                      itemBuilder: (_) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Text('Редактировать'),
+                        ),
+                        PopupMenuItem(
+                          value: 'block',
+                          child: Text(
+                            investor.isBlocked
+                                ? 'Разблокировать'
+                                : 'Заблокировать',
+                          ),
+                        ),
+                        if (investor.isBlocked)
+                          const PopupMenuItem(
+                            value: 'clear',
+                            child: Text('Аннулировать'),
+                          ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Text(
+                            'Удалить',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    ),
                     Text(
                       createdAtText == '—' ? '' : 'от $createdAtText',
                       style: const TextStyle(
@@ -365,6 +508,13 @@ class _InvestorsError extends StatelessWidget {
   }
 }
 
+class _InvestmentDraft {
+  const _InvestmentDraft(this.amount, this.date);
+
+  final double amount;
+  final DateTime date;
+}
+
 class _AddInvestmentDialog extends StatefulWidget {
   const _AddInvestmentDialog({required this.name});
 
@@ -376,6 +526,7 @@ class _AddInvestmentDialog extends StatefulWidget {
 
 class _AddInvestmentDialogState extends State<_AddInvestmentDialog> {
   final _controller = TextEditingController();
+  DateTime _date = DateTime.now();
   String? _errorText;
 
   @override
@@ -391,7 +542,7 @@ class _AddInvestmentDialogState extends State<_AddInvestmentDialog> {
       setState(() => _errorText = 'Введите корректную сумму');
       return;
     }
-    Navigator.pop(context, value);
+    Navigator.pop(context, _InvestmentDraft(value, _date));
   }
 
   @override
@@ -436,6 +587,25 @@ class _AddInvestmentDialogState extends State<_AddInvestmentDialog> {
                     vertical: 16,
                   ),
                 ),
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.calendar_today_outlined),
+                title: const Text('Дата инвестиции'),
+                subtitle: Text(DateFormat('dd.MM.yyyy').format(_date)),
+                onTap: () async {
+                  final selected = await showDatePicker(
+                    context: context,
+                    initialDate: _date,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now().add(const Duration(days: 3650)),
+                    locale: const Locale('ru', 'RU'),
+                  );
+                  if (selected != null && mounted) {
+                    setState(() => _date = selected);
+                  }
+                },
               ),
               const SizedBox(height: 20),
               Row(

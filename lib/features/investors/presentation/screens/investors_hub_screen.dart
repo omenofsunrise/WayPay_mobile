@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/routes/routes.dart';
+import 'package:waypay_mobile/features/investors/presentation/screens/deleted_investors_screen.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class InvestorsHubScreen extends StatelessWidget {
@@ -34,6 +35,17 @@ class InvestorsHubScreen extends StatelessWidget {
                 icon: Icons.person_outline,
                 label: 'Инвесторы',
                 onTap: () => _openInvestorsList(context),
+              ),
+              const SizedBox(height: 16),
+              _InvestorsCard(
+                icon: Icons.archive_outlined,
+                label: 'Архив инвесторов',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const DeletedInvestorsScreen(),
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
               _InvestorsCard(
