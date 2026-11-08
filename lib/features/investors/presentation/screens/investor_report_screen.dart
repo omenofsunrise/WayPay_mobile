@@ -811,19 +811,6 @@ class _InvestorHeroCard extends StatelessWidget {
   final InvestorsModel investor;
   final double balance;
 
-  String get _initials {
-    final source = investor.nickname.trim().isNotEmpty
-        ? investor.nickname
-        : investor.fullName;
-    return source
-        .trim()
-        .split(RegExp(r'\s+'))
-        .where((part) => part.isNotEmpty)
-        .take(2)
-        .map((part) => part[0].toUpperCase())
-        .join();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -849,24 +836,6 @@ class _InvestorHeroCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Text(
-                  _initials.isEmpty ? 'И' : _initials,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

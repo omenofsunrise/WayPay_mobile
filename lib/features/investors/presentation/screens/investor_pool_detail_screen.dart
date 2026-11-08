@@ -819,20 +819,6 @@ class _PoolInvestorCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Container(
-                        width: 42,
-                        height: 42,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE6F5F3),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.person_outline,
-                          color: Color(AppColors.primary),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

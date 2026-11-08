@@ -305,18 +305,6 @@ class _InvestorCard extends StatelessWidget {
     return DateFormat('dd.MM.yyyy').format(date);
   }
 
-  String get _initials {
-    final source = investor.nickname.trim().isNotEmpty
-        ? investor.nickname
-        : investor.fullName;
-    final parts = source.trim().split(RegExp(r'\s+'));
-    return parts
-        .where((part) => part.isNotEmpty)
-        .take(2)
-        .map((part) => part[0].toUpperCase())
-        .join();
-  }
-
   @override
   Widget build(BuildContext context) {
     final endDateText = _formatDate(investor.contractEndDate);
@@ -356,24 +344,6 @@ class _InvestorCard extends StatelessWidget {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE6F5F3),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            _initials.isEmpty ? 'И' : _initials,
-                            style: const TextStyle(
-                              color: Color(AppColors.primary),
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
