@@ -29,8 +29,12 @@ class InvestorReportScreen extends StatefulWidget {
   State<InvestorReportScreen> createState() => _InvestorReportScreenState();
 }
 
-class _InvestorReportScreenState extends State<InvestorReportScreen> {
+class _InvestorReportScreenState extends State<InvestorReportScreen>
+    with SingleTickerProviderStateMixin {
+  static const _operationKeys = ['payouts', 'credits', 'contributions'];
+
   late InvestorsModel selectedInvestor;
+  late final TabController _operationsController;
   Map<String, dynamic>? reportData;
   List<InvestorPayoutModel> payouts = [];
   List<InvestorContributionModel> contributions = [];
@@ -42,8 +46,24 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
   @override
   void initState() {
     super.initState();
+    _operationsController = TabController(length: 3, vsync: this)
+      ..addListener(_handleOperationsTabChanged);
     selectedInvestor = widget.initialInvestor;
     _loadInvestorAndReport(selectedInvestor.id);
+  }
+
+  void _handleOperationsTabChanged() {
+    final nextTab = _operationKeys[_operationsController.index];
+    if (!mounted || operationsTab == nextTab) return;
+    setState(() => operationsTab = nextTab);
+  }
+
+  @override
+  void dispose() {
+    _operationsController
+      ..removeListener(_handleOperationsTabChanged)
+      ..dispose();
+    super.dispose();
   }
 
   Future<void> _loadInvestorAndReport(int investorId) async {
@@ -595,37 +615,24 @@ class _InvestorReportScreenState extends State<InvestorReportScreen> {
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  children: [
-                                    _OperationChip(
-                                      label: 'Выплаты',
-                                      selected: operationsTab == 'payouts',
-                                      onTap: () => setState(
-                                        () => operationsTab = 'payouts',
-                                      ),
-                                    ),
-                                    _OperationChip(
-                                      label: 'Договоры',
-                                      selected: operationsTab == 'credits',
-                                      onTap: () => setState(
-                                        () => operationsTab = 'credits',
-                                      ),
-                                    ),
-                                    _OperationChip(
-                                      label: 'Инвестиции',
-                                      selected:
-                                          operationsTab == 'contributions',
-                                      onTap: () => setState(
-                                        () => operationsTab = 'contributions',
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              CustomTabSwitcher(
+                                controller: _operationsController,
+                                tabs: const [
+                                  'Выплаты',
+                                  'Договоры',
+                                  'Инвестиции',
+                                ],
                               ),
                               const SizedBox(height: 12),
-                              _buildOperations(),
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 220),
+                                switchInCurve: Curves.easeOut,
+                                switchOutCurve: Curves.easeIn,
+                                child: KeyedSubtree(
+                                  key: ValueKey(operationsTab),
+                                  child: _buildOperations(),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -815,19 +822,16 @@ class _InvestorHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF138C92), Color(0xFF0B6F76)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E5EA)),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x26138C92),
-            offset: Offset(0, 8),
-            blurRadius: 24,
+            color: Color(0x0F000000),
+            offset: Offset(0, 4),
+            blurRadius: 16,
           ),
         ],
       ),
@@ -836,6 +840,19 @@ class _InvestorHeroCard extends StatelessWidget {
         children: [
           Row(
             children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE4F4F1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.person_outline,
+                  color: Color(AppColors.primary),
+                ),
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -845,7 +862,7 @@ class _InvestorHeroCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: Color(AppColors.black),
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                       ),
@@ -856,8 +873,8 @@ class _InvestorHeroCard extends StatelessWidget {
                         investor.fullName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.76),
+                        style: const TextStyle(
+                          color: Color(AppColors.uiBorder),
                           fontSize: 13,
                         ),
                       ),
@@ -870,8 +887,8 @@ class _InvestorHeroCard extends StatelessWidget {
           const SizedBox(height: 24),
           Text(
             'Доступно в кассе',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.72),
+            style: const TextStyle(
+              color: Color(AppColors.uiBorder),
               fontSize: 13,
             ),
           ),
@@ -879,7 +896,7 @@ class _InvestorHeroCard extends StatelessWidget {
           Text(
             '${NumberFormat.decimalPattern('ru_RU').format(balance)} ₽',
             style: const TextStyle(
-              color: Colors.white,
+              color: Color(AppColors.black),
               fontSize: 28,
               fontWeight: FontWeight.w700,
               letterSpacing: -0.5,
@@ -890,13 +907,13 @@ class _InvestorHeroCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.12),
+                color: const Color(0xFFE4F4F1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 'Договор до ${DateFormat('dd.MM.yyyy').format(investor.contractEndDate!)}',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Color(AppColors.primary),
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
@@ -1071,30 +1088,6 @@ class _ActionButton extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _OperationChip extends StatelessWidget {
-  const _OperationChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: selected,
-        onSelected: (_) => onTap(),
       ),
     );
   }

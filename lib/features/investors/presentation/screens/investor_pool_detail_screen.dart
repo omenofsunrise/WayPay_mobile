@@ -28,7 +28,16 @@ class InvestorPoolDetailScreen extends StatefulWidget {
       _InvestorPoolDetailScreenState();
 }
 
-class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
+class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen>
+    with SingleTickerProviderStateMixin {
+  static const _operationKeys = [
+    'payouts',
+    'credits',
+    'contributions',
+    'reinvestments',
+  ];
+
+  late final TabController _operationsController;
   Map<String, dynamic>? _reportData;
   List<InvestorsModel> _investors = [];
   List<InvestorPayoutModel> _payouts = [];
@@ -44,9 +53,25 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
   @override
   void initState() {
     super.initState();
+    _operationsController = TabController(length: 4, vsync: this)
+      ..addListener(_handleOperationsTabChanged);
     _loadReport();
     _loadInvestors();
     _loadOperations();
+  }
+
+  void _handleOperationsTabChanged() {
+    final nextTab = _operationKeys[_operationsController.index];
+    if (!mounted || _operationsTab == nextTab) return;
+    setState(() => _operationsTab = nextTab);
+  }
+
+  @override
+  void dispose() {
+    _operationsController
+      ..removeListener(_handleOperationsTabChanged)
+      ..dispose();
+    super.dispose();
   }
 
   Future<void> _loadReport() async {
@@ -529,45 +554,25 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen> {
                                 ),
                               ),
                               const SizedBox(height: 10),
-                              SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  children: [
-                                    _PoolOperationChip(
-                                      label: 'Выплаты',
-                                      selected: _operationsTab == 'payouts',
-                                      onTap: () => setState(
-                                        () => _operationsTab = 'payouts',
-                                      ),
-                                    ),
-                                    _PoolOperationChip(
-                                      label: 'Договоры',
-                                      selected: _operationsTab == 'credits',
-                                      onTap: () => setState(
-                                        () => _operationsTab = 'credits',
-                                      ),
-                                    ),
-                                    _PoolOperationChip(
-                                      label: 'Инвестиции',
-                                      selected:
-                                          _operationsTab == 'contributions',
-                                      onTap: () => setState(
-                                        () => _operationsTab = 'contributions',
-                                      ),
-                                    ),
-                                    _PoolOperationChip(
-                                      label: 'Реинвестиции',
-                                      selected:
-                                          _operationsTab == 'reinvestments',
-                                      onTap: () => setState(
-                                        () => _operationsTab = 'reinvestments',
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              CustomTabSwitcher(
+                                controller: _operationsController,
+                                tabs: const [
+                                  'Выплаты',
+                                  'Договоры',
+                                  'Инвестиции',
+                                  'Реинвест.',
+                                ],
                               ),
                               const SizedBox(height: 10),
-                              _buildOperations(),
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 220),
+                                switchInCurve: Curves.easeOut,
+                                switchOutCurve: Curves.easeIn,
+                                child: KeyedSubtree(
+                                  key: ValueKey(_operationsTab),
+                                  child: _buildOperations(),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -683,19 +688,16 @@ class _PoolNameCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF138C92), Color(0xFF0B6F76)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E5EA)),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x26138C92),
-            offset: Offset(0, 8),
-            blurRadius: 24,
+            color: Color(0x0F000000),
+            offset: Offset(0, 4),
+            blurRadius: 16,
           ),
         ],
       ),
@@ -708,12 +710,12 @@ class _PoolNameCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(14),
+                  color: const Color(0xFFE4F4F1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.account_balance_outlined,
-                  color: Colors.white,
+                  color: Color(AppColors.primary),
                 ),
               ),
               const SizedBox(width: 12),
@@ -726,16 +728,16 @@ class _PoolNameCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: Color(AppColors.black),
                         fontSize: 19,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    const Text(
                       'Инвестиционный пул',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.72),
+                        color: Color(AppColors.uiBorder),
                         fontSize: 13,
                       ),
                     ),
@@ -747,8 +749,8 @@ class _PoolNameCard extends StatelessWidget {
           const SizedBox(height: 24),
           Text(
             'Касса пула',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.72),
+            style: const TextStyle(
+              color: Color(AppColors.uiBorder),
               fontSize: 13,
             ),
           ),
@@ -756,7 +758,7 @@ class _PoolNameCard extends StatelessWidget {
           Text(
             '${NumberFormat.decimalPattern('ru_RU').format(balance)} ₽',
             style: const TextStyle(
-              color: Colors.white,
+              color: Color(AppColors.black),
               fontSize: 28,
               fontWeight: FontWeight.w700,
               letterSpacing: -0.5,
@@ -1177,30 +1179,6 @@ class _InfoColumn extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _PoolOperationChip extends StatelessWidget {
-  const _PoolOperationChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: selected,
-        onSelected: (_) => onTap(),
-      ),
     );
   }
 }
