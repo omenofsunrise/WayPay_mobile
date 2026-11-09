@@ -322,11 +322,10 @@ class _AuthWaySelector extends StatelessWidget {
   Widget _item(String label, AuthWay method) {
     final selected = value == method;
     return Expanded(
-      child: InkWell(
+      child: GestureDetector(
         onTap: onChanged == null ? null : () => onChanged!(method),
-        borderRadius: BorderRadius.circular(8),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+        behavior: HitTestBehavior.opaque,
+        child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
           decoration: BoxDecoration(
             color: selected ? Colors.white : Colors.transparent,
