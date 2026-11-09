@@ -25,6 +25,7 @@ import 'package:waypay_mobile/features/home/presentation/screens/client_create_s
 import 'package:waypay_mobile/features/home/presentation/screens/client_detail_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/client_list_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/client_blacklist_screen.dart';
+import 'package:waypay_mobile/features/clients/presentation/screens/blacklist_plus_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/main_client_screen.dart';
 import 'package:waypay_mobile/features/home/presentation/screens/queue_list_screen.dart';
@@ -224,6 +225,11 @@ class AppRouter {
         path: Routes.controlPanelScreen.toPath,
         name: Routes.controlPanelScreen.toName,
         builder: (context, state) => const ControlPanelScreen(),
+      ),
+      GoRoute(
+        path: Routes.blacklistPlusScreen.toPath,
+        name: Routes.blacklistPlusScreen.toName,
+        builder: (context, state) => const BlacklistPlusScreen(),
       ),
       GoRoute(
         path: Routes.profileActiveSessionsScreen.toPath,

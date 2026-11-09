@@ -137,6 +137,15 @@ class _MainClientScreenState extends State<MainClientScreen> {
                           context.pushNamed(Routes.blacklistScreen.toName),
                     ),
                   ),
+                  SliverToBoxAdapter(
+                    child: MainClientCard(
+                      icon: Icons.fact_check_outlined,
+                      title: 'ЧС+',
+                      value: '',
+                      onTap: () =>
+                          context.pushNamed(Routes.blacklistPlusScreen.toName),
+                    ),
+                  ),
                 ],
               );
             },

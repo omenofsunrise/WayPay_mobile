@@ -64,6 +64,11 @@ List<SearchDestination> getDefaultSearchDestinations() {
       keywords: ['черный список', 'blacklist', 'stop', 'ban'],
     ),
     SearchDestination(
+      title: 'ЧС+',
+      route: Routes.blacklistPlusScreen,
+      keywords: ['чс+', 'чс плюс', 'проверка', 'black catalog', 'stop list'],
+    ),
+    SearchDestination(
       title: 'Аналитика',
       route: Routes.analyticsScreen,
       keywords: ['аналитика', 'статистика', 'отчёты', 'analytics', 'dashboard'],
