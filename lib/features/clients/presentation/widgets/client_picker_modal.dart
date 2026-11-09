@@ -88,6 +88,12 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
 
   String _formatDate(DateTime date) => DateFormat('dd.MM.yyyy').format(date);
 
+  String _creditSummary(List<int> creditIds) {
+    if (creditIds.isEmpty) return 'Активных договоров нет';
+    final numbers = creditIds.map((id) => '№$id').join(', ');
+    return 'Активные договоры: $numbers';
+  }
+
   Widget _buildResults(ClientsState state) {
     if (!_hasValidSearch) {
       if (_searchController.text.trim().isEmpty) {
@@ -161,6 +167,37 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
               children: [
                 Text(_formatDate(client.birthdate)),
                 Text(client.phone),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      client.creditIds.isEmpty
+                          ? Icons.description_outlined
+                          : Icons.description,
+                      size: 16,
+                      color: client.creditIds.isEmpty
+                          ? const Color(AppColors.uiBorder)
+                          : const Color(AppColors.primary),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        _creditSummary(client.creditIds),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: client.creditIds.isEmpty
+                              ? FontWeight.w400
+                              : FontWeight.w600,
+                          color: client.creditIds.isEmpty
+                              ? const Color(AppColors.uiBorder)
+                              : const Color(AppColors.primary),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
             trailing: Text(
