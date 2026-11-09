@@ -309,12 +309,44 @@ class _AuthWaySelector extends StatelessWidget {
         color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Row(
-        spacing: 8,
-        children: [
-          _item('Звонок', AuthWay.callCheck),
-          _item('WhatsApp', AuthWay.whatsAppCode),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const gap = 8.0;
+          final itemWidth = (constraints.maxWidth - gap) / 2;
+
+          return Stack(
+            children: [
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 240),
+                curve: Curves.easeOutCubic,
+                left: value == AuthWay.callCheck ? 0 : itemWidth + gap,
+                top: 0,
+                bottom: 0,
+                width: itemWidth,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x14000000),
+                        offset: Offset(0, 1),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Row(
+                spacing: gap,
+                children: [
+                  _item('Звонок', AuthWay.callCheck),
+                  _item('WhatsApp', AuthWay.whatsAppCode),
+                ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -325,24 +357,11 @@ class _AuthWaySelector extends StatelessWidget {
       child: GestureDetector(
         onTap: onChanged == null ? null : () => onChanged!(method),
         behavior: HitTestBehavior.opaque,
-        child: Container(
+        child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-          decoration: BoxDecoration(
-            color: selected ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: selected
-                ? const [
-                    BoxShadow(
-                      color: Color(0x14000000),
-                      offset: Offset(0, 1),
-                      blurRadius: 4,
-                    ),
-                  ]
-                : null,
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
+          child: AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
             style: AppStyle.inter(
               size: 14,
               weight: selected ? FontWeight.w600 : FontWeight.w500,
@@ -350,6 +369,7 @@ class _AuthWaySelector extends StatelessWidget {
                   ? const Color(AppColors.primary)
                   : const Color(0xFF777777),
             ),
+            child: Text(label, textAlign: TextAlign.center),
           ),
         ),
       ),
