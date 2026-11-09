@@ -362,6 +362,11 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
 
   @override
   Widget build(BuildContext context) {
+    final resultsHeight = (MediaQuery.sizeOf(context).height * 0.46).clamp(
+      360.0,
+      420.0,
+    );
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
       child: Column(
@@ -404,7 +409,7 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
             ),
           const SizedBox(height: 16),
           SizedBox(
-            height: 320,
+            height: resultsHeight,
             child: BlocBuilder<ClientsBloc, ClientsState>(
               builder: (context, state) => _buildResults(state),
             ),
