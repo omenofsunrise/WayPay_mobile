@@ -92,7 +92,7 @@ class _SearchSuggesterState extends State<SearchSuggester> {
   void _onChanged(String raw) {
     final query = raw.trim().toLowerCase();
     if (query.isEmpty) {
-      setState(() => _results = List.from(_history));
+      setState(() => _results = _defaultResults());
       _showOverlay();
       return;
     }
@@ -108,9 +108,20 @@ class _SearchSuggesterState extends State<SearchSuggester> {
     }
     scored.sort((a, b) => b.value.compareTo(a.value));
     setState(() {
-      _results = scored.take(6).map((e) => e.key.title).toList();
+      _results = scored.map((e) => e.key.title).toList();
     });
     _showOverlay();
+  }
+
+  List<String> _defaultResults() {
+    final result = <String>[];
+    for (final title in [
+      ..._history,
+      ...widget.destinations.map((destination) => destination.title),
+    ]) {
+      if (!result.contains(title)) result.add(title);
+    }
+    return result;
   }
 
   void _onSubmit(String raw) {
@@ -185,6 +196,7 @@ class _SearchSuggesterState extends State<SearchSuggester> {
 
   Widget _buildResultsCard() {
     return Container(
+      constraints: const BoxConstraints(maxHeight: 360),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
@@ -197,42 +209,42 @@ class _SearchSuggesterState extends State<SearchSuggester> {
         ],
       ),
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: _results.isEmpty
-            ? const [
-                ListTile(
-                  dense: true,
-                  title: Text(
-                    'Ничего не найдено',
-                    style: TextStyle(fontSize: 15, color: Color(0xFF9CA3AF)),
-                  ),
-                ),
-              ]
-            : _results
-                  .map(
-                    (text) => ListTile(
-                      dense: true,
-                      title: Text(
-                        text,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Color(AppColors.black),
-                        ),
+      child: _results.isEmpty
+          ? const ListTile(
+              dense: true,
+              title: Text(
+                'Ничего не найдено',
+                style: TextStyle(fontSize: 15, color: Color(0xFF9CA3AF)),
+              ),
+            )
+          : Scrollbar(
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: _results.length,
+                itemBuilder: (_, index) {
+                  final text = _results[index];
+                  return ListTile(
+                    dense: true,
+                    title: Text(
+                      text,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Color(AppColors.black),
                       ),
-                      onTap: () {
-                        final match = widget.destinations.firstWhere(
-                          (d) => d.title == text,
-                          orElse: () => widget.destinations.first,
-                        );
-                        _goTo(text, match.route);
-                      },
                     ),
-                  )
-                  .toList(),
-      ),
+                    onTap: () {
+                      final match = widget.destinations.firstWhere(
+                        (d) => d.title == text,
+                        orElse: () => widget.destinations.first,
+                      );
+                      _goTo(text, match.route);
+                    },
+                  );
+                },
+              ),
+            ),
     );
   }
 
@@ -250,9 +262,7 @@ class _SearchSuggesterState extends State<SearchSuggester> {
         onTap: () {
           if (_controller.text.isEmpty) {
             setState(() {
-              _results = _history.isNotEmpty
-                  ? List.from(_history)
-                  : widget.destinations.take(5).map((d) => d.title).toList();
+              _results = _defaultResults();
             });
             _showOverlay();
           }
