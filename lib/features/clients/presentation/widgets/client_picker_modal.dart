@@ -319,12 +319,30 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
           return ListTile(
             contentPadding: EdgeInsets.zero,
             onTap: () => Navigator.of(context).pop(client),
-            title: Text(
-              client.fullName,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Color(AppColors.black),
-              ),
+            title: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    client.fullName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Color(AppColors.black),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    'ID ${client.id}',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(AppColors.uiBorder),
+                    ),
+                  ),
+                ),
+              ],
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -334,10 +352,6 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
                 const SizedBox(height: 8),
                 _buildCreditList(client.id),
               ],
-            ),
-            trailing: Text(
-              'ID ${client.id}',
-              style: const TextStyle(color: Color(AppColors.uiBorder)),
             ),
           );
         },
