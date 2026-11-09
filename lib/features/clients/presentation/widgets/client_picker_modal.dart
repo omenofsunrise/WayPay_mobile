@@ -9,6 +9,8 @@ import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
+import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
+import 'package:waypay_mobile/features/credit/presentation/widgets/credit_modal.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
 class ClientPickerModal extends StatefulWidget {
@@ -26,7 +28,7 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
   String _lastSubmittedQuery = '';
   final CreditRemoteDataSource _creditDataSource =
       getIt<CreditRemoteDataSource>();
-  final Map<int, Future<List<int>>> _creditIdsByClient = {};
+  final Map<int, Future<List<CreditModel>>> _creditsByClient = {};
 
   static const _searchDelay = Duration(milliseconds: 400);
 
@@ -93,22 +95,59 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
 
   String _formatDate(DateTime date) => DateFormat('dd.MM.yyyy').format(date);
 
-  String _creditSummary(List<int> creditIds) {
-    if (creditIds.isEmpty) return 'Договоров нет';
-    final numbers = creditIds.map((id) => '№$id').join(', ');
-    return 'Договоры: $numbers';
+  Future<List<CreditModel>> _loadClientCredits(int clientId) {
+    return _creditsByClient.putIfAbsent(
+      clientId,
+      () => _creditDataSource.getCreditsByClientId(clientId),
+    );
   }
 
-  Future<List<int>> _loadClientCreditIds(int clientId) {
-    return _creditIdsByClient.putIfAbsent(clientId, () async {
-      final credits = await _creditDataSource.getCreditsByClientId(clientId);
-      return credits.map((credit) => credit.id).toList(growable: false);
-    });
+  Color _statusColor(String status) {
+    final normalized = status.toLowerCase();
+    if (normalized.contains('просроч')) return Colors.red;
+    if (normalized.contains('актив')) return const Color(AppColors.primary);
+    return const Color(AppColors.uiBorder);
   }
 
-  Widget _buildCreditSummary(int clientId) {
-    return FutureBuilder<List<int>>(
-      future: _loadClientCreditIds(clientId),
+  Future<void> _openCredit(int creditId) async {
+    final rootNavigator = Navigator.of(context, rootNavigator: true);
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    CreditModel? credit;
+    try {
+      credit = await _creditDataSource.getCreditById(creditId);
+    } catch (_) {
+      credit = null;
+    }
+
+    if (rootNavigator.mounted && rootNavigator.canPop()) {
+      rootNavigator.pop();
+    }
+    if (!mounted) return;
+
+    if (credit == null) {
+      showAppMessage(
+        context,
+        'Не удалось загрузить договор',
+        type: AppMessageType.error,
+      );
+      return;
+    }
+
+    await rootNavigator.push(
+      MaterialPageRoute(
+        builder: (_) => CreditFullScreen(credit: credit!, isControl: false),
+      ),
+    );
+  }
+
+  Widget _buildCreditList(int clientId) {
+    return FutureBuilder<List<CreditModel>>(
+      future: _loadClientCredits(clientId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Text(
@@ -124,35 +163,98 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
           );
         }
 
-        final creditIds = snapshot.data ?? const <int>[];
-        final hasCredits = creditIds.isNotEmpty;
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              hasCredits ? Icons.description : Icons.description_outlined,
-              size: 16,
-              color: hasCredits
-                  ? const Color(AppColors.primary)
-                  : const Color(AppColors.uiBorder),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                _creditSummary(creditIds),
+        final credits = snapshot.data ?? const <CreditModel>[];
+        if (credits.isEmpty) {
+          return const Row(
+            children: [
+              Icon(
+                Icons.description_outlined,
+                size: 16,
+                color: Color(AppColors.uiBorder),
+              ),
+              SizedBox(width: 6),
+              Text(
+                'Договоров нет',
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight: hasCredits ? FontWeight.w600 : FontWeight.w400,
-                  color: hasCredits
-                      ? const Color(AppColors.primary)
-                      : const Color(AppColors.uiBorder),
+                  color: Color(AppColors.uiBorder),
                 ),
               ),
-            ),
+            ],
+          );
+        }
+
+        return Column(
+          children: [
+            for (int index = 0; index < credits.length; index++) ...[
+              if (index > 0)
+                const Divider(height: 12, color: Color(0xFFE5E5EA)),
+              _buildCreditRow(credits[index]),
+            ],
           ],
         );
       },
+    );
+  }
+
+  Widget _buildCreditRow(CreditModel credit) {
+    final status = credit.status?.trim().isNotEmpty == true
+        ? credit.status!.trim()
+        : (credit.isActive ? 'Активный' : 'Закрытый');
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: () => _openCredit(credit.id),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.description_outlined,
+              size: 18,
+              color: Color(AppColors.primary),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Договор №${credit.id}',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(AppColors.black),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _formatDate(credit.creditDate),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(AppColors.uiBorder),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              status,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: _statusColor(status),
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Icon(
+              Icons.chevron_right,
+              size: 18,
+              color: Color(AppColors.uiBorder),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -229,8 +331,8 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
               children: [
                 Text(_formatDate(client.birthdate)),
                 Text(client.phone),
-                const SizedBox(height: 4),
-                _buildCreditSummary(client.id),
+                const SizedBox(height: 8),
+                _buildCreditList(client.id),
               ],
             ),
             trailing: Text(
