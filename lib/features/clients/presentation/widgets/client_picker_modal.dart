@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
 
+import 'package:waypay_mobile/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
+import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
 class ClientPickerModal extends StatefulWidget {
@@ -22,6 +24,9 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
   bool _showSearchHint = false;
   bool _hasValidSearch = false;
   String _lastSubmittedQuery = '';
+  final CreditRemoteDataSource _creditDataSource =
+      getIt<CreditRemoteDataSource>();
+  final Map<int, Future<List<int>>> _creditIdsByClient = {};
 
   static const _searchDelay = Duration(milliseconds: 400);
 
@@ -89,9 +94,66 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
   String _formatDate(DateTime date) => DateFormat('dd.MM.yyyy').format(date);
 
   String _creditSummary(List<int> creditIds) {
-    if (creditIds.isEmpty) return 'Активных договоров нет';
+    if (creditIds.isEmpty) return 'Договоров нет';
     final numbers = creditIds.map((id) => '№$id').join(', ');
-    return 'Активные договоры: $numbers';
+    return 'Договоры: $numbers';
+  }
+
+  Future<List<int>> _loadClientCreditIds(int clientId) {
+    return _creditIdsByClient.putIfAbsent(clientId, () async {
+      final credits = await _creditDataSource.getCreditsByClientId(clientId);
+      return credits.map((credit) => credit.id).toList(growable: false);
+    });
+  }
+
+  Widget _buildCreditSummary(int clientId) {
+    return FutureBuilder<List<int>>(
+      future: _loadClientCreditIds(clientId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Text(
+            'Проверяем договоры…',
+            style: TextStyle(fontSize: 13, color: Color(AppColors.uiBorder)),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return const Text(
+            'Не удалось проверить договоры',
+            style: TextStyle(fontSize: 13, color: Colors.red),
+          );
+        }
+
+        final creditIds = snapshot.data ?? const <int>[];
+        final hasCredits = creditIds.isNotEmpty;
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              hasCredits ? Icons.description : Icons.description_outlined,
+              size: 16,
+              color: hasCredits
+                  ? const Color(AppColors.primary)
+                  : const Color(AppColors.uiBorder),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                _creditSummary(creditIds),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: hasCredits ? FontWeight.w600 : FontWeight.w400,
+                  color: hasCredits
+                      ? const Color(AppColors.primary)
+                      : const Color(AppColors.uiBorder),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildResults(ClientsState state) {
@@ -168,36 +230,7 @@ class _ClientPickerModalState extends State<ClientPickerModal> {
                 Text(_formatDate(client.birthdate)),
                 Text(client.phone),
                 const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(
-                      client.creditIds.isEmpty
-                          ? Icons.description_outlined
-                          : Icons.description,
-                      size: 16,
-                      color: client.creditIds.isEmpty
-                          ? const Color(AppColors.uiBorder)
-                          : const Color(AppColors.primary),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        _creditSummary(client.creditIds),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: client.creditIds.isEmpty
-                              ? FontWeight.w400
-                              : FontWeight.w600,
-                          color: client.creditIds.isEmpty
-                              ? const Color(AppColors.uiBorder)
-                              : const Color(AppColors.primary),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                _buildCreditSummary(client.id),
               ],
             ),
             trailing: Text(

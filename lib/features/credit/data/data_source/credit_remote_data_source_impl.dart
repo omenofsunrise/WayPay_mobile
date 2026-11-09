@@ -63,7 +63,10 @@ class CreditRemoteDataSourceImpl implements CreditRemoteDataSource {
   @override
   Future<List<CreditModel>> getCreditsByClientId(int clientId) async {
     try {
-      final response = await dio.get('Credit/list/$clientId');
+      final response = await dio.get(
+        'Credit/list/$clientId',
+        queryParameters: const {'page': 1, 'pageSize': 100},
+      );
       final data = response.data;
       if (data is Map<String, dynamic>) {
         return CreditResponseModel.fromJson(data).items;
