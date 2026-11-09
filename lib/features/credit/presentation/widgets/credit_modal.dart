@@ -1081,6 +1081,8 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
   }
 
   Future<void> _loadPaymentPreview() async {
+    if (!mounted) return;
+
     setState(() {
       _isLoadingPayments = true;
       _paymentsError = null;
@@ -1116,7 +1118,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
 
   Future<void> _sendWhatsAppMessage(ScheduleModel schedule) async {
     final scheduleId = schedule.id;
-    if (_whatsAppLoading.contains(scheduleId)) return;
+    if (!mounted || _whatsAppLoading.contains(scheduleId)) return;
 
     final phone = formatRussianPhoneForWhatsApp(widget.credit.clientPhone);
     if (phone == null) {
@@ -1178,6 +1180,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
       final noteDataSource = getIt<NoteRemoteDataSource>();
       final data = await noteDataSource.fetchNotesByCreditId(creditId);
 
+      if (!mounted) return;
       setState(() {
         _notes = data;
         _isLoadingNotes = false;
@@ -1186,15 +1189,14 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
       debugPrint('❌ Ошибка при загрузке заметок: $e');
       debugPrintStack(stackTrace: stack);
 
+      if (!mounted) return;
       setState(() => _isLoadingNotes = false);
 
-      if (mounted) {
-        showAppMessage(
-          context,
-          'Ошибка загрузки заметок: $e',
-          type: AppMessageType.error,
-        );
-      }
+      showAppMessage(
+        context,
+        'Ошибка загрузки заметок: $e',
+        type: AppMessageType.error,
+      );
     }
   }
 
