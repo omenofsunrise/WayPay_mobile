@@ -34,6 +34,12 @@ class ControlPanelScreen extends StatelessWidget {
     final extended = _hasExtendedAccess(role);
     final items = <_ControlPanelItem>[
       _ControlPanelItem(
+        icon: Icons.tune_outlined,
+        title: 'Настройка интерфейса',
+        subtitle: 'Скрытие неиспользуемых разделов',
+        onTap: () => context.pushNamed(Routes.interfaceSettingsScreen.toName),
+      ),
+      _ControlPanelItem(
         icon: Icons.people_outline,
         title: 'Сотрудники',
         subtitle: 'Сотрудники и их доступы',

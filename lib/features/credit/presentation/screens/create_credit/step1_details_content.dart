@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
+import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/features/clients/presentation/widgets/client_picker_modal.dart';
@@ -425,34 +426,39 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
 
             const SizedBox(height: 12),
 
-            ModalTextField(
-              controller: _creditNameController,
-              label: 'Название договора (необязательно)',
-              hintText: 'Название договора (необязательно)',
-            ),
+            if (UserStorage().showCreditName) ...[
+              ModalTextField(
+                controller: _creditNameController,
+                label: 'Название договора (необязательно)',
+                hintText: 'Название договора (необязательно)',
+              ),
+              const SizedBox(height: 12),
+            ],
 
-            const SizedBox(height: 12),
-
-            _buildPickerField(
-              controller: _catalogDisplayController,
-              label: 'Каталог (необязательно)',
-              onTap: _showCatalogPicker,
-              showClear: selectedCatalog != null,
-              onClear: selectedCatalog != null ? _removeCatalog : null,
-            ),
-
-            const SizedBox(height: 12),
-
-            _buildPickerField(
-              controller: _categoryDisplayController,
-              label: 'Категория (необязательно)',
-              onTap: _showCategoryPicker,
-              showClear: state.selectedCategory != null,
-              onClear: state.selectedCategory != null ? _removeCategory : null,
-            ),
+            if (UserStorage().showCreditCatalog) ...[
+              _buildPickerField(
+                controller: _catalogDisplayController,
+                label: 'Каталог (необязательно)',
+                onTap: _showCatalogPicker,
+                showClear: selectedCatalog != null,
+                onClear: selectedCatalog != null ? _removeCatalog : null,
+              ),
+              const SizedBox(height: 12),
+            ],
+            if (UserStorage().showCreditCategory) ...[
+              _buildPickerField(
+                controller: _categoryDisplayController,
+                label: 'Категория (необязательно)',
+                onTap: _showCategoryPicker,
+                showClear: state.selectedCategory != null,
+                onClear: state.selectedCategory != null
+                    ? _removeCategory
+                    : null,
+              ),
+              const SizedBox(height: 12),
+            ],
 
             if (creditRequest.inDebt) ...[
-              const SizedBox(height: 12),
               ModalTextField(
                 controller: _debtCommentController,
                 label: 'Комментарий',

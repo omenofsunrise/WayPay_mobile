@@ -15,6 +15,10 @@ class UserStorage {
   static const _permissionsKey = 'user_permissions';
   static const _creditAcceptanceKey = 'company_credit_acceptance';
   static const _paymentAcceptanceKey = 'company_payment_acceptance';
+  static const _showCreditNameKey = 'company_show_credit_name';
+  static const _showCreditCatalogKey = 'company_show_credit_catalog';
+  static const _showCreditCategoryKey = 'company_show_credit_category';
+  static const _showNotificationsKey = 'show_notifications';
 
   final ValueNotifier<EmployeeRole?> roleNotifier =
       ValueNotifier<EmployeeRole?>(null);
@@ -28,6 +32,16 @@ class UserStorage {
     true,
   );
   final ValueNotifier<bool> paymentAcceptanceNotifier = ValueNotifier<bool>(
+    true,
+  );
+  final ValueNotifier<bool> showCreditNameNotifier = ValueNotifier<bool>(true);
+  final ValueNotifier<bool> showCreditCatalogNotifier = ValueNotifier<bool>(
+    true,
+  );
+  final ValueNotifier<bool> showCreditCategoryNotifier = ValueNotifier<bool>(
+    true,
+  );
+  final ValueNotifier<bool> showNotificationsNotifier = ValueNotifier<bool>(
     true,
   );
 
@@ -49,6 +63,13 @@ class UserStorage {
         prefs.getBool(_creditAcceptanceKey) ?? true;
     paymentAcceptanceNotifier.value =
         prefs.getBool(_paymentAcceptanceKey) ?? true;
+    showCreditNameNotifier.value = prefs.getBool(_showCreditNameKey) ?? true;
+    showCreditCatalogNotifier.value =
+        prefs.getBool(_showCreditCatalogKey) ?? true;
+    showCreditCategoryNotifier.value =
+        prefs.getBool(_showCreditCategoryKey) ?? true;
+    showNotificationsNotifier.value =
+        prefs.getBool(_showNotificationsKey) ?? true;
   }
 
   Future<void> saveRole(EmployeeRole role) async {
@@ -79,6 +100,36 @@ class UserStorage {
     paymentAcceptanceNotifier.value = payment;
   }
 
+  Future<void> saveInterfaceVisibility({
+    bool? showCreditName,
+    bool? showCreditCatalog,
+    bool? showCreditCategory,
+    bool? showNotifications,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (showCreditName != null) {
+      await prefs.setBool(_showCreditNameKey, showCreditName);
+      showCreditNameNotifier.value = showCreditName;
+    }
+    if (showCreditCatalog != null) {
+      await prefs.setBool(_showCreditCatalogKey, showCreditCatalog);
+      showCreditCatalogNotifier.value = showCreditCatalog;
+    }
+    if (showCreditCategory != null) {
+      await prefs.setBool(_showCreditCategoryKey, showCreditCategory);
+      showCreditCategoryNotifier.value = showCreditCategory;
+    }
+    if (showNotifications != null) {
+      await prefs.setBool(_showNotificationsKey, showNotifications);
+      showNotificationsNotifier.value = showNotifications;
+    }
+  }
+
+  bool get showCreditName => showCreditNameNotifier.value;
+  bool get showCreditCatalog => showCreditCatalogNotifier.value;
+  bool get showCreditCategory => showCreditCategoryNotifier.value;
+  bool get showNotifications => showNotificationsNotifier.value;
+
   bool get paymentAcceptance => paymentAcceptanceNotifier.value;
 
   /// То же, но прямо из хранилища: при старте приложения уведомитель
@@ -107,10 +158,18 @@ class UserStorage {
     await prefs.remove(_permissionsKey);
     await prefs.remove(_creditAcceptanceKey);
     await prefs.remove(_paymentAcceptanceKey);
+    await prefs.remove(_showCreditNameKey);
+    await prefs.remove(_showCreditCatalogKey);
+    await prefs.remove(_showCreditCategoryKey);
+    await prefs.remove(_showNotificationsKey);
     roleNotifier.value = null;
     permissionsNotifier.value = {};
     creditAcceptanceNotifier.value = true;
     paymentAcceptanceNotifier.value = true;
+    showCreditNameNotifier.value = true;
+    showCreditCatalogNotifier.value = true;
+    showCreditCategoryNotifier.value = true;
+    showNotificationsNotifier.value = true;
   }
 
   bool hasRoleSync(List<EmployeeRole> roles) {

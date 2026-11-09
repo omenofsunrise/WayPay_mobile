@@ -41,6 +41,7 @@ enum Routes {
   analyticsScreen,
   companyDataScreen,
   controlPanelScreen,
+  interfaceSettingsScreen,
   privacyPolicyScreen,
   privacyPolicyIntroScreen,
 }
@@ -132,6 +133,8 @@ extension RoutesExtension on Routes {
         return '/company_data_screen';
       case Routes.controlPanelScreen:
         return '/control_panel_screen';
+      case Routes.interfaceSettingsScreen:
+        return '/interface_settings_screen';
       case Routes.privacyPolicyScreen:
         return '/privacy_policy_screen';
       case Routes.privacyPolicyIntroScreen:
@@ -225,6 +228,8 @@ extension RoutesExtension on Routes {
         return 'COMPANY_DATA_SCREEN';
       case Routes.controlPanelScreen:
         return 'CONTROL_PANEL_SCREEN';
+      case Routes.interfaceSettingsScreen:
+        return 'INTERFACE_SETTINGS_SCREEN';
       case Routes.privacyPolicyScreen:
         return 'PRIVACY_POLICY_SCREEN';
       case Routes.privacyPolicyIntroScreen:
