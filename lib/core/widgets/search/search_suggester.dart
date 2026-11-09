@@ -53,7 +53,6 @@ class _SearchSuggesterState extends State<SearchSuggester> {
   final _link = LayerLink();
   final GlobalKey _fieldKey = GlobalKey();
   OverlayEntry? _overlayEntry;
-  final List<String> _history = [];
   List<String> _results = [];
   Size? _fieldSize;
 
@@ -114,14 +113,7 @@ class _SearchSuggesterState extends State<SearchSuggester> {
   }
 
   List<String> _defaultResults() {
-    final result = <String>[];
-    for (final title in [
-      ..._history,
-      ...widget.destinations.map((destination) => destination.title),
-    ]) {
-      if (!result.contains(title)) result.add(title);
-    }
-    return result;
+    return widget.destinations.map((destination) => destination.title).toList();
   }
 
   void _onSubmit(String raw) {
@@ -148,10 +140,6 @@ class _SearchSuggesterState extends State<SearchSuggester> {
     setState(() {
       _results = [];
       _controller.clear();
-      _history
-        ..removeWhere((item) => item.toLowerCase() == title.toLowerCase())
-        ..insert(0, title);
-      if (_history.length > 5) _history.removeRange(5, _history.length);
     });
     _hideOverlay();
     FocusScope.of(context).unfocus();
@@ -259,14 +247,7 @@ class _SearchSuggesterState extends State<SearchSuggester> {
         focusNode: _focusNode,
         onChanged: _onChanged,
         onSubmitted: _onSubmit,
-        onTap: () {
-          if (_controller.text.isEmpty) {
-            setState(() {
-              _results = _defaultResults();
-            });
-            _showOverlay();
-          }
-        },
+        onTap: () => _onChanged(_controller.text),
       ),
     );
   }
