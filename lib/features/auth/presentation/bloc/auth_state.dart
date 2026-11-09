@@ -7,10 +7,11 @@ class AuthInitial extends AuthState {}
 class AuthLoading extends AuthState {}
 
 class AuthCodeSent extends AuthState {
-  final String checkId;
-  final String callPhone;
+  final AuthWay authWay;
+  final String? checkId;
+  final String? callPhone;
 
-  AuthCodeSent({required this.checkId, required this.callPhone});
+  AuthCodeSent({required this.authWay, this.checkId, this.callPhone});
 }
 
 class AuthSuccess extends AuthState {}

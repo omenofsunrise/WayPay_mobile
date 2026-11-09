@@ -8,6 +8,7 @@ import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:waypay_mobile/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:waypay_mobile/features/auth/data/models/start_auth_request_model.dart';
 import 'package:waypay_mobile/features/auth/data/models/call_confirm_request_model.dart';
+import 'package:waypay_mobile/features/auth/data/models/auth_way.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 
 part 'auth_state.dart';
@@ -18,14 +19,23 @@ class AuthCubit extends Cubit<AuthState> {
   final _authDataSource = getIt<AuthRemoteDataSource>();
   final _userStorage = getIt<UserStorage>();
 
-  Future<void> startAuth(String phone, String userType) async {
+  Future<void> startAuth(
+    String phone,
+    String userType, {
+    AuthWay authWay = AuthWay.callCheck,
+  }) async {
     emit(AuthLoading());
     try {
       final startResponse = await _authDataSource.startAuth(
-        StartAuthRequestModel(phone: phone, userType: userType),
+        StartAuthRequestModel(
+          phone: phone,
+          userType: userType,
+          authWay: authWay,
+        ),
       );
       emit(
         AuthCodeSent(
+          authWay: authWay,
           checkId: startResponse.checkId,
           callPhone: startResponse.callPhone,
         ),
@@ -39,7 +49,41 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> confirmCall(String checkId, String phone) async {
+  Future<void> confirmCall(
+    String checkId,
+    String phone, {
+    String userType = 'employee',
+  }) async {
+    await _confirm(
+      checkId: checkId,
+      phone: phone,
+      userType: userType,
+      authWay: AuthWay.callCheck,
+      fallback: 'Не удалось подтвердить звонок.',
+    );
+  }
+
+  Future<void> confirmWhatsAppCode(
+    String code,
+    String phone, {
+    String userType = 'employee',
+  }) async {
+    await _confirm(
+      checkId: code,
+      phone: phone,
+      userType: userType,
+      authWay: AuthWay.whatsAppCode,
+      fallback: 'Неверный код. Попробуйте ещё раз.',
+    );
+  }
+
+  Future<void> _confirm({
+    required String checkId,
+    required String phone,
+    required String userType,
+    required AuthWay authWay,
+    required String fallback,
+  }) async {
     if (state is AuthSuccess) {
       return;
     }
@@ -51,6 +95,8 @@ class AuthCubit extends Cubit<AuthState> {
         CallConfirmRequestModel(
           checkId: checkId,
           phone: phone,
+          userType: userType,
+          authWay: authWay,
           // Токен может быть ещё не выдан — на iOS он появляется только
           // после APNs. Тогда уйдёт null, и вход не сломается.
           deviceId: getIt<PushNotificationService>().token,
@@ -82,11 +128,7 @@ class AuthCubit extends Cubit<AuthState> {
 
       emit(AuthSuccess());
     } catch (e) {
-      emit(
-        AuthError(
-          mapApiError(e, fallback: 'Не удалось подтвердить звонок.').message,
-        ),
-      );
+      emit(AuthError(mapApiError(e, fallback: fallback).message));
     }
   }
 }

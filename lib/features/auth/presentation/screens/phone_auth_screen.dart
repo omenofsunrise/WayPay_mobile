@@ -5,7 +5,9 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:waypay_mobile/core/utils/phone_input_formatter.dart';
 
 import 'package:waypay_mobile/features/auth/presentation/bloc/auth_cubit.dart';
+import 'package:waypay_mobile/features/auth/data/models/auth_way.dart';
 import 'package:waypay_mobile/features/auth/presentation/widgets/call_confirmation_dialog.dart';
+import 'package:waypay_mobile/features/auth/presentation/widgets/whatsapp_confirmation_dialog.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart'
     hide CallConfirmationDialog;
 import 'package:waypay_mobile/routes/routes.dart';
@@ -28,6 +30,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
     filter: {"#": RegExp(r'\d')},
   );
   bool _isDialogShowing = false;
+  AuthWay _authWay = AuthWay.callCheck;
 
   @override
   void initState() {
@@ -43,7 +46,11 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
     if (_formKey.currentState!.validate()) {
       final formattedPhone = '8${_phoneFormatter.getUnmaskedText()}';
       debugPrint('🔐 Начинаем авторизацию для: $formattedPhone');
-      context.read<AuthCubit>().startAuth(formattedPhone, widget.userType);
+      context.read<AuthCubit>().startAuth(
+        formattedPhone,
+        widget.userType,
+        authWay: _authWay,
+      );
     }
   }
 
@@ -64,28 +71,39 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
           debugPrint('🎯 Состояние AuthCubit изменилось: $state');
 
           if (state is AuthCodeSent) {
-            debugPrint('📞 Показываем диалог подтверждения');
             final formattedPhone = '8${_phoneFormatter.getUnmaskedText()}';
 
             if (!_isDialogShowing) {
               _isDialogShowing = true;
 
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                showDialog(
+                final authCubit = context.read<AuthCubit>();
+                showDialog<void>(
                   context: context,
                   barrierDismissible: false,
-                  builder: (_) => CallConfirmationDialog(
-                    callPhone: state.callPhone,
-                    checkId: state.checkId,
-                    phone: formattedPhone,
-                    onTryConfirm: () async {
-                      await context.read<AuthCubit>().confirmCall(
-                        state.checkId,
-                        formattedPhone,
-                      );
-                    },
+                  builder: (_) => BlocProvider.value(
+                    value: authCubit,
+                    child: state.authWay == AuthWay.whatsAppCode
+                        ? WhatsAppConfirmationDialog(
+                            phone: formattedPhone,
+                            onConfirm: (code) => authCubit.confirmWhatsAppCode(
+                              code,
+                              formattedPhone,
+                              userType: widget.userType,
+                            ),
+                          )
+                        : CallConfirmationDialog(
+                            callPhone: state.callPhone ?? '',
+                            checkId: state.checkId ?? '',
+                            phone: formattedPhone,
+                            onTryConfirm: () => authCubit.confirmCall(
+                              state.checkId ?? '',
+                              formattedPhone,
+                              userType: widget.userType,
+                            ),
+                          ),
                   ),
-                ).then((_) {});
+                ).then((_) => _isDialogShowing = false);
               });
             }
           }
@@ -248,6 +266,13 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                             },
                           ),
                           const SizedBox(height: 18),
+                          _AuthWaySelector(
+                            value: _authWay,
+                            onChanged: isLoading
+                                ? null
+                                : (value) => setState(() => _authWay = value),
+                          ),
+                          const SizedBox(height: 18),
                           isLoading
                               ? const Center(child: CircularProgressIndicator())
                               : DefaultButton(
@@ -265,6 +290,61 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _AuthWaySelector extends StatelessWidget {
+  const _AuthWaySelector({required this.value, required this.onChanged});
+
+  final AuthWay value;
+  final ValueChanged<AuthWay>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: const Color(AppColors.greyLight),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          _item('Звонок', AuthWay.callCheck),
+          _item('WhatsApp', AuthWay.whatsAppCode),
+        ],
+      ),
+    );
+  }
+
+  Widget _item(String label, AuthWay method) {
+    final selected = value == method;
+    return Expanded(
+      child: InkWell(
+        onTap: onChanged == null ? null : () => onChanged!(method),
+        borderRadius: BorderRadius.circular(8),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(vertical: 11),
+          decoration: BoxDecoration(
+            color: selected
+                ? const Color(AppColors.primary)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: AppStyle.inter(
+              size: 14,
+              weight: FontWeight.w600,
+              color: selected
+                  ? const Color(AppColors.background)
+                  : const Color(AppColors.black),
+            ),
+          ),
+        ),
       ),
     );
   }
