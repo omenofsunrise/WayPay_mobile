@@ -306,10 +306,11 @@ class _AuthWaySelector extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(AppColors.greyLight),
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
+        spacing: 8,
         children: [
           _item('Звонок', AuthWay.callCheck),
           _item('WhatsApp', AuthWay.whatsAppCode),
@@ -325,23 +326,30 @@ class _AuthWaySelector extends StatelessWidget {
         onTap: onChanged == null ? null : () => onChanged!(method),
         borderRadius: BorderRadius.circular(8),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(vertical: 11),
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
           decoration: BoxDecoration(
-            color: selected
-                ? const Color(AppColors.primary)
-                : Colors.transparent,
+            color: selected ? Colors.white : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
+            boxShadow: selected
+                ? const [
+                    BoxShadow(
+                      color: Color(0x14000000),
+                      offset: Offset(0, 1),
+                      blurRadius: 4,
+                    ),
+                  ]
+                : null,
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
             style: AppStyle.inter(
               size: 14,
-              weight: FontWeight.w600,
+              weight: selected ? FontWeight.w600 : FontWeight.w500,
               color: selected
-                  ? const Color(AppColors.background)
-                  : const Color(AppColors.black),
+                  ? const Color(AppColors.primary)
+                  : const Color(0xFF777777),
             ),
           ),
         ),
