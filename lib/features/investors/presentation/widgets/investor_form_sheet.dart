@@ -10,13 +10,9 @@ Future<bool?> showInvestorFormSheet(
   InvestorsModel? investor,
   int? poolId,
 }) {
-  return showModalBottomSheet<bool>(
+  return showWayPayBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.white,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-    ),
     builder: (_) => _InvestorFormSheet(investor: investor, poolId: poolId),
   );
 }

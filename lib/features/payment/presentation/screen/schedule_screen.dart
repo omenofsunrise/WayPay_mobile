@@ -156,7 +156,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   }
 
   Future<void> _openFilters() async {
-    final result = await showModalBottomSheet<ScheduleFilters>(
+    final result = await showWayPayBottomSheet<ScheduleFilters>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -177,7 +177,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   }
 
   Future<void> _openSortSheet() async {
-    final result = await showModalBottomSheet<PaymentSortOption>(
+    final result = await showWayPayBottomSheet<PaymentSortOption>(
       context: context,
       useRootNavigator: true,
       clipBehavior: Clip.antiAlias,

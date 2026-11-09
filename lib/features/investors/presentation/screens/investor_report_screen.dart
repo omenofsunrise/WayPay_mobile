@@ -6,7 +6,6 @@ import 'package:printing/printing.dart';
 import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/config/api_config.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/core/widgets/dashboard_info_mini_card.dart';
 import 'package:waypay_mobile/features/investors/data/data_sources/investors_remote_data_source.dart';
 import 'package:waypay_mobile/features/investors/data/models/investors_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/investor_contribution_model.dart';
@@ -153,7 +152,7 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
     final balance = _asDouble(
       reportData?['balance'] ?? selectedInvestor.balance,
     );
-    final source = await showModalBottomSheet<String>(
+    final source = await showWayPayBottomSheet<String>(
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
@@ -216,22 +215,12 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
   }
 
   Future<void> _deletePayout(InvestorPayoutModel payout) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Удалить выплату?'),
-        content: Text('${formatNumber(payout.amount)} ₽'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Отмена'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Удалить'),
-          ),
-        ],
-      ),
+    final confirmed = await showWayPayConfirmDialog(
+      context,
+      title: 'Удалить выплату?',
+      message: '${formatNumber(payout.amount)} ₽',
+      confirmText: 'Удалить',
+      isDestructive: true,
     );
     if (confirmed != true) return;
     try {
@@ -252,9 +241,11 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
     final saved = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Редактирование инвестиции'),
-          content: Column(
+        builder: (context, setDialogState) => WayPayModal(
+          title: 'Редактирование инвестиции',
+          onClose: () => Navigator.pop(dialogContext, false),
+          onPrimary: () => Navigator.pop(dialogContext, true),
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
@@ -281,16 +272,6 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Отмена'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text('Сохранить'),
-            ),
-          ],
         ),
       ),
     );
@@ -326,22 +307,12 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
       return;
     }
     if (action == 'reject') {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('Удалить инвестицию?'),
-          content: Text('${formatNumber(contribution.amount)} ₽'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Отмена'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text('Удалить'),
-            ),
-          ],
-        ),
+      final confirmed = await showWayPayConfirmDialog(
+        context,
+        title: 'Удалить инвестицию?',
+        message: '${formatNumber(contribution.amount)} ₽',
+        confirmText: 'Удалить',
+        isDestructive: true,
       );
       if (confirmed != true) return;
     }
@@ -391,7 +362,7 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
       final agreement = await getIt<InvestorsRemoteDataSource>()
           .getInvestorAgreement(selectedInvestor.id);
       if (!mounted) return;
-      await showModalBottomSheet<void>(
+      await showWayPayBottomSheet<void>(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.white,
@@ -588,12 +559,23 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _InvestorHeroCard(
-                                investor: selectedInvestor,
-                                balance: _asDouble(
-                                  reportData?['balance'] ??
-                                      selectedInvestor.balance,
+                              WayPayEntityHeaderCard(
+                                title: selectedInvestor.nickname,
+                                subtitle: selectedInvestor.fullName,
+                                icon: const Icon(
+                                  Icons.person_outline,
+                                  color: Color(AppColors.primary),
                                 ),
+                                metricLabel: 'Доступно в кассе',
+                                metricValue:
+                                    '${NumberFormat.decimalPattern('ru_RU').format(_asDouble(reportData?['balance'] ?? selectedInvestor.balance))} ₽',
+                                badge: selectedInvestor.contractEndDate == null
+                                    ? null
+                                    : WayPayStatusBadge(
+                                        text:
+                                            'Договор до ${DateFormat('dd.MM.yyyy').format(selectedInvestor.contractEndDate!)}',
+                                        tone: WayPayStatusTone.info,
+                                      ),
                               ),
                               const SizedBox(height: 12),
                               _InvestorActions(
@@ -647,11 +629,11 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
 
   Widget _buildOperations() {
     if (operationsTab == 'payouts') {
-      if (payouts.isEmpty) return const _EmptyOperations(text: 'Выплат нет');
+      if (payouts.isEmpty) return const WayPayEmptyState(title: 'Выплат нет');
       return Column(
         children: payouts
             .map(
-              (payout) => _OperationCard(
+              (payout) => WayPayOperationTile(
                 title: '${formatNumber(payout.amount)} ₽',
                 subtitle:
                     '${formatDate(payout.payoutDate.toIso8601String())} · ${payout.employeeFullName}',
@@ -668,11 +650,13 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
       );
     }
     if (operationsTab == 'credits') {
-      if (credits.isEmpty) return const _EmptyOperations(text: 'Договоров нет');
+      if (credits.isEmpty) {
+        return const WayPayEmptyState(title: 'Договоров нет');
+      }
       return Column(
         children: credits
             .map(
-              (credit) => _OperationCard(
+              (credit) => WayPayOperationTile(
                 title: credit.name?.isNotEmpty == true
                     ? 'Договор №${credit.name}'
                     : 'Договор №${credit.id}',
@@ -685,12 +669,12 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
       );
     }
     if (contributions.isEmpty) {
-      return const _EmptyOperations(text: 'Инвестиций нет');
+      return const WayPayEmptyState(title: 'Инвестиций нет');
     }
     return Column(
       children: contributions
           .map(
-            (contribution) => _OperationCard(
+            (contribution) => WayPayOperationTile(
               title: '${formatNumber(contribution.amount)} ₽',
               subtitle: DateFormat('dd.MM.yyyy').format(contribution.date),
               status: contribution.confirmed
@@ -812,120 +796,6 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
   }
 }
 
-class _InvestorHeroCard extends StatelessWidget {
-  const _InvestorHeroCard({required this.investor, required this.balance});
-
-  final InvestorsModel investor;
-  final double balance;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E5EA)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0F000000),
-            offset: Offset(0, 4),
-            blurRadius: 16,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE4F4F1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.person_outline,
-                  color: Color(AppColors.primary),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      investor.nickname,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(AppColors.black),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    if (investor.fullName.isNotEmpty) ...[
-                      const SizedBox(height: 3),
-                      Text(
-                        investor.fullName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Color(AppColors.uiBorder),
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Доступно в кассе',
-            style: const TextStyle(
-              color: Color(AppColors.uiBorder),
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${NumberFormat.decimalPattern('ru_RU').format(balance)} ₽',
-            style: const TextStyle(
-              color: Color(AppColors.black),
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.5,
-            ),
-          ),
-          if (investor.contractEndDate != null) ...[
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE4F4F1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                'Договор до ${DateFormat('dd.MM.yyyy').format(investor.contractEndDate!)}',
-                style: const TextStyle(
-                  color: Color(AppColors.primary),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
 class _AnalyticsGrid extends StatelessWidget {
   const _AnalyticsGrid({required this.metrics});
 
@@ -943,7 +813,7 @@ class _AnalyticsGrid extends StatelessWidget {
               .map(
                 (metric) => SizedBox(
                   width: itemWidth,
-                  child: DashboardInfoMiniCard(
+                  child: WayPayMetricCard.asset(
                     circleColor:
                         metric.backgroundColor ??
                         (metric.highlighted
@@ -1021,155 +891,50 @@ class _InvestorActions extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _ActionButton(
-                  icon: Icons.account_balance_wallet_outlined,
-                  label: 'Касса',
-                  onTap: onCash,
-                ),
-                _ActionButton(
-                  icon: Icons.edit_outlined,
-                  label: 'Изменить',
-                  onTap: onEdit,
-                ),
-                _ActionButton(
-                  icon: Icons.link,
-                  label: 'Ссылка',
-                  onTap: onShare,
-                ),
-                _ActionButton(
-                  icon: Icons.description_outlined,
-                  label: 'Договор',
-                  onTap: onAgreement,
-                ),
-                _ActionButton(
-                  icon: Icons.ios_share_outlined,
-                  label: 'PDF',
-                  onTap: onExport,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Container(
-          width: 72,
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF4F7F8),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            children: [
-              Icon(icon, size: 21, color: const Color(AppColors.primary)),
-              const SizedBox(height: 6),
-              Text(label, maxLines: 1, style: const TextStyle(fontSize: 11)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OperationCard extends StatelessWidget {
-  const _OperationCard({
-    required this.title,
-    required this.subtitle,
-    required this.status,
-    this.trailing,
-  });
-
-  final String title;
-  final String subtitle;
-  final String status;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE8ECF1)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(AppColors.uiBorder),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: WayPayActionTile(
+                    icon: Icons.account_balance_wallet_outlined,
+                    label: 'Касса',
+                    onTap: onCash,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  status,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(AppColors.primary),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: WayPayActionTile(
+                    icon: Icons.edit_outlined,
+                    label: 'Изменить',
+                    onTap: onEdit,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: WayPayActionTile(
+                    icon: Icons.link,
+                    label: 'Ссылка',
+                    onTap: onShare,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: WayPayActionTile(
+                    icon: Icons.description_outlined,
+                    label: 'Договор',
+                    onTap: onAgreement,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: WayPayActionTile(
+                    icon: Icons.ios_share_outlined,
+                    label: 'PDF',
+                    onTap: onExport,
                   ),
                 ),
               ],
             ),
           ),
-          if (trailing != null) trailing!,
         ],
-      ),
-    );
-  }
-}
-
-class _EmptyOperations extends StatelessWidget {
-  const _EmptyOperations({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: const TextStyle(color: Color(AppColors.uiBorder)),
       ),
     );
   }

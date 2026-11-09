@@ -62,10 +62,11 @@ class _InvestorCashPositionScreenState
   }
 
   /// История отсортирована сервером по дате убыванию, поэтому текущая позиция — первая.
-  InvestorCashPositionModel? get _current => _items.isEmpty ? null : _items.first;
+  InvestorCashPositionModel? get _current =>
+      _items.isEmpty ? null : _items.first;
 
   Future<void> _openMoveSheet() async {
-    final changed = await showModalBottomSheet<bool>(
+    final changed = await showWayPayBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -78,38 +79,19 @@ class _InvestorCashPositionScreenState
 
     if (changed == true) {
       if (!mounted) return;
-      showAppMessage(
-        context,
-        'Касса переведена',
-        type: AppMessageType.success,
-      );
+      showAppMessage(context, 'Касса переведена', type: AppMessageType.success);
       await _load();
     }
   }
 
   Future<void> _confirmDelete(InvestorCashPositionModel item) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Удалить запись?'),
-        content: Text(
-          'Запись «${item.label}» от ${_formatDate(item.date)} будет удалена '
-          'из истории кассы.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Отмена'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text(
-              'Удалить',
-              style: TextStyle(color: Color(AppColors.red)),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showWayPayConfirmDialog(
+      context,
+      title: 'Удалить запись?',
+      message:
+          'Запись «${item.label}» от ${_formatDate(item.date)} будет удалена из истории кассы.',
+      confirmText: 'Удалить',
+      isDestructive: true,
     );
 
     if (confirmed != true) return;

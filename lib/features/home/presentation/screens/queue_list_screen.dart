@@ -108,7 +108,7 @@ class _QueueListViewState extends State<_QueueListView> {
 
   void _showCreateQueueDialog() {
     BottomNavController.instance.hide();
-    showModalBottomSheet(
+    showWayPayBottomSheet(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -307,7 +307,7 @@ class _CreateQueueModalState extends State<_CreateQueueModal> {
 
   Future<void> _pickClient() async {
     BottomNavController.instance.hide();
-    final client = await showModalBottomSheet<ClientModel>(
+    final client = await showWayPayBottomSheet<ClientModel>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,

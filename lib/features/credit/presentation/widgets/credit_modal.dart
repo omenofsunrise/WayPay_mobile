@@ -155,64 +155,14 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
     return IconButton(
       icon: SvgPicture.asset(SvgIcons.delete),
       onPressed: () async {
-        final confirmed = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-            contentPadding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Center(
-                  child: Text(
-                    'Удаление договора №${widget.credit.id}',
-                    textAlign: TextAlign.center,
-                    style: AppStyle.manrope(
-                      size: 20,
-                      weight: FontWeight.w600,
-                      color: const Color(AppColors.black),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Это действие будет невозможно отменить,\nвы уверены что хотите удалить договор?',
-                  textAlign: TextAlign.center,
-                  style: AppStyle.manrope(
-                    size: 14,
-                    weight: FontWeight.w500,
-                    color: const Color(0xFF6B7280),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DefaultButton(
-                        text: 'Отменить',
-                        color: const Color(0xFFB7BFC8),
-                        textColor: const Color(AppColors.black),
-                        onPressed: () => Navigator.of(ctx).pop(false),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: DefaultButton(
-                        text: 'Удалить',
-                        color: const Color(AppColors.red),
-                        textColor: Colors.white,
-                        onPressed: () => Navigator.of(ctx).pop(true),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+        final confirmed = await showWayPayConfirmDialog(
+          context,
+          title: 'Удаление договора №${widget.credit.id}',
+          message:
+              'Это действие будет невозможно отменить. Вы уверены, что хотите удалить договор?',
+          confirmText: 'Удалить',
+          cancelText: 'Отменить',
+          isDestructive: true,
         );
 
         if (confirmed == true) {
@@ -669,7 +619,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
   }
 
   void _showShareSheet(BuildContext context) {
-    showModalBottomSheet(
+    showWayPayBottomSheet(
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
@@ -1048,7 +998,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
   }
 
   void _showCreatePaymentModal(BuildContext context, CreditModel credit) {
-    showModalBottomSheet(
+    showWayPayBottomSheet(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -1065,7 +1015,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
   }
 
   void showAddNoteDialog(BuildContext context, int creditId) {
-    showModalBottomSheet(
+    showWayPayBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

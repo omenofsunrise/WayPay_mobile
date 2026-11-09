@@ -93,21 +93,12 @@ class _ClientListScreenState extends State<ClientListScreen> {
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 16)),
               SliverToBoxAdapter(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: SearchField(
-                        controller: _searchController,
-                        hintText: 'Поиск',
-                        onChanged: _onSearchChanged,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    AddButton(
-                      onPressed: () =>
-                          context.pushNamed(Routes.clientCreateScreen.toName),
-                    ),
-                  ],
+                child: WayPaySearchToolbar(
+                  controller: _searchController,
+                  hintText: 'Поиск',
+                  onChanged: _onSearchChanged,
+                  onAdd: () =>
+                      context.pushNamed(Routes.clientCreateScreen.toName),
                 ),
               ),
               if (_showSearchHint)

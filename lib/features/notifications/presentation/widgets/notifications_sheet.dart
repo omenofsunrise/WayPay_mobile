@@ -11,16 +11,10 @@ class NotificationsSheet extends StatelessWidget {
   const NotificationsSheet({super.key});
 
   static Future<void> show(BuildContext context) {
-    return showModalBottomSheet(
+    return showWayPayBottomSheet(
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
-
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      clipBehavior: Clip.antiAlias,
       builder: (sheetContext) {
         return BlocProvider(
           create: (_) => getIt<NotificationsCubit>()..load(markAsRead: true),
@@ -73,17 +67,24 @@ class NotificationsSheet extends StatelessWidget {
                   builder: (context, state) {
                     if (state is NotificationsLoading ||
                         state is NotificationsInitial) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const WayPayLoadingState();
                     }
 
                     if (state is NotificationsError) {
-                      return _ErrorView(message: state.message);
+                      return WayPayErrorState(
+                        title: 'Не удалось загрузить уведомления',
+                        message: state.message,
+                        onRetry: () =>
+                            context.read<NotificationsCubit>().load(),
+                      );
                     }
 
                     final st = state as NotificationsLoaded;
                     final items = st.items;
                     if (items.isEmpty) {
-                      return const _EmptyView();
+                      return const WayPayEmptyState(
+                        title: 'Пока нет уведомлений',
+                      );
                     }
 
                     return NotificationListener<ScrollNotification>(
@@ -225,64 +226,5 @@ class _NotificationTile extends StatelessWidget {
         ? parts[1].trim()[0].toUpperCase()
         : '';
     return '$first$second';
-  }
-}
-
-class _EmptyView extends StatelessWidget {
-  const _EmptyView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Пока нет уведомлений',
-        style: AppStyle.manrope(
-          size: 16,
-          weight: FontWeight.w500,
-          color: const Color(AppColors.grey),
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        spacing: 12,
-        children: [
-          Text(
-            'Не удалось загрузить уведомления',
-            style: AppStyle.manrope(
-              size: 16,
-              weight: FontWeight.w600,
-              color: const Color(AppColors.black),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            message,
-            style: AppStyle.manrope(
-              size: 12,
-              weight: FontWeight.w400,
-              color: const Color(AppColors.grey),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: () => context.read<NotificationsCubit>().load(),
-            child: const Text('Обновить'),
-          ),
-        ],
-      ),
-    );
   }
 }

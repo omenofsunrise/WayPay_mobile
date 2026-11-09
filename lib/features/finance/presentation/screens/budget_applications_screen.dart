@@ -283,7 +283,7 @@ class _BudgetApplicationsScreenState extends State<BudgetApplicationsScreen>
     required List<_SelectionItem<T>> options,
     T? currentValue,
   }) {
-    return showModalBottomSheet<T>(
+    return showWayPayBottomSheet<T>(
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(

@@ -8,8 +8,6 @@ import 'package:waypay_mobile/core/widgets/search/search_suggester.dart';
 import 'package:waypay_mobile/features/home/domain/repositories/home_repository_impl.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
-import 'package:waypay_mobile/features/home/presentation/widgets/dashboard_card.dart';
-import 'package:waypay_mobile/features/home/presentation/widgets/section_title.dart';
 import 'package:waypay_mobile/features/home/data/models/employee_model.dart';
 import 'package:waypay_mobile/features/home/domain/usecases/get_employee_data_usecase.dart';
 import 'package:waypay_mobile/features/home/data/data_source/home_remote_data_source_impl.dart';
@@ -72,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Метод оставлен, чтобы кнопку можно было вернуть одной строкой.
   // ignore: unused_element
   void _openAddBottomSheet() {
-    showModalBottomSheet(
+    showWayPayBottomSheet(
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
@@ -343,18 +341,18 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionTitle(text: 'Компании'),
+          const WayPaySectionHeader(title: 'Компании'),
           Row(
             children: [
               Expanded(
-                child: DashboardCard(
+                child: WayPayDashboardCard(
                   title: 'Активные',
                   value: _formatCount(data.activeCompaniesCount),
                 ),
               ),
               const SizedBox(width: 13),
               Expanded(
-                child: DashboardCard(
+                child: WayPayDashboardCard(
                   title: 'Всего',
                   value: _formatCount(data.companiesCount),
                 ),
@@ -373,14 +371,14 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              const SectionTitle(text: 'Финансы'),
+              const WayPaySectionHeader(title: 'Финансы'),
               const Spacer(),
               MoreDetailsButton(
                 onPressed: () => context.pushNamed(Routes.financeScreen.toName),
               ),
             ],
           ),
-          DashboardCard(
+          WayPayDashboardCard(
             title: 'Бюджет',
             value: _formatCurrency(
               (data.budgetIncome ?? 0) - (data.budgetOutcome ?? 0),
@@ -390,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             children: [
               Expanded(
-                child: DashboardCard(
+                child: WayPayDashboardCard(
                   title: 'Приходы бюджета',
                   value: _formatCurrency(data.budgetIncome),
                   description: _getCurrentMonth(),
@@ -398,7 +396,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(width: 13),
               Expanded(
-                child: DashboardCard(
+                child: WayPayDashboardCard(
                   title: 'Расходы бюджета',
                   value: _formatCurrency(data.budgetOutcome),
                   valueColor: const Color(AppColors.red),
@@ -431,7 +429,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              const SectionTitle(text: 'Платежи'),
+              const WayPaySectionHeader(title: 'Платежи'),
               const Spacer(),
               MoreDetailsButton(
                 onPressed: () {
@@ -443,19 +441,19 @@ class _HomeScreenState extends State<HomeScreen> {
           // Подтверждение платежей выключено — делить их на подтверждённые
           // и нет незачем, показываем общую сумму.
           if (UserStorage().paymentAcceptance) ...[
-            DashboardCard(
+            WayPayDashboardCard(
               title: 'Подтверждённые платежи',
               value: _formatCurrency(data.approvedPaymentsAmount),
               additionalValue: '${_formatCount(approvedCount)} шт',
             ),
-            DashboardCard(
+            WayPayDashboardCard(
               title: 'Неподтверждённые платежи',
               value: _formatCurrency(data.disapprovePaymentsAmount),
               additionalValue: '${_formatCount(disapprovedCount)} шт',
               valueColor: const Color(AppColors.red),
             ),
           ] else
-            DashboardCard(
+            WayPayDashboardCard(
               title: 'Платежи',
               value: _formatCurrency(
                 (data.approvedPaymentsAmount ?? 0) +
@@ -474,7 +472,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              const SectionTitle(text: 'Договоры'),
+              const WayPaySectionHeader(title: 'Договоры'),
               const Spacer(),
               MoreDetailsButton(
                 onPressed: () {
@@ -486,7 +484,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             children: [
               Expanded(
-                child: DashboardCard(
+                child: WayPayDashboardCard(
                   title: 'Закрытые',
                   value: _formatCount(data.closedCreditsCount),
                   description: _getCurrentMonth(),
@@ -494,7 +492,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(width: 13),
               Expanded(
-                child: DashboardCard(
+                child: WayPayDashboardCard(
                   title: 'Активные',
                   value: _formatCount(data.activeCreditsCount),
                   description: _getCurrentMonth(),
@@ -514,7 +512,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              const SectionTitle(text: 'Клиенты'),
+              const WayPaySectionHeader(title: 'Клиенты'),
               const Spacer(),
               MoreDetailsButton(
                 onPressed: () {
@@ -526,14 +524,14 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             children: [
               Expanded(
-                child: DashboardCard(
+                child: WayPayDashboardCard(
                   title: 'Всего',
                   value: _formatCount(data.clientsCount),
                 ),
               ),
               const SizedBox(width: 13),
               Expanded(
-                child: DashboardCard(
+                child: WayPayDashboardCard(
                   title: 'Заявки',
                   value: _formatCount(data.creditApplicationCount),
                 ),
@@ -552,7 +550,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              const SectionTitle(text: 'Инвесторы'),
+              const WayPaySectionHeader(title: 'Инвесторы'),
               const Spacer(),
               MoreDetailsButton(
                 onPressed: () {
@@ -561,8 +559,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          DashboardCard(title: 'Касса', value: _formatCurrency(data.balance)),
-          DashboardCard(
+          WayPayDashboardCard(
+            title: 'Касса',
+            value: _formatCurrency(data.balance),
+          ),
+          WayPayDashboardCard(
             title: 'Сумма инвестиций',
             value: _formatCurrency(data.investment),
           ),
@@ -578,7 +579,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              const SectionTitle(text: 'Аналитика'),
+              const WayPaySectionHeader(title: 'Аналитика'),
               const Spacer(),
               MoreDetailsButton(
                 onPressed: () =>
@@ -586,11 +587,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          DashboardCard(
+          WayPayDashboardCard(
             title: 'Текущий доход',
             value: _formatCurrency(data.currentIncome),
           ),
-          DashboardCard(
+          WayPayDashboardCard(
             title: 'Ожидаемый доход',
             value: _formatCurrency(data.expectedIncome),
           ),

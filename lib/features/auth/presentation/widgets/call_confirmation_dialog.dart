@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
@@ -39,9 +40,7 @@ class _CallConfirmationDialogState extends State<CallConfirmationDialog> {
         setState(() => _isChecking = true);
         await widget.onTryConfirm();
       } finally {
-        if (mounted) {
-          setState(() => _isChecking = false);
-        }
+        if (mounted) setState(() => _isChecking = false);
       }
     });
   }
@@ -53,7 +52,7 @@ class _CallConfirmationDialogState extends State<CallConfirmationDialog> {
   }
 
   Future<void> _callNumber() async {
-    final digits = widget.callPhone.replaceAll(RegExp(r'\\D'), '');
+    final digits = widget.callPhone.replaceAll(RegExp(r'\D'), '');
     if (digits.isEmpty) return;
     final uri = Uri(scheme: 'tel', path: digits);
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -68,50 +67,48 @@ class _CallConfirmationDialogState extends State<CallConfirmationDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Color(AppColors.background),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Подтверждение авторизации',
-              style: AppStyle.semiBold20,
-              textAlign: TextAlign.center,
+    return WayPayModal(
+      title: 'Подтверждение авторизации',
+      subtitle: 'Подтвердите вход звонком с вашего номера',
+      onClose: () => Navigator.of(context).pop(),
+      showCancelButton: false,
+      showPrimaryButton: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Для завершения авторизации позвоните на номер:',
+            style: AppStyle.medium16.copyWith(color: const Color(0xFF555555)),
+          ),
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: _callNumber,
+            child: Text(
+              widget.callPhone,
+              style: AppStyle.inter(
+                size: 22,
+                weight: FontWeight.w700,
+                color: const Color(AppColors.primary),
+              ).copyWith(decoration: TextDecoration.underline),
             ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'После звонка система автоматически подтвердит авторизацию.',
+            style: AppStyle.medium16.copyWith(color: const Color(0xFF555555)),
+          ),
+          if (_isChecking) ...[
             const SizedBox(height: 16),
             Text(
-              'Для завершения авторизации позвоните на номер:',
-              style: AppStyle.medium16.copyWith(
-                color: const Color(AppColors.grey),
+              'Ожидаем подтверждение звонка...',
+              style: AppStyle.inter(
+                size: 14,
+                weight: FontWeight.w500,
+                color: const Color(AppColors.primary),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            GestureDetector(
-              onTap: _callNumber,
-              child: Text(
-                widget.callPhone,
-                style: AppStyle.inter(
-                  size: 20,
-                  weight: FontWeight.w700,
-                  color: const Color(AppColors.primary),
-                ).copyWith(decoration: TextDecoration.underline),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'После звонка проверка будет происходить автоматически.',
-              style: AppStyle.medium16.copyWith(
-                color: const Color(AppColors.grey),
-              ),
-              textAlign: TextAlign.center,
             ),
           ],
-        ),
+        ],
       ),
     );
   }

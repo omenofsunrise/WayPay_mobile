@@ -84,7 +84,7 @@ class _AddBudgetIncomeScreenState extends State<AddBudgetIncomeScreen> {
   }
 
   Future<void> _openInvestorPicker() async {
-    final selected = await showModalBottomSheet<InvestorPickerResult>(
+    final selected = await showWayPayBottomSheet<InvestorPickerResult>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,

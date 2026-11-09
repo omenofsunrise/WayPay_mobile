@@ -74,24 +74,15 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
     final controller = TextEditingController(text: initialValue);
     final result = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(title),
-        content: TextField(
+      builder: (dialogContext) => WayPayModal(
+        title: title,
+        onClose: () => Navigator.pop(dialogContext),
+        onPrimary: () => Navigator.pop(dialogContext, controller.text.trim()),
+        child: TextField(
           controller: controller,
           autofocus: true,
           decoration: const InputDecoration(labelText: 'Название пула'),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Отмена'),
-          ),
-          TextButton(
-            onPressed: () =>
-                Navigator.pop(dialogContext, controller.text.trim()),
-            child: const Text('Сохранить'),
-          ),
-        ],
       ),
     );
     controller.dispose();
@@ -124,22 +115,12 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
         if (name == null || name.isEmpty || name == pool.name) return;
         await source.updateInvestorPoolName(pool.id, name);
       } else if (action == 'delete') {
-        final confirmed = await showDialog<bool>(
-          context: context,
-          builder: (dialogContext) => AlertDialog(
-            title: const Text('Удалить пул?'),
-            content: Text('Пул «${pool.name}» будет удалён.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext, false),
-                child: const Text('Отмена'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext, true),
-                child: const Text('Удалить'),
-              ),
-            ],
-          ),
+        final confirmed = await showWayPayConfirmDialog(
+          context,
+          title: 'Удалить пул?',
+          message: 'Пул «${pool.name}» будет удалён.',
+          confirmText: 'Удалить',
+          isDestructive: true,
         );
         if (confirmed != true) return;
         await source.deleteInvestorPool(pool.id);
@@ -258,7 +239,7 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
         padding: const EdgeInsets.only(bottom: 24),
         children: [
           if (pools.isNotEmpty) ...[
-            const _SectionTitle(text: 'Пулы'),
+            const WayPaySectionHeader(title: 'Пулы'),
             const SizedBox(height: 8),
             ...pools.map(
               (pool) => Padding(
@@ -283,24 +264,6 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
   List<InvestorPoolModel> _extractPools(InvestorPoolState state) {
     if (state is InvestorPoolLoaded) return state.items;
     return [];
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
-        color: Color(AppColors.uiBorder),
-      ),
-    );
   }
 }
 
@@ -415,7 +378,7 @@ class _InvestorPoolCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: _InfoColumn(
+                      child: WayPayInfoItem(
                         label: 'Касса пула',
                         value: _formatCurrency(pool.balance),
                       ),
@@ -427,7 +390,7 @@ class _InvestorPoolCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _InfoColumn(
+                      child: WayPayInfoItem(
                         label: 'Активен до',
                         value: _formatDate(pool.activeUntil),
                       ),
@@ -446,38 +409,6 @@ class _InvestorPoolCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _InfoColumn extends StatelessWidget {
-  const _InfoColumn({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            color: Color(AppColors.uiBorder),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(AppColors.black),
-          ),
-        ),
-      ],
     );
   }
 }

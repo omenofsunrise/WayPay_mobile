@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waypay_mobile/assets/resources.dart';
-import 'package:waypay_mobile/core/widgets/dashboard_info_mini_card.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/analytic_items_cubit.dart';
 import 'package:waypay_mobile/features/analytics/presentation/cubit/analytic_items_state.dart';
 import 'package:intl/intl.dart';
@@ -49,38 +48,38 @@ class DashboardInfoCard extends StatelessWidget {
               childAspectRatio: 1.45,
             ),
             children: [
-              DashboardInfoMiniCard(
+              WayPayMetricCard.asset(
                 circleColor: const Color(AppColors.greenTie),
                 iconAsset: SvgIcons.investition,
                 title: 'Сумма инвестиций',
                 value: currencyFormatter.format(data.investmentAmount),
               ),
-              DashboardInfoMiniCard(
+              WayPayMetricCard.asset(
                 circleColor: const Color(AppColors.greenTie),
                 iconAsset: SvgIcons.cash,
                 title: 'Остаток в кассе',
                 value: currencyFormatter.format(data.cash),
               ),
-              DashboardInfoMiniCard(
+              WayPayMetricCard.asset(
                 circleColor: const Color(AppColors.greenTie),
                 iconAsset: SvgIcons.rub,
                 title: 'Сумма остатков',
                 value: currencyFormatter.format(data.restAmount),
               ),
-              DashboardInfoMiniCard(
+              WayPayMetricCard.asset(
                 circleColor: const Color(AppColors.orangeTie),
                 iconAsset: SvgIcons.delay,
                 title: 'Просрочка',
                 value: currencyFormatter.format(data.latePayment),
                 valueColor: const Color(0xFFFF5A5A),
               ),
-              DashboardInfoMiniCard(
+              WayPayMetricCard.asset(
                 circleColor: const Color(0x4D14BFDB),
                 iconAsset: SvgIcons.doc,
                 title: 'Активные договоры',
                 value: numberFormatter.format(data.activeCredits),
               ),
-              DashboardInfoMiniCard(
+              WayPayMetricCard.asset(
                 circleColor: const Color(0x4D14BFDB),
                 iconAsset: SvgIcons.doc,
                 title: 'Закрытые договоры',

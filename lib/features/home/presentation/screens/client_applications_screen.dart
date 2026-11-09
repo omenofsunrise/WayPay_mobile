@@ -129,7 +129,7 @@ class _ClientApplicationsScreenState extends State<ClientApplicationsScreen>
 
   Future<void> _openFilters() async {
     BottomNavController.instance.hide();
-    final result = await showModalBottomSheet<ClientApplicationFilters>(
+    final result = await showWayPayBottomSheet<ClientApplicationFilters>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -303,15 +303,18 @@ class _ApplicationsTabContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (data.isLoading && data.items.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const WayPayLoadingState();
     }
 
     if (data.error != null) {
-      return _ErrorView(message: data.error!, onRetry: onRetry);
+      return WayPayErrorState(message: data.error!, onRetry: () => onRetry());
     }
 
     if (data.items.isEmpty) {
-      return const _EmptyApplicationsView();
+      return const WayPayEmptyState(
+        title: 'Заявок пока нет',
+        icon: Icons.inbox_outlined,
+      );
     }
 
     return RefreshIndicator(
@@ -339,69 +342,6 @@ class _ApplicationsTabContent extends StatelessWidget {
             onTap: () => onApplicationTap(application),
           );
         },
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.message, required this.onRetry});
-
-  final String message;
-  final Future<void> Function() onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.red, fontSize: 15),
-            ),
-            const SizedBox(height: 12),
-            DefaultButton(
-              text: 'Повторить',
-              onPressed: () => onRetry(),
-              color: const Color(AppColors.primary),
-              textColor: Colors.white,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyApplicationsView extends StatelessWidget {
-  const _EmptyApplicationsView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          Icon(
-            Icons.inbox_outlined,
-            size: 48,
-            color: Color(AppColors.uiBorder),
-          ),
-          SizedBox(height: 12),
-          Text(
-            'Нет заявок по текущим фильтрам',
-            style: TextStyle(
-              fontSize: 15,
-              color: Color(AppColors.uiBorder),
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
       ),
     );
   }

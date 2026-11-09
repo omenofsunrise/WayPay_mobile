@@ -169,24 +169,11 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen>
   }
 
   Future<void> _reinvestPool() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Реинвестировать доход?'),
-        content: const Text(
-          'Текущий доход инвесторов пула будет добавлен к инвестициям.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Отмена'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Реинвестировать'),
-          ),
-        ],
-      ),
+    final confirmed = await showWayPayConfirmDialog(
+      context,
+      title: 'Реинвестировать доход?',
+      message: 'Текущий доход инвесторов пула будет добавлен к инвестициям.',
+      confirmText: 'Реинвестировать',
     );
     if (confirmed != true) return;
     try {
@@ -257,25 +244,17 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen>
         );
         final saved = await showDialog<bool>(
           context: context,
-          builder: (dialogContext) => AlertDialog(
-            title: const Text('Изменить инвестицию'),
-            content: TextField(
+          builder: (dialogContext) => WayPayModal(
+            title: 'Изменить инвестицию',
+            onClose: () => Navigator.pop(dialogContext, false),
+            onPrimary: () => Navigator.pop(dialogContext, true),
+            child: TextField(
               controller: controller,
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
               decoration: const InputDecoration(labelText: 'Сумма, ₽'),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext, false),
-                child: const Text('Отмена'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext, true),
-                child: const Text('Сохранить'),
-              ),
-            ],
           ),
         );
         final amount = double.tryParse(
@@ -448,13 +427,18 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _PoolNameCard(
-                                name: (_reportData?['name'] ?? widget.pool.name)
-                                    .toString(),
-                                balance: _asDouble(
-                                  _reportData?['balance'] ??
-                                      widget.pool.balance,
+                              WayPayEntityHeaderCard(
+                                title:
+                                    (_reportData?['name'] ?? widget.pool.name)
+                                        .toString(),
+                                subtitle: 'Инвестиционный пул',
+                                icon: const Icon(
+                                  Icons.account_balance_outlined,
+                                  color: Color(AppColors.primary),
                                 ),
+                                metricLabel: 'Касса пула',
+                                metricValue:
+                                    '${NumberFormat.decimalPattern('ru_RU').format(_asDouble(_reportData?['balance'] ?? widget.pool.balance))} ₽',
                               ),
                               const SizedBox(height: 16),
                               _AnalyticsGrid(metrics: _buildMetrics()),
@@ -588,12 +572,12 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen>
   Widget _buildOperations() {
     if (_operationsTab == 'payouts') {
       if (_payouts.isEmpty) {
-        return const _PoolEmptyOperations(text: 'Выплат нет');
+        return const WayPayEmptyState(title: 'Выплат нет');
       }
       return Column(
         children: _payouts
             .map(
-              (item) => _PoolOperationCard(
+              (item) => WayPayOperationTile(
                 title: '${_formatNumber(item.amount)} ₽',
                 subtitle:
                     '${DateFormat('dd.MM.yyyy').format(item.payoutDate)} · ${item.employeeFullName}',
@@ -608,12 +592,12 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen>
     }
     if (_operationsTab == 'contributions') {
       if (_contributions.isEmpty) {
-        return const _PoolEmptyOperations(text: 'Инвестиций нет');
+        return const WayPayEmptyState(title: 'Инвестиций нет');
       }
       return Column(
         children: _contributions
             .map(
-              (item) => _PoolOperationCard(
+              (item) => WayPayOperationTile(
                 title: '${_formatNumber(item.amount)} ₽',
                 subtitle:
                     '${DateFormat('dd.MM.yyyy').format(item.date)} · ${item.investorNickname ?? 'Инвестор'}',
@@ -645,12 +629,12 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen>
     }
     if (_operationsTab == 'credits') {
       if (_credits.isEmpty) {
-        return const _PoolEmptyOperations(text: 'Договоров нет');
+        return const WayPayEmptyState(title: 'Договоров нет');
       }
       return Column(
         children: _credits
             .map(
-              (item) => _PoolOperationCard(
+              (item) => WayPayOperationTile(
                 title: item.name?.isNotEmpty == true
                     ? 'Договор №${item.name}'
                     : 'Договор №${item.id}',
@@ -662,110 +646,18 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen>
       );
     }
     if (_reinvestments.isEmpty) {
-      return const _PoolEmptyOperations(text: 'Реинвестиций нет');
+      return const WayPayEmptyState(title: 'Реинвестиций нет');
     }
     return Column(
       children: _reinvestments
           .map(
-            (item) => _PoolOperationCard(
+            (item) => WayPayOperationTile(
               title: '${_formatNumber(item.amount)} ₽',
               subtitle:
                   '${DateFormat('dd.MM.yyyy').format(item.date)} · ${item.investorNickname}',
             ),
           )
           .toList(),
-    );
-  }
-}
-
-class _PoolNameCard extends StatelessWidget {
-  const _PoolNameCard({required this.name, required this.balance});
-
-  final String name;
-  final double balance;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E5EA)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0F000000),
-            offset: Offset(0, 4),
-            blurRadius: 16,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE4F4F1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.account_balance_outlined,
-                  color: Color(AppColors.primary),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(AppColors.black),
-                        fontSize: 19,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    const Text(
-                      'Инвестиционный пул',
-                      style: TextStyle(
-                        color: Color(AppColors.uiBorder),
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Касса пула',
-            style: const TextStyle(
-              color: Color(AppColors.uiBorder),
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${NumberFormat.decimalPattern('ru_RU').format(balance)} ₽',
-            style: const TextStyle(
-              color: Color(AppColors.black),
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.5,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -859,13 +751,13 @@ class _PoolInvestorCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: _InfoColumn(
+                        child: WayPayInfoItem(
                           label: 'Инвестиции',
                           value: _formatCurrency(investor.investmentAmount),
                         ),
                       ),
                       Expanded(
-                        child: _InfoColumn(
+                        child: WayPayInfoItem(
                           label: 'Добавлен',
                           value: _formatDate(investor.createdAt),
                         ),
@@ -1046,7 +938,17 @@ class _AnalyticsGrid extends StatelessWidget {
               .map(
                 (metric) => SizedBox(
                   width: itemWidth,
-                  child: _MetricCard(metric: metric),
+                  child: WayPayMetricCard(
+                    title: metric.title,
+                    value: metric.value,
+                    valueColor: metric.valueColor,
+                    iconBackground:
+                        metric.backgroundColor ??
+                        (metric.highlighted
+                            ? const Color(0x4D14BFDB)
+                            : const Color(0xFFE4F4F1)),
+                    icon: SvgPicture.asset(metric.icon, width: 20, height: 20),
+                  ),
                 ),
               )
               .toList(),
@@ -1072,186 +974,4 @@ class _MetricData {
   final Color valueColor;
   final Color? backgroundColor;
   final bool highlighted;
-}
-
-class _MetricCard extends StatelessWidget {
-  const _MetricCard({required this.metric});
-
-  final _MetricData metric;
-
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: 160, maxWidth: 171),
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 128),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x14000809),
-              offset: Offset(2, 2),
-              blurRadius: 4,
-            ),
-            BoxShadow(
-              color: Color(0x05000809),
-              offset: Offset(0, 0),
-              blurRadius: 6,
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color:
-                    metric.backgroundColor ??
-                    (metric.highlighted
-                        ? const Color(0x4D14BFDB)
-                        : const Color(0xFFE4F4F1)),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Center(
-                child: SvgPicture.asset(metric.icon, width: 20, height: 20),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              metric.title,
-              style: const TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-                height: 20 / 14,
-                letterSpacing: 0,
-                color: Color(AppColors.uiBorder),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              metric.value,
-              style: TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.w600,
-                fontSize: 20,
-                height: 1.2,
-                letterSpacing: 0,
-                color: metric.valueColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _InfoColumn extends StatelessWidget {
-  const _InfoColumn({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            color: Color(AppColors.uiBorder),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(AppColors.black),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _PoolOperationCard extends StatelessWidget {
-  const _PoolOperationCard({
-    required this.title,
-    required this.subtitle,
-    this.trailing,
-  });
-
-  final String title;
-  final String subtitle;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE8ECF1)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(AppColors.uiBorder),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (trailing != null) trailing!,
-        ],
-      ),
-    );
-  }
-}
-
-class _PoolEmptyOperations extends StatelessWidget {
-  const _PoolEmptyOperations({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: const TextStyle(color: Color(AppColors.uiBorder)),
-      ),
-    );
-  }
 }

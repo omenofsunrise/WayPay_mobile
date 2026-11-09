@@ -99,7 +99,7 @@ class _PaymentIncomeScreenState extends State<PaymentIncomeScreen> {
   }
 
   Future<void> _openFilterSheet() async {
-    final result = await showModalBottomSheet<_PaymentFilterResult>(
+    final result = await showWayPayBottomSheet<_PaymentFilterResult>(
       context: context,
       isScrollControlled: true,
       barrierColor: Colors.white.withValues(alpha: 0.7),
@@ -445,7 +445,7 @@ class _PaymentFilterFormState extends State<_PaymentFilterForm> {
 
   Future<void> _pickMonth() async {
     BottomNavController.instance.hide();
-    final result = await showModalBottomSheet<int>(
+    final result = await showWayPayBottomSheet<int>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -477,7 +477,7 @@ class _PaymentFilterFormState extends State<_PaymentFilterForm> {
     final currentYear = DateTime.now().year;
     final years = List.generate(6, (index) => currentYear - 2 + index);
     BottomNavController.instance.hide();
-    final result = await showModalBottomSheet<int>(
+    final result = await showWayPayBottomSheet<int>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -504,7 +504,7 @@ class _PaymentFilterFormState extends State<_PaymentFilterForm> {
   }
 
   Future<void> _selectInvestor() async {
-    final result = await showModalBottomSheet<InvestorPickerResult>(
+    final result = await showWayPayBottomSheet<InvestorPickerResult>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,

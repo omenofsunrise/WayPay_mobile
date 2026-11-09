@@ -106,7 +106,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
   Future<void> _showInvestorPicker() async {
     BottomNavController.instance.hide();
 
-    final result = await showModalBottomSheet<InvestorPickerResult>(
+    final result = await showWayPayBottomSheet<InvestorPickerResult>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -156,7 +156,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
   Future<void> _showClientPicker() async {
     BottomNavController.instance.hide();
 
-    final client = await showModalBottomSheet<ClientModel>(
+    final client = await showWayPayBottomSheet<ClientModel>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -186,7 +186,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
   Future<void> _showGuarantorPicker() async {
     BottomNavController.instance.hide();
 
-    final client = await showModalBottomSheet<ClientModel>(
+    final client = await showWayPayBottomSheet<ClientModel>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -224,7 +224,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
         .read<CreditCreationCubit>()
         .state
         .selectedCatalog;
-    final result = await showModalBottomSheet<ObjectTypeModel?>(
+    final result = await showWayPayBottomSheet<ObjectTypeModel?>(
       context: context,
       clipBehavior: Clip.antiAlias,
       backgroundColor: Colors.white,
@@ -252,7 +252,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
         .read<CreditCreationCubit>()
         .state
         .selectedCategory;
-    final result = await showModalBottomSheet<ObjectTypeModel?>(
+    final result = await showWayPayBottomSheet<ObjectTypeModel?>(
       context: context,
       clipBehavior: Clip.antiAlias,
       backgroundColor: Colors.white,
@@ -300,14 +300,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
   }
 
   Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: AppStyle.manrope(
-        size: 18,
-        weight: FontWeight.w600,
-        color: const Color(AppColors.black),
-      ),
-    );
+    return WayPaySectionHeader(title: title);
   }
 
   Widget _buildDropdownSuffix({

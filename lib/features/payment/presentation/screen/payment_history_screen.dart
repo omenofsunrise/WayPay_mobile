@@ -96,7 +96,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   }
 
   Future<void> _openFilters() async {
-    final result = await showModalBottomSheet<PaymentHistoryFilters>(
+    final result = await showWayPayBottomSheet<PaymentHistoryFilters>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -118,7 +118,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   }
 
   Future<void> _openSortSheet() async {
-    final result = await showModalBottomSheet<PaymentSortOption>(
+    final result = await showWayPayBottomSheet<PaymentSortOption>(
       context: context,
       useRootNavigator: true,
       clipBehavior: Clip.antiAlias,

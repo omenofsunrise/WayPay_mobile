@@ -46,27 +46,14 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
   }
 
   Future<void> _revoke(SessionModel s) async {
-    final agreed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: Color(AppColors.background),
-        title: const Text('Завершить сессию?'),
-        content: Text(
-          s.isCurrentSession
-              ? 'Вы собираетесь завершить ТЕКУЩУЮ сессию. После этого потребуется повторный вход.'
-              : 'Вы уверены, что хотите завершить выбранную сессию?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Отмена'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Завершить'),
-          ),
-        ],
-      ),
+    final agreed = await showWayPayConfirmDialog(
+      context,
+      title: 'Завершить сессию?',
+      message: s.isCurrentSession
+          ? 'Вы собираетесь завершить ТЕКУЩУЮ сессию. После этого потребуется повторный вход.'
+          : 'Вы уверены, что хотите завершить выбранную сессию?',
+      confirmText: 'Завершить',
+      isDestructive: true,
     );
     if (agreed != true) return;
 

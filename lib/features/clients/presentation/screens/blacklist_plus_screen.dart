@@ -164,20 +164,20 @@ class _BlacklistPlusScreenState extends State<BlacklistPlusScreen> {
   }
 
   Widget _buildContent() {
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) return const WayPayLoadingState();
     if (_error != null) {
-      return _MessageState(icon: Icons.error_outline, text: _error!);
+      return WayPayErrorState(message: _error!);
     }
     if (!_searched) {
-      return const _MessageState(
+      return const WayPayEmptyState(
         icon: Icons.fact_check_outlined,
-        text: 'Введите ФИО или телефон, чтобы проверить человека в ЧС+',
+        title: 'Введите ФИО или телефон, чтобы проверить человека в ЧС+',
       );
     }
     if (_items.isEmpty) {
-      return const _MessageState(
+      return const WayPayEmptyState(
         icon: Icons.verified_user_outlined,
-        text: 'Совпадений в ЧС+ не найдено',
+        title: 'Совпадений в ЧС+ не найдено',
       );
     }
     return ListView.separated(
@@ -241,82 +241,29 @@ class _BlacklistPlusCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          _InfoRow(icon: Icons.phone_outlined, value: entry.phone),
-          _InfoRow(
+          WayPayIconText(icon: Icons.phone_outlined, text: entry.phone),
+          WayPayIconText(
             icon: Icons.cake_outlined,
-            value: 'Дата рождения: ${_date(entry.birthdate)}',
+            text: 'Дата рождения: ${_date(entry.birthdate)}',
           ),
           if (entry.document.isNotEmpty)
-            _InfoRow(
+            WayPayIconText(
               icon: Icons.badge_outlined,
-              value:
+              text:
                   'Паспорт: ${entry.document}${entry.documentIssueDate == null ? '' : ' от ${_date(entry.documentIssueDate)}'}',
             ),
           if (entry.address.isNotEmpty)
-            _InfoRow(icon: Icons.location_on_outlined, value: entry.address),
+            WayPayIconText(
+              icon: Icons.location_on_outlined,
+              text: entry.address,
+            ),
           if (activeDebts > 0)
-            _InfoRow(
+            WayPayIconText(
               icon: Icons.warning_amber_rounded,
-              value: 'Активных долгов: $activeDebts',
+              text: 'Активных долгов: $activeDebts',
               color: Colors.red,
             ),
         ],
-      ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.icon, required this.value, this.color});
-
-  final IconData icon;
-  final String value;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 18, color: color ?? const Color(AppColors.uiBorder)),
-          const SizedBox(width: 9),
-          Expanded(
-            child: Text(
-              value.isEmpty ? '—' : value,
-              style: TextStyle(fontSize: 14, color: color),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MessageState extends StatelessWidget {
-  const _MessageState({required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 48, color: const Color(AppColors.uiBorder)),
-            const SizedBox(height: 12),
-            Text(
-              text,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(AppColors.uiBorder)),
-            ),
-          ],
-        ),
       ),
     );
   }

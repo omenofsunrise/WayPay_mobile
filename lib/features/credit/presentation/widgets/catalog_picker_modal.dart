@@ -212,7 +212,7 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
 
   Future<void> _openCreateCatalog() async {
     final bloc = context.read<ObjectTypeBloc>();
-    final created = await showModalBottomSheet<ObjectTypeModel>(
+    final created = await showWayPayBottomSheet<ObjectTypeModel>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -231,7 +231,7 @@ class _CatalogPickerModalState extends State<CatalogPickerModal> {
   }
 
   Future<void> _editCatalog(ObjectTypeModel catalog) async {
-    await showModalBottomSheet<void>(
+    await showWayPayBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

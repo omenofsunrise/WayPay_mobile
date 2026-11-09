@@ -76,11 +76,11 @@ class QueueClientCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: _InfoColumn(label: 'Сумма', value: amount),
+                      child: WayPayInfoItem(label: 'Сумма', value: amount),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _InfoColumn(
+                      child: WayPayInfoItem(
                         label: 'Телефон',
                         value: phone,
                         alignRight: true,
@@ -93,46 +93,6 @@ class QueueClientCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _InfoColumn extends StatelessWidget {
-  const _InfoColumn({
-    required this.label,
-    required this.value,
-    this.alignRight = false,
-  });
-
-  final String label;
-  final String value;
-  final bool alignRight;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: alignRight
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            color: Color(AppColors.uiBorder),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          textAlign: alignRight ? TextAlign.end : TextAlign.start,
-          style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            color: Color(AppColors.black),
-          ),
-        ),
-      ],
     );
   }
 }

@@ -99,7 +99,7 @@ class ClientApplicationCard extends StatelessWidget {
                   children: [
                     Expanded(
                       flex: 2,
-                      child: _InfoRow(
+                      child: WayPayInfoItem(
                         label: 'Товар',
                         value: productName,
                         maxLines: 1,
@@ -107,7 +107,7 @@ class ClientApplicationCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _InfoRow(
+                      child: WayPayInfoItem(
                         label: 'Стоимость',
                         value: amount,
                         alignRight: true,
@@ -120,51 +120,6 @@ class ClientApplicationCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({
-    required this.label,
-    required this.value,
-    this.alignRight = false,
-    this.maxLines,
-  });
-
-  final String label;
-  final String value;
-  final bool alignRight;
-  final int? maxLines;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: alignRight
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: Color(AppColors.uiBorder),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          textAlign: alignRight ? TextAlign.end : TextAlign.start,
-          style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            color: Color(AppColors.black),
-          ),
-          maxLines: maxLines,
-          overflow: maxLines != null ? TextOverflow.ellipsis : null,
-        ),
-      ],
     );
   }
 }

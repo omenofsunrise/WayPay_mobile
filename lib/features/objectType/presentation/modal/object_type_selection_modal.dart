@@ -65,7 +65,7 @@ class _ObjectTypeSelectionModalState extends State<ObjectTypeSelectionModal> {
   }
 
   void _openCreateObjectTypeModal() {
-    showModalBottomSheet<ObjectTypeModel>(
+    showWayPayBottomSheet<ObjectTypeModel>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -90,7 +90,7 @@ class _ObjectTypeSelectionModalState extends State<ObjectTypeSelectionModal> {
     BuildContext context,
     ObjectTypeModel objectType,
   ) {
-    showModalBottomSheet(
+    showWayPayBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
@@ -156,7 +156,7 @@ class _ObjectTypeSelectionModalState extends State<ObjectTypeSelectionModal> {
   }
 
   void _openEditObjectTypeModal(ObjectTypeModel objectType) {
-    showModalBottomSheet(
+    showWayPayBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -166,35 +166,19 @@ class _ObjectTypeSelectionModalState extends State<ObjectTypeSelectionModal> {
     });
   }
 
-  void _showDeleteConfirmationDialog(
+  Future<void> _showDeleteConfirmationDialog(
     BuildContext context,
     ObjectTypeModel objectType,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Удалить каталог?',
-          style: AppStyle.manrope(size: 18, weight: FontWeight.w600),
-        ),
-        content: Text(
+  ) async {
+    final confirmed = await showWayPayConfirmDialog(
+      context,
+      title: 'Удалить каталог?',
+      message:
           'Вы уверены, что хотите удалить каталог "${objectType.name}"? Это действие нельзя отменить.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('Отмена'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _deleteObjectType(objectType);
-            },
-            child: Text('Удалить'),
-          ),
-        ],
-      ),
+      confirmText: 'Удалить',
+      isDestructive: true,
     );
+    if (confirmed) _deleteObjectType(objectType);
   }
 
   void _deleteObjectType(ObjectTypeModel objectType) {

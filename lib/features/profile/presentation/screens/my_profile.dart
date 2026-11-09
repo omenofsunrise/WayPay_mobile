@@ -52,22 +52,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   }
 
   Future<void> _deletePhoto() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Удалить фото?'),
-        content: const Text('Вы уверены, что хотите удалить фотографию?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Отмена'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Удалить'),
-          ),
-        ],
-      ),
+    final confirmed = await showWayPayConfirmDialog(
+      context,
+      title: 'Удалить фото?',
+      message: 'Вы уверены, что хотите удалить фотографию?',
+      confirmText: 'Удалить',
+      isDestructive: true,
     );
 
     if (confirmed == true) {

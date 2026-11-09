@@ -130,7 +130,7 @@ class _ClientApplicationsFiltersFormState
   }
 
   Future<void> _selectRegion() async {
-    final selected = await showModalBottomSheet<String>(
+    final selected = await showWayPayBottomSheet<String>(
       context: context,
       builder: (_) => ClientApplicationsFilterSelector(
         title: 'Регион',
@@ -145,7 +145,7 @@ class _ClientApplicationsFiltersFormState
   }
 
   Future<void> _selectDistrict() async {
-    final selected = await showModalBottomSheet<String>(
+    final selected = await showWayPayBottomSheet<String>(
       context: context,
       builder: (_) => ClientApplicationsFilterSelector(
         title: 'Район',

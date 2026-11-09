@@ -150,19 +150,28 @@ class PaymentPreviewCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: _InfoColumn(
+                      child: WayPayInfoItem(
                         label: 'Дата платежа',
                         value: _formattedDate,
+                        valueStyle: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 24),
                     Expanded(
                       child: Align(
                         alignment: Alignment.centerLeft,
-                        child: _InfoColumn(
+                        child: WayPayInfoItem(
                           label: 'Платеж',
                           value: _formattedAmount,
                           valueColor: const Color(AppColors.primary),
+                          valueStyle: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w500,
+                            color: Color(AppColors.primary),
+                          ),
                         ),
                       ),
                     ),
@@ -173,46 +182,6 @@ class PaymentPreviewCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _InfoColumn extends StatelessWidget {
-  const _InfoColumn({
-    required this.label,
-    required this.value,
-    this.valueColor = const Color(AppColors.black),
-  });
-
-  final String label;
-  final String value;
-  final Color valueColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            height: 24 / 14,
-            color: Color(AppColors.uiBorder),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w500,
-            height: 24 / 22,
-            color: valueColor,
-          ),
-        ),
-      ],
     );
   }
 }

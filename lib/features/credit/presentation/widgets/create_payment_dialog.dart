@@ -449,7 +449,7 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
   }
 
   void _showCardPicker() {
-    showModalBottomSheet<int>(
+    showWayPayBottomSheet<int>(
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(

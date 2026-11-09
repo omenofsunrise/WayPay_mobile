@@ -168,7 +168,7 @@ class _CompanyDataScreenState extends State<CompanyDataScreen> {
 
   Future<void> _pickCard() async {
     if (_cards.isEmpty) return;
-    final result = await showModalBottomSheet<int>(
+    final result = await showWayPayBottomSheet<int>(
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(

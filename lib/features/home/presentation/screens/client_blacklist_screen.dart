@@ -132,16 +132,19 @@ class _ClientBlacklistScreenState extends State<ClientBlacklistScreen> {
     }
 
     if (state is BlacklistLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const WayPayLoadingState();
     }
 
     if (state is BlacklistError) {
-      return _ErrorView(message: state.message, onRetry: _retryLastSearch);
+      return WayPayErrorState(
+        message: state.message,
+        onRetry: _retryLastSearch,
+      );
     }
 
     if (state is BlacklistLoaded) {
       if (state.clients.isEmpty) {
-        return const _EmptyView();
+        return const WayPayEmptyState(title: 'Клиенты не найдены');
       }
 
       return ListView.builder(
@@ -175,52 +178,6 @@ class _StartSearchPlaceholder extends StatelessWidget {
             fontSize: 15,
             color: Color(AppColors.uiBorder),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyView extends StatelessWidget {
-  const _EmptyView();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Клиенты не найдены',
-        style: TextStyle(
-          fontSize: 16,
-          color: Color(AppColors.uiBorder),
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.red),
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton(onPressed: onRetry, child: const Text('Повторить')),
-          ],
         ),
       ),
     );

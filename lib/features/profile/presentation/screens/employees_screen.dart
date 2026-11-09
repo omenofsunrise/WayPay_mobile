@@ -25,7 +25,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
 
   void _openAddEmployeeScreen() {
     final bloc = context.read<EmployeesBloc>();
-    showModalBottomSheet<void>(
+    showWayPayBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -178,10 +178,13 @@ class _EmployeeCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: _InfoRow(label: 'Роль', value: employee.roleLabel),
+                      child: WayPayInfoItem(
+                        label: 'Роль',
+                        value: employee.roleLabel,
+                      ),
                     ),
                     Expanded(
-                      child: _InfoRow(
+                      child: WayPayInfoItem(
                         label: 'Мин надбавка',
                         value: '${employee.minSurcharge}',
                       ),
@@ -192,10 +195,16 @@ class _EmployeeCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: _InfoRow(label: 'Адрес', value: employee.address),
+                      child: WayPayInfoItem(
+                        label: 'Адрес',
+                        value: employee.address,
+                      ),
                     ),
                     Expanded(
-                      child: _InfoRow(label: 'Телефон', value: employee.phone),
+                      child: WayPayInfoItem(
+                        label: 'Телефон',
+                        value: employee.phone,
+                      ),
                     ),
                   ],
                 ),
@@ -204,32 +213,6 @@ class _EmployeeCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _InfoRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: AppStyle.manrope(
-            size: 14,
-            weight: FontWeight.w400,
-            color: const Color(0xFF6B7280),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(value, style: AppStyle.manrope(size: 16, weight: FontWeight.w500)),
-      ],
     );
   }
 }

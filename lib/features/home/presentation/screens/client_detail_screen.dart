@@ -19,7 +19,6 @@ import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_dat
 import 'package:waypay_mobile/features/credit/data/models/credit_model.dart';
 import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart';
 import 'package:waypay_mobile/features/home/presentation/widgets/contract_history_card.dart';
-import 'package:waypay_mobile/features/home/presentation/widgets/info_section_card.dart';
 import 'package:waypay_mobile/features/home/presentation/widgets/upload_photo_placeholder.dart';
 import 'package:waypay_mobile/features/note/data/data_sources/note_remote_data_source.dart';
 import 'package:waypay_mobile/features/note/data/models/note_create_request.dart';
@@ -414,22 +413,22 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
                 ),
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
               SliverToBoxAdapter(
-                child: InfoSectionCard(
+                child: WayPayInfoCard(
                   title: 'ФИО клиента',
-                  fields: [InfoFieldData(value: _fullName)],
+                  fields: [WayPayInfoField(value: _fullName)],
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
               SliverToBoxAdapter(
-                child: InfoSectionCard(
+                child: WayPayInfoCard(
                   fieldsPerRow: 2,
                   fields: [
-                    InfoFieldData(
+                    WayPayInfoField(
                       label: 'Телефон',
                       value: _phone,
                       onTap: _phone == '-' ? null : () => _callPhone(_phone),
                     ),
-                    InfoFieldData(
+                    WayPayInfoField(
                       label: 'WhatsApp',
                       value: _whatsApp,
                       valueTextAlign: TextAlign.end,
@@ -442,30 +441,30 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
               SliverToBoxAdapter(
-                child: InfoSectionCard(
+                child: WayPayInfoCard(
                   fields: [
-                    InfoFieldData(label: 'Дата рождения', value: _birthDate),
+                    WayPayInfoField(label: 'Дата рождения', value: _birthDate),
                   ],
                 ),
               ),
               if (_hasPassportSection) ...[
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
                 SliverToBoxAdapter(
-                  child: InfoSectionCard(
+                  child: WayPayInfoCard(
                     fieldsPerRow: 1,
                     fields: [
                       if (_passportNumber != null)
-                        InfoFieldData(
+                        WayPayInfoField(
                           label: 'Серия и номер паспорта',
                           value: _passportNumber!,
                         ),
                       if (_registrationAddress != null)
-                        InfoFieldData(
+                        WayPayInfoField(
                           label: 'Адрес регистрации',
                           value: _registrationAddress!,
                         ),
                       if (_actualAddress != null)
-                        InfoFieldData(
+                        WayPayInfoField(
                           label: 'Фактический адрес',
                           value: _actualAddress!,
                         ),

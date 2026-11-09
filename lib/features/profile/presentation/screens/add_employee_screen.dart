@@ -130,7 +130,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   }
 
   void _pickRole() async {
-    final role = await showModalBottomSheet<EmployeeRole>(
+    final role = await showWayPayBottomSheet<EmployeeRole>(
       context: context,
       builder: (sheetContext) => SafeArea(
         child: Column(

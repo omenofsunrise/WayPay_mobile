@@ -104,24 +104,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
   }
 
   Future<bool> _confirm(String title, String message) async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (dialogContext) => AlertDialog(
-            title: Text(title),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext, false),
-                child: const Text('Отмена'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext, true),
-                child: const Text('Подтвердить'),
-              ),
-            ],
-          ),
-        ) ??
-        false;
+    return showWayPayConfirmDialog(context, title: title, message: message);
   }
 
   Future<void> _runInvestorAction(
@@ -417,7 +400,7 @@ class _InvestorCard extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: _InfoColumn(
+                          child: WayPayInfoItem(
                             label: 'Касса',
                             value: _formatCurrency(investor.balance),
                           ),
@@ -429,7 +412,7 @@ class _InvestorCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: _InfoColumn(
+                          child: WayPayInfoItem(
                             label: 'Договор до',
                             value: endDateText,
                           ),
@@ -494,38 +477,6 @@ class _AddInvestorButton extends StatelessWidget {
           child: Icon(Icons.person_add_alt_1_outlined, color: Colors.white),
         ),
       ),
-    );
-  }
-}
-
-class _InfoColumn extends StatelessWidget {
-  const _InfoColumn({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            color: Color(AppColors.uiBorder),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(AppColors.black),
-          ),
-        ),
-      ],
     );
   }
 }

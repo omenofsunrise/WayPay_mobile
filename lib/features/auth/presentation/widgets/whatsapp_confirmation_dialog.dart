@@ -36,88 +36,69 @@ class _WhatsAppConfirmationDialogState
         final isLoading = state is AuthLoading;
         final error = state is AuthError ? state.message : null;
 
-        return Dialog(
-          backgroundColor: const Color(AppColors.background),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    onPressed: isLoading
-                        ? null
-                        : () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
+        return WayPayModal(
+          title: 'Подтверждение по WhatsApp',
+          subtitle: 'Введите код, отправленный на ваш номер',
+          onClose: isLoading ? null : () => Navigator.of(context).pop(),
+          primaryText: 'Подтвердить',
+          submittingText: 'Проверка...',
+          isSubmitting: isLoading,
+          primaryEnabled: _codeController.text.trim().isNotEmpty,
+          onPrimary: _submit,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Мы отправили код в WhatsApp на номер:',
+                style: AppStyle.medium16.copyWith(
+                  color: const Color(0xFF555555),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                widget.phone,
+                style: AppStyle.inter(
+                  size: 20,
+                  weight: FontWeight.w700,
+                  color: const Color(AppColors.primary),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Введите полученный код, чтобы завершить авторизацию.',
+                style: AppStyle.medium16.copyWith(
+                  color: const Color(0xFF555555),
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _codeController,
+                autofocus: true,
+                enabled: !isLoading,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.done,
+                autofillHints: const [AutofillHints.oneTimeCode],
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                textAlign: TextAlign.center,
+                style: AppStyle.inter(size: 20, weight: FontWeight.w600),
+                decoration: InputDecoration(
+                  hintText: 'Код из WhatsApp',
+                  errorText: error,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                ),
-                Text(
-                  'Подтверждение по WhatsApp',
-                  style: AppStyle.semiBold20,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Введите код, отправленный в WhatsApp на номер',
-                  style: AppStyle.medium16.copyWith(
-                    color: const Color(AppColors.grey),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.phone,
-                  style: AppStyle.inter(
-                    size: 18,
-                    weight: FontWeight.w700,
-                    color: const Color(AppColors.primary),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _codeController,
-                  autofocus: true,
-                  enabled: !isLoading,
-                  keyboardType: TextInputType.number,
-                  textInputAction: TextInputAction.done,
-                  autofillHints: const [AutofillHints.oneTimeCode],
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  textAlign: TextAlign.center,
-                  style: AppStyle.inter(size: 20, weight: FontWeight.w600),
-                  decoration: InputDecoration(
-                    hintText: 'Код из WhatsApp',
-                    errorText: error,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(
-                        color: Color(AppColors.primary),
-                        width: 2,
-                      ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(
+                      color: Color(AppColors.primary),
+                      width: 2,
                     ),
                   ),
-                  onSubmitted: isLoading ? null : (_) => _submit(),
                 ),
-                const SizedBox(height: 18),
-                if (isLoading)
-                  const CircularProgressIndicator()
-                else
-                  SizedBox(
-                    width: double.infinity,
-                    child: DefaultButton(
-                      text: 'Подтвердить',
-                      isPrimary: true,
-                      onPressed: _submit,
-                    ),
-                  ),
-              ],
-            ),
+                onChanged: (_) => setState(() {}),
+                onSubmitted: isLoading ? null : (_) => _submit(),
+              ),
+            ],
           ),
         );
       },

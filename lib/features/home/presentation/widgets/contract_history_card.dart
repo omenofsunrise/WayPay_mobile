@@ -86,7 +86,7 @@ class ContractHistoryCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: _AmountColumn(
+                      child: WayPayInfoItem(
                         label: 'Уплачено',
                         value: paidAmount,
                         valueColor: const Color(AppColors.primary),
@@ -94,7 +94,7 @@ class ContractHistoryCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _AmountColumn(
+                      child: WayPayInfoItem(
                         label: 'Остаток',
                         value: remainingAmount,
                         valueColor: const Color(AppColors.red),
@@ -107,44 +107,6 @@ class ContractHistoryCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _AmountColumn extends StatelessWidget {
-  const _AmountColumn({
-    required this.label,
-    required this.value,
-    required this.valueColor,
-  });
-
-  final String label;
-  final String value;
-  final Color valueColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Color(AppColors.uiBorder),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: valueColor,
-          ),
-        ),
-      ],
     );
   }
 }

@@ -84,14 +84,14 @@ class ClientInfoCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: _LabeledValue(
+                      child: WayPayInfoItem(
                         label: 'Дата рождения',
                         value: birthDate,
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _LabeledValue(
+                      child: WayPayInfoItem(
                         label: 'Долг',
                         value: PriceFormatter.formatPrice(debt),
                         valueColor: debt > 0
@@ -105,7 +105,7 @@ class ClientInfoCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: _LabeledValue(
+                      child: WayPayInfoItem(
                         label: 'Телефон',
                         value: phone,
                         onTap: _isCallable(phone)
@@ -115,7 +115,7 @@ class ClientInfoCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _LabeledValue(
+                      child: WayPayInfoItem(
                         label: 'WhatsApp',
                         value: whatsApp,
                         onTap: _isCallable(whatsApp)
@@ -149,59 +149,5 @@ class ClientInfoCard extends StatelessWidget {
 
   bool _isCallable(String value) {
     return normalizeRussianPhone(value) != null;
-  }
-}
-
-class _LabeledValue extends StatelessWidget {
-  const _LabeledValue({
-    required this.label,
-    required this.value,
-    this.onTap,
-    this.valueColor,
-  });
-
-  final String label;
-  final String value;
-  final VoidCallback? onTap;
-  final Color? valueColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Color(AppColors.uiBorder),
-          ),
-        ),
-        const SizedBox(height: 4),
-        if (onTap != null)
-          InkWell(
-            onTap: onTap,
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(AppColors.primary),
-              ),
-            ),
-          )
-        else
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: valueColor ?? const Color(AppColors.black),
-            ),
-          ),
-      ],
-    );
   }
 }

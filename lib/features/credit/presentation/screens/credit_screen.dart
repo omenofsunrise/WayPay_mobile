@@ -16,7 +16,6 @@ import 'package:waypay_mobile/features/credit/data/models/get_query_credits.dart
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_event.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_state.dart';
-import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
@@ -75,7 +74,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
     // FilterSheet даёт только отступы и содержимое — ни фона, ни скруглений.
     // Поверхность задаёт вызывающий, иначе лист выходит прозрачным на весь
     // экран. Параметры те же, что у рабочего листа фильтров расписания.
-    final result = await showModalBottomSheet<GetCreditsQuery>(
+    final result = await showWayPayBottomSheet<GetCreditsQuery>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -352,4 +351,3 @@ class _CreditListState extends State<_CreditList> {
     );
   }
 }
-

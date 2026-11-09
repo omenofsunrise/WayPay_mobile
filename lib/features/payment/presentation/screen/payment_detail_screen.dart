@@ -144,7 +144,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
     final credit = _credit;
     if (!_canCreatePayment || credit == null) return;
 
-    showModalBottomSheet(
+    showWayPayBottomSheet(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -267,25 +267,37 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                     ],
                   ),
                 ),
-                _StatusBadge(isPaid: _isPaid),
+                WayPayStatusBadge(
+                  text: _isPaid ? 'Оплачен' : 'Не оплачен',
+                  tone: _isPaid
+                      ? WayPayStatusTone.success
+                      : WayPayStatusTone.neutral,
+                ),
               ],
             ),
             const SizedBox(height: 20),
-            _InfoRow(label: 'Договор', value: '№ $_creditId'),
+            WayPayInfoItem(
+              label: 'Договор',
+              value: '№ $_creditId',
+              horizontal: true,
+            ),
             const SizedBox(height: 12),
-            _InfoRow(
+            WayPayInfoItem(
               label: 'Сумма договора',
               value: _formatCurrency(credit?.totalAmount),
+              horizontal: true,
             ),
             const SizedBox(height: 12),
-            _InfoRow(
+            WayPayInfoItem(
               label: 'Дата платежа',
               value: _formatIsoDate(_paymentDateRaw),
+              horizontal: true,
             ),
             const SizedBox(height: 12),
-            _InfoRow(
+            WayPayInfoItem(
               label: 'Сумма платежа',
               value: _formatCurrency(_paymentAmount),
+              horizontal: true,
             ),
             if (_canCreatePayment) ...[
               const SizedBox(height: 20),
@@ -296,72 +308,6 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
               ),
             ],
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(AppColors.uiBorder),
-            ),
-          ),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(AppColors.black),
-          ),
-          textAlign: TextAlign.right,
-        ),
-      ],
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.isPaid});
-
-  final bool isPaid;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = isPaid ? 'Оплачен' : 'Не оплачен';
-    final background = isPaid
-        ? const Color(AppColors.primaryLight)
-        : const Color(0xFFE2E4EA);
-    final color = isPaid
-        ? const Color(AppColors.primary)
-        : const Color(AppColors.black);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: color,
-          height: 1.3,
         ),
       ),
     );
