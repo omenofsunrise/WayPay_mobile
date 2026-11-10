@@ -66,6 +66,87 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _openNavigationMenu() {
+    showWayPayBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.35),
+      builder: (sheetContext) {
+        return Container(
+          height: MediaQuery.sizeOf(sheetContext).height * 0.72,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Меню',
+                        style: AppStyle.manrope(
+                          size: 24,
+                          weight: FontWeight.w700,
+                          color: const Color(AppColors.black),
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        tooltip: 'Закрыть',
+                        onPressed: () => Navigator.of(sheetContext).pop(),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: _destinations.length,
+                    separatorBuilder: (_, __) =>
+                        const Divider(height: 1, indent: 20, endIndent: 20),
+                    itemBuilder: (_, index) {
+                      final destination = _destinations[index];
+                      return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 2,
+                        ),
+                        title: Text(
+                          destination.title,
+                          style: AppStyle.manrope(
+                            size: 16,
+                            weight: FontWeight.w500,
+                            color: const Color(AppColors.black),
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.chevron_right_rounded,
+                          color: Color(AppColors.uiBorder),
+                        ),
+                        onTap: () {
+                          Navigator.of(sheetContext).pop();
+                          context.pushNamed(destination.route.toName);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   // Кнопку «+» убрали с главного экрана, её место занял колокольчик.
   // Метод оставлен, чтобы кнопку можно было вернуть одной строкой.
   // ignore: unused_element
@@ -263,6 +344,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       builder: (_, showNotifications, __) => Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          IconButton(
+                            tooltip: 'Меню',
+                            onPressed: _openNavigationMenu,
+                            icon: const Icon(
+                              Icons.menu_rounded,
+                              color: Color(AppColors.uiBorder),
+                            ),
+                          ),
                           IconButton(
                             tooltip: 'Панель управления',
                             onPressed: () => context.pushNamed(

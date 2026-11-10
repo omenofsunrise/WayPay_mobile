@@ -9,19 +9,9 @@ List<SearchDestination> getDefaultSearchDestinations() {
       keywords: ['договор', 'рассрочка', 'credit', 'contract'],
     ),
     SearchDestination(
-      title: 'Платежи (ожидаемые)',
-      route: Routes.scheduleScreen,
-      keywords: ['платежи', 'ожидаемые', 'schedule', 'календарь', 'payments'],
-    ),
-    SearchDestination(
       title: 'История платежей',
       route: Routes.paymentHistoryScreen,
       keywords: ['история', 'платеж', 'history', 'payments'],
-    ),
-    SearchDestination(
-      title: 'Клиенты',
-      route: Routes.mainClientScreen,
-      keywords: ['клиенты', 'client', 'people', 'customer'],
     ),
     SearchDestination(
       title: 'Очередь клиентов',
@@ -29,14 +19,14 @@ List<SearchDestination> getDefaultSearchDestinations() {
       keywords: ['очередь', 'queue', 'клиент'],
     ),
     SearchDestination(
-      title: 'Всего клиентов',
+      title: 'Все клиенты',
       route: Routes.clientListScreen,
-      keywords: ['все клиенты', 'clients', 'list'],
+      keywords: ['всего клиентов', 'клиенты', 'clients', 'list'],
     ),
     SearchDestination(
-      title: 'Очередь заявок',
+      title: 'Заявки клиентов',
       route: Routes.clientApplicationsScreen,
-      keywords: ['заявки', 'applications', 'lead', 'request'],
+      keywords: ['очередь заявок', 'заявки', 'applications', 'lead', 'request'],
     ),
     SearchDestination(
       title: 'Финансы',
@@ -72,16 +62,6 @@ List<SearchDestination> getDefaultSearchDestinations() {
       title: 'Аналитика',
       route: Routes.analyticsScreen,
       keywords: ['аналитика', 'статистика', 'отчёты', 'analytics', 'dashboard'],
-    ),
-    SearchDestination(
-      title: 'Калькулятор',
-      route: Routes.calculatorScreen,
-      keywords: ['калькулятор', 'расчёт', 'рассрочка', 'calculator'],
-    ),
-    SearchDestination(
-      title: 'Профиль',
-      route: Routes.profileScreen,
-      keywords: ['профиль', 'аккаунт', 'сотрудник', 'profile'],
     ),
   ];
 }

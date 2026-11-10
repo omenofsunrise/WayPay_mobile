@@ -91,8 +91,8 @@ class _SearchSuggesterState extends State<SearchSuggester> {
   void _onChanged(String raw) {
     final query = raw.trim().toLowerCase();
     if (query.isEmpty) {
-      setState(() => _results = _defaultResults());
-      _showOverlay();
+      setState(() => _results = []);
+      _hideOverlay();
       return;
     }
     final variants = _expandQueryVariants(query);
@@ -110,10 +110,6 @@ class _SearchSuggesterState extends State<SearchSuggester> {
       _results = scored.map((e) => e.key.title).toList();
     });
     _showOverlay();
-  }
-
-  List<String> _defaultResults() {
-    return widget.destinations.map((destination) => destination.title).toList();
   }
 
   void _onSubmit(String raw) {
@@ -247,7 +243,11 @@ class _SearchSuggesterState extends State<SearchSuggester> {
         focusNode: _focusNode,
         onChanged: _onChanged,
         onSubmitted: _onSubmit,
-        onTap: () => _onChanged(_controller.text),
+        onTap: () {
+          if (_controller.text.trim().isNotEmpty) {
+            _onChanged(_controller.text);
+          }
+        },
       ),
     );
   }
