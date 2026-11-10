@@ -21,91 +21,61 @@ class _InvestorPayoutDialogState extends State<InvestorPayoutDialog> {
   final _controller = TextEditingController();
   String? errorText;
 
+  void _submit() {
+    final value = double.tryParse(_controller.text.replaceAll(',', '.'));
+    if (value == null || value <= 0) {
+      setState(() => errorText = 'Введите корректную сумму');
+      return;
+    }
+    if (value > widget.maxAmount) {
+      setState(() => errorText = 'Сумма превышает доступную');
+      return;
+    }
+    Navigator.pop(context, value);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Выплата инвестору',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+    return WayPayModal(
+      title: 'Выплата инвестору',
+      onClose: () => Navigator.pop(context),
+      onPrimary: _submit,
+      primaryText: 'Выплатить',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ModalTextField(
+            controller: _controller,
+            label: 'Сумма выплаты',
+            hintText: 'Введите сумму',
+            errorText: errorText,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          ),
+          const SizedBox(height: 16),
+          WayPayInfoCard(
+            fieldsPerRow: 2,
+            fields: [
+              WayPayInfoField(
+                label: 'Можно вывести',
+                value: '${widget.maxAmount.toStringAsFixed(0)} ₽',
               ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _controller,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Введите сумму',
-                  errorText: errorText,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 16,
-                  ),
-                ),
+              WayPayInfoField(
+                label: 'Доход',
+                value: '${widget.income.toStringAsFixed(0)} ₽',
               ),
-              const SizedBox(height: 12),
-              Text(
-                'Можно вывести: ${widget.maxAmount.toStringAsFixed(0)} ₽',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Доход: ${widget.income.toStringAsFixed(0)} ₽ | Баланс: ${widget.balance.toStringAsFixed(0)} ₽',
-                style: const TextStyle(color: Colors.black45),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: DefaultButton(
-                      text: 'Отмена',
-                      isPrimary: false,
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: DefaultButton(
-                      text: 'Выплатить',
-                      isPrimary: true,
-                      onPressed: () {
-                        final value = double.tryParse(_controller.text);
-                        if (value == null || value <= 0) {
-                          setState(
-                            () => errorText = 'Введите корректную сумму',
-                          );
-                          return;
-                        }
-                        if (value > widget.maxAmount) {
-                          setState(
-                            () => errorText = 'Сумма превышает доступную',
-                          );
-                          return;
-                        }
-                        Navigator.pop(context, value);
-                      },
-                    ),
-                  ),
-                ],
+              WayPayInfoField(
+                label: 'Баланс',
+                value: '${widget.balance.toStringAsFixed(0)} ₽',
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

@@ -126,188 +126,83 @@ class _MoveCashPositionSheetState extends State<MoveCashPositionSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    return SafeArea(
-      child: Container(
-        margin: const EdgeInsets.only(top: 20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        'Перевести кассу',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Color(AppColors.black),
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: _isSaving
-                          ? null
-                          : () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close, size: 24),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  widget.investorName,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(AppColors.uiBorder),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Куда перевести',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Color(AppColors.uiBorder),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                for (final type in InvestorCashPositionType.values)
-                  _PositionOption(
-                    title: type.title,
-                    selected: _type == type,
-                    onTap: _isSaving
-                        ? null
-                        : () {
-                            setState(() => _type = type);
-                            if (type == InvestorCashPositionType.pool) {
-                              _loadPools();
-                            }
-                          },
-                  ),
-                if (_type == InvestorCashPositionType.pool) ...[
-                  const SizedBox(height: 8),
-                  if (_isLoadingPools)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  else if (_poolsError != null)
-                    Text(
-                      _poolsError!,
-                      style: const TextStyle(color: Color(AppColors.red)),
-                    )
-                  else if (_pools.isEmpty)
-                    const Text(
-                      'У компании нет пулов',
-                      style: TextStyle(color: Color(AppColors.uiBorder)),
-                    )
-                  else
-                    DropdownButtonFormField<int>(
-                      initialValue: _poolId,
-                      isExpanded: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Пул',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: _pools
-                          .map(
-                            (pool) => DropdownMenuItem<int>(
-                              value: pool.id,
-                              child: Text(
-                                pool.name,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: _isSaving
-                          ? null
-                          : (value) => setState(() => _poolId = value),
-                    ),
-                ],
-                const SizedBox(height: 16),
-                ModalTextField(
-                  controller: _dateController,
-                  label: 'Дата перевода',
-                  hintText: 'Выберите дату',
-                  readOnly: true,
-                  onTap: _isSaving ? null : _pickDate,
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: _isSaving
-                      ? const Center(child: CircularProgressIndicator())
-                      : DefaultButton(
-                          text: 'Перевести',
-                          isPrimary: true,
-                          onPressed: _canSave ? _save : null,
-                        ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PositionOption extends StatelessWidget {
-  const _PositionOption({
-    required this.title,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String title;
-  final bool selected;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          children: [
-            Icon(
-              selected
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-              size: 22,
-              color: selected
-                  ? const Color(AppColors.primary)
-                  : const Color(AppColors.uiBorder),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Color(AppColors.black),
-                ),
+    return WayPayBottomSheet(
+      title: 'Перевести кассу',
+      subtitle: widget.investorName,
+      onClose: _isSaving ? () {} : () => Navigator.of(context).pop(),
+      footer: SizedBox(
+        width: double.infinity,
+        child: _isSaving
+            ? const Center(child: CircularProgressIndicator())
+            : DefaultButton(
+                text: 'Перевести',
+                isPrimary: true,
+                onPressed: _canSave ? _save : null,
               ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const WayPaySectionHeader(title: 'Куда перевести'),
+          const SizedBox(height: 8),
+          for (final type in InvestorCashPositionType.values)
+            CustomRadioButton(
+              value: true,
+              groupValue: _type == type,
+              label: type.title,
+              onChanged: _isSaving
+                  ? (_) {}
+                  : (_) {
+                      setState(() => _type = type);
+                      if (type == InvestorCashPositionType.pool) _loadPools();
+                    },
             ),
+          if (_type == InvestorCashPositionType.pool) ...[
+            const SizedBox(height: 8),
+            if (_isLoadingPools)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (_poolsError != null)
+              Text(
+                _poolsError!,
+                style: AppStyle.manrope(
+                  size: 13,
+                  weight: FontWeight.w500,
+                  color: const Color(AppColors.red),
+                ),
+              )
+            else if (_pools.isEmpty)
+              const WayPayEmptyState(title: 'У компании нет пулов')
+            else
+              WayPayDropdownField<int>(
+                value: _poolId,
+                label: 'Пул',
+                items: _pools
+                    .map(
+                      (pool) => DropdownMenuItem<int>(
+                        value: pool.id,
+                        child: Text(pool.name, overflow: TextOverflow.ellipsis),
+                      ),
+                    )
+                    .toList(),
+                onChanged: _isSaving
+                    ? null
+                    : (value) => setState(() => _poolId = value),
+              ),
           ],
-        ),
+          const SizedBox(height: 16),
+          ModalTextField(
+            controller: _dateController,
+            label: 'Дата перевода',
+            hintText: 'Выберите дату',
+            readOnly: true,
+            onTap: _isSaving ? null : _pickDate,
+            suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18),
+          ),
+        ],
       ),
     );
   }

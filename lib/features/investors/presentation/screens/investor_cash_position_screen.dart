@@ -139,13 +139,9 @@ class _InvestorCashPositionScreenState
                 ),
               ),
               const SizedBox(height: 16),
-              Text(
-                'История переводов${_totalCount > 0 ? ' ($_totalCount)' : ''}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(AppColors.black),
-                ),
+              WayPaySectionHeader(
+                title:
+                    'История переводов${_totalCount > 0 ? ' ($_totalCount)' : ''}',
               ),
               const SizedBox(height: 8),
               Expanded(child: _buildHistory()),
@@ -160,82 +156,37 @@ class _InvestorCashPositionScreenState
 
   Widget _buildCurrentCard() {
     final current = _current;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+    return WayPayInfoCard(
+      title: widget.investorName,
+      fields: [
+        WayPayInfoField(
+          label: 'Сейчас касса',
+          value: _isLoading && current == null
+              ? '—'
+              : (current?.label ?? 'Позиция не задана'),
+        ),
+        if (current != null)
+          WayPayInfoField(
+            label: 'Дата перевода',
+            value: _formatDate(current.date),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            widget.investorName,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(AppColors.black),
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Сейчас касса',
-            style: TextStyle(fontSize: 13, color: Color(AppColors.uiBorder)),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _isLoading && current == null
-                ? '—'
-                : (current?.label ?? 'Позиция не задана'),
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Color(AppColors.black),
-            ),
-          ),
-          if (current != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              'с ${_formatDate(current.date)}',
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(AppColors.uiBorder),
-              ),
-            ),
-          ],
-        ],
-      ),
+      ],
+      fieldsPerRow: current == null ? 1 : 2,
     );
   }
 
   Widget _buildHistory() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const WayPayLoadingState();
     }
     if (_error != null) {
-      return Center(
-        child: Text(
-          _error!,
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: Color(AppColors.red)),
-        ),
+      return WayPayErrorState(
+        message: _error,
+        onRetry: () => _load(page: _page),
       );
     }
     if (_items.isEmpty) {
-      return const Center(
-        child: Text(
-          'Переводов кассы пока не было',
-          style: TextStyle(color: Color(AppColors.uiBorder)),
-        ),
-      );
+      return const WayPayEmptyState(title: 'Переводов кассы пока не было');
     }
 
     return RefreshIndicator(
@@ -251,56 +202,19 @@ class _InvestorCashPositionScreenState
 
   Widget _buildHistoryTile(InvestorCashPositionModel item) {
     final isPool = item.position == InvestorCashPositionType.pool;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+    return WayPayOperationTile(
+      title: item.label,
+      subtitle: _formatDate(item.date),
+      trailing: IconButton(
+        onPressed: () => _confirmDelete(item),
+        icon: const Icon(
+          CupertinoIcons.trash,
+          size: 20,
+          color: Color(AppColors.grey),
+        ),
       ),
-      child: Row(
-        children: [
-          Icon(
-            isPool ? CupertinoIcons.person_3_fill : CupertinoIcons.tray_fill,
-            size: 20,
-            color: const Color(AppColors.primary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.label,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: Color(AppColors.black),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  _formatDate(item.date),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(AppColors.uiBorder),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          InkWell(
-            onTap: () => _confirmDelete(item),
-            child: const Padding(
-              padding: EdgeInsets.all(4),
-              child: Icon(
-                CupertinoIcons.trash,
-                size: 20,
-                color: Color(AppColors.grey),
-              ),
-            ),
-          ),
-        ],
-      ),
+      status: isPool ? 'Пул' : 'Личная касса',
+      statusTone: isPool ? WayPayStatusTone.info : WayPayStatusTone.neutral,
     );
   }
 

@@ -10,6 +10,7 @@ import 'package:waypay_mobile/features/investors/data/models/investors_model.dar
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investor_report_screen.dart';
 import 'package:waypay_mobile/features/investors/presentation/widgets/investor_form_sheet.dart';
+import 'package:waypay_mobile/features/investors/presentation/widgets/investor_investment_dialog.dart';
 
 class InvestorsScreen extends StatefulWidget {
   const InvestorsScreen({super.key});
@@ -55,9 +56,13 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
   }
 
   Future<void> _handleAddInvestment(InvestorsModel investor) async {
-    final investment = await showDialog<_InvestmentDraft>(
+    final investment = await showDialog<InvestorInvestmentDraft>(
       context: context,
-      builder: (_) => _AddInvestmentDialog(name: investor.fullName),
+      builder: (_) => InvestorInvestmentDialog(
+        investorName: investor.fullName.isEmpty
+            ? investor.nickname
+            : investor.fullName,
+      ),
     );
     if (!mounted || investment == null) return;
 
@@ -182,7 +187,7 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  _AddInvestorButton(onTap: () => _openInvestorForm()),
+                  AddButton(onPressed: () => _openInvestorForm()),
                 ],
               ),
               const SizedBox(height: 16),
@@ -191,10 +196,10 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                   builder: (context, state) {
                     if (state is InvestorsInitial ||
                         state is InvestorsLoading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const WayPayLoadingState();
                     }
                     if (state is InvestorsError) {
-                      return _InvestorsError(
+                      return WayPayErrorState(
                         message: state.message,
                         onRetry: () => context.read<InvestorsBloc>().add(
                           LoadInvestorsEvent(refresh: true),
@@ -203,12 +208,8 @@ class _InvestorsScreenState extends State<InvestorsScreen> {
                     }
                     if (state is InvestorsLoaded) {
                       if (state.investors.isEmpty) {
-                        return const Center(
-                          child: Text(
-                            'Нет инвесторов по текущим параметрам',
-                            style: TextStyle(color: Color(AppColors.uiBorder)),
-                            textAlign: TextAlign.center,
-                          ),
+                        return const WayPayEmptyState(
+                          title: 'Нет инвесторов по текущим параметрам',
                         );
                       }
                       return NotificationListener<ScrollNotification>(
@@ -292,341 +293,59 @@ class _InvestorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final endDateText = _formatDate(investor.contractEndDate);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0F000000),
-            offset: Offset(0, 4),
-            blurRadius: 16,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
-              ),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      InvestorReportScreen(initialInvestor: investor),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 8, 14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                investor.nickname,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              if (investor.fullName.isNotEmpty) ...[
-                                const SizedBox(height: 3),
-                                Text(
-                                  investor.fullName,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: Color(AppColors.uiBorder),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                        if (investor.isBlocked)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4),
-                            child: Icon(
-                              Icons.lock_outline,
-                              size: 18,
-                              color: Colors.red,
-                            ),
-                          ),
-                        PopupMenuButton<String>(
-                          padding: EdgeInsets.zero,
-                          onSelected: onAction,
-                          itemBuilder: (_) => [
-                            const PopupMenuItem(
-                              value: 'edit',
-                              child: Text('Редактировать'),
-                            ),
-                            PopupMenuItem(
-                              value: 'block',
-                              child: Text(
-                                investor.isBlocked
-                                    ? 'Разблокировать'
-                                    : 'Заблокировать',
-                              ),
-                            ),
-                            if (investor.isBlocked)
-                              const PopupMenuItem(
-                                value: 'clear',
-                                child: Text('Аннулировать'),
-                              ),
-                            const PopupMenuItem(
-                              value: 'delete',
-                              child: Text(
-                                'Удалить',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 18),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: WayPayInfoItem(
-                            label: 'Касса',
-                            value: _formatCurrency(investor.balance),
-                          ),
-                        ),
-                        Container(
-                          width: 1,
-                          height: 36,
-                          color: const Color(0xFFEEF1F4),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: WayPayInfoItem(
-                            label: 'Договор до',
-                            value: endDateText,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const Divider(height: 1, color: Color(0xFFEEF1F4)),
-          InkWell(
-            borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(16),
-            ),
-            onTap: onAddInvestment,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.add_circle_outline,
-                    size: 19,
-                    color: Color(AppColors.primary),
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    'Добавить инвестицию',
-                    style: TextStyle(
-                      color: Color(AppColors.primary),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AddInvestorButton extends StatelessWidget {
-  const _AddInvestorButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: const Color(AppColors.primary),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: const SizedBox(
-          width: 48,
-          height: 48,
-          child: Icon(Icons.person_add_alt_1_outlined, color: Colors.white),
-        ),
-      ),
-    );
-  }
-}
-
-class _InvestorsError extends StatelessWidget {
-  const _InvestorsError({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
+    return WayPayEntityCard(
+      title: investor.nickname,
+      subtitle: investor.fullName.isEmpty ? null : investor.fullName,
+      trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.red),
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton(onPressed: onRetry, child: const Text('Повторить')),
-        ],
-      ),
-    );
-  }
-}
-
-class _InvestmentDraft {
-  const _InvestmentDraft(this.amount, this.date);
-
-  final double amount;
-  final DateTime date;
-}
-
-class _AddInvestmentDialog extends StatefulWidget {
-  const _AddInvestmentDialog({required this.name});
-
-  final String name;
-
-  @override
-  State<_AddInvestmentDialog> createState() => _AddInvestmentDialogState();
-}
-
-class _AddInvestmentDialogState extends State<_AddInvestmentDialog> {
-  final _controller = TextEditingController();
-  DateTime _date = DateTime.now();
-  String? _errorText;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    final raw = _controller.text.trim().replaceAll(',', '.');
-    final value = double.tryParse(raw);
-    if (value == null || value <= 0) {
-      setState(() => _errorText = 'Введите корректную сумму');
-      return;
-    }
-    Navigator.pop(context, _InvestmentDraft(value, _date));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Добавить инвестицию',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                widget.name,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(AppColors.uiBorder),
+          if (investor.isBlocked)
+            const Icon(Icons.lock_outline, size: 18, color: Colors.red),
+          PopupMenuButton<String>(
+            padding: EdgeInsets.zero,
+            onSelected: onAction,
+            itemBuilder: (_) => [
+              const PopupMenuItem(value: 'edit', child: Text('Редактировать')),
+              PopupMenuItem(
+                value: 'block',
+                child: Text(
+                  investor.isBlocked ? 'Разблокировать' : 'Заблокировать',
                 ),
               ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _controller,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+              if (investor.isBlocked)
+                const PopupMenuItem(
+                  value: 'clear',
+                  child: Text('Аннулировать'),
                 ),
-                decoration: InputDecoration(
-                  hintText: 'Введите сумму',
-                  errorText: _errorText,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 16,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.calendar_today_outlined),
-                title: const Text('Дата инвестиции'),
-                subtitle: Text(DateFormat('dd.MM.yyyy').format(_date)),
-                onTap: () async {
-                  final selected = await showDatePicker(
-                    context: context,
-                    initialDate: _date,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime.now().add(const Duration(days: 3650)),
-                    locale: const Locale('ru', 'RU'),
-                  );
-                  if (selected != null && mounted) {
-                    setState(() => _date = selected);
-                  }
-                },
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: DefaultButton(
-                      text: 'Отмена',
-                      isPrimary: false,
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: DefaultButton(
-                      text: 'Добавить',
-                      isPrimary: true,
-                      onPressed: _submit,
-                    ),
-                  ),
-                ],
+              const PopupMenuItem(
+                value: 'delete',
+                child: Text('Удалить', style: TextStyle(color: Colors.red)),
               ),
             ],
           ),
+        ],
+      ),
+      details: [
+        WayPayInfoItem(
+          label: 'Касса',
+          value: _formatCurrency(investor.balance),
+        ),
+        WayPayInfoItem(label: 'Договор до', value: endDateText),
+      ],
+      actions: [
+        WayPayCardAction(
+          icon: Icons.add_circle_outline,
+          label: 'Добавить инвестицию',
+          onPressed: onAddInvestment,
+        ),
+      ],
+      backgroundColor: investor.isBlocked
+          ? const Color(0xFFFFF2F2)
+          : Colors.white,
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => InvestorReportScreen(initialInvestor: investor),
         ),
       ),
     );

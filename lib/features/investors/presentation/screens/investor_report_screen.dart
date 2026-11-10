@@ -154,36 +154,29 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
     );
     final source = await showWayPayBottomSheet<String>(
       context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Источник выплаты',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+      builder: (sheetContext) => WayPayBottomSheet(
+        title: 'Источник выплаты',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            WayPayEntityTile(
+              title: 'Из дохода',
+              subtitle: '${formatNumber(income)} ₽ доступно',
+              leading: const WayPayIconBadge(icon: Icons.trending_up),
+              showChevron: true,
+              onTap: () => Navigator.pop(sheetContext, 'income'),
+            ),
+            const Divider(height: 1),
+            WayPayEntityTile(
+              title: 'Из инвестиции',
+              subtitle: '${formatNumber(balance)} ₽ в кассе',
+              leading: const WayPayIconBadge(
+                icon: Icons.account_balance_wallet_outlined,
               ),
-              const SizedBox(height: 12),
-              ListTile(
-                leading: const Icon(Icons.trending_up),
-                title: const Text('Из дохода'),
-                subtitle: Text('${formatNumber(income)} ₽ доступно'),
-                onTap: () => Navigator.pop(sheetContext, 'income'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.account_balance_wallet_outlined),
-                title: const Text('Из инвестиции'),
-                subtitle: Text('${formatNumber(balance)} ₽ в кассе'),
-                onTap: () => Navigator.pop(sheetContext, 'investment'),
-              ),
-            ],
-          ),
+              showChevron: true,
+              onTap: () => Navigator.pop(sheetContext, 'investment'),
+            ),
+          ],
         ),
       ),
     );
@@ -237,6 +230,9 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
     final amountController = TextEditingController(
       text: contribution.amount.toStringAsFixed(0),
     );
+    final dateController = TextEditingController(
+      text: DateFormat('dd.MM.yyyy').format(contribution.date),
+    );
     var date = contribution.date;
     final saved = await showDialog<bool>(
       context: context,
@@ -248,17 +244,19 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
+              ModalTextField(
                 controller: amountController,
+                label: 'Сумма, ₽',
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(labelText: 'Сумма, ₽'),
               ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Дата'),
-                subtitle: Text(DateFormat('dd.MM.yyyy').format(date)),
+              const SizedBox(height: 14),
+              ModalTextField(
+                controller: dateController,
+                label: 'Дата',
+                readOnly: true,
+                suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18),
                 onTap: () async {
                   final selected = await showDatePicker(
                     context: dialogContext,
@@ -267,7 +265,14 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
                     lastDate: DateTime.now().add(const Duration(days: 3650)),
                     locale: const Locale('ru', 'RU'),
                   );
-                  if (selected != null) setDialogState(() => date = selected);
+                  if (selected != null) {
+                    setDialogState(() {
+                      date = selected;
+                      dateController.text = DateFormat(
+                        'dd.MM.yyyy',
+                      ).format(selected);
+                    });
+                  }
                 },
               ),
             ],
@@ -277,12 +282,14 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
     );
     if (saved != true) {
       amountController.dispose();
+      dateController.dispose();
       return;
     }
     final amount = double.tryParse(
       amountController.text.trim().replaceAll(',', '.'),
     );
     amountController.dispose();
+    dateController.dispose();
     if (amount == null || amount <= 0) return;
     try {
       await getIt<InvestorsRemoteDataSource>().updateInvestmentContribution(
@@ -364,60 +371,26 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
       if (!mounted) return;
       await showWayPayBottomSheet<void>(
         context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.white,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        builder: (sheetContext) => SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Договор с инвестором',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 16),
-                  ...agreement.entries.map(
-                    (entry) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _agreementLabel(entry.key),
-                              style: const TextStyle(
-                                color: Color(AppColors.uiBorder),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              entry.value?.toString() ?? '—',
-                              textAlign: TextAlign.right,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: DefaultButton(
-                      text: 'Поделиться PDF',
-                      isPrimary: true,
-                      onPressed: () => _shareAgreementPdf(agreement),
-                    ),
-                  ),
-                ],
-              ),
+        builder: (_) => WayPayBottomSheet(
+          title: 'Договор с инвестором',
+          footer: SizedBox(
+            width: double.infinity,
+            child: DefaultButton(
+              text: 'Поделиться PDF',
+              isPrimary: true,
+              onPressed: () => _shareAgreementPdf(agreement),
             ),
+          ),
+          child: WayPayInfoCard(
+            showShadow: false,
+            fields: agreement.entries
+                .map(
+                  (entry) => WayPayInfoField(
+                    label: _agreementLabel(entry.key),
+                    value: entry.value?.toString() ?? '—',
+                  ),
+                )
+                .toList(),
           ),
         ),
       );
@@ -540,16 +513,12 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
               const SizedBox(height: 16),
               Expanded(
                 child: isLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const WayPayLoadingState()
                     : reportData == null
-                    ? Center(
-                        child: Text(
-                          error ?? 'Нет данных',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Color(AppColors.uiBorder),
-                          ),
-                        ),
+                    ? WayPayErrorState(
+                        message: error ?? 'Нет данных',
+                        onRetry: () =>
+                            _loadInvestorAndReport(selectedInvestor.id),
                       )
                     : RefreshIndicator(
                         onRefresh: () =>
@@ -589,12 +558,8 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
                               const SizedBox(height: 16),
                               _AnalyticsGrid(metrics: _buildMetrics()),
                               const SizedBox(height: 20),
-                              const Text(
-                                'История операций',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                              const WayPaySectionHeader(
+                                title: 'История операций',
                               ),
                               const SizedBox(height: 12),
                               CustomTabSwitcher(
@@ -870,12 +835,10 @@ class _InvestorActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return WayPaySurfaceCard(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
+      showShadow: false,
+      showBorder: true,
       child: Column(
         children: [
           SizedBox(

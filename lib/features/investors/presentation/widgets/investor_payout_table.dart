@@ -56,96 +56,37 @@ class _InvestorPayoutTableState extends State<InvestorPayoutTable> {
           children: [
             InkWell(
               onTap: () => setState(() => _isExpanded = !_isExpanded),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'История выплат',
-                    style: AppStyle.manrope(size: 15, weight: FontWeight.w400),
-                  ),
-                  Icon(
-                    _isExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: Color(AppColors.grey),
-                  ),
-                ],
+              child: WayPaySectionHeader(
+                title: 'История выплат',
+                action: Icon(
+                  _isExpanded
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  color: const Color(AppColors.grey),
+                ),
               ),
             ),
             const SizedBox(height: 12),
             if (_isExpanded)
               hasPayouts
-                  ? Table(
-                      columnWidths: const {
-                        0: FlexColumnWidth(1),
-                        1: FlexColumnWidth(1),
-                        2: FlexColumnWidth(1),
-                      },
-                      border: TableBorder.all(
-                        color: Color(AppColors.borderColor),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      children: [
-                        TableRow(
-                          children: [
-                            _buildHeaderCell('Дата выплаты'),
-                            _buildHeaderCell('Выплатил'),
-                            _buildHeaderCell('Выплата, руб'),
-                          ],
-                        ),
-                        ...payouts.map(
-                          (p) => TableRow(
-                            children: [
-                              _buildDataCell(formatDate(p.payoutDate)),
-                              _buildDataCell(p.employeeFullName),
-                              _buildDataCell('${formatAmount(p.amount)} ₽'),
-                            ],
-                          ),
-                        ),
-                      ],
+                  ? Column(
+                      children: payouts
+                          .map(
+                            (p) => Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: WayPayOperationTile(
+                                title: '${formatAmount(p.amount)} ₽',
+                                subtitle:
+                                    '${formatDate(p.payoutDate)} · ${p.employeeFullName}',
+                              ),
+                            ),
+                          )
+                          .toList(),
                     )
-                  : Container(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Выплат нет',
-                        style: AppStyle.manrope(
-                          size: 15,
-                          weight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
+                  : const WayPayEmptyState(title: 'Выплат нет'),
           ],
         );
       },
-    );
-  }
-
-  Widget _buildHeaderCell(String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Center(
-        child: Text(
-          text,
-          style: AppStyle.manrope(size: 15, weight: FontWeight.w600),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDataCell(String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Center(
-        child: Text(
-          text,
-          style: AppStyle.manrope(
-            size: 15,
-            weight: FontWeight.w400,
-            color: Color(AppColors.primary),
-          ),
-        ),
-      ),
     );
   }
 }

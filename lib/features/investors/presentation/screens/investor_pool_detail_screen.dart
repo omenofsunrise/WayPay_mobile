@@ -11,6 +11,7 @@ import 'package:waypay_mobile/features/investors/data/models/investor_contributi
 import 'package:waypay_mobile/features/investors/data/models/investor_payout_model.dart';
 import 'package:waypay_mobile/features/investors/data/models/reinvestment_model.dart';
 import 'package:waypay_mobile/features/investors/presentation/widgets/investor_form_sheet.dart';
+import 'package:waypay_mobile/features/investors/presentation/widgets/investor_investment_dialog.dart';
 import 'package:waypay_mobile/features/investors/presentation/widgets/investor_payout_dialog.dart';
 import 'package:waypay_mobile/features/investors/presentation/screens/investor_report_screen.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
@@ -248,12 +249,12 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen>
             title: 'Изменить инвестицию',
             onClose: () => Navigator.pop(dialogContext, false),
             onPrimary: () => Navigator.pop(dialogContext, true),
-            child: TextField(
+            child: ModalTextField(
               controller: controller,
+              label: 'Сумма, ₽',
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: const InputDecoration(labelText: 'Сумма, ₽'),
             ),
           ),
         );
@@ -280,9 +281,13 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen>
   }
 
   Future<void> _handleAddInvestment(InvestorsModel investor) async {
-    final investment = await showDialog<_PoolInvestmentDraft>(
+    final investment = await showDialog<InvestorInvestmentDraft>(
       context: context,
-      builder: (_) => _AddInvestmentDialog(name: investor.fullName),
+      builder: (_) => InvestorInvestmentDialog(
+        investorName: investor.fullName.isEmpty
+            ? investor.nickname
+            : investor.fullName,
+      ),
     );
     if (!mounted || investment == null) return;
 
@@ -409,16 +414,11 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen>
               const SizedBox(height: 16),
               Expanded(
                 child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const WayPayLoadingState()
                     : _reportData == null
-                    ? Center(
-                        child: Text(
-                          _error ?? 'Нет данных',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Color(AppColors.uiBorder),
-                          ),
-                        ),
+                    ? WayPayErrorState(
+                        message: _error ?? 'Нет данных',
+                        onRetry: _refreshAll,
                       )
                     : RefreshIndicator(
                         onRefresh: _refreshAll,
@@ -465,41 +465,18 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen>
                                 ],
                               ),
                               const SizedBox(height: 20),
-                              const Text(
-                                'Инвесторы',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(AppColors.uiBorder),
-                                ),
-                              ),
+                              const WayPaySectionHeader(title: 'Инвесторы'),
                               const SizedBox(height: 8),
                               if (_isInvestorsLoading)
-                                const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 16),
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                )
+                                const WayPayLoadingState()
                               else if (_investorsError != null)
-                                Center(
-                                  child: Text(
-                                    _investorsError!,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      color: Color(AppColors.uiBorder),
-                                    ),
-                                  ),
+                                WayPayErrorState(
+                                  message: _investorsError,
+                                  onRetry: _loadInvestors,
                                 )
                               else if (_investors.isEmpty)
-                                const Center(
-                                  child: Text(
-                                    'Инвесторы не найдены',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Color(AppColors.uiBorder),
-                                    ),
-                                  ),
+                                const WayPayEmptyState(
+                                  title: 'Инвесторы не найдены',
                                 )
                               else
                                 Column(
@@ -530,12 +507,8 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen>
                                       .toList(),
                                 ),
                               const SizedBox(height: 20),
-                              const Text(
-                                'История операций',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                              const WayPaySectionHeader(
+                                title: 'История операций',
                               ),
                               const SizedBox(height: 10),
                               CustomTabSwitcher(
@@ -691,232 +664,32 @@ class _PoolInvestorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0F000000),
-            offset: Offset(0, 4),
-            blurRadius: 16,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          InkWell(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            onTap: onOpen,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              investor.nickname,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            if (investor.fullName.isNotEmpty)
-                              Text(
-                                investor.fullName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Color(AppColors.uiBorder),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      const Icon(
-                        Icons.chevron_right,
-                        color: Color(AppColors.uiBorder),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: WayPayInfoItem(
-                          label: 'Инвестиции',
-                          value: _formatCurrency(investor.investmentAmount),
-                        ),
-                      ),
-                      Expanded(
-                        child: WayPayInfoItem(
-                          label: 'Добавлен',
-                          value: _formatDate(investor.createdAt),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const Divider(height: 1, color: Color(0xFFEEF1F4)),
-          Row(
-            children: [
-              Expanded(
-                child: TextButton.icon(
-                  onPressed: onAddInvestment,
-                  icon: const Icon(Icons.add_circle_outline, size: 18),
-                  label: const Text('Инвестиция'),
-                ),
-              ),
-              Container(width: 1, height: 24, color: const Color(0xFFEEF1F4)),
-              Expanded(
-                child: TextButton.icon(
-                  onPressed: onPayout,
-                  icon: const Icon(Icons.payments_outlined, size: 18),
-                  label: const Text('Выплатить'),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PoolInvestmentDraft {
-  const _PoolInvestmentDraft(this.amount, this.date);
-
-  final double amount;
-  final DateTime date;
-}
-
-class _AddInvestmentDialog extends StatefulWidget {
-  const _AddInvestmentDialog({required this.name});
-
-  final String name;
-
-  @override
-  State<_AddInvestmentDialog> createState() => _AddInvestmentDialogState();
-}
-
-class _AddInvestmentDialogState extends State<_AddInvestmentDialog> {
-  final _controller = TextEditingController();
-  DateTime _date = DateTime.now();
-  String? _errorText;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    final raw = _controller.text.trim().replaceAll(',', '.');
-    final value = double.tryParse(raw);
-    if (value == null || value <= 0) {
-      setState(() => _errorText = 'Введите корректную сумму');
-      return;
-    }
-    Navigator.pop(context, _PoolInvestmentDraft(value, _date));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Добавить инвестицию',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                widget.name,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(AppColors.uiBorder),
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _controller,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Введите сумму',
-                  errorText: _errorText,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 16,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.calendar_today_outlined),
-                title: const Text('Дата инвестиции'),
-                subtitle: Text(DateFormat('dd.MM.yyyy').format(_date)),
-                onTap: () async {
-                  final selected = await showDatePicker(
-                    context: context,
-                    initialDate: _date,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime.now().add(const Duration(days: 3650)),
-                    locale: const Locale('ru', 'RU'),
-                  );
-                  if (selected != null && mounted) {
-                    setState(() => _date = selected);
-                  }
-                },
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: DefaultButton(
-                      text: 'Отмена',
-                      isPrimary: false,
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: DefaultButton(
-                      text: 'Добавить',
-                      isPrimary: true,
-                      onPressed: _submit,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+    return WayPayEntityCard(
+      title: investor.nickname,
+      subtitle: investor.fullName.isEmpty ? null : investor.fullName,
+      details: [
+        WayPayInfoItem(
+          label: 'Инвестиции',
+          value: _formatCurrency(investor.investmentAmount),
         ),
-      ),
+        WayPayInfoItem(
+          label: 'Добавлен',
+          value: _formatDate(investor.createdAt),
+        ),
+      ],
+      actions: [
+        WayPayCardAction(
+          icon: Icons.add_circle_outline,
+          label: 'Инвестиция',
+          onPressed: onAddInvestment,
+        ),
+        WayPayCardAction(
+          icon: Icons.payments_outlined,
+          label: 'Выплатить',
+          onPressed: onPayout,
+        ),
+      ],
+      onTap: onOpen,
     );
   }
 }

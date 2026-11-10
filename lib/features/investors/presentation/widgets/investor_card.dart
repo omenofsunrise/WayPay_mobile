@@ -25,7 +25,21 @@ class _InvestorCardState extends State<InvestorCard> {
       builder: (context, role, _) {
         userStorage.canViewContent();
 
-        return InkWell(
+        return WayPayEntityCard(
+          title: widget.investor.nickname,
+          details: [
+            WayPayInfoItem(
+              label: 'Касса',
+              value: '${widget.investor.balance.toStringAsFixed(0)} ₽',
+              valueColor: isPositive
+                  ? const Color(AppColors.primaryLight)
+                  : const Color(AppColors.pinkTint),
+            ),
+          ],
+          detailColumns: 1,
+          backgroundColor: widget.investor.isBlocked
+              ? const Color(0xFFFFF2F2)
+              : Colors.white,
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
@@ -34,49 +48,6 @@ class _InvestorCardState extends State<InvestorCard> {
               ),
             );
           },
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            decoration: BoxDecoration(
-              color: widget.investor.isBlocked
-                  ? Colors.red.withValues(alpha: 0.1)
-                  : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.investor.nickname,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '${widget.investor.balance.toStringAsFixed(0)} ₽',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: isPositive
-                          ? const Color(AppColors.primaryLight)
-                          : const Color(AppColors.pinkTint),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         );
       },
     );

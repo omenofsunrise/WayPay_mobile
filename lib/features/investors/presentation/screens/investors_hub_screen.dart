@@ -31,15 +31,15 @@ class InvestorsHubScreen extends StatelessWidget {
                 showNotifications: false,
               ),
               const SizedBox(height: 24),
-              _InvestorsCard(
-                icon: Icons.person_outline,
-                label: 'Инвесторы',
+              WayPayEntityCard(
+                title: 'Инвесторы',
+                leading: const WayPayIconBadge(icon: Icons.person_outline),
                 onTap: () => _openInvestorsList(context),
               ),
               const SizedBox(height: 16),
-              _InvestorsCard(
-                icon: Icons.archive_outlined,
-                label: 'Архив инвесторов',
+              WayPayEntityCard(
+                title: 'Архив инвесторов',
+                leading: const WayPayIconBadge(icon: Icons.archive_outlined),
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -48,60 +48,12 @@ class InvestorsHubScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              _InvestorsCard(
-                icon: Icons.account_balance_outlined,
-                label: 'Пулы инвесторов',
+              WayPayEntityCard(
+                title: 'Пулы инвесторов',
+                leading: const WayPayIconBadge(
+                  icon: Icons.account_balance_outlined,
+                ),
                 onTap: () => _openInvestorsPool(context),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _InvestorsCard extends StatelessWidget {
-  const _InvestorsCard({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      elevation: 0,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF2F4F7),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: const Color(AppColors.black)),
-              ),
-              const SizedBox(width: 16),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Color(AppColors.black),
-                ),
               ),
             ],
           ),

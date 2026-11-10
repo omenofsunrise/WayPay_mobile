@@ -78,10 +78,10 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
         title: title,
         onClose: () => Navigator.pop(dialogContext),
         onPrimary: () => Navigator.pop(dialogContext, controller.text.trim()),
-        child: TextField(
+        child: ModalTextField(
           controller: controller,
+          label: 'Название пула',
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'Название пула'),
         ),
       ),
     );
@@ -161,22 +161,7 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Material(
-                    color: const Color(AppColors.primary),
-                    borderRadius: BorderRadius.circular(12),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: _createPool,
-                      child: const SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: Icon(
-                          Icons.add_business_outlined,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
+                  AddButton(onPressed: _createPool),
                 ],
               ),
               const SizedBox(height: 16),
@@ -200,21 +185,15 @@ class _InvestorPoolScreenState extends State<InvestorPoolScreen> {
 
     if (pools.isEmpty) {
       if (isLoading) {
-        return const Center(child: CircularProgressIndicator());
+        return const WayPayLoadingState();
       }
       if (poolState is InvestorPoolError) {
-        return _InvestorPoolError(
+        return WayPayErrorState(
           message: poolState.message,
           onRetry: _retrySearch,
         );
       }
-      return const Center(
-        child: Text(
-          'Нет пулов по текущим параметрам',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Color(AppColors.uiBorder)),
-        ),
-      );
+      return const WayPayEmptyState(title: 'Нет пулов по текущим параметрам');
     }
 
     final hasMorePools = poolState is InvestorPoolLoaded && poolState.hasMore;
@@ -289,150 +268,34 @@ class _InvestorPoolCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      elevation: 0,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () => context.pushNamed(
-          Routes.investorPoolDetailScreen.toName,
-          extra: pool,
-        ),
-        child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x0F000000),
-                offset: Offset(0, 4),
-                blurRadius: 16,
-              ),
-            ],
+    return WayPayEntityCard(
+      title: pool.name,
+      subtitle: 'Создан ${_formatDate(pool.createdAt)}',
+      leading: const WayPayIconBadge(icon: Icons.account_balance_outlined),
+      trailing: PopupMenuButton<String>(
+        padding: EdgeInsets.zero,
+        onSelected: onAction,
+        itemBuilder: (_) => const [
+          PopupMenuItem(value: 'edit', child: Text('Переименовать')),
+          PopupMenuItem(
+            value: 'delete',
+            child: Text('Удалить', style: TextStyle(color: Colors.red)),
           ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE6F5F3),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.account_balance_outlined,
-                        color: Color(AppColors.primary),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            pool.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            'Создан ${_formatDate(pool.createdAt)}',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Color(AppColors.uiBorder),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    PopupMenuButton<String>(
-                      padding: EdgeInsets.zero,
-                      onSelected: onAction,
-                      itemBuilder: (_) => const [
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: Text('Переименовать'),
-                        ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Text(
-                            'Удалить',
-                            style: TextStyle(color: Colors.red),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: WayPayInfoItem(
-                        label: 'Касса пула',
-                        value: _formatCurrency(pool.balance),
-                      ),
-                    ),
-                    Container(
-                      width: 1,
-                      height: 36,
-                      color: const Color(0xFFEEF1F4),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: WayPayInfoItem(
-                        label: 'Активен до',
-                        value: _formatDate(pool.activeUntil),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(top: 8, right: 8),
-                      child: Icon(
-                        Icons.chevron_right,
-                        color: Color(AppColors.uiBorder),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _InvestorPoolError extends StatelessWidget {
-  const _InvestorPoolError({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.red),
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton(onPressed: onRetry, child: const Text('Повторить')),
         ],
+      ),
+      details: [
+        WayPayInfoItem(
+          label: 'Касса пула',
+          value: _formatCurrency(pool.balance),
+        ),
+        WayPayInfoItem(
+          label: 'Активен до',
+          value: _formatDate(pool.activeUntil),
+        ),
+      ],
+      onTap: () => context.pushNamed(
+        Routes.investorPoolDetailScreen.toName,
+        extra: pool,
       ),
     );
   }

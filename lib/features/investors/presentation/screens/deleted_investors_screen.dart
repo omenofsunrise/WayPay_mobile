@@ -11,16 +11,34 @@ class DeletedInvestorsScreen extends StatefulWidget {
   State<DeletedInvestorsScreen> createState() => _DeletedInvestorsScreenState();
 }
 
-class _DeletedInvestorsScreenState extends State<DeletedInvestorsScreen> {
+class _DeletedInvestorsScreenState extends State<DeletedInvestorsScreen>
+    with SingleTickerProviderStateMixin {
   Map<String, dynamic>? _data;
   String? _error;
   bool _loading = true;
   String _tab = 'payouts';
+  late final TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this)
+      ..addListener(_onTabChanged);
     _load();
+  }
+
+  void _onTabChanged() {
+    if (_tabController.indexIsChanging) return;
+    final value = _tabController.index == 0 ? 'payouts' : 'contributions';
+    if (_tab != value) setState(() => _tab = value);
+  }
+
+  @override
+  void dispose() {
+    _tabController
+      ..removeListener(_onTabChanged)
+      ..dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -79,20 +97,9 @@ class _DeletedInvestorsScreenState extends State<DeletedInvestorsScreen> {
                 showNotifications: false,
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  ChoiceChip(
-                    label: const Text('Выплаты'),
-                    selected: _tab == 'payouts',
-                    onSelected: (_) => setState(() => _tab = 'payouts'),
-                  ),
-                  const SizedBox(width: 8),
-                  ChoiceChip(
-                    label: const Text('Инвестиции'),
-                    selected: _tab == 'contributions',
-                    onSelected: (_) => setState(() => _tab = 'contributions'),
-                  ),
-                ],
+              CustomTabSwitcher(
+                controller: _tabController,
+                tabs: const ['Выплаты', 'Инвестиции'],
               ),
               const SizedBox(height: 12),
               Expanded(child: _buildContent()),
@@ -104,21 +111,12 @@ class _DeletedInvestorsScreenState extends State<DeletedInvestorsScreen> {
   }
 
   Widget _buildContent() {
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) return const WayPayLoadingState();
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(_error!, textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            TextButton(onPressed: _load, child: const Text('Повторить')),
-          ],
-        ),
-      );
+      return WayPayErrorState(message: _error, onRetry: _load);
     }
     if (_items.isEmpty) {
-      return const Center(child: Text('Архив пуст'));
+      return const WayPayEmptyState(title: 'Архив пуст');
     }
     return RefreshIndicator(
       onRefresh: _load,
@@ -139,24 +137,12 @@ class _DeletedInvestorsScreenState extends State<DeletedInvestorsScreen> {
                 ? item['payoutDate']
                 : (item['date'] ?? item['createdAt']),
           );
-          return Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 8),
-                Text(amount, style: const TextStyle(fontSize: 18)),
-                const SizedBox(height: 4),
-                Text(
-                  date,
-                  style: const TextStyle(color: Color(AppColors.uiBorder)),
-                ),
-              ],
+          return WayPayOperationTile(
+            title: name,
+            subtitle: date,
+            trailing: Text(
+              amount,
+              style: AppStyle.manrope(size: 16, weight: FontWeight.w600),
             ),
           );
         },

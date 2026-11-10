@@ -51,51 +51,15 @@ class _InvestorTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 4,
-              child: Text(
-                name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 3,
-              child: Text(
-                cashText,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(AppColors.black),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 3,
-              child: Text(
-                contractText,
-                textAlign: TextAlign.right,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(AppColors.uiBorder),
-                ),
-              ),
-            ),
-          ],
-        ),
+    return WayPayEntityTile(
+      title: name,
+      subtitle: 'Договор до $contractText',
+      trailing: Text(
+        cashText,
+        style: AppStyle.manrope(size: 14, weight: FontWeight.w600),
       ),
+      showChevron: true,
+      onTap: onTap,
     );
   }
 }
@@ -221,75 +185,43 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
     return [];
   }
 
-  Widget _buildResults(InvestorsState investorsState, InvestorPoolState poolState) {
+  Widget _buildResults(
+    InvestorsState investorsState,
+    InvestorPoolState poolState,
+  ) {
     final investors = _extractInvestors(investorsState);
     final pools = _extractPools(poolState);
     final hasData = investors.isNotEmpty || pools.isNotEmpty;
 
     if (!hasData) {
       final isLoading =
-          investorsState is InvestorsLoading || poolState is InvestorPoolLoading;
+          investorsState is InvestorsLoading ||
+          poolState is InvestorPoolLoading;
       if (isLoading) {
-        return const Center(child: CircularProgressIndicator());
+        return const WayPayLoadingState();
       }
       if (investorsState is InvestorsError && poolState is InvestorPoolError) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Ошибка загрузки списка.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.red),
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: _retryLastSearch,
-              child: const Text('Повторить'),
-            ),
-          ],
+        return WayPayErrorState(
+          message: 'Ошибка загрузки списка.',
+          onRetry: _retryLastSearch,
         );
       }
       if (investorsState is InvestorsError && !widget.includePool) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              investorsState.message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.red),
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: _retryLastSearch,
-              child: const Text('Повторить'),
-            ),
-          ],
+        return WayPayErrorState(
+          message: investorsState.message,
+          onRetry: _retryLastSearch,
         );
       }
       if (poolState is InvestorPoolError && !widget.includeInvestor) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              poolState.message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.red),
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: _retryLastSearch,
-              child: const Text('Повторить'),
-            ),
-          ],
+        return WayPayErrorState(
+          message: poolState.message,
+          onRetry: _retryLastSearch,
         );
       }
-      return Center(
-        child: Text(
-          widget.includePool
-              ? 'Инвесторы и пулы не найдены'
-              : 'Инвесторы не найдены',
-          style: const TextStyle(color: Color(AppColors.uiBorder)),
-        ),
+      return WayPayEmptyState(
+        title: widget.includePool
+            ? 'Инвесторы и пулы не найдены'
+            : 'Инвесторы не найдены',
       );
     }
 
@@ -301,20 +233,9 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
     }
 
     if (investorsState is InvestorsError && poolState is InvestorPoolError) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            'Ошибка загрузки списка.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.red),
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: _retryLastSearch,
-            child: const Text('Повторить'),
-          ),
-        ],
+      return WayPayErrorState(
+        message: 'Ошибка загрузки списка.',
+        onRetry: _retryLastSearch,
       );
     }
 
@@ -332,9 +253,9 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
           name: investor.nickname,
           cashText: _formatCash(investor.cashbox),
           contractText: _formatDateShort(investor.contractEndDate),
-          onTap: () => Navigator.of(context).pop(
-            InvestorPickerResult.investor(investor),
-          ),
+          onTap: () => Navigator.of(
+            context,
+          ).pop(InvestorPickerResult.investor(investor)),
         ),
       );
     }
@@ -345,9 +266,8 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
           name: pool.name,
           cashText: _formatCash(pool.balance),
           contractText: _formatDateShort(date),
-          onTap: () => Navigator.of(context).pop(
-            InvestorPickerResult.pool(pool),
-          ),
+          onTap: () =>
+              Navigator.of(context).pop(InvestorPickerResult.pool(pool)),
         ),
       );
     }
@@ -362,42 +282,28 @@ class _InvestorPickerModalState extends State<InvestorPickerModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+    return WayPayBottomSheet(
+      title: widget.title,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  widget.title,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-              ),
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.close),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
           SearchField(
             controller: _searchController,
             hintText: 'Поиск',
             onChanged: (_) => _onSearchChanged(),
           ),
           if (_showSearchHint)
-            const Padding(
-              padding: EdgeInsets.only(top: 12),
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Введите имя или номер телефона для поиска',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Color(AppColors.uiBorder),
+                  style: AppStyle.manrope(
+                    size: 14,
+                    weight: FontWeight.w400,
+                    color: const Color(AppColors.uiBorder),
                   ),
                 ),
               ),
