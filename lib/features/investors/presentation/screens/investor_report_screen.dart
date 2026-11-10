@@ -256,7 +256,7 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
                 controller: dateController,
                 label: 'Дата',
                 readOnly: true,
-                suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18),
+                suffixIcon: const WayPayCalendarIcon(),
                 onTap: () async {
                   final selected = await showDatePicker(
                     context: dialogContext,

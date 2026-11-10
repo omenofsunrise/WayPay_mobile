@@ -196,7 +196,7 @@ class _InvestorFormSheetState extends State<_InvestorFormSheet> {
             label: 'Дата окончания договора',
             readOnly: true,
             onTap: _saving ? null : _pickDate,
-            suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18),
+            suffixIcon: const WayPayCalendarIcon(),
           ),
           if (_error != null) ...[
             const SizedBox(height: 12),

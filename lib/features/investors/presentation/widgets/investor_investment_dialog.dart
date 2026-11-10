@@ -92,7 +92,7 @@ class _InvestorInvestmentDialogState extends State<InvestorInvestmentDialog> {
             label: 'Дата инвестиции',
             readOnly: true,
             onTap: _pickDate,
-            suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18),
+            suffixIcon: const WayPayCalendarIcon(),
           ),
         ],
       ),

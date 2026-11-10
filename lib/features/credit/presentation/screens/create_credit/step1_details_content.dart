@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:waypay_mobile/assets/resources.dart';
 import 'package:waypay_mobile/core/utils/bottom_nav_controller.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:waypay_mobile/features/clients/data/models/clients/client_model.dart';
@@ -397,15 +395,7 @@ class _Step1DetailsContentState extends State<Step1DetailsContent> {
               controller: _creditDateController,
               label: 'Выберите дату',
               onTap: () => _pickCreditDate(creditRequest.creditDate),
-              customSuffixIcon: SvgPicture.asset(
-                SvgIcons.calendar,
-                width: 20,
-                height: 20,
-                colorFilter: ColorFilter.mode(
-                  const Color(0xFF6B717C),
-                  BlendMode.srcIn,
-                ),
-              ),
+              customSuffixIcon: const WayPayCalendarIcon(),
             ),
 
             const SizedBox(height: 12),

@@ -200,7 +200,7 @@ class _MoveCashPositionSheetState extends State<MoveCashPositionSheet> {
             hintText: 'Выберите дату',
             readOnly: true,
             onTap: _isSaving ? null : _pickDate,
-            suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18),
+            suffixIcon: const WayPayCalendarIcon(),
           ),
         ],
       ),
