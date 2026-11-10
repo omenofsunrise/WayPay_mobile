@@ -58,8 +58,6 @@ import 'package:waypay_mobile/features/payment/presentation/cubit/schedule_previ
 import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
 import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source_impl.dart';
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_bloc.dart';
-import 'package:waypay_mobile/features/profile/presentation/cubit/credit_stats_cubit.dart';
-import 'package:waypay_mobile/features/profile/presentation/cubit/payment_stats_cubit.dart';
 import 'package:waypay_mobile/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:waypay_mobile/features/sold_products/data/data_sources/sold_product_remote_data_source.dart';
 import 'package:waypay_mobile/features/sold_products/data/data_sources/sold_product_remote_data_source_impl.dart';
@@ -154,8 +152,6 @@ Future<void> initDependencies() async {
   getIt.registerFactory(() => ProfileCubit());
   getIt.registerFactory(() => EmployeesBloc());
   getIt.registerFactory(() => CompanyCubit());
-  getIt.registerFactory(() => PaymentStatsCubit());
-  getIt.registerFactory(() => CreditStatsCubit());
   getIt.registerFactory(() => AnalyticItemsCubit());
   getIt.registerFactory(() => DebtDynamicCubit());
   getIt.registerFactory(() => InvestmentDynamicCubit());

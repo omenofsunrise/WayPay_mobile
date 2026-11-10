@@ -42,7 +42,6 @@ import 'package:waypay_mobile/features/investors/presentation/screens/investors_
 import 'package:waypay_mobile/features/finance/presentation/screens/finance_main_screen.dart';
 import 'package:waypay_mobile/features/finance/presentation/screens/budget_applications_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/profile_screen.dart';
-import 'package:waypay_mobile/features/profile/presentation/screens/profile_statistics_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/active_sessions_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/employees_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/add_employee_screen.dart';
@@ -255,15 +254,6 @@ class AppRouter {
           return AddEmployeeScreen(employeesBloc: bloc);
         },
       ),
-      GoRoute(
-        path: Routes.profileStatsScreen.toPath,
-        name: Routes.profileStatsScreen.toName,
-        builder: (context, state) {
-          final employeeId = state.extra as int?;
-          return ProfileStatisticsScreen(employeeId: employeeId);
-        },
-      ),
-
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainLayout(navigationShell: navigationShell);

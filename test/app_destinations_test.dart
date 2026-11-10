@@ -1,10 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:waypay_mobile/core/widgets/search/search_destinations.dart';
+import 'package:waypay_mobile/core/navigation/app_destinations.dart';
 
 void main() {
   test('navigation menu contains only unique relevant destinations', () {
-    final destinations = getDefaultSearchDestinations();
-    final titles = destinations
+    final titles = appDestinations
         .map((destination) => destination.title)
         .toList();
 

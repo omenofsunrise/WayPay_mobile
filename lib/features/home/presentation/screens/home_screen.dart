@@ -1,10 +1,9 @@
 import 'package:waypay_mobile/features/notifications/presentation/widgets/notifications_bell_button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:waypay_mobile/core/navigation/app_destinations.dart';
 import 'package:waypay_mobile/core/network/dio_client.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
-import 'package:waypay_mobile/core/widgets/search/search_destinations.dart';
-import 'package:waypay_mobile/core/widgets/search/search_suggester.dart';
 import 'package:waypay_mobile/features/home/domain/repositories/home_repository_impl.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
@@ -47,7 +46,7 @@ class _AddRow extends StatelessWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late Future<EmployeeModel> _employeeDataFuture;
   late GetEmployeeDataUseCase _getEmployeeDataUseCase;
-  late final List<SearchDestination> _destinations;
+  final List<AppDestination> _destinations = appDestinations;
 
   @override
   void initState() {
@@ -56,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _getEmployeeDataUseCase = GetEmployeeDataUseCase(
       HomeRepositoryImpl(HomeRemoteDataSourceImpl(dio)),
     );
-    _destinations = getDefaultSearchDestinations();
     _loadEmployeeData();
   }
 
@@ -369,14 +367,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SearchSuggester(destinations: _destinations),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 13),
                   Expanded(
                     child: CustomScrollView(
                       physics: const ClampingScrollPhysics(),

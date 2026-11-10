@@ -1,6 +1,4 @@
-import 'package:waypay_mobile/features/profile/data/models/credit_stat.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
-import 'package:waypay_mobile/features/profile/data/models/payment_stat.dart';
 
 abstract class EmployeeRemoteDataSource {
   Future<void> uploadEmployeePhoto({required int id, required String filePath});
@@ -30,15 +28,5 @@ abstract class EmployeeRemoteDataSource {
   });
   Future<Map<String, dynamic>> getEmployeeById(int id);
   Future<void> deleteEmployee(int id);
-  Future<List<PaymentStat>> getPaymentsStats({int months = 12});
-  Future<List<PaymentStat>> getPaymentsStatsById({
-    required int employeeId,
-    int months = 12,
-  });
-  Future<List<CreditStat>> getCreditsStats({int months = 12});
-  Future<List<CreditStat>> getCreditsStatsById({
-    required int employeeId,
-    int months = 12,
-  });
   Future<List<EmployeeName>> getEmployeeFullNames();
 }
