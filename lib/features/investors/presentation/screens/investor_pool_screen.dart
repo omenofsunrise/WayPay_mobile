@@ -272,14 +272,20 @@ class _InvestorPoolCard extends StatelessWidget {
       title: pool.name,
       subtitle: 'Создан ${_formatDate(pool.createdAt)}',
       leading: const WayPayIconBadge(icon: Icons.account_balance_outlined),
-      trailing: PopupMenuButton<String>(
-        padding: EdgeInsets.zero,
+      trailing: WayPayOverflowMenuButton<String>(
+        title: 'Действия с пулом',
         onSelected: onAction,
-        itemBuilder: (_) => const [
-          PopupMenuItem(value: 'edit', child: Text('Переименовать')),
-          PopupMenuItem(
+        items: const [
+          WayPayActionSheetItem(
+            value: 'edit',
+            label: 'Переименовать',
+            icon: Icons.edit_outlined,
+          ),
+          WayPayActionSheetItem(
             value: 'delete',
-            child: Text('Удалить', style: TextStyle(color: Colors.red)),
+            label: 'Удалить',
+            icon: Icons.delete_outline,
+            isDestructive: true,
           ),
         ],
       ),

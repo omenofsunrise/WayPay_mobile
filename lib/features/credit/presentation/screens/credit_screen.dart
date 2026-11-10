@@ -52,9 +52,9 @@ class _CreditsScreenState extends State<CreditsScreen> {
       // Значения из листа фильтров приоритетнее вкладки: вкладка задаёт
       // только то, что пользователь не выбрал вручную.
       isFavourite:
-          f?.isFavourite ??
-          (_selectedTab == CreditTab.favourite ? true : null),
-      isActive: f?.isActive ?? (_selectedTab == CreditTab.archived ? false : null),
+          f?.isFavourite ?? (_selectedTab == CreditTab.favourite ? true : null),
+      isActive:
+          f?.isActive ?? (_selectedTab == CreditTab.archived ? false : null),
       debt: f?.debt ?? (_selectedTab == CreditTab.debtors ? true : null),
       name: f?.name,
       investorNickname: f?.investorNickname,
@@ -77,6 +77,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
     final result = await showWayPayBottomSheet<GetCreditsQuery>(
       context: context,
       isScrollControlled: true,
+      enableDrag: false,
       useRootNavigator: true,
       clipBehavior: Clip.antiAlias,
       barrierColor: Colors.white.withValues(alpha: 0.7),

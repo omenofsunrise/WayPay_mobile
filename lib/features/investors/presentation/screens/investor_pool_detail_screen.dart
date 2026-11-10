@@ -513,6 +513,7 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen>
                               const SizedBox(height: 10),
                               CustomTabSwitcher(
                                 controller: _operationsController,
+                                isScrollable: true,
                                 tabs: const [
                                   'Выплаты',
                                   'Договоры',
@@ -574,24 +575,26 @@ class _InvestorPoolDetailScreenState extends State<InvestorPoolDetailScreen>
                 title: '${_formatNumber(item.amount)} ₽',
                 subtitle:
                     '${DateFormat('dd.MM.yyyy').format(item.date)} · ${item.investorNickname ?? 'Инвестор'}',
-                trailing: PopupMenuButton<String>(
+                trailing: WayPayOverflowMenuButton<String>(
+                  title: 'Действия с инвестицией',
                   onSelected: (action) => _contributionAction(item, action),
-                  itemBuilder: (_) => [
-                    const PopupMenuItem(
+                  items: [
+                    const WayPayActionSheetItem(
                       value: 'edit',
-                      child: Text('Редактировать'),
+                      label: 'Редактировать',
+                      icon: Icons.edit_outlined,
                     ),
                     if (!item.confirmed)
-                      const PopupMenuItem(
+                      const WayPayActionSheetItem(
                         value: 'confirm',
-                        child: Text('Подтвердить'),
+                        label: 'Подтвердить',
+                        icon: Icons.check_circle_outline,
                       ),
-                    const PopupMenuItem(
+                    const WayPayActionSheetItem(
                       value: 'reject',
-                      child: Text(
-                        'Удалить',
-                        style: TextStyle(color: Colors.red),
-                      ),
+                      label: 'Удалить',
+                      icon: Icons.delete_outline,
+                      isDestructive: true,
                     ),
                   ],
                 ),

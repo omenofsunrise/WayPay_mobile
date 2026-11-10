@@ -645,22 +645,27 @@ class _InvestorReportScreenState extends State<InvestorReportScreen>
               status: contribution.confirmed
                   ? 'Подтверждено'
                   : 'Не подтверждено',
-              trailing: PopupMenuButton<String>(
+              trailing: WayPayOverflowMenuButton<String>(
+                title: 'Действия с инвестицией',
                 onSelected: (action) =>
                     _contributionAction(contribution, action),
-                itemBuilder: (_) => [
-                  const PopupMenuItem(
+                items: [
+                  const WayPayActionSheetItem(
                     value: 'edit',
-                    child: Text('Редактировать'),
+                    label: 'Редактировать',
+                    icon: Icons.edit_outlined,
                   ),
                   if (!contribution.confirmed)
-                    const PopupMenuItem(
+                    const WayPayActionSheetItem(
                       value: 'confirm',
-                      child: Text('Подтвердить'),
+                      label: 'Подтвердить',
+                      icon: Icons.check_circle_outline,
                     ),
-                  const PopupMenuItem(
+                  const WayPayActionSheetItem(
                     value: 'reject',
-                    child: Text('Удалить', style: TextStyle(color: Colors.red)),
+                    label: 'Удалить',
+                    icon: Icons.delete_outline,
+                    isDestructive: true,
                   ),
                 ],
               ),

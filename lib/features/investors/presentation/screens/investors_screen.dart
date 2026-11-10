@@ -301,25 +301,34 @@ class _InvestorCard extends StatelessWidget {
         children: [
           if (investor.isBlocked)
             const Icon(Icons.lock_outline, size: 18, color: Colors.red),
-          PopupMenuButton<String>(
-            padding: EdgeInsets.zero,
+          WayPayOverflowMenuButton<String>(
+            title: 'Действия с инвестором',
             onSelected: onAction,
-            itemBuilder: (_) => [
-              const PopupMenuItem(value: 'edit', child: Text('Редактировать')),
-              PopupMenuItem(
+            items: [
+              const WayPayActionSheetItem(
+                value: 'edit',
+                label: 'Редактировать',
+                icon: Icons.edit_outlined,
+              ),
+              WayPayActionSheetItem(
                 value: 'block',
-                child: Text(
-                  investor.isBlocked ? 'Разблокировать' : 'Заблокировать',
-                ),
+                label: investor.isBlocked ? 'Разблокировать' : 'Заблокировать',
+                icon: investor.isBlocked
+                    ? Icons.lock_open_outlined
+                    : Icons.lock_outline,
               ),
               if (investor.isBlocked)
-                const PopupMenuItem(
+                const WayPayActionSheetItem(
                   value: 'clear',
-                  child: Text('Аннулировать'),
+                  label: 'Аннулировать',
+                  icon: Icons.remove_circle_outline,
+                  isDestructive: true,
                 ),
-              const PopupMenuItem(
+              const WayPayActionSheetItem(
                 value: 'delete',
-                child: Text('Удалить', style: TextStyle(color: Colors.red)),
+                label: 'Удалить',
+                icon: Icons.delete_outline,
+                isDestructive: true,
               ),
             ],
           ),
