@@ -29,11 +29,21 @@ import 'package:waypay_mobile/features/network_error/screens/network_error_scree
 import 'package:waypay_mobile/routes/app_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
+import 'package:waypay_mobile/blacklist_plus/blacklist_plus_app.dart';
+import 'package:waypay_mobile/blacklist_plus/core/di/dependency_injection.dart'
+    as blacklist_plus;
+import 'package:waypay_mobile/core/app_mode/app_mode.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ru_RU', null);
   await initDependencies();
+  try {
+    await blacklist_plus.initDependencies();
+  } catch (e) {
+    debugPrint('⚠️ ЧС+ не инициализировался: $e');
+  }
+  await AppModeController.instance.load();
 
   // Пуши не должны мешать запуску: если Firebase не настроен или разрешение
   // не выдано, приложение обязано открыться как обычно.
@@ -123,6 +133,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             theme: WayPayTheme.light,
           );
 
+    return ValueListenableBuilder<AppMode>(
+      valueListenable: AppModeController.instance,
+      builder: (context, mode, _) {
+        if (mode == AppMode.blacklistPlus && !isOffline!) {
+          return const BlacklistPlusApp();
+        }
+        return _buildWayPay(app);
+      },
+    );
+  }
+
+  Widget _buildWayPay(Widget app) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => getIt<AuthCubit>()),

@@ -52,6 +52,10 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   http: ^1.5.0
   audioplayers: ^6.7.1
+  # ЧС+ (lib/blacklist_plus): напоминания о долгах
+  flutter_local_notifications: ^17.2.3
+  timezone: ^0.9.4
+  flutter_timezone: ^3.0.1
   waypay_flutter_library:
     path: packages/waypay_styles
 
@@ -66,6 +70,9 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/sounds/
+    - assets/blacklist_plus/images/
+    - assets/blacklist_plus/icons/
+    - assets/blacklist_plus/templates/
     - assets/fonts/Roboto-Regular.ttf
     - assets/fonts/Roboto-Bold.ttf
   fonts:
@@ -91,3 +98,6 @@ flutter_launcher_icons:
   adaptive_icon_background: "#ffffff"
   adaptive_icon_foreground: "assets/images/app_icon.png"
   remove_alpha_ios: true
+
+dependency_overrides:
+  objective_c: 9.1.0

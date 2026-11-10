@@ -36,6 +36,12 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+	</array>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Доступ нужен для сохранения и экспорта файлов/изображений.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Нужен доступ к камере, чтобы добавить фото к заметке.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:waypay_mobile/assets/resources.dart';
+import 'package:waypay_mobile/core/app_mode/app_mode.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
 import 'package:waypay_mobile/core/widgets/helpers.dart';
 import 'package:waypay_mobile/core/widgets/refresh.dart';
@@ -200,6 +201,15 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             onTap: () => context.pushNamed(Routes.companyDataScreen.toName),
           ),
         ],
+      [
+        _ProfileMenuItem(
+          icon: const Icon(Icons.swap_horiz_rounded),
+          label: 'Перейти в ЧС+',
+          onTap: () => AppModeController.instance.switchTo(
+            AppMode.blacklistPlus,
+          ),
+        ),
+      ],
       [
         _ProfileMenuItem(
           icon: SvgPicture.asset(SvgIcons.politics),
