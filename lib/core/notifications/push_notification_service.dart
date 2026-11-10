@@ -30,7 +30,7 @@ Future<void> _ensureFirebase() async {
 /// обновлении, а кто его отправит на сервер — решает вызывающий код.
 class PushNotificationService {
   PushNotificationService({FirebaseMessaging? messaging})
-      : _injectedMessaging = messaging;
+    : _injectedMessaging = messaging;
 
   final FirebaseMessaging? _injectedMessaging;
 
@@ -60,7 +60,10 @@ class PushNotificationService {
   Stream<RemoteMessage> get foregroundMessages => FirebaseMessaging.onMessage;
 
   /// Пуш, по которому приложение открыли из свёрнутого состояния.
-  Stream<RemoteMessage> get openedMessages => FirebaseMessaging.onMessageOpenedApp;
+  Stream<RemoteMessage> get openedMessages =>
+      FirebaseMessaging.onMessageOpenedApp;
+
+  Future<RemoteMessage?> getInitialMessage() => _messaging.getInitialMessage();
 
   Future<void> init() async {
     await _ensureFirebase();
@@ -70,9 +73,11 @@ class PushNotificationService {
     debugPrint('🔔 Разрешение на уведомления: ${settings.authorizationStatus}');
 
     await _messaging.setForegroundNotificationPresentationOptions(
-      alert: true,
+      // На переднем плане уведомление уже показывает общий WebSocket-баннер.
+      // Иначе iOS рисует второе системное уведомление поверх него.
+      alert: false,
       badge: true,
-      sound: true,
+      sound: false,
     );
 
     // Не ждём здесь: на iOS токен APNs приходит через несколько секунд, а

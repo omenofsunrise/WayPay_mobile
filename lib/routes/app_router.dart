@@ -15,6 +15,7 @@ import 'package:waypay_mobile/features/auth/presentation/screens/pin_code_screen
 import 'package:waypay_mobile/features/bottom_navigation_bar/main_layout.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/create_credit/new_credit_creation_screen.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/credit_screen.dart';
+import 'package:waypay_mobile/features/credit/presentation/widgets/credit_tab.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
 import 'package:waypay_mobile/features/home/data/models/credit_applications/credit_application_model.dart';
@@ -465,7 +466,11 @@ class AppRouter {
                   GoRoute(
                     path: Routes.creditsScreen.toPath,
                     name: Routes.creditsScreen.toName,
-                    builder: (context, state) => const CreditsScreen(),
+                    builder: (context, state) => CreditsScreen(
+                      initialTab: state.uri.queryParameters['tab'] == 'debtors'
+                          ? CreditTab.debtors
+                          : CreditTab.all,
+                    ),
                   ),
                 ],
               ),

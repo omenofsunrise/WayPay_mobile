@@ -20,19 +20,22 @@ import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 
 class CreditsScreen extends StatefulWidget {
-  const CreditsScreen({super.key});
+  const CreditsScreen({super.key, this.initialTab = CreditTab.all});
+
+  final CreditTab initialTab;
 
   @override
   State<CreditsScreen> createState() => _CreditsScreenState();
 }
 
 class _CreditsScreenState extends State<CreditsScreen> {
-  CreditTab _selectedTab = CreditTab.all;
+  late CreditTab _selectedTab;
   GetCreditsQuery? _filters;
 
   @override
   void initState() {
     super.initState();
+    _selectedTab = widget.initialTab;
     _loadCredits();
   }
 

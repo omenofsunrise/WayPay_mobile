@@ -1,8 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:waypay_mobile/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/core/notifications/notification_presentation.dart';
+import 'package:waypay_mobile/core/notifications/notification_route_handler.dart';
 import 'package:waypay_mobile/features/notifications/data/models/notification_model.dart';
 import 'package:waypay_mobile/features/notifications/presentation/cubit/notifications_cubit.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
@@ -17,7 +17,7 @@ class NotificationsSheet extends StatelessWidget {
       isScrollControlled: true,
       builder: (sheetContext) {
         return BlocProvider(
-          create: (_) => getIt<NotificationsCubit>()..load(markAsRead: true),
+          create: (_) => getIt<NotificationsCubit>()..load(),
           child: const NotificationsSheet(),
         );
       },
@@ -133,34 +133,27 @@ class _NotificationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final date = DateFormat('dd.MM.yyyy').format(item.dateTime.toLocal());
-    final initials = _extractInitials(item.senderFullname);
-    final avatar = item.senderAvatarPath;
+    final date = formatNotificationRelativeTime(item.dateTime);
     final isUnread = !item.isRead;
     final cubit = context.read<NotificationsCubit>();
+    final title = notificationDisplayTitle(item.title ?? '', item.type);
 
     return InkWell(
-      onTap: () => cubit.markAsRead(item.id),
+      onTap: () async {
+        await cubit.markAsRead(item.id);
+        if (!context.mounted) return;
+        Navigator.of(context).pop();
+        await NotificationRouteHandler.open(item.route);
+      },
       borderRadius: BorderRadius.circular(12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: Color(AppColors.primaryLight),
-            backgroundImage: avatar != null && avatar.isNotEmpty
-                ? CachedNetworkImageProvider(avatar)
-                : null,
-            child: (avatar == null || avatar.isEmpty)
-                ? Text(
-                    initials,
-                    style: AppStyle.manrope(
-                      size: 16,
-                      weight: FontWeight.w600,
-                      color: const Color(AppColors.white),
-                    ),
-                  )
-                : null,
+          NotificationLeading(
+            title: title,
+            type: item.type,
+            image: item.senderAvatarPath,
+            size: 48,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -176,9 +169,28 @@ class _NotificationTile extends StatelessWidget {
                     color: const Color(AppColors.grey),
                   ),
                 ),
-                if ((item.title ?? '').isNotEmpty)
+                if (isAdminWhatsAppNotification(item.type))
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0x1F7C3AED),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      '📣 Ответ на рекламу',
+                      style: TextStyle(
+                        color: Color(0xFF7C3AED),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                if (title.isNotEmpty)
                   Text(
-                    item.title!,
+                    title,
                     style: AppStyle.manrope(
                       size: 16,
                       weight: isUnread ? FontWeight.w600 : FontWeight.w500,
@@ -188,7 +200,7 @@ class _NotificationTile extends StatelessWidget {
                     ),
                   ),
                 if ((item.message ?? '').isNotEmpty)
-                  Text(
+                  NotificationLinkText(
                     item.message!,
                     style: AppStyle.manrope(
                       size: 14,
@@ -212,19 +224,5 @@ class _NotificationTile extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _extractInitials(String? fullName) {
-    if (fullName == null || fullName.trim().isEmpty) {
-      return 'CM';
-    }
-    final parts = fullName.trim().split(RegExp(r'\s+'));
-    final first = parts.first.trim().isNotEmpty
-        ? parts.first.trim()[0].toUpperCase()
-        : 'C';
-    final second = parts.length > 1 && parts[1].trim().isNotEmpty
-        ? parts[1].trim()[0].toUpperCase()
-        : '';
-    return '$first$second';
   }
 }
