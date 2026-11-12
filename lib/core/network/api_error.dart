@@ -38,6 +38,7 @@ ApiError _fromDio(DioException e, {String? fallback}) {
     case DioExceptionType.connectionTimeout:
     case DioExceptionType.sendTimeout:
     case DioExceptionType.receiveTimeout:
+    case DioExceptionType.transformTimeout:
       return ApiError(
         'Превышено время ожидания. Возможно, у вас включён VPN — '
         'отключите его и попробуйте ещё раз. Также проверьте интернет-соединение.',

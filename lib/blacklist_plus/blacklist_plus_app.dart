@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/blacklist_plus/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/blacklist_plus/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:waypay_mobile/blacklist_plus/routes/app_router.dart';
