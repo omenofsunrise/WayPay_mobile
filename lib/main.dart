@@ -118,42 +118,53 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     if (isOffline == null) {
       return const MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+        color: Color(AppColors.background),
+        home: Scaffold(
+          backgroundColor: Color(AppColors.background),
+          body: Center(child: CircularProgressIndicator()),
+        ),
       );
     }
 
     final app = isOffline!
         ? const MaterialApp(
             debugShowCheckedModeBanner: false,
+            color: Color(AppColors.background),
             home: NetworkErrorScreen(),
           )
         : MaterialApp.router(
             debugShowCheckedModeBanner: false,
             title: 'waypay_mobile',
+            color: const Color(AppColors.background),
             routerConfig: AppRouter.router,
             // Уведомления по сокету должны всплывать на любом экране.
-            builder: (context, child) =>
-                LiveNotifications(child: child ?? const SizedBox.shrink()),
+            builder: (context, child) => ColoredBox(
+              color: const Color(AppColors.background),
+              child: LiveNotifications(child: child ?? const SizedBox.expand()),
+            ),
             theme: WayPayTheme.light,
           );
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: AppConsentController.instance,
-      builder: (context, accepted, _) {
-        if (!accepted) return const AppConsentScreen();
-        return ValueListenableBuilder<AppMode?>(
-          valueListenable: AppModeController.instance,
-          builder: (context, mode, _) {
-            if (mode == null) {
-              return const AppModeSelectionScreen();
-            }
-            if (mode == AppMode.blacklistPlus && !isOffline!) {
-              return const BlacklistPlusApp();
-            }
-            return _buildWayPay(app);
-          },
-        );
-      },
+    return ColoredBox(
+      color: const Color(AppColors.background),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: AppConsentController.instance,
+        builder: (context, accepted, _) {
+          if (!accepted) return const AppConsentScreen();
+          return ValueListenableBuilder<AppMode?>(
+            valueListenable: AppModeController.instance,
+            builder: (context, mode, _) {
+              if (mode == null) {
+                return const AppModeSelectionScreen();
+              }
+              if (mode == AppMode.blacklistPlus && !isOffline!) {
+                return const BlacklistPlusApp();
+              }
+              return _buildWayPay(app);
+            },
+          );
+        },
+      ),
     );
   }
 

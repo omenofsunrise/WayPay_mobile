@@ -16,6 +16,7 @@ class BlacklistPlusApp extends StatelessWidget {
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         title: 'ЧС+',
+        color: const Color(AppColors.background),
         builder: _appTextScaleBuilder,
         routerConfig: AppRouter.router,
         theme: WayPayTheme.light,
@@ -28,6 +29,9 @@ Widget _appTextScaleBuilder(BuildContext context, Widget? child) {
   final mediaQuery = MediaQuery.of(context);
   return MediaQuery(
     data: mediaQuery.copyWith(textScaler: const TextScaler.linear(0.94)),
-    child: child ?? const SizedBox.shrink(),
+    child: ColoredBox(
+      color: const Color(AppColors.background),
+      child: child ?? const SizedBox.expand(),
+    ),
   );
 }

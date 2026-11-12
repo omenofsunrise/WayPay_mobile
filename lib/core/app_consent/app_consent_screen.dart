@@ -24,6 +24,7 @@ class _AppConsentScreenState extends State<AppConsentScreen> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      color: const Color(AppColors.background),
       theme: WayPayTheme.light,
       home: _showPolicy ? _policyScreen() : _introScreen(),
     );

@@ -9,6 +9,7 @@ class AppModeSelectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      color: const Color(AppColors.background),
       theme: WayPayTheme.light,
       home: Scaffold(
         backgroundColor: const Color(AppColors.background),
