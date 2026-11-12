@@ -183,6 +183,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                         ModalTextField(
                           controller: _phoneController,
                           focusNode: _phoneFocus,
+                          autofocus: true,
                           keyboardType: TextInputType.phone,
                           inputFormatters: [_phoneFormatter],
                           label: 'Номер телефона',
