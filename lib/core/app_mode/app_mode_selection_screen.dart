@@ -14,108 +14,54 @@ class AppModeSelectionScreen extends StatelessWidget {
         backgroundColor: const Color(AppColors.background),
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Spacer(),
                 Text(
                   'Выберите сервис',
                   style: AppStyle.manrope(
-                    size: 28,
-                    weight: FontWeight.w700,
+                    size: 24,
+                    weight: FontWeight.w600,
                     color: const Color(AppColors.black),
                   ),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Text(
                   'WayPay и ЧС+ — отдельные сервисы со своей авторизацией.',
                   style: AppStyle.manrope(
-                    size: 15,
+                    size: 14,
                     weight: FontWeight.w400,
                     color: const Color(AppColors.uiBorder),
                   ),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 28),
-                _ModeCard(
-                  title: 'WayPay CRM',
-                  description:
-                      'Договоры, платежи, клиенты и управление компанией',
-                  icon: Icons.business_center_outlined,
-                  onTap: () =>
-                      AppModeController.instance.switchTo(AppMode.waypay),
-                ),
-                const SizedBox(height: 14),
-                _ModeCard(
-                  title: 'ЧС+',
-                  description: 'Проверка людей и работа с базой ЧС+',
-                  icon: Icons.policy_outlined,
-                  onTap: () => AppModeController.instance.switchTo(
-                    AppMode.blacklistPlus,
+                const SizedBox(height: 36),
+                SizedBox(
+                  width: double.infinity,
+                  child: DefaultButton(
+                    text: 'WayPay CRM',
+                    isPrimary: true,
+                    onPressed: () =>
+                        AppModeController.instance.switchTo(AppMode.waypay),
                   ),
                 ),
-                const Spacer(flex: 2),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: DefaultButton(
+                    text: 'ЧС+',
+                    onPressed: () => AppModeController.instance.switchTo(
+                      AppMode.blacklistPlus,
+                    ),
+                  ),
+                ),
+                const Spacer(),
               ],
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ModeCard extends StatelessWidget {
-  const _ModeCard({
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String title;
-  final String description;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return WayPaySurfaceCard(
-      onTap: onTap,
-      showBorder: true,
-      child: Row(
-        children: [
-          WayPayIconBadge(icon: icon),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppStyle.manrope(
-                    size: 18,
-                    weight: FontWeight.w700,
-                    color: const Color(AppColors.black),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  description,
-                  style: AppStyle.manrope(
-                    size: 13,
-                    weight: FontWeight.w400,
-                    color: const Color(AppColors.uiBorder),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          const Icon(
-            Icons.chevron_right_rounded,
-            color: Color(AppColors.primary),
-          ),
-        ],
       ),
     );
   }
