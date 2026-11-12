@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:waypay_mobile/core/utils/phone_input_formatter.dart';
+import 'package:waypay_mobile/core/app_mode/app_mode.dart';
 
 import 'package:waypay_mobile/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:waypay_mobile/features/auth/data/models/auth_way.dart';
@@ -140,6 +141,14 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        tooltip: 'Назад к выбору сервиса',
+                        onPressed: AppModeController.instance.clearSelection,
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                      ),
+                    ),
                     const Spacer(),
                     Form(
                       key: _formKey,

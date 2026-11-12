@@ -5,6 +5,7 @@ import 'package:waypay_mobile/blacklist_plus/features/auth/data/data_sources/aut
 import 'package:waypay_mobile/blacklist_plus/features/auth/presentation/widgets/call_confirmation_dialog.dart';
 import 'package:waypay_mobile/blacklist_plus/features/auth/presentation/widgets/name_required_dialog.dart';
 import 'package:waypay_mobile/blacklist_plus/routes/routes.dart';
+import 'package:waypay_mobile/core/app_mode/app_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -133,6 +134,14 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        tooltip: 'Назад к выбору сервиса',
+                        onPressed: AppModeController.instance.clearSelection,
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                      ),
+                    ),
                     const Spacer(),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
