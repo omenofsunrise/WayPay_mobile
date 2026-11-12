@@ -172,6 +172,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     FadeTransition(opacity: animation, child: child),
                 layoutBuilder: (currentChild, previousChildren) => Stack(
                   fit: StackFit.expand,
+                  alignment: Alignment.topLeft,
                   children: [
                     ...previousChildren,
                     if (currentChild != null) currentChild,
