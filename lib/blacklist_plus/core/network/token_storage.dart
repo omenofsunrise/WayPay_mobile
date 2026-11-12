@@ -53,6 +53,13 @@ class TokenStorage {
     return access;
   }
 
+  /// Быстрая локальная проверка для маршрутизации. Не обновляет токен по сети:
+  /// это сделает Dio-перехватчик при первом API-запросе.
+  Future<bool> hasStoredAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getString(_accessKey) ?? '').isNotEmpty;
+  }
+
   Future<String?> refreshNow() => _refreshAccessToken();
 
   Future<void> debugExpireAccessTokenNow() async {

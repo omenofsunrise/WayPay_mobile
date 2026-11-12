@@ -84,8 +84,8 @@ class AppRouter {
       final here = state.uri.toString();
 
       if (isAuthenticated) {
-        final access = await tokenStorage.getAccessToken();
-        if (access == null) {
+        final hasStoredAccess = await tokenStorage.hasStoredAccessToken();
+        if (!hasStoredAccess) {
           await tokenStorage.setAuthenticated(false);
           isAuthenticated = false;
         }

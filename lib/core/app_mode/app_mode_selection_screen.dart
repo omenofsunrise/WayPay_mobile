@@ -2,25 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/core/app_mode/app_mode.dart';
 
-class AppModeSelectionScreen extends StatefulWidget {
+class AppModeSelectionScreen extends StatelessWidget {
   const AppModeSelectionScreen({super.key});
-
-  @override
-  State<AppModeSelectionScreen> createState() => _AppModeSelectionScreenState();
-}
-
-class _AppModeSelectionScreenState extends State<AppModeSelectionScreen> {
-  AppMode? _openingMode;
-
-  Future<void> _open(AppMode mode) async {
-    if (_openingMode != null) return;
-    setState(() => _openingMode = mode);
-    try {
-      await AppModeController.instance.switchTo(mode);
-    } finally {
-      if (mounted) setState(() => _openingMode = null);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,42 +42,20 @@ class _AppModeSelectionScreenState extends State<AppModeSelectionScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: DefaultButton(
-                    text: _openingMode == AppMode.waypay
-                        ? 'Открываем...'
-                        : 'WayPay CRM',
+                    text: 'WayPay CRM',
                     isPrimary: true,
-                    showIcon: _openingMode == AppMode.waypay,
-                    iconWidget: _openingMode == AppMode.waypay
-                        ? const SizedBox.square(
-                            dimension: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : null,
-                    onPressed: _openingMode == null
-                        ? () => _open(AppMode.waypay)
-                        : null,
+                    onPressed: () =>
+                        AppModeController.instance.switchTo(AppMode.waypay),
                   ),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
                   child: DefaultButton(
-                    text: _openingMode == AppMode.blacklistPlus
-                        ? 'Открываем...'
-                        : 'ЧС+',
-                    showIcon: _openingMode == AppMode.blacklistPlus,
-                    iconWidget: _openingMode == AppMode.blacklistPlus
-                        ? const SizedBox.square(
-                            dimension: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : null,
-                    onPressed: _openingMode == null
-                        ? () => _open(AppMode.blacklistPlus)
-                        : null,
+                    text: 'ЧС+',
+                    onPressed: () => AppModeController.instance.switchTo(
+                      AppMode.blacklistPlus,
+                    ),
                   ),
                 ),
                 const Spacer(),
