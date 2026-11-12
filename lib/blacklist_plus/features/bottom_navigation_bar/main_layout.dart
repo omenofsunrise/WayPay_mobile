@@ -10,8 +10,9 @@ class MainLayout extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
   static const _navConfigs = [
-    _NavItemConfig(icon: SvgIcons.notebook, branchIndex: 0),
-    _NavItemConfig(icon: SvgIcons.bell, branchIndex: 1),
+    _NavItemConfig(icon: SvgIcons.calculator, branchIndex: 0),
+    _NavItemConfig(icon: SvgIcons.notebook, branchIndex: 1),
+    _NavItemConfig(icon: SvgIcons.bell, branchIndex: 2),
   ];
 
   @override
