@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:waypay_mobile/blacklist_plus/core/di/dependency_injection.dart';
 import 'package:waypay_mobile/blacklist_plus/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:waypay_mobile/blacklist_plus/features/auth/data/models/auth_way.dart';
 import 'package:waypay_mobile/blacklist_plus/features/auth/data/models/call_confirm_request_model.dart';
 import 'package:waypay_mobile/blacklist_plus/features/auth/data/models/start_auth_request_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,19 +29,29 @@ class AuthCubit extends Cubit<AuthState> {
   String? _callPhone;
   String? _userType;
   String? _name;
+  AuthWay _authWay = AuthWay.callCheck;
 
   Timer? _pollTimer;
 
-  Future<void> startAuth(String phone, String userType) async {
+  Future<void> startAuth(
+    String phone,
+    String userType, {
+    AuthWay authWay = AuthWay.callCheck,
+  }) async {
     final normalized = _normalizePhone(phone);
     _phone = normalized;
     _userType = userType;
     _name = null;
+    _authWay = authWay;
 
     emit(AuthLoading());
     try {
       final startResponse = await _authDataSource.startAuth(
-        StartAuthRequestModel(phone: normalized, userType: userType),
+        StartAuthRequestModel(
+          phone: normalized,
+          userType: userType,
+          authWay: authWay,
+        ),
       );
 
       _checkId = startResponse.checkId;
@@ -50,6 +61,7 @@ class AuthCubit extends Cubit<AuthState> {
         if (_enableRegistration) {
           emit(
             AuthNameRequired(
+              authWay: authWay,
               checkId: startResponse.checkId,
               callPhone: startResponse.callPhone,
             ),
@@ -68,11 +80,14 @@ class AuthCubit extends Cubit<AuthState> {
 
       emit(
         AuthCodeSent(
+          authWay: authWay,
           checkId: startResponse.checkId,
           callPhone: startResponse.callPhone,
         ),
       );
-      _startPolling();
+      if (authWay == AuthWay.callCheck) {
+        _startPolling();
+      }
     } catch (e) {
       _resetContext();
       emit(
@@ -101,8 +116,12 @@ class AuthCubit extends Cubit<AuthState> {
     }
 
     _name = trimmed;
-    emit(AuthCodeSent(checkId: checkId, callPhone: callPhone));
-    _startPolling();
+    emit(
+      AuthCodeSent(authWay: _authWay, checkId: checkId, callPhone: callPhone),
+    );
+    if (_authWay == AuthWay.callCheck) {
+      _startPolling();
+    }
   }
 
   Future<bool> confirmCall(String checkId, String phone) async {
@@ -122,6 +141,7 @@ class AuthCubit extends Cubit<AuthState> {
           phone: normalized,
           name: _name,
           userType: _userType ?? 'blacklist_plus',
+          authWay: AuthWay.callCheck,
         ),
       );
 
@@ -135,6 +155,40 @@ class AuthCubit extends Cubit<AuthState> {
     } catch (e) {
       print('⚠️ Verification error (ignored, polling continues): $e');
       return false;
+    } finally {
+      _isVerifying = false;
+    }
+  }
+
+  Future<void> confirmWhatsAppCode(String code, String phone) async {
+    if (state is AuthSuccess || _isVerifying) return;
+
+    _isVerifying = true;
+    final normalized = _normalizePhone(phone);
+    _phone ??= normalized;
+
+    emit(AuthLoading());
+    try {
+      final confirmed = await _authDataSource.confirmCall(
+        CallConfirmRequestModel(
+          checkId: code,
+          phone: normalized,
+          name: _name,
+          userType: _userType ?? 'blacklist_plus',
+          authWay: AuthWay.whatsAppCode,
+        ),
+      );
+
+      if (!confirmed) {
+        emit(AuthError('Неверный код. Попробуйте ещё раз.'));
+        return;
+      }
+
+      _stopPolling();
+      _resetContext();
+      emit(AuthSuccess());
+    } catch (e) {
+      emit(AuthError(_mapAuthError(e, 'Неверный код. Попробуйте ещё раз.')));
     } finally {
       _isVerifying = false;
     }
@@ -175,6 +229,7 @@ class AuthCubit extends Cubit<AuthState> {
     _callPhone = null;
     _userType = null;
     _name = null;
+    _authWay = AuthWay.callCheck;
   }
 
   String _normalizePhone(String input) {
