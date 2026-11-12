@@ -28,6 +28,7 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
   Timer? _debounce;
 
   String? _currentUserId;
+  String _currentUserName = 'Пользователь';
 
   @override
   void initState() {
@@ -53,9 +54,13 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
           ? Map<String, dynamic>.from(clientRaw)
           : null;
       final id = (client?['id'] as String?) ?? '';
+      final name = (client?['name'] as String?)?.trim();
       if (!mounted) return;
       setState(() {
         _currentUserId = id;
+        if (name != null && name.isNotEmpty) {
+          _currentUserName = name;
+        }
       });
     } catch (_) {}
   }
@@ -251,7 +256,7 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
           Header(
             title: 'Чёрный список',
             showBackButton: false,
-            fullName: 'Профиль',
+            fullName: _currentUserName,
             avatarRouteName: Routes.profileScreen.toName,
             showNotifications: true,
             notificationsButton: Material(

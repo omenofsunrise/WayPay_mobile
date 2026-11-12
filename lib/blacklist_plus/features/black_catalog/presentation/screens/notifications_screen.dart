@@ -1,4 +1,5 @@
 import 'package:waypay_mobile/blacklist_plus/core/di/dependency_injection.dart';
+import 'package:waypay_mobile/blacklist_plus/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/data/data_sources/black_catalog_remote_data_source.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/data/models/notification.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/presentation/cubit/notifications_cubit.dart';
@@ -19,12 +20,25 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   late final NotificationsCubit _cubit;
   final ScrollController _scrollController = ScrollController();
+  String _currentUserName = 'Пользователь';
 
   @override
   void initState() {
     super.initState();
     _cubit = NotificationsCubit()..loadInitial();
     _scrollController.addListener(_onScroll);
+    _loadCurrentUser();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    final session = await getIt<AuthRemoteDataSource>().getSessionInfo();
+    final clientRaw = session?['client'];
+    final client = clientRaw is Map
+        ? Map<String, dynamic>.from(clientRaw)
+        : null;
+    final name = (client?['name'] as String?)?.trim();
+    if (!mounted || name == null || name.isEmpty) return;
+    setState(() => _currentUserName = name);
   }
 
   @override
@@ -117,10 +131,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return Container(
       color: const Color(AppColors.background),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: const Header(
+      child: Header(
         title: 'Уведомления',
         showBackButton: false,
         showNotifications: false,
+        fullName: _currentUserName,
+        avatarRouteName: Routes.profileScreen.toName,
       ),
     );
   }

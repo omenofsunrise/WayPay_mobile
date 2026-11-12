@@ -1,14 +1,10 @@
 import 'package:waypay_mobile/blacklist_plus/core/network/token_storage.dart';
-import 'package:waypay_mobile/blacklist_plus/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/blacklist_plus/core/utils/moderation_utils.dart';
-import 'package:waypay_mobile/blacklist_plus/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:waypay_mobile/blacklist_plus/features/auth/presentation/screens/phone_auth_screen.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/data/models/black_catalog_item.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/presentation/screens/black_catalog_dossier_screen.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/presentation/screens/black_catalog_screen.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/presentation/screens/notifications_screen.dart';
 import 'package:waypay_mobile/blacklist_plus/features/bottom_navigation_bar/main_layout.dart';
-import 'package:waypay_mobile/blacklist_plus/features/calc/calculator_page.dart';
 import 'package:waypay_mobile/blacklist_plus/features/info/privacy_policy_screen.dart';
 import 'package:waypay_mobile/blacklist_plus/features/info/screens/privacy_policy_intro_screen.dart';
 import 'package:waypay_mobile/blacklist_plus/features/profile/presentation/screens/profile_screen.dart';
@@ -56,26 +52,8 @@ class AppRouter {
         }
         return null;
       }
-      final isCalculatorRoute = here == Routes.calculatorScreen.toPath;
       if (here == '/' || here == Routes.phoneAuthScreen.toPath) {
         return Routes.blacklistScreen.toPath;
-      }
-      if (isCalculatorRoute) {
-        try {
-          final authDataSource = getIt<AuthRemoteDataSource>();
-          final results = await Future.wait([
-            authDataSource.getAuthInfo(),
-            authDataSource.hasActiveSubscription(),
-          ]);
-          final authInfo = results[0] as Map<String, dynamic>;
-          final hasActive = results[1] as bool;
-          final canUseCalculator = isUserModerated(authInfo) && hasActive;
-          if (!canUseCalculator) {
-            return Routes.blacklistScreen.toPath;
-          }
-        } catch (_) {
-          return Routes.blacklistScreen.toPath;
-        }
       }
 
       return null;
@@ -109,15 +87,6 @@ class AppRouter {
         builder: (context, state, navigationShell) =>
             MainLayout(navigationShell: navigationShell),
         branches: [
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: Routes.calculatorScreen.toPath,
-                name: Routes.calculatorScreen.toName,
-                builder: (context, state) => const CalculatorScreen(),
-              ),
-            ],
-          ),
           StatefulShellBranch(
             routes: [
               GoRoute(
