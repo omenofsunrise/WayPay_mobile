@@ -136,16 +136,12 @@ class AppRouter {
               ),
             ],
           ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: Routes.profileScreen.toPath,
-                name: Routes.profileScreen.toName,
-                builder: (context, state) => const ProfileScreen(),
-              ),
-            ],
-          ),
         ],
+      ),
+      GoRoute(
+        path: Routes.profileScreen.toPath,
+        name: Routes.profileScreen.toName,
+        builder: (context, state) => const ProfileScreen(),
       ),
       GoRoute(
         path: Routes.blackCatalogDossierScreen.toPath,

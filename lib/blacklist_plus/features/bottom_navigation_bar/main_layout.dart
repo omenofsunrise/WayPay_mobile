@@ -23,7 +23,6 @@ class _MainLayoutState extends State<MainLayout> {
     _NavItemConfig(icon: SvgIcons.calculator, branchIndex: 0),
     _NavItemConfig(icon: SvgIcons.notebook, branchIndex: 1),
     _NavItemConfig(icon: SvgIcons.bell, branchIndex: 2),
-    _NavItemConfig(icon: SvgIcons.users, branchIndex: 3),
   ];
 
   @override

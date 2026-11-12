@@ -82,12 +82,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Header(
                 title: 'Профиль',
                 showNotifications: false,
                 showAvatar: false,
+                showBackButton: true,
+                fallbackRoute: Routes.blacklistScreen.toPath,
               ),
             ),
             Expanded(

@@ -248,7 +248,9 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
         children: [
           Header(
             title: 'Чёрный список',
-            showBackButton: true,
+            showBackButton: false,
+            fullName: 'Профиль',
+            avatarRouteName: Routes.profileScreen.toName,
             showNotifications: true,
             notificationsButton: IconButton(
               onPressed: () =>
