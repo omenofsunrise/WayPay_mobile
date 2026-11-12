@@ -19,11 +19,11 @@ class StatsSnapshot {
   });
 
   const StatsSnapshot.empty()
-      : totalAdded = 0,
-        totalDeleted = 0,
-        totalViewed = 0,
-        streak = 0,
-        activeDaysTotal = 0;
+    : totalAdded = 0,
+      totalDeleted = 0,
+      totalViewed = 0,
+      streak = 0,
+      activeDaysTotal = 0;
 }
 
 class LocalStatsService extends ChangeNotifier {

@@ -1,4 +1,3 @@
-import 'package:waypay_mobile/blacklist_plus/core/widgets/app_dialog.dart';
 import 'package:waypay_mobile/blacklist_plus/features/calc/data/calc_preset.dart';
 import 'package:waypay_mobile/blacklist_plus/features/calc/data/calculation_mode.dart';
 import 'package:flutter/material.dart';
@@ -75,9 +74,7 @@ class _CalcPresetDialogState extends State<_CalcPresetDialog> {
     _percentController = TextEditingController(
       text: e == null ? '' : e.percent.toString(),
     );
-    _roundController = TextEditingController(
-      text: (e?.round ?? 50).toString(),
-    );
+    _roundController = TextEditingController(text: (e?.round ?? 50).toString());
   }
 
   static String _formatMoney(int value) {
@@ -154,69 +151,72 @@ class _CalcPresetDialogState extends State<_CalcPresetDialog> {
   @override
   Widget build(BuildContext context) {
     final isEdit = widget.editing != null;
-    return AppDialog(
+    return WayPayModal(
       title: isEdit ? 'Редактировать категорию' : 'Новая категория наценки',
-      content: Column(
+      primaryText: isEdit ? 'Сохранить' : 'Создать',
+      onClose: () => Navigator.of(context).pop(),
+      onPrimary: _submit,
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-            ModalTextField(
-              controller: _titleController,
-              label: 'Название',
-              hintText: 'Например, Авто или Бытовая техника',
-              errorText: _titleError,
-              keyboardType: TextInputType.text,
-            ),
-            const SizedBox(height: 12),
-            ModalTextField(
-              controller: _amountController,
-              label: 'Сумма товара, ₽',
-              hintText: '0',
-              errorText: _amountError,
-              keyboardType: const TextInputType.numberWithOptions(),
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                CurrencyInputFormatter(
-                  thousandSeparator: ThousandSeparator.Space,
-                  mantissaLength: 0,
-                  trailingSymbol: '',
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ModalTextField(
-              controller: _monthsController,
-              label: 'Срок рассрочки, мес',
-              hintText: '12',
-              errorText: _monthsError,
-              keyboardType: const TextInputType.numberWithOptions(),
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            ),
-            const SizedBox(height: 12),
-            ModalTextField(
-              controller: _percentController,
-              label: 'Наценка, %',
-              hintText: '20',
-              errorText: _percentError,
-              keyboardType: const TextInputType.numberWithOptions(),
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            ),
-            const SizedBox(height: 12),
-            ModalTextField(
-              controller: _initialController,
-              label: 'Первоначальный взнос (необязательно), ₽',
-              hintText: '0',
-              keyboardType: const TextInputType.numberWithOptions(),
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                CurrencyInputFormatter(
-                  thousandSeparator: ThousandSeparator.Space,
-                  mantissaLength: 0,
-                  trailingSymbol: '',
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
+          ModalTextField(
+            controller: _titleController,
+            label: 'Название',
+            hintText: 'Например, Авто или Бытовая техника',
+            errorText: _titleError,
+            keyboardType: TextInputType.text,
+          ),
+          const SizedBox(height: 12),
+          ModalTextField(
+            controller: _amountController,
+            label: 'Сумма товара, ₽',
+            hintText: '0',
+            errorText: _amountError,
+            keyboardType: const TextInputType.numberWithOptions(),
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              CurrencyInputFormatter(
+                thousandSeparator: ThousandSeparator.Space,
+                mantissaLength: 0,
+                trailingSymbol: '',
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ModalTextField(
+            controller: _monthsController,
+            label: 'Срок рассрочки, мес',
+            hintText: '12',
+            errorText: _monthsError,
+            keyboardType: const TextInputType.numberWithOptions(),
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          ),
+          const SizedBox(height: 12),
+          ModalTextField(
+            controller: _percentController,
+            label: 'Наценка, %',
+            hintText: '20',
+            errorText: _percentError,
+            keyboardType: const TextInputType.numberWithOptions(),
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          ),
+          const SizedBox(height: 12),
+          ModalTextField(
+            controller: _initialController,
+            label: 'Первоначальный взнос (необязательно), ₽',
+            hintText: '0',
+            keyboardType: const TextInputType.numberWithOptions(),
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              CurrencyInputFormatter(
+                thousandSeparator: ThousandSeparator.Space,
+                mantissaLength: 0,
+                trailingSymbol: '',
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
           ModalTextField(
             controller: _roundController,
             label: 'Округлять до, ₽',
@@ -226,17 +226,6 @@ class _CalcPresetDialogState extends State<_CalcPresetDialog> {
           ),
         ],
       ),
-      actions: [
-        const AppDialogCancelButton(),
-        SizedBox(
-          width: 140,
-          child: DefaultButton(
-            text: isEdit ? 'Сохранить' : 'Создать',
-            isPrimary: true,
-            onPressed: _submit,
-          ),
-        ),
-      ],
     );
   }
 }

@@ -67,8 +67,7 @@ class CalcPresetService extends ChangeNotifier {
   }
 
   Future<void> update(CalcPreset preset) async {
-    _presets =
-        _presets.map((p) => p.id == preset.id ? preset : p).toList();
+    _presets = _presets.map((p) => p.id == preset.id ? preset : p).toList();
     await _persist();
     notifyListeners();
   }

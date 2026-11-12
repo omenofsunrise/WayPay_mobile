@@ -62,64 +62,39 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _roundController.addListener(_calculate);
   }
 
-  void _showCalculationModeMenu(BuildContext context) {
-    final RenderBox overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
-    const double popupWidth = 220;
-
-    Offset? anchor;
-    Size? anchorSize;
-    final RenderBox? titleBox =
-        _headerTitleKey.currentContext?.findRenderObject() as RenderBox?;
-    if (titleBox != null) {
-      anchor = titleBox.localToGlobal(Offset.zero, ancestor: overlay);
-      anchorSize = titleBox.size;
-    } else {
-      final RenderBox button = context.findRenderObject() as RenderBox;
-      anchor = button.localToGlobal(
-        Offset(button.size.width / 2, button.size.height),
-        ancestor: overlay,
-      );
-      anchorSize = Size.zero;
-    }
-
-    final double desiredLeft =
-        anchor.dx +
-        (anchorSize.width.isFinite ? (anchorSize.width - popupWidth) / 2 : 0);
-    final double clampedLeft = desiredLeft.clamp(
-      16.0,
-      overlay.size.width - popupWidth - 16.0,
-    );
-    final double top = anchor.dy + anchorSize.height + 8;
-    final double right = overlay.size.width - clampedLeft - popupWidth;
-    final double bottom = overlay.size.height - top;
-    final RelativeRect position = RelativeRect.fromLTRB(
-      clampedLeft,
-      top,
-      right,
-      bottom,
-    );
-
-    showMenu<CalculationMode>(
+  Future<void> _showCalculationModeMenu(BuildContext context) async {
+    final mode = await showWayPayActionSheet<CalculationMode>(
       context: context,
-      position: position,
-      color: Color(AppColors.white),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      title: 'Режим расчёта',
       items: [
-        _buildCalculationModeItem(
-          CalculationMode.standard,
-          'Стандартный (на всю сумму)',
+        WayPayActionSheetItem(
+          value: CalculationMode.standard,
+          label: 'Стандартный (на всю сумму)',
+          icon: _calculationMode == CalculationMode.standard
+              ? Icons.radio_button_checked
+              : Icons.radio_button_off,
         ),
-        _buildCalculationModeItem(
-          CalculationMode.afterInitial,
-          'Надбавка после вычета взноса',
+        WayPayActionSheetItem(
+          value: CalculationMode.afterInitial,
+          label: 'Надбавка после вычета взноса',
+          icon: _calculationMode == CalculationMode.afterInitial
+              ? Icons.radio_button_checked
+              : Icons.radio_button_off,
         ),
-        _buildCalculationModeItem(
-          CalculationMode.monthlyPercent,
-          'Процент за 1 месяц (x месяцев)',
+        WayPayActionSheetItem(
+          value: CalculationMode.monthlyPercent,
+          label: 'Процент за 1 месяц (× месяцев)',
+          icon: _calculationMode == CalculationMode.monthlyPercent
+              ? Icons.radio_button_checked
+              : Icons.radio_button_off,
         ),
       ],
     );
+    if (mode == null || mode == _calculationMode || !mounted) return;
+    setState(() {
+      _calculationMode = mode;
+      _calculate();
+    });
   }
 
   void _handleMonthsChanged() {
@@ -139,67 +114,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       selection: TextSelection.collapsed(offset: text.length),
     );
     _calculate();
-  }
-
-  PopupMenuItem<CalculationMode> _buildCalculationModeItem(
-    CalculationMode mode,
-    String title,
-  ) {
-    final isSelected = _calculationMode == mode;
-    return PopupMenuItem<CalculationMode>(
-      value: mode,
-      onTap: () {
-        if (mode != _calculationMode) {
-          setState(() {
-            _calculationMode = mode;
-            _calculate();
-          });
-        }
-      },
-      child: Row(
-        children: [
-          Container(
-            width: 16,
-            height: 16,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: isSelected
-                    ? const Color(AppColors.primary)
-                    : const Color(AppColors.borderColor),
-                width: 2,
-              ),
-            ),
-            child: isSelected
-                ? Center(
-                    child: Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(3)),
-                        color: Color(AppColors.primary),
-                      ),
-                    ),
-                  )
-                : null,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: AppStyle.manrope(
-                size: 14,
-                weight: FontWeight.w400,
-                height: 24 / 14,
-                color: isSelected
-                    ? const Color(AppColors.black)
-                    : const Color(0xFF6B7280),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -234,10 +148,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Future<void> _editPreset(CalcPreset preset) async {
-    final result = await showCalcPresetModal(
-      context: context,
-      editing: preset,
-    );
+    final result = await showCalcPresetModal(context: context, editing: preset);
     if (result == null) return;
     await _presetService.update(
       preset.copyWith(
@@ -253,58 +164,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Future<void> _showPresetMenu(CalcPreset preset) async {
-    final action = await showModalBottomSheet<String>(
+    final action = await showWayPayActionSheet<String>(
       context: context,
-      backgroundColor: const Color(AppColors.white),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 8),
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(AppColors.uncomfPayment),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                preset.title,
-                style: AppStyle.manrope(
-                  size: 16,
-                  weight: FontWeight.w700,
-                  color: const Color(AppColors.black),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            ListTile(
-              leading: const Icon(
-                Icons.edit_outlined,
-                color: Color(AppColors.primary),
-              ),
-              title: const Text('Редактировать'),
-              onTap: () => Navigator.pop(ctx, 'edit'),
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.delete_outline,
-                color: Color(AppColors.red),
-              ),
-              title: const Text('Удалить'),
-              onTap: () => Navigator.pop(ctx, 'delete'),
-            ),
-            const SizedBox(height: 8),
-          ],
+      title: preset.title,
+      items: const [
+        WayPayActionSheetItem(
+          value: 'edit',
+          label: 'Редактировать',
+          icon: Icons.edit_outlined,
         ),
-      ),
+        WayPayActionSheetItem(
+          value: 'delete',
+          label: 'Удалить',
+          icon: Icons.delete_outline,
+          isDestructive: true,
+        ),
+      ],
     );
     if (action == 'edit') {
       await _editPreset(preset);
@@ -344,9 +219,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Не удалось создать PDF: $e')));
+        'Не удалось создать PDF: $e',
+        type: AppMessageType.error,
+      );
     }
   }
 
@@ -788,8 +665,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   void _calculate() {
     final ws = RegExp(r'\s');
-    final amount =
-        double.tryParse(_sumController.text.replaceAll(ws, '')) ?? 0;
+    final amount = double.tryParse(_sumController.text.replaceAll(ws, '')) ?? 0;
     final months = int.tryParse(_monthsController.text.replaceAll(ws, '')) ?? 1;
     final initial =
         double.tryParse(_initialController.text.replaceAll(ws, '')) ?? 0;
@@ -851,7 +727,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(AppColors.background),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(56),
         child: SafeArea(
@@ -874,9 +750,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       color: Color(AppColors.black),
                     ),
                     tooltip: 'Шаблоны документов',
-                    onPressed: () => context.goNamed(
-                      Routes.templatesScreen.toName,
-                    ),
+                    onPressed: () =>
+                        context.goNamed(Routes.templatesScreen.toName),
                   ),
                   IconButton(
                     icon: SvgPicture.asset(
@@ -928,7 +803,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         children: [
           Expanded(
             child: Container(
-              color: Colors.white,
+              color: const Color(AppColors.background),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -1195,53 +1070,40 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildResultSection() {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+    return WayPaySurfaceCard(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Результаты расчёта',
+            style: AppStyle.manrope(size: 22, weight: FontWeight.w700),
           ),
+          const SizedBox(height: 16),
+          _buildResultRow(
+            'Ежемесячный платеж',
+            '${_formatCurrency(monthlyPayment)} ₽',
+          ),
+          _buildResultRow('Надбавка %', '${_formatPercentValue()}%'),
+          const SizedBox(height: 8),
+          _buildResultRow(
+            'Сумма долга',
+            '${_formatCurrency(debt)} ₽',
+            leadingDot: const Color(AppColors.primary),
+          ),
+          _buildResultRow(
+            'Переплата',
+            '${_formatCurrency(overpayment)} ₽',
+            leadingDot: const Color(0xFF6CD5C6),
+          ),
+          _buildResultRow('Общая сумма', '${_formatCurrency(total)} ₽'),
+          _buildResultRow(
+            'Последний месяц оплаты',
+            DateFormat('LLLL yyyy', 'ru').format(lastPaymentDate),
+          ),
+          const SizedBox(height: 12),
+          PaymentLineBar(debt: debt, overpayment: overpayment, total: total),
         ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Результаты расчёта',
-              style: AppStyle.manrope(size: 22, weight: FontWeight.w700),
-            ),
-            const SizedBox(height: 16),
-            _buildResultRow(
-              'Ежемесячный платеж',
-              '${_formatCurrency(monthlyPayment)} ₽',
-            ),
-            _buildResultRow('Надбавка %', '${_formatPercentValue()}%'),
-            const SizedBox(height: 8),
-            _buildResultRow(
-              'Сумма долга',
-              '${_formatCurrency(debt)} ₽',
-              leadingDot: const Color(AppColors.primary),
-            ),
-            _buildResultRow(
-              'Переплата',
-              '${_formatCurrency(overpayment)} ₽',
-              leadingDot: const Color(0xFF6CD5C6),
-            ),
-            _buildResultRow('Общая сумма', '${_formatCurrency(total)} ₽'),
-            _buildResultRow(
-              'Последний месяц оплаты',
-              DateFormat('LLLL yyyy', 'ru').format(lastPaymentDate),
-            ),
-            const SizedBox(height: 12),
-            PaymentLineBar(debt: debt, overpayment: overpayment, total: total),
-          ],
-        ),
       ),
     );
   }
@@ -1431,11 +1293,7 @@ class _AddPresetChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.add,
-                size: 16,
-                color: Color(AppColors.primary),
-              ),
+              const Icon(Icons.add, size: 16, color: Color(AppColors.primary)),
               const SizedBox(width: 6),
               Text(
                 'Создать',

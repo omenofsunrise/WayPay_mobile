@@ -239,95 +239,60 @@ class _BlackCatalogFormDialogState extends State<_BlackCatalogFormDialog> {
     final title = isEditing ? 'Редактировать запись' : 'Добавить запись';
     final saveButton = isEditing ? 'Сохранить' : 'Добавить';
 
-    return Dialog(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF111827),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _input(
-                  controller: _fullnameController,
-                  hint: 'ФИО',
-                  onChanged: _onFullnameChanged,
-                ),
-                const SizedBox(height: 12),
-                _input(
-                  controller: _birthdateController,
-                  hint: 'Дата рождения (ДД.ММ.ГГГГ)',
-                  onChanged: (v) => _onDateChanged(_birthdateController, v),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                    LengthLimitingTextInputFormatter(10),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _input(
-                  controller: _docController,
-                  hint: 'Документ (серия и номер)',
-                ),
-                const SizedBox(height: 12),
-                _input(controller: _addressController, hint: 'Адрес'),
-                if (!isEditing) ...[
-                  if (widget.showDebtSection) ...[
-                    const SizedBox(height: 12),
-                    _input(
-                      controller: _debtEndingController,
-                      hint: 'Оформлен до (ДД.ММ.ГГГГ)',
-                      onChanged: (v) =>
-                          _onDateChanged(_debtEndingController, v),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                        LengthLimitingTextInputFormatter(10),
-                      ],
-                      errorText: _debtError,
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  ModalTextField(
-                    controller: _commentController,
-                    label: 'Комментарий',
-                    maxLines: 4,
-                    minLines: 3,
-                  ),
-                ],
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: DefaultButton(
-                    text: saveButton,
-                    isPrimary: true,
-                    onPressed: _submitting ? null : _submit,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed: _submitting
-                      ? null
-                      : () => Navigator.of(context).pop(),
-                  child: const Text('Отмена'),
-                ),
-              ],
-            ),
+    return WayPayModal(
+      title: title,
+      primaryText: saveButton,
+      isSubmitting: _submitting,
+      onClose: _submitting ? null : () => Navigator.of(context).pop(),
+      onPrimary: _submit,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _input(
+            controller: _fullnameController,
+            hint: 'ФИО',
+            onChanged: _onFullnameChanged,
           ),
-        ),
+          const SizedBox(height: 12),
+          _input(
+            controller: _birthdateController,
+            hint: 'Дата рождения (ДД.ММ.ГГГГ)',
+            onChanged: (v) => _onDateChanged(_birthdateController, v),
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+              LengthLimitingTextInputFormatter(10),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _input(controller: _docController, hint: 'Документ (серия и номер)'),
+          const SizedBox(height: 12),
+          _input(controller: _addressController, hint: 'Адрес'),
+          if (!isEditing) ...[
+            if (widget.showDebtSection) ...[
+              const SizedBox(height: 12),
+              _input(
+                controller: _debtEndingController,
+                hint: 'Оформлен до (ДД.ММ.ГГГГ)',
+                onChanged: (v) => _onDateChanged(_debtEndingController, v),
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                  LengthLimitingTextInputFormatter(10),
+                ],
+                errorText: _debtError,
+              ),
+            ],
+            const SizedBox(height: 12),
+            ModalTextField(
+              controller: _commentController,
+              label: 'Комментарий',
+              maxLines: 4,
+              minLines: 3,
+            ),
+          ],
+        ],
       ),
     );
   }

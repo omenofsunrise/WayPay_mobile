@@ -36,14 +36,15 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
     setState(() => _busy = true);
     try {
       final file = await _copyAssetToTemp();
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: _docxMime)],
-        subject: widget.template.title,
-      );
+      await Share.shareXFiles([
+        XFile(file.path, mimeType: _docxMime),
+      ], subject: widget.template.title);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Не удалось открыть шаблон: $e')),
+      showAppMessage(
+        context,
+        'Не удалось открыть шаблон: $e',
+        type: AppMessageType.error,
       );
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -54,7 +55,7 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
   Widget build(BuildContext context) {
     final t = widget.template;
     return Scaffold(
-      backgroundColor: const Color(AppColors.white),
+      backgroundColor: const Color(AppColors.background),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(56),
         child: SafeArea(
@@ -91,10 +92,7 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                   _Section(
                     icon: Icons.help_outline,
                     title: 'Когда использовать',
-                    body: Text(
-                      t.whenToUse,
-                      style: _bodyStyle,
-                    ),
+                    body: Text(t.whenToUse, style: _bodyStyle),
                   ),
                   _Section(
                     icon: Icons.checklist_rtl,
@@ -109,9 +107,7 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('• ', style: _bodyStyle),
-                                Expanded(
-                                  child: Text(field, style: _bodyStyle),
-                                ),
+                                Expanded(child: Text(field, style: _bodyStyle)),
                               ],
                             ),
                           ),
@@ -192,11 +188,7 @@ class _Section extends StatelessWidget {
   final String title;
   final Widget body;
 
-  const _Section({
-    required this.icon,
-    required this.title,
-    required this.body,
-  });
+  const _Section({required this.icon, required this.title, required this.body});
 
   @override
   Widget build(BuildContext context) {
@@ -220,10 +212,7 @@ class _Section extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.only(left: 26),
-            child: body,
-          ),
+          Padding(padding: const EdgeInsets.only(left: 26), child: body),
         ],
       ),
     );

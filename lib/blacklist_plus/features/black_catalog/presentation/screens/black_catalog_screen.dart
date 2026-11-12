@@ -6,7 +6,6 @@ import 'package:waypay_mobile/blacklist_plus/features/black_catalog/data/models/
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/presentation/cubit/black_catalog_list_cubit.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/presentation/widgets/add_debt_modal.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/presentation/widgets/black_catalog_card.dart';
-import 'package:waypay_mobile/blacklist_plus/core/widgets/app_dialog.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/presentation/widgets/black_catalog_form_modal.dart';
 import 'package:waypay_mobile/blacklist_plus/features/stats/data/local_stats_service.dart';
 import 'package:waypay_mobile/blacklist_plus/routes/routes.dart';
@@ -74,61 +73,21 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
   }
 
   Future<void> _showAddMenu() async {
-    final option = await showModalBottomSheet<BlackCatalogAddOption>(
+    final option = await showWayPayActionSheet<BlackCatalogAddOption>(
       context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 12),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD1D5DB),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Добавить',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              ListTile(
-                leading: const Icon(
-                  Icons.add_box_outlined,
-                  color: Color(0xFF94A3B8),
-                ),
-                title: const Text('Чёрный список'),
-                onTap: () =>
-                    Navigator.pop(ctx, BlackCatalogAddOption.blacklist),
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.description_outlined,
-                  color: Color(0xFF64748B),
-                ),
-                title: const Text('Оформленный'),
-                onTap: () =>
-                    Navigator.pop(ctx, BlackCatalogAddOption.completed),
-              ),
-              const SizedBox(height: 12),
-            ],
-          ),
-        );
-      },
+      title: 'Добавить',
+      items: const [
+        WayPayActionSheetItem(
+          value: BlackCatalogAddOption.blacklist,
+          label: 'Чёрный список',
+          icon: Icons.gpp_bad_outlined,
+        ),
+        WayPayActionSheetItem(
+          value: BlackCatalogAddOption.completed,
+          label: 'Оформленный',
+          icon: Icons.description_outlined,
+        ),
+      ],
     );
 
     if (option == null) return;
@@ -189,13 +148,13 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
   }
 
   Future<void> _confirmDelete(BlackCatalogItem item) async {
-    final confirmed = await showAppConfirmDialog(
-      context: context,
+    final confirmed = await showWayPayConfirmDialog(
+      context,
       title: 'Удалить запись?',
       message:
           'Вы уверены, что хотите удалить ${item.fullname} из чёрного каталога?',
       confirmText: 'Удалить',
-      destructive: true,
+      isDestructive: true,
     );
     if (!confirmed) return;
     try {
@@ -213,53 +172,28 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
 
   Future<void> _showItemMenu(BlackCatalogItem item) async {
     final canEdit = _canEditItem(item);
-    final action = await showModalBottomSheet<String>(
+    final action = await showWayPayActionSheet<String>(
       context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFFD1D5DB),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 12),
-            if (canEdit)
-              ListTile(
-                leading: const Icon(Icons.edit_outlined),
-                title: const Text('Редактировать'),
-                onTap: () => Navigator.pop(ctx, 'edit'),
-              ),
-            ListTile(
-              leading: const Icon(Icons.payments_outlined),
-              title: const Text('Добавить долг'),
-              onTap: () => Navigator.pop(ctx, 'add_debt'),
-            ),
-            if (canEdit)
-              ListTile(
-                leading: const Icon(
-                  Icons.delete_outline,
-                  color: Color(0xFFEF4444),
-                ),
-                title: const Text(
-                  'Удалить',
-                  style: TextStyle(color: Color(0xFFEF4444)),
-                ),
-                onTap: () => Navigator.pop(ctx, 'delete'),
-              ),
-            const SizedBox(height: 12),
-          ],
+      items: [
+        if (canEdit)
+          const WayPayActionSheetItem(
+            value: 'edit',
+            label: 'Редактировать',
+            icon: Icons.edit_outlined,
+          ),
+        const WayPayActionSheetItem(
+          value: 'add_debt',
+          label: 'Добавить долг',
+          icon: Icons.payments_outlined,
         ),
-      ),
+        if (canEdit)
+          const WayPayActionSheetItem(
+            value: 'delete',
+            label: 'Удалить',
+            icon: Icons.delete_outline,
+            isDestructive: true,
+          ),
+      ],
     );
 
     if (action == null) return;
@@ -278,9 +212,7 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
 
   void _showError(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    showAppMessage(context, message, type: AppMessageType.error);
   }
 
   @override

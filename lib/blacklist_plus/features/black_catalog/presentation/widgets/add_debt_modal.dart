@@ -1,4 +1,3 @@
-import 'package:waypay_mobile/blacklist_plus/core/widgets/app_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
@@ -93,9 +92,13 @@ class _AddDebtDialogState extends State<_AddDebtDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AppDialog(
+    return WayPayModal(
       title: 'Добавить долг',
-      content: Column(
+      primaryText: 'Добавить',
+      isSubmitting: _submitting,
+      onClose: _submitting ? null : () => Navigator.of(context).pop(),
+      onPrimary: _submit,
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -124,19 +127,6 @@ class _AddDebtDialogState extends State<_AddDebtDialog> {
           ),
         ],
       ),
-      actions: [
-        AppDialogCancelButton(
-          onPressed: _submitting ? null : () => Navigator.of(context).pop(),
-        ),
-        SizedBox(
-          width: 140,
-          child: DefaultButton(
-            text: 'Добавить',
-            isPrimary: true,
-            onPressed: _submitting ? null : _submit,
-          ),
-        ),
-      ],
     );
   }
 }

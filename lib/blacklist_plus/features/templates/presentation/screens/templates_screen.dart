@@ -10,7 +10,7 @@ class TemplatesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(AppColors.white),
+      backgroundColor: const Color(AppColors.background),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(56),
         child: SafeArea(
@@ -95,87 +95,13 @@ class _TemplateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: const Color(AppColors.white),
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: Ink(
-          decoration: BoxDecoration(
-            color: const Color(AppColors.white),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(AppColors.uncomfPayment)),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x0D000000),
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: const Color(AppColors.greenTie),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.description_outlined,
-                  size: 22,
-                  color: Color(AppColors.primary),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      template.title,
-                      style: AppStyle.manrope(
-                        size: 16,
-                        weight: FontWeight.w600,
-                        color: const Color(AppColors.black),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      template.shortDescription,
-                      style: AppStyle.manrope(
-                        size: 13,
-                        weight: FontWeight.w400,
-                        height: 1.4,
-                        color: const Color(AppColors.uiBorder),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Word (.docx) · нажмите для подробностей',
-                      style: AppStyle.manrope(
-                        size: 11,
-                        weight: FontWeight.w500,
-                        color: const Color(AppColors.borderColor),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(
-                Icons.chevron_right,
-                color: Color(AppColors.borderColor),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return WayPayEntityCard(
+      title: template.title,
+      subtitle: template.shortDescription,
+      leading: const WayPayIconBadge(icon: Icons.description_outlined),
+      details: const [WayPayInfoItem(label: 'Формат', value: 'Word (.docx)')],
+      detailColumns: 1,
+      onTap: onTap,
     );
   }
 }

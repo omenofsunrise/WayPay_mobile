@@ -42,15 +42,15 @@ class LocalDebt {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'debtorName': debtorName,
-        'amountRub': amountRub,
-        'createdAt': createdAt.toIso8601String(),
-        'dueDate': dueDate?.toIso8601String(),
-        'comment': comment,
-        'isPaid': isPaid,
-        'paidAt': paidAt?.toIso8601String(),
-      };
+    'id': id,
+    'debtorName': debtorName,
+    'amountRub': amountRub,
+    'createdAt': createdAt.toIso8601String(),
+    'dueDate': dueDate?.toIso8601String(),
+    'comment': comment,
+    'isPaid': isPaid,
+    'paidAt': paidAt?.toIso8601String(),
+  };
 
   factory LocalDebt.fromJson(Map<String, dynamic> json) {
     return LocalDebt(

@@ -47,8 +47,10 @@ class DebtReminderService {
   Future<bool> requestPermissionIfNeeded() async {
     await init();
     if (Platform.isIOS) {
-      final ios = _plugin.resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>();
+      final ios = _plugin
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >();
       return await ios?.requestPermissions(
             alert: true,
             badge: true,
@@ -57,8 +59,10 @@ class DebtReminderService {
           false;
     }
     if (Platform.isAndroid) {
-      final android = _plugin.resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
+      final android = _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       return await android?.requestNotificationsPermission() ?? true;
     }
     return false;
@@ -155,22 +159,18 @@ class DebtReminderService {
   }
 
   DateTime? _computeFireDate(DateTime dueDate) {
-    final fire = DateTime(
-      dueDate.year,
-      dueDate.month,
-      dueDate.day - 1,
-      10,
-      0,
-    );
+    final fire = DateTime(dueDate.year, dueDate.month, dueDate.day - 1, 10, 0);
     if (fire.isBefore(DateTime.now())) return null;
     return fire;
   }
 
   String _relativeWhen(DateTime dueDate) {
     final today = DateTime.now();
-    final diff = DateTime(dueDate.year, dueDate.month, dueDate.day)
-        .difference(DateTime(today.year, today.month, today.day))
-        .inDays;
+    final diff = DateTime(
+      dueDate.year,
+      dueDate.month,
+      dueDate.day,
+    ).difference(DateTime(today.year, today.month, today.day)).inDays;
     if (diff == 1) return 'завтра';
     if (diff == 0) return 'сегодня';
     return DateFormat('dd.MM.yyyy', 'ru').format(dueDate);

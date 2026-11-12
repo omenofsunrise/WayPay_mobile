@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:waypay_mobile/blacklist_plus/assets/resources.dart';
 import 'package:waypay_mobile/blacklist_plus/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/blacklist_plus/core/widgets/app_dialog.dart';
 import 'package:waypay_mobile/blacklist_plus/features/stats/data/debt_export_service.dart';
 import 'package:waypay_mobile/blacklist_plus/features/stats/data/debt_reminder_service.dart';
 import 'package:waypay_mobile/blacklist_plus/features/stats/data/local_debt.dart';
@@ -62,13 +61,10 @@ class _StatsScreenState extends State<StatsScreen> {
 
     if (!mounted) return;
     if (result.dueDate != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Напоминание запланировано за день до возврата (${_fmtFireDate(result.dueDate!)})',
-          ),
-          duration: const Duration(seconds: 3),
-        ),
+      showAppMessage(
+        context,
+        'Напоминание запланировано на ${_fmtFireDate(result.dueDate!)}',
+        type: AppMessageType.success,
       );
     }
   }
@@ -80,88 +76,28 @@ class _StatsScreenState extends State<StatsScreen> {
 
   Future<void> _showExportSheet() async {
     if (_debts.debts.isEmpty) return;
-    await showModalBottomSheet<void>(
+    final format = await showWayPayActionSheet<String>(
       context: context,
-      backgroundColor: const Color(AppColors.white),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 8),
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(AppColors.uncomfPayment),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Экспорт журнала',
-                style: AppStyle.manrope(
-                  size: 16,
-                  weight: FontWeight.w700,
-                  color: const Color(AppColors.black),
-                ),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Файл со списком долгов, суммами и статусами',
-                style: AppStyle.manrope(
-                  size: 12,
-                  weight: FontWeight.w400,
-                  color: const Color(AppColors.uiBorder),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            ListTile(
-              leading: const Icon(
-                Icons.picture_as_pdf_outlined,
-                color: Color(AppColors.primary),
-              ),
-              title: const Text('Скачать в PDF'),
-              subtitle: const Text(
-                'Документ для печати или отправки',
-              ),
-              onTap: () async {
-                Navigator.pop(ctx);
-                await _exportAndShare(asExcel: false);
-              },
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.table_chart_outlined,
-                color: Color(AppColors.primary),
-              ),
-              title: const Text('Скачать в Excel (.xlsx)'),
-              subtitle: const Text(
-                'Таблица для дальнейшей работы с цифрами',
-              ),
-              onTap: () async {
-                Navigator.pop(ctx);
-                await _exportAndShare(asExcel: true);
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
+      title: 'Экспорт журнала',
+      items: const [
+        WayPayActionSheetItem(
+          value: 'pdf',
+          label: 'Скачать в PDF',
+          icon: Icons.picture_as_pdf_outlined,
         ),
-      ),
+        WayPayActionSheetItem(
+          value: 'excel',
+          label: 'Скачать в Excel (.xlsx)',
+          icon: Icons.table_chart_outlined,
+        ),
+      ],
     );
+    if (format == 'pdf') await _exportAndShare(asExcel: false);
+    if (format == 'excel') await _exportAndShare(asExcel: true);
   }
 
   Future<void> _exportAndShare({required bool asExcel}) async {
     final service = getIt<DebtExportService>();
-    final messenger = ScaffoldMessenger.of(context);
     try {
       final File file = asExcel
           ? await service.exportToExcel(_debts.debts)
@@ -171,25 +107,27 @@ class _StatsScreenState extends State<StatsScreen> {
           ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
           : 'application/pdf';
 
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: mime)],
-        subject: 'Журнал долгов',
-      );
+      await Share.shareXFiles([
+        XFile(file.path, mimeType: mime),
+      ], subject: 'Журнал долгов');
     } catch (e) {
-      messenger.showSnackBar(
-        SnackBar(content: Text('Не удалось создать файл: $e')),
+      if (!mounted) return;
+      showAppMessage(
+        context,
+        'Не удалось создать файл: $e',
+        type: AppMessageType.error,
       );
     }
   }
 
   Future<void> _confirmRemove(LocalDebt debt) async {
-    final ok = await showAppConfirmDialog(
-      context: context,
+    final ok = await showWayPayConfirmDialog(
+      context,
       title: 'Удалить запись?',
       message:
           'Удалить долг "${debt.debtorName} — ${_money(debt.amountRub)} ₽" из вашего журнала?',
       confirmText: 'Удалить',
-      destructive: true,
+      isDestructive: true,
     );
     if (ok) {
       await _debts.remove(debt.id);
@@ -257,35 +195,10 @@ class _StatsScreenState extends State<StatsScreen> {
             const SizedBox(height: 12),
             _MoneyCard(totals: totals),
             const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Журнал долгов',
-                        style: AppStyle.manrope(
-                          size: 16,
-                          weight: FontWeight.w700,
-                          color: const Color(AppColors.black),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Локальная запись — хранится только на устройстве',
-                        style: AppStyle.manrope(
-                          size: 12,
-                          weight: FontWeight.w400,
-                          color: const Color(AppColors.uiBorder),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                AddButton(onPressed: _onAddDebt),
-              ],
+            WayPaySectionHeader(
+              title: 'Журнал долгов',
+              subtitle: 'Хранится только на этом устройстве',
+              action: AddButton(onPressed: _onAddDebt),
             ),
             const SizedBox(height: 12),
             if (_debts.debts.isEmpty)
@@ -312,8 +225,7 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 }
 
-String _money(int value) =>
-    NumberFormat.decimalPattern('ru').format(value);
+String _money(int value) => NumberFormat.decimalPattern('ru').format(value);
 
 class _StreakCard extends StatelessWidget {
   final int streak;
@@ -464,46 +376,11 @@ class _MetricTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(AppColors.white),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(AppColors.uncomfPayment)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: accent.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 18, color: accent),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            value,
-            style: AppStyle.manrope(
-              size: 22,
-              weight: FontWeight.w700,
-              color: const Color(AppColors.black),
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: AppStyle.manrope(
-              size: 12,
-              weight: FontWeight.w500,
-              color: const Color(AppColors.uiBorder),
-            ),
-          ),
-        ],
-      ),
+    return WayPayMetricCard(
+      title: label,
+      value: value,
+      icon: Icon(icon, size: 18, color: accent),
+      iconBackground: accent.withValues(alpha: 0.12),
     );
   }
 }
@@ -514,81 +391,14 @@ class _MoneyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: const Color(AppColors.white),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(AppColors.uncomfPayment)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Сводка по долгам',
-            style: AppStyle.manrope(
-              size: 14,
-              weight: FontWeight.w600,
-              color: const Color(AppColors.uiBorder),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                _money(totals.activeSumRub),
-                style: AppStyle.manrope(
-                  size: 28,
-                  weight: FontWeight.w700,
-                  color: const Color(AppColors.black),
-                ),
-              ),
-              const SizedBox(width: 4),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  '₽',
-                  style: AppStyle.manrope(
-                    size: 18,
-                    weight: FontWeight.w600,
-                    color: const Color(AppColors.uiBorder),
-                  ),
-                ),
-              ),
-              const Spacer(),
-              if (totals.paidSumRub > 0)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE7F8F0),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'вернули ${_money(totals.paidSumRub)} ₽',
-                    style: AppStyle.manrope(
-                      size: 12,
-                      weight: FontWeight.w600,
-                      color: const Color(0xFF047857),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'должны вам сейчас',
-            style: AppStyle.manrope(
-              size: 12,
-              weight: FontWeight.w400,
-              color: const Color(AppColors.uiBorder),
-            ),
-          ),
-        ],
-      ),
+    return WayPayDashboardCard(
+      title: 'Сводка по долгам',
+      value: '${_money(totals.activeSumRub)} ₽',
+      description: 'Должны вам сейчас',
+      additionalValue: totals.paidSumRub > 0
+          ? 'Вернули ${_money(totals.paidSumRub)} ₽'
+          : null,
+      margin: EdgeInsets.zero,
     );
   }
 }
@@ -607,151 +417,44 @@ class _DebtCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPaid = debt.isPaid;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(AppColors.white),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isPaid
-              ? const Color(0xFFBBF7D0)
-              : const Color(AppColors.uncomfPayment),
+    return WayPayEntityCard(
+      title: debt.debtorName,
+      subtitle: debt.comment,
+      leading: WayPayIconBadge(
+        icon: isPaid ? Icons.check_circle_outline : Icons.payments_outlined,
+        foregroundColor: isPaid
+            ? const Color(0xFF0B8F4D)
+            : const Color(AppColors.primary),
+      ),
+      trailing: WayPayStatusBadge(
+        text: isPaid ? 'Закрыт' : '${_money(debt.amountRub)} ₽',
+        tone: isPaid ? WayPayStatusTone.success : WayPayStatusTone.warning,
+      ),
+      details: [
+        WayPayInfoItem(label: 'Создан', value: _fmtDate(debt.createdAt)),
+        if (debt.dueDate != null)
+          WayPayInfoItem(label: 'Вернуть до', value: _fmtDate(debt.dueDate!)),
+        if (isPaid && debt.paidAt != null)
+          WayPayInfoItem(label: 'Закрыт', value: _fmtDate(debt.paidAt!)),
+      ],
+      detailColumns: 1,
+      actions: [
+        WayPayCardAction(
+          icon: isPaid ? Icons.undo : Icons.check,
+          label: isPaid ? 'Вернуть в долг' : 'Закрыть долг',
+          onPressed: onTogglePaid,
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  debt.debtorName,
-                  style: AppStyle.manrope(
-                    size: 15,
-                    weight: FontWeight.w600,
-                    color: const Color(AppColors.black),
-                  ),
-                ),
-              ),
-              Text(
-                '${_money(debt.amountRub)} ₽',
-                style: AppStyle.manrope(
-                  size: 15,
-                  weight: FontWeight.w700,
-                  color: isPaid
-                      ? const Color(0xFF10B981)
-                      : const Color(AppColors.black),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 12,
-            runSpacing: 4,
-            children: [
-              _MetaText(
-                icon: Icons.calendar_today_outlined,
-                text: 'Создан ${_fmtDate(debt.createdAt)}',
-              ),
-              if (debt.dueDate != null)
-                _MetaText(
-                  icon: Icons.event_outlined,
-                  text: 'Возврат до ${_fmtDate(debt.dueDate!)}',
-                ),
-              if (isPaid && debt.paidAt != null)
-                _MetaText(
-                  icon: Icons.check_circle_outline,
-                  text: 'Закрыт ${_fmtDate(debt.paidAt!)}',
-                  color: const Color(0xFF10B981),
-                ),
-            ],
-          ),
-          if (debt.comment != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              debt.comment!,
-              style: AppStyle.manrope(
-                size: 13,
-                weight: FontWeight.w400,
-                height: 1.4,
-                color: const Color(AppColors.uiBorder),
-              ),
-            ),
-          ],
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: onTogglePaid,
-                  icon: Icon(
-                    isPaid ? Icons.undo : Icons.check,
-                    size: 16,
-                    color: const Color(AppColors.primary),
-                  ),
-                  label: Text(
-                    isPaid ? 'Снова в долг' : 'Долг закрыт',
-                    style: AppStyle.manrope(
-                      size: 13,
-                      weight: FontWeight.w600,
-                      color: const Color(AppColors.primary),
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(AppColors.primary)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              IconButton(
-                onPressed: onRemove,
-                icon: const Icon(
-                  Icons.delete_outline,
-                  color: Color(AppColors.red),
-                ),
-                tooltip: 'Удалить',
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _fmtDate(DateTime dt) => DateFormat('dd.MM.yyyy', 'ru').format(dt);
-}
-
-class _MetaText extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final Color? color;
-  const _MetaText({required this.icon, required this.text, this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = color ?? const Color(AppColors.uiBorder);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 13, color: c),
-        const SizedBox(width: 4),
-        Text(
-          text,
-          style: AppStyle.manrope(
-            size: 12,
-            weight: FontWeight.w500,
-            color: c,
-          ),
+        WayPayCardAction(
+          icon: Icons.delete_outline,
+          label: 'Удалить',
+          onPressed: onRemove,
+          isDestructive: true,
         ),
       ],
     );
   }
+
+  String _fmtDate(DateTime dt) => DateFormat('dd.MM.yyyy', 'ru').format(dt);
 }
 
 class _EmptyDebts extends StatelessWidget {
@@ -759,41 +462,11 @@ class _EmptyDebts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: const Color(AppColors.white),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(AppColors.uncomfPayment)),
-      ),
-      child: Column(
-        children: [
-          const Icon(
-            Icons.inbox_outlined,
-            size: 36,
-            color: Color(AppColors.borderColor),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Журнал пуст',
-            style: AppStyle.manrope(
-              size: 14,
-              weight: FontWeight.w600,
-              color: const Color(AppColors.black),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Нажмите «Добавить долг», чтобы записать первую сумму.',
-            textAlign: TextAlign.center,
-            style: AppStyle.manrope(
-              size: 12,
-              weight: FontWeight.w400,
-              color: const Color(AppColors.uiBorder),
-            ),
-          ),
-        ],
+    return const WayPaySurfaceCard(
+      child: WayPayEmptyState(
+        icon: Icons.inbox_outlined,
+        title: 'Журнал пуст',
+        message: 'Добавьте первый долг, чтобы он появился в журнале',
       ),
     );
   }

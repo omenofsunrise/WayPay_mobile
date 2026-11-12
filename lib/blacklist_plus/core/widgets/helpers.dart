@@ -1,7 +1,7 @@
 import 'package:waypay_mobile/blacklist_plus/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/blacklist_plus/core/widgets/app_dialog.dart';
 import 'package:waypay_mobile/blacklist_plus/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:flutter/material.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 Future<bool> showConfirmDialog({
   required BuildContext context,
@@ -10,8 +10,8 @@ Future<bool> showConfirmDialog({
   String cancelText = 'Отмена',
   String confirmText = 'Подтвердить',
 }) {
-  return showAppConfirmDialog(
-    context: context,
+  return showWayPayConfirmDialog(
+    context,
     title: title,
     message: content,
     cancelText: cancelText,
@@ -21,7 +21,7 @@ Future<bool> showConfirmDialog({
 
 void showMessage(String message, BuildContext context) {
   if (!context.mounted) return;
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  showAppMessage(context, message);
 }
 
 final _avatarColors = [

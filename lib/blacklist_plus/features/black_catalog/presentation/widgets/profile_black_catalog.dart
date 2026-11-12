@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:waypay_mobile/blacklist_plus/core/widgets/app_dialog.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/data/models/black_catalog_item.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/presentation/cubit/my_black_catalog_cubit.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/presentation/widgets/black_catalog_card.dart';
@@ -70,13 +69,13 @@ class _ProfileBlackCatalogState extends State<ProfileBlackCatalog> {
   }
 
   Future<void> _confirmDelete(BlackCatalogItem item) async {
-    final confirmed = await showAppConfirmDialog(
-      context: context,
+    final confirmed = await showWayPayConfirmDialog(
+      context,
       title: 'Удалить запись?',
       message:
           'Вы уверены, что хотите удалить ${item.fullname} из чёрного каталога?',
       confirmText: 'Удалить',
-      destructive: true,
+      isDestructive: true,
     );
 
     if (confirmed) {
@@ -84,9 +83,11 @@ class _ProfileBlackCatalogState extends State<ProfileBlackCatalog> {
         await _cubit.deleteItem(item.id);
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(
+        showAppMessage(
           context,
-        ).showSnackBar(SnackBar(content: Text('Ошибка при удалении: $e')));
+          'Ошибка при удалении: $e',
+          type: AppMessageType.error,
+        );
       }
     }
   }
@@ -117,32 +118,7 @@ class _ProfileBlackCatalogState extends State<ProfileBlackCatalog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: Color(0xFFE0F2F2),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.person_outline,
-                size: 20,
-                color: Color(0xFF2563EB),
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              'Мой чёрный список',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF333333),
-              ),
-            ),
-          ],
-        ),
+        const WayPaySectionHeader(title: 'Мой чёрный список'),
         const SizedBox(height: 12),
         SearchField(
           controller: _searchController,
@@ -155,21 +131,10 @@ class _ProfileBlackCatalogState extends State<ProfileBlackCatalog> {
 
   Widget _buildContent(MyBlackCatalogState state) {
     if (state is MyBlackCatalogLoading) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 32),
-        child: Center(child: CircularProgressIndicator()),
-      );
+      return const SizedBox(height: 180, child: WayPayLoadingState());
     }
     if (state is MyBlackCatalogError) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        child: Center(
-          child: Text(
-            'Ошибка: ${state.message}',
-            style: const TextStyle(color: Color(0xFFEF4444)),
-          ),
-        ),
-      );
+      return WayPayErrorState(message: state.message);
     }
     if (state is! MyBlackCatalogLoaded) {
       return const SizedBox.shrink();
@@ -177,32 +142,12 @@ class _ProfileBlackCatalogState extends State<ProfileBlackCatalog> {
 
     if (state.items.isEmpty) {
       final hasSearched = state.query.length >= 5;
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-        child: Center(
-          child: Column(
-            children: [
-              const Text('📋', style: TextStyle(fontSize: 48)),
-              const SizedBox(height: 12),
-              const Text(
-                'Мой чёрный список',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                hasSearched
-                    ? 'По запросу "${state.query}" ничего не найдено.'
-                    : 'Введите ФИО клиента (минимум 5 символов) для поиска в вашем чёрном каталоге.',
-                style: const TextStyle(color: Color(0xFF6B7280)),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
+      return WayPayEmptyState(
+        icon: Icons.fact_check_outlined,
+        title: 'Мой чёрный список',
+        message: hasSearched
+            ? 'По запросу «${state.query}» ничего не найдено'
+            : 'Введите ФИО клиента для поиска по вашим записям',
       );
     }
 

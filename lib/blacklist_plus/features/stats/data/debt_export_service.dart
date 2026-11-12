@@ -142,9 +142,10 @@ class DebtExportService {
         TextCellValue(d.comment ?? ''),
       ];
       for (var c = 0; c < values.length; c++) {
-        sheet.cell(
-          CellIndex.indexByColumnRow(columnIndex: c, rowIndex: row),
-        ).value = values[c];
+        sheet
+                .cell(CellIndex.indexByColumnRow(columnIndex: c, rowIndex: row))
+                .value =
+            values[c];
       }
     }
 
@@ -170,20 +171,14 @@ class DebtExportService {
     return pw.Container(
       padding: const pw.EdgeInsets.only(bottom: 12),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(
-          bottom: pw.BorderSide(color: _kAccent, width: 2),
-        ),
+        border: pw.Border(bottom: pw.BorderSide(color: _kAccent, width: 2)),
       ),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
             'Журнал долгов',
-            style: pw.TextStyle(
-              font: fontBold,
-              fontSize: 22,
-              color: _kPrimary,
-            ),
+            style: pw.TextStyle(font: fontBold, fontSize: 22, color: _kPrimary),
           ),
           pw.SizedBox(height: 4),
           pw.Text(
@@ -254,11 +249,7 @@ class DebtExportService {
         ),
         pw.Text(
           text,
-          style: pw.TextStyle(
-            font: fontBold,
-            fontSize: 16,
-            color: _kPrimary,
-          ),
+          style: pw.TextStyle(font: fontBold, fontSize: 16, color: _kPrimary),
         ),
       ],
     );

@@ -1,5 +1,4 @@
 import 'package:waypay_mobile/blacklist_plus/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/blacklist_plus/core/widgets/app_dialog.dart';
 import 'package:waypay_mobile/blacklist_plus/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/data/data_sources/black_catalog_remote_data_source.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/data/models/black_catalog_item.dart';
@@ -59,12 +58,12 @@ class _BlackCatalogDossierScreenState extends State<BlackCatalogDossierScreen> {
   }
 
   Future<void> _deleteDebt(int debtId) async {
-    final confirmed = await showAppConfirmDialog(
-      context: context,
+    final confirmed = await showWayPayConfirmDialog(
+      context,
       title: 'Удалить долг?',
       message: 'Вы уверены, что хотите удалить этот долг?',
       confirmText: 'Удалить',
-      destructive: true,
+      isDestructive: true,
     );
     if (!confirmed) return;
     try {
@@ -72,9 +71,11 @@ class _BlackCatalogDossierScreenState extends State<BlackCatalogDossierScreen> {
       await _refreshItem();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Не удалось удалить долг: $e')));
+        'Не удалось удалить долг: $e',
+        type: AppMessageType.error,
+      );
     }
   }
 
@@ -92,7 +93,7 @@ class _BlackCatalogDossierScreenState extends State<BlackCatalogDossierScreen> {
     final isBlacklist = (_item.isSwindler ?? false) || !hasActiveDebt;
 
     return Scaffold(
-      backgroundColor: const Color(AppColors.white),
+      backgroundColor: const Color(AppColors.background),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(56),
         child: SafeArea(
@@ -115,66 +116,67 @@ class _BlackCatalogDossierScreenState extends State<BlackCatalogDossierScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                _item.fullname,
-                style: AppStyle.manrope(
-                  size: 22,
-                  weight: FontWeight.w700,
-                  color: const Color(AppColors.black),
+              WayPayEntityHeaderCard(
+                title: _item.fullname,
+                subtitle: 'Запись ЧС+',
+                icon: Icon(
+                  isBlacklist
+                      ? Icons.gpp_bad_outlined
+                      : Icons.description_outlined,
+                  color: isBlacklist
+                      ? const Color(AppColors.red)
+                      : const Color(AppColors.primary),
+                ),
+                metricLabel: 'Идентификатор',
+                metricValue: '#${_item.id}',
+                badge: WayPayStatusBadge(
+                  text: isBlacklist ? 'Чёрный список' : 'Есть оформления',
+                  tone: isBlacklist
+                      ? WayPayStatusTone.danger
+                      : WayPayStatusTone.warning,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                'ID: ${_item.id}',
-                style: AppStyle.manrope(
-                  size: 12,
-                  weight: FontWeight.w400,
-                  color: const Color(AppColors.borderColor),
+              const SizedBox(height: 16),
+              WayPaySurfaceCard(
+                showBorder: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const WayPaySectionHeader(title: 'Общая информация'),
+                    const SizedBox(height: 16),
+                    WayPayInfoGrid(
+                      columns: 1,
+                      children: [
+                        WayPayInfoItem(
+                          label: 'Дата рождения',
+                          value: _formatDate(_item.birthdate),
+                          valueColor: isBlacklist
+                              ? const Color(AppColors.red)
+                              : null,
+                        ),
+                        WayPayInfoItem(
+                          label: 'Адрес',
+                          value: (_item.address?.isNotEmpty ?? false)
+                              ? _item.address!
+                              : 'Не указан',
+                        ),
+                        WayPayInfoItem(
+                          label: 'Документ',
+                          value: (_item.doc?.isNotEmpty ?? false)
+                              ? _item.doc!
+                              : 'Не указан',
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: _StatusBadge(isBlacklist: isBlacklist),
-              ),
-              const SizedBox(height: 24),
-
-              const _SectionTitle('Общая информация'),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 24,
-                runSpacing: 16,
-                children: [
-                  _InfoCell(
-                    label: 'Дата рождения',
-                    value: _formatDate(_item.birthdate),
-                    isWarning: isBlacklist,
-                    isDebt: !isBlacklist,
-                  ),
-                  _InfoCell(
-                    label: 'Адрес',
-                    value: (_item.address?.isNotEmpty ?? false)
-                        ? _item.address!
-                        : 'Не указан',
-                    isWarning: isBlacklist,
-                    isDebt: !isBlacklist,
-                  ),
-                  _InfoCell(
-                    label: 'Документ',
-                    value: (_item.doc?.isNotEmpty ?? false)
-                        ? _item.doc!
-                        : 'Не указан',
-                    isWarning: isBlacklist,
-                    isDebt: !isBlacklist,
-                  ),
-                ],
               ),
 
               if (activeDebts.isNotEmpty || expiredDebts.isNotEmpty) ...[
                 const SizedBox(height: 24),
                 const Divider(color: Color(AppColors.uncomfPayment)),
                 const SizedBox(height: 16),
-                const _SectionTitle('Оформления'),
+                const WayPaySectionHeader(title: 'Оформления'),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 10,
@@ -203,7 +205,7 @@ class _BlackCatalogDossierScreenState extends State<BlackCatalogDossierScreen> {
               const SizedBox(height: 24),
               const Divider(color: Color(AppColors.uncomfPayment)),
               const SizedBox(height: 16),
-              const _SectionTitle('Комментарии'),
+              const WayPaySectionHeader(title: 'Комментарии'),
               const SizedBox(height: 10),
               if (_currentUserId != null)
                 BlocProvider(
@@ -233,115 +235,6 @@ String _formatDate(String? raw) {
   return DateFormat('dd.MM.yyyy', 'ru_RU').format(parsed);
 }
 
-class _SectionTitle extends StatelessWidget {
-  final String text;
-  const _SectionTitle(this.text);
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: AppStyle.manrope(
-        size: 15,
-        weight: FontWeight.w700,
-        color: const Color(AppColors.black),
-      ),
-    );
-  }
-}
-
-class _InfoCell extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool isWarning;
-  final bool isDebt;
-
-  const _InfoCell({
-    required this.label,
-    required this.value,
-    this.isWarning = false,
-    this.isDebt = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isWarning
-        ? const Color(AppColors.red)
-        : isDebt
-            ? const Color(0xFFB45309)
-            : const Color(AppColors.black);
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: 140),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: AppStyle.manrope(
-              size: 12,
-              weight: FontWeight.w400,
-              color: const Color(AppColors.uiBorder),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: AppStyle.manrope(
-              size: 14,
-              weight: FontWeight.w600,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  final bool isBlacklist;
-  const _StatusBadge({required this.isBlacklist});
-
-  @override
-  Widget build(BuildContext context) {
-    final bg = isBlacklist ? Colors.black : const Color(0xFFF59E0B);
-    final fg = isBlacklist ? const Color(AppColors.red) : Colors.white;
-    final text = isBlacklist ? 'Чёрный список' : 'Есть оформления';
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(6),
-        boxShadow: [
-          BoxShadow(
-            color: (isBlacklist
-                    ? const Color(AppColors.red)
-                    : const Color(0xFFF59E0B))
-                .withOpacity(0.5),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.warning_amber_rounded, size: 14, color: fg),
-          const SizedBox(width: 6),
-          Text(
-            text,
-            style: AppStyle.manrope(
-              size: 13,
-              weight: FontWeight.w700,
-              color: fg,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _DebtBadgeRow extends StatelessWidget {
   final Debt debt;
   final bool expired;
@@ -359,8 +252,9 @@ class _DebtBadgeRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final bg = expired ? const Color(0xFFE5E7EB) : const Color(0xFFFEF3C7);
     final fg = expired ? const Color(0xFF4B5563) : const Color(0xFFB45309);
-    final border =
-        expired ? const Color(AppColors.uncomfPayment) : const Color(0xFFFDE68A);
+    final border = expired
+        ? const Color(AppColors.uncomfPayment)
+        : const Color(0xFFFDE68A);
     final dateStr = _formatDate(debt.debtEndingAt);
     final label = expired ? 'закрыто $dateStr' : 'до $dateStr';
 
@@ -457,23 +351,9 @@ class _CommentsSectionState extends State<_CommentsSection> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (state is CommentsLoading)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Center(child: CircularProgressIndicator()),
-              )
+              const SizedBox(height: 120, child: WayPayLoadingState())
             else if (state is CommentsError) ...[
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF1F0),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFFFCCC7)),
-                ),
-                child: Text(
-                  'Ошибка: ${state.message}',
-                  style: const TextStyle(color: Color(0xFFCF1322)),
-                ),
-              ),
+              WayPayErrorState(message: state.message),
             ] else if (state is CommentsLoaded) ...[
               if (state.comments.isEmpty)
                 Padding(
@@ -535,14 +415,11 @@ class _CommentsSectionState extends State<_CommentsSection> {
       createdAt = DateFormat('dd.MM.yyyy', 'ru_RU').format(parsed);
     }
 
-    return Container(
+    return WayPaySurfaceCard(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(AppColors.white),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(AppColors.uncomfPayment)),
-      ),
+      showShadow: false,
+      showBorder: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

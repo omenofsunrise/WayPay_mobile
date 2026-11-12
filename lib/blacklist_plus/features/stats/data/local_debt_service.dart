@@ -20,10 +20,10 @@ class DebtTotals {
   });
 
   const DebtTotals.empty()
-      : activeCount = 0,
-        paidCount = 0,
-        activeSumRub = 0,
-        paidSumRub = 0;
+    : activeCount = 0,
+      paidCount = 0,
+      activeSumRub = 0,
+      paidSumRub = 0;
 }
 
 class LocalDebtService extends ChangeNotifier {
@@ -87,9 +87,8 @@ class LocalDebtService extends ChangeNotifier {
   Future<void> markPaid(String id) async {
     _debts = _debts
         .map(
-          (d) => d.id == id
-              ? d.copyWith(isPaid: true, paidAt: DateTime.now())
-              : d,
+          (d) =>
+              d.id == id ? d.copyWith(isPaid: true, paidAt: DateTime.now()) : d,
         )
         .toList();
     await _save();
@@ -100,9 +99,7 @@ class LocalDebtService extends ChangeNotifier {
   Future<void> unmarkPaid(String id) async {
     _debts = _debts
         .map(
-          (d) => d.id == id
-              ? d.copyWith(isPaid: false, clearPaidAt: true)
-              : d,
+          (d) => d.id == id ? d.copyWith(isPaid: false, clearPaidAt: true) : d,
         )
         .toList();
     await _save();

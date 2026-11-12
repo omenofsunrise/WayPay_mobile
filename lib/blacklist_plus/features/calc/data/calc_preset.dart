@@ -43,15 +43,15 @@ class CalcPreset {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'amount': amount,
-        'months': months,
-        'initial': initial,
-        'percent': percent,
-        'round': round,
-        'mode': mode.storageKey,
-      };
+    'id': id,
+    'title': title,
+    'amount': amount,
+    'months': months,
+    'initial': initial,
+    'percent': percent,
+    'round': round,
+    'mode': mode.storageKey,
+  };
 
   factory CalcPreset.fromJson(Map<String, dynamic> json) {
     return CalcPreset(

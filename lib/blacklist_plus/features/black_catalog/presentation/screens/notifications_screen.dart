@@ -74,9 +74,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       );
       if (!mounted) return;
       if (response.blackCatalogs.isEmpty) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Запись не найдена')));
+        showAppMessage(context, 'Запись не найдена');
         return;
       }
       context.pushNamed(
@@ -85,9 +83,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      showAppMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text('Не удалось открыть запись: $e')));
+        'Не удалось открыть запись: $e',
+        type: AppMessageType.error,
+      );
     }
   }
 
@@ -96,7 +96,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(AppColors.background),
         body: SafeArea(
           child: Column(
             children: [
@@ -115,7 +115,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Widget _buildHeader() {
     return Container(
-      color: Colors.white,
+      color: const Color(AppColors.background),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: const Header(
         title: 'Уведомления',
@@ -127,47 +127,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Widget _buildBody(NotificationsState state) {
     if (state is NotificationsLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const WayPayLoadingState();
     }
     if (state is NotificationsError) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            'Ошибка: ${state.message}',
-            style: const TextStyle(color: Color(0xFFEF4444)),
-          ),
-        ),
-      );
+      return WayPayErrorState(message: state.message);
     }
     if (state is! NotificationsLoaded) return const SizedBox.shrink();
 
     if (state.items.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('🔔', style: TextStyle(fontSize: 56)),
-              SizedBox(height: 16),
-              Text(
-                'Нет уведомлений',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF111827),
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Здесь будут отображаться все уведомления о новых записях и изменениях',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Color(0xFF6B7280), fontSize: 14),
-              ),
-            ],
-          ),
-        ),
+      return const WayPayEmptyState(
+        icon: Icons.notifications_none,
+        title: 'Нет уведомлений',
+        message: 'Здесь появятся уведомления о новых записях и изменениях',
       );
     }
 
@@ -219,65 +190,32 @@ class _NotificationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isRead = notification.isRead;
-    return Material(
-      color: isRead ? Colors.white : const Color(0xFFE0F2F2),
-      borderRadius: BorderRadius.circular(10),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: isRead ? const Color(0xFFE5E7EB) : const Color(0xFF2563EB),
-            ),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      notification.content,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: isRead ? FontWeight.w400 : FontWeight.w600,
-                        color: const Color(0xFF111827),
-                      ),
-                    ),
-                  ),
-                  if (!isRead)
-                    InkWell(
-                      onTap: onMarkAsRead,
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        width: 28,
-                        height: 28,
-                        margin: const EdgeInsets.only(left: 8),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF2563EB),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.check,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                dateLabel,
-                style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
-              ),
-            ],
-          ),
+    return WayPaySurfaceCard(
+      onTap: onTap,
+      showBorder: !isRead,
+      showShadow: isRead,
+      backgroundColor: isRead
+          ? const Color(AppColors.white)
+          : const Color(0xFFE6F5F3),
+      child: WayPayEntityTile(
+        title: notification.content,
+        subtitle: dateLabel,
+        padding: EdgeInsets.zero,
+        leading: WayPayIconBadge(
+          icon: isRead
+              ? Icons.notifications_none
+              : Icons.notifications_active_outlined,
         ),
+        trailing: isRead
+            ? null
+            : IconButton(
+                tooltip: 'Отметить прочитанным',
+                onPressed: onMarkAsRead,
+                icon: const Icon(
+                  Icons.check_circle_outline,
+                  color: Color(AppColors.primary),
+                ),
+              ),
       ),
     );
   }

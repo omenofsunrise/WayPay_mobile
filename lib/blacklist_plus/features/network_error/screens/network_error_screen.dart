@@ -1,5 +1,6 @@
 import 'package:waypay_mobile/blacklist_plus/assets/resources.dart';
 import 'package:flutter/material.dart';
+import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class NetworkErrorScreen extends StatelessWidget {
   const NetworkErrorScreen({super.key});
@@ -7,7 +8,7 @@ class NetworkErrorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(AppColors.background),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

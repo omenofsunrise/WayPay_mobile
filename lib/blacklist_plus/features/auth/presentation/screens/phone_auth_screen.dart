@@ -128,7 +128,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
           );
 
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: const Color(AppColors.background),
             body: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -199,12 +199,10 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                                   final digits = _phoneFormatter
                                       .getUnmaskedText();
                                   if (digits.length != 10) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Номер должен состоять из 10 цифр',
-                                        ),
-                                      ),
+                                    showAppMessage(
+                                      context,
+                                      'Номер должен состоять из 10 цифр',
+                                      type: AppMessageType.error,
                                     );
                                     return;
                                   }
