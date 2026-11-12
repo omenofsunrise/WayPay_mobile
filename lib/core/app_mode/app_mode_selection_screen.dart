@@ -20,7 +20,7 @@ class AppModeSelectionScreen extends StatelessWidget {
               children: [
                 const Spacer(),
                 Text(
-                  'Выберите программу',
+                  'Выберите сервис',
                   style: AppStyle.manrope(
                     size: 28,
                     weight: FontWeight.w700,
@@ -29,7 +29,7 @@ class AppModeSelectionScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'WayPay и ЧС+ используют разные аккаунты и отдельную авторизацию.',
+                  'WayPay и ЧС+ — отдельные сервисы со своей авторизацией.',
                   style: AppStyle.manrope(
                     size: 15,
                     weight: FontWeight.w400,
