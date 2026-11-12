@@ -288,9 +288,9 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(AppColors.background),
         floatingActionButton: FloatingActionButton(
-          backgroundColor: const Color(0xFF2563EB),
+          backgroundColor: const Color(AppColors.primary),
           onPressed: _showAddMenu,
           child: const Icon(Icons.add, color: Colors.white),
         ),
@@ -313,7 +313,7 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: const Color(AppColors.background),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -346,18 +346,10 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
 
   Widget _buildBody(BlackCatalogListState state) {
     if (state is BlackCatalogListLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const WayPayLoadingState();
     }
     if (state is BlackCatalogListError) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            'Ошибка: ${state.message}',
-            style: const TextStyle(color: Color(0xFFEF4444)),
-          ),
-        ),
-      );
+      return WayPayErrorState(message: state.message);
     }
     if (state is BlackCatalogListEmpty) {
       return _buildEmpty(state);
@@ -370,39 +362,13 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
 
   Widget _buildEmpty(BlackCatalogListEmpty state) {
     final hasSearched = state.hasSearched;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              hasSearched ? '🔍' : '📋',
-              style: const TextStyle(fontSize: 56),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              hasSearched
-                  ? 'Запись в чёрном каталоге не найдена'
-                  : 'Чёрный список',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF111827),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              hasSearched
-                  ? 'По вашему запросу "${state.query}" ничего не найдено.'
-                  : 'Введите ФИО клиента (минимум 5 символов) для поиска в чёрном каталоге.',
-              style: const TextStyle(color: Color(0xFF6B7280), fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+    return WayPayEmptyState(
+      icon: hasSearched
+          ? Icons.person_search_outlined
+          : Icons.fact_check_outlined,
+      title: hasSearched
+          ? 'По запросу «${state.query}» ничего не найдено'
+          : 'Введите ФИО для проверки в ЧС+',
     );
   }
 

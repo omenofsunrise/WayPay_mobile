@@ -17,43 +17,10 @@ class BlacklistPlusApp extends StatelessWidget {
         title: 'ЧС+',
         builder: _appTextScaleBuilder,
         routerConfig: AppRouter.router,
-        theme: _theme,
+        theme: WayPayTheme.light,
       ),
     );
   }
-
-  static final ThemeData _theme = ThemeData(
-    colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2563EB)),
-    useMaterial3: true,
-    scaffoldBackgroundColor: Colors.white,
-    appBarTheme: const AppBarTheme(
-      iconTheme: IconThemeData(color: Colors.black),
-      backgroundColor: Colors.white,
-    ),
-    inputDecorationTheme: InputDecorationTheme(
-      border: _border,
-      enabledBorder: _border,
-      focusedBorder: _border,
-      errorBorder: _border,
-      focusedErrorBorder: _border,
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(shape: _shape),
-    ),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(shape: _shape),
-    ),
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(shape: _shape),
-    ),
-  );
-
-  static final _border = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(8),
-  );
-  static final _shape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(8),
-  );
 }
 
 Widget _appTextScaleBuilder(BuildContext context, Widget? child) {

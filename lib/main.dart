@@ -33,6 +33,7 @@ import 'package:waypay_mobile/blacklist_plus/blacklist_plus_app.dart';
 import 'package:waypay_mobile/blacklist_plus/core/di/dependency_injection.dart'
     as blacklist_plus;
 import 'package:waypay_mobile/core/app_mode/app_mode.dart';
+import 'package:waypay_mobile/core/app_mode/app_mode_selection_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -133,9 +134,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             theme: WayPayTheme.light,
           );
 
-    return ValueListenableBuilder<AppMode>(
+    return ValueListenableBuilder<AppMode?>(
       valueListenable: AppModeController.instance,
       builder: (context, mode, _) {
+        if (mode == null) {
+          return const AppModeSelectionScreen();
+        }
         if (mode == AppMode.blacklistPlus && !isOffline!) {
           return const BlacklistPlusApp();
         }
