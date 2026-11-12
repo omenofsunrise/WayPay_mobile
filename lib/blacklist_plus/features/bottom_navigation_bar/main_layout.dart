@@ -20,11 +20,10 @@ class _MainLayoutState extends State<MainLayout> {
   late final Future<bool> _showCalculatorFuture;
 
   static const _navConfigs = [
-    _NavItemConfig(icon: SvgIcons.book, branchIndex: 0),
-    _NavItemConfig(icon: SvgIcons.doc, branchIndex: 1),
-    _NavItemConfig(icon: SvgIcons.calculator, branchIndex: 2),
-    _NavItemConfig(icon: SvgIcons.notebook, branchIndex: 3),
-    _NavItemConfig(icon: SvgIcons.users, branchIndex: 4),
+    _NavItemConfig(icon: SvgIcons.calculator, branchIndex: 0),
+    _NavItemConfig(icon: SvgIcons.notebook, branchIndex: 1),
+    _NavItemConfig(icon: SvgIcons.bell, branchIndex: 2),
+    _NavItemConfig(icon: SvgIcons.users, branchIndex: 3),
   ];
 
   @override
@@ -64,7 +63,7 @@ class _MainLayoutState extends State<MainLayout> {
               final showCalculator = snapshot.data ?? true;
               final items = showCalculator
                   ? _navConfigs
-                  : _navConfigs.where((item) => item.branchIndex != 2).toList();
+                  : _navConfigs.where((item) => item.branchIndex != 0).toList();
               final currentUiIndex = items.indexWhere(
                 (item) => item.branchIndex == navigationShell.currentIndex,
               );

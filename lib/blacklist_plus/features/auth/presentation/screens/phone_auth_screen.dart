@@ -1,7 +1,4 @@
 import 'package:waypay_mobile/blacklist_plus/features/auth/presentation/bloc/auth_cubit.dart';
-import 'package:waypay_mobile/blacklist_plus/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/blacklist_plus/core/utils/moderation_utils.dart';
-import 'package:waypay_mobile/blacklist_plus/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:waypay_mobile/blacklist_plus/features/auth/presentation/widgets/call_confirmation_dialog.dart';
 import 'package:waypay_mobile/blacklist_plus/features/auth/presentation/widgets/name_required_dialog.dart';
 import 'package:waypay_mobile/blacklist_plus/routes/routes.dart';
@@ -230,24 +227,9 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
     );
   }
 
-  Future<void> _navigateAfterAuth() async {
+  void _navigateAfterAuth() {
     if (_isNavigating || !mounted) return;
     _isNavigating = true;
-    try {
-      final authDataSource = getIt<AuthRemoteDataSource>();
-      final authInfo = await authDataSource.getAuthInfo();
-      final moderated = isUserModerated(authInfo);
-      if (!mounted) return;
-      context.go(
-        moderated
-            ? Routes.calculatorScreen.toPath
-            : Routes.blacklistScreen.toPath,
-      );
-    } catch (_) {
-      if (!mounted) return;
-      context.go(Routes.blacklistScreen.toPath);
-    } finally {
-      _isNavigating = false;
-    }
+    context.go(Routes.blacklistScreen.toPath);
   }
 }

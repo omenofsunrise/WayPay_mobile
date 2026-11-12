@@ -7,7 +7,6 @@ import 'package:waypay_mobile/blacklist_plus/features/black_catalog/presentation
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/presentation/widgets/add_debt_modal.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/presentation/widgets/black_catalog_card.dart';
 import 'package:waypay_mobile/blacklist_plus/features/black_catalog/presentation/widgets/black_catalog_form_modal.dart';
-import 'package:waypay_mobile/blacklist_plus/features/stats/data/local_stats_service.dart';
 import 'package:waypay_mobile/blacklist_plus/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -106,7 +105,6 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
         isSwindler: result.isSwindler,
         debtEndingAt: result.debtEndingAt,
       );
-      unawaited(getIt<LocalStatsService>().recordAdd());
     } catch (e) {
       _showError('Ошибка при сохранении: $e');
     }
@@ -159,14 +157,12 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
     if (!confirmed) return;
     try {
       await _cubit.deleteItem(item.id);
-      unawaited(getIt<LocalStatsService>().recordDelete());
     } catch (e) {
       _showError('Не удалось удалить: $e');
     }
   }
 
   void _openDossier(BlackCatalogItem item) {
-    unawaited(getIt<LocalStatsService>().recordView());
     context.pushNamed(Routes.blackCatalogDossierScreen.toName, extra: item);
   }
 
@@ -256,7 +252,7 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
             showNotifications: true,
             notificationsButton: IconButton(
               onPressed: () =>
-                  context.pushNamed(Routes.notificationsScreen.toName),
+                  context.goNamed(Routes.notificationsScreen.toName),
               icon: const Icon(
                 Icons.notifications_none,
                 color: Color(AppColors.black),

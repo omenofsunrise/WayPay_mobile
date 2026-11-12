@@ -118,22 +118,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               AppMode.waypay,
                             ),
                           ),
-                          const SizedBox(height: 12),
-                          _NavTile(
-                            icon: Icons.bar_chart_rounded,
-                            title: 'Статистика и долги',
-                            subtitle: 'Активность и локальный журнал долгов',
-                            onTap: () =>
-                                context.goNamed(Routes.statsScreen.toName),
-                          ),
-                          const SizedBox(height: 12),
-                          _NavTile(
-                            icon: Icons.description_outlined,
-                            title: 'Шаблоны документов',
-                            subtitle: 'Расписки, акты и уведомления',
-                            onTap: () =>
-                                context.goNamed(Routes.templatesScreen.toName),
-                          ),
                           const SizedBox(height: 24),
                           const ProfileBlackCatalog(
                             allowEdit: true,

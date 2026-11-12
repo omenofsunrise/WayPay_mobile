@@ -12,10 +12,6 @@ import 'package:waypay_mobile/blacklist_plus/features/calc/calculator_page.dart'
 import 'package:waypay_mobile/blacklist_plus/features/info/privacy_policy_screen.dart';
 import 'package:waypay_mobile/blacklist_plus/features/info/screens/privacy_policy_intro_screen.dart';
 import 'package:waypay_mobile/blacklist_plus/features/profile/presentation/screens/profile_screen.dart';
-import 'package:waypay_mobile/blacklist_plus/features/stats/presentation/screens/stats_screen.dart';
-import 'package:waypay_mobile/blacklist_plus/features/templates/data/document_template.dart';
-import 'package:waypay_mobile/blacklist_plus/features/templates/presentation/screens/template_detail_screen.dart';
-import 'package:waypay_mobile/blacklist_plus/features/templates/presentation/screens/templates_screen.dart';
 import 'package:waypay_mobile/blacklist_plus/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -62,7 +58,7 @@ class AppRouter {
       }
       final isCalculatorRoute = here == Routes.calculatorScreen.toPath;
       if (here == '/' || here == Routes.phoneAuthScreen.toPath) {
-        return Routes.statsScreen.toPath;
+        return Routes.blacklistScreen.toPath;
       }
       if (isCalculatorRoute) {
         try {
@@ -75,10 +71,10 @@ class AppRouter {
           final hasActive = results[1] as bool;
           final canUseCalculator = isUserModerated(authInfo) && hasActive;
           if (!canUseCalculator) {
-            return Routes.statsScreen.toPath;
+            return Routes.blacklistScreen.toPath;
           }
         } catch (_) {
-          return Routes.statsScreen.toPath;
+          return Routes.blacklistScreen.toPath;
         }
       }
 
@@ -116,24 +112,6 @@ class AppRouter {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: Routes.statsScreen.toPath,
-                name: Routes.statsScreen.toName,
-                builder: (context, state) => const StatsScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: Routes.templatesScreen.toPath,
-                name: Routes.templatesScreen.toName,
-                builder: (context, state) => const TemplatesScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
                 path: Routes.calculatorScreen.toPath,
                 name: Routes.calculatorScreen.toName,
                 builder: (context, state) => const CalculatorScreen(),
@@ -146,6 +124,15 @@ class AppRouter {
                 path: Routes.blacklistScreen.toPath,
                 name: Routes.blacklistScreen.toName,
                 builder: (context, state) => const BlackCatalogScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.notificationsScreen.toPath,
+                name: Routes.notificationsScreen.toName,
+                builder: (context, state) => const NotificationsScreen(),
               ),
             ],
           ),
@@ -172,24 +159,6 @@ class AppRouter {
           }
           return BlackCatalogDossierScreen(initialItem: item);
         },
-      ),
-      GoRoute(
-        path: Routes.templateDetailScreen.toPath,
-        name: Routes.templateDetailScreen.toName,
-        builder: (context, state) {
-          final template = state.extra as DocumentTemplate?;
-          if (template == null) {
-            return const Scaffold(
-              body: Center(child: Text('Шаблон не передан')),
-            );
-          }
-          return TemplateDetailScreen(template: template);
-        },
-      ),
-      GoRoute(
-        path: Routes.notificationsScreen.toPath,
-        name: Routes.notificationsScreen.toName,
-        builder: (context, state) => const NotificationsScreen(),
       ),
     ],
   );

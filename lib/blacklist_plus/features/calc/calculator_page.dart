@@ -1,16 +1,10 @@
 import 'dart:io';
 import 'package:waypay_mobile/blacklist_plus/assets/resources.dart';
-import 'package:waypay_mobile/blacklist_plus/core/di/dependency_injection.dart';
-import 'package:waypay_mobile/blacklist_plus/features/calc/data/calc_preset.dart';
-import 'package:waypay_mobile/blacklist_plus/features/calc/data/calc_preset_service.dart';
 import 'package:waypay_mobile/blacklist_plus/features/calc/data/calculation_mode.dart';
-import 'package:waypay_mobile/blacklist_plus/features/calc/widgets/calc_preset_modal.dart';
-import 'package:waypay_mobile/blacklist_plus/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -35,8 +29,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final _roundController = TextEditingController();
   final FocusNode _monthsFocusNode = FocusNode();
 
-  final CalcPresetService _presetService = getIt<CalcPresetService>();
-
   DateTime _startDate = DateTime.now().add(const Duration(days: 31));
 
   double monthlyPayment = 0;
@@ -57,7 +49,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _monthsController.addListener(_handleMonthsChanged);
     _sumController.addListener(_calculate);
     _initialController.addListener(_calculate);
-    _presetService.addListener(_onPresetsChanged);
     _percentController.addListener(_calculate);
     _roundController.addListener(_calculate);
   }
@@ -119,7 +110,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   @override
   void dispose() {
     _monthsController.removeListener(_handleMonthsChanged);
-    _presetService.removeListener(_onPresetsChanged);
     _sumController.dispose();
     _monthsController.dispose();
     _initialController.dispose();
@@ -127,65 +117,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _roundController.dispose();
     _monthsFocusNode.dispose();
     super.dispose();
-  }
-
-  void _onPresetsChanged() {
-    if (mounted) setState(() {});
-  }
-
-  Future<void> _createPreset() async {
-    final result = await showCalcPresetModal(context: context);
-    if (result == null) return;
-    await _presetService.add(
-      title: result.title,
-      amount: result.amount,
-      months: result.months,
-      initial: result.initial,
-      percent: result.percent,
-      round: result.round,
-      mode: result.mode,
-    );
-  }
-
-  Future<void> _editPreset(CalcPreset preset) async {
-    final result = await showCalcPresetModal(context: context, editing: preset);
-    if (result == null) return;
-    await _presetService.update(
-      preset.copyWith(
-        title: result.title,
-        amount: result.amount,
-        months: result.months,
-        initial: result.initial,
-        percent: result.percent,
-        round: result.round,
-        mode: result.mode,
-      ),
-    );
-  }
-
-  Future<void> _showPresetMenu(CalcPreset preset) async {
-    final action = await showWayPayActionSheet<String>(
-      context: context,
-      title: preset.title,
-      items: const [
-        WayPayActionSheetItem(
-          value: 'edit',
-          label: 'Редактировать',
-          icon: Icons.edit_outlined,
-        ),
-        WayPayActionSheetItem(
-          value: 'delete',
-          label: 'Удалить',
-          icon: Icons.delete_outline,
-          isDestructive: true,
-        ),
-      ],
-    );
-    if (action == 'edit') {
-      await _editPreset(preset);
-    } else if (action == 'delete') {
-      await _presetService.remove(preset.id);
-    }
   }
 
   Rect? _sharePositionOrigin() {
@@ -744,16 +675,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: const Icon(
-                      Icons.description_outlined,
-                      size: 24,
-                      color: Color(AppColors.black),
-                    ),
-                    tooltip: 'Шаблоны документов',
-                    onPressed: () =>
-                        context.goNamed(Routes.templatesScreen.toName),
-                  ),
-                  IconButton(
                     icon: SvgPicture.asset(
                       SvgIcons.calcMode,
                       width: 24,
@@ -817,73 +738,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  void _applyPreset(CalcPreset preset) {
-    _sumController.text = _formatCurrency(preset.amount.toDouble());
-    _initialController.text = preset.initial == 0
-        ? ''
-        : _formatCurrency(preset.initial.toDouble());
-    _percentController.text = preset.percent.toString();
-    _roundController.text = preset.round.toString();
-    setState(() {
-      _calculationMode = preset.mode;
-    });
-    _updateMonths(preset.months);
-  }
-
-  Widget _buildPresetsSection() {
-    final presets = _presetService.presets;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Категории наценки',
-            style: AppStyle.manrope(
-              size: 14,
-              weight: FontWeight.w600,
-              color: const Color(AppColors.black),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Тап — применить, долгое нажатие — редактировать',
-            style: AppStyle.manrope(
-              size: 11,
-              weight: FontWeight.w400,
-              color: const Color(AppColors.uiBorder),
-            ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 40,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: presets.length + 1,
-              separatorBuilder: (_, _) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return _AddPresetChip(onTap: _createPreset);
-                }
-                final preset = presets[index - 1];
-                return _PresetChip(
-                  label: '${preset.title} · ${preset.percent}%',
-                  onTap: () => _applyPreset(preset),
-                  onLongPress: () => _showPresetMenu(preset),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-        ],
-      ),
-    );
-  }
-
   Widget _buildInputSection() {
     return Column(
       children: [
-        _buildPresetsSection(),
         _buildFloatingTextField(
           controller: _sumController,
           hint: 'Сумма рассрочки, ₽',
@@ -1216,95 +1073,6 @@ class PaymentLineBar extends StatelessWidget {
               },
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PresetChip extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-  final VoidCallback? onLongPress;
-
-  const _PresetChip({
-    required this.label,
-    required this.onTap,
-    this.onLongPress,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: const Color(AppColors.greenTie),
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        onLongPress: onLongPress,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.bolt_outlined,
-                size: 16,
-                color: Color(AppColors.primary),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: AppStyle.manrope(
-                  size: 13,
-                  weight: FontWeight.w600,
-                  color: const Color(AppColors.primary),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AddPresetChip extends StatelessWidget {
-  final VoidCallback onTap;
-  const _AddPresetChip({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: const Color(AppColors.white),
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: const Color(AppColors.primary),
-              width: 1.2,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.add, size: 16, color: Color(AppColors.primary)),
-              const SizedBox(width: 6),
-              Text(
-                'Создать',
-                style: AppStyle.manrope(
-                  size: 13,
-                  weight: FontWeight.w600,
-                  color: const Color(AppColors.primary),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

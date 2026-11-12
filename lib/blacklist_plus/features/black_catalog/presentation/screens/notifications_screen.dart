@@ -119,7 +119,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: const Header(
         title: 'Уведомления',
-        showBackButton: true,
+        showBackButton: false,
         showNotifications: false,
       ),
     );
