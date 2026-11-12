@@ -10,7 +10,9 @@ import 'package:waypay_mobile/blacklist_plus/features/black_catalog/presentation
 import 'package:waypay_mobile/blacklist_plus/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:waypay_mobile/blacklist_plus/assets/resources.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
 
 class BlackCatalogScreen extends StatefulWidget {
@@ -252,15 +254,28 @@ class _BlackCatalogScreenState extends State<BlackCatalogScreen> {
             fullName: 'Профиль',
             avatarRouteName: Routes.profileScreen.toName,
             showNotifications: true,
-            notificationsButton: IconButton(
-              onPressed: () =>
-                  context.goNamed(Routes.notificationsScreen.toName),
-              icon: const Icon(
-                Icons.notifications_none,
-                color: Color(AppColors.black),
+            notificationsButton: Material(
+              color: Colors.transparent,
+              shape: const CircleBorder(),
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: () => context.goNamed(Routes.notificationsScreen.toName),
+                child: SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: Center(
+                    child: SvgPicture.asset(
+                      SvgIcons.bell,
+                      width: 24,
+                      height: 24,
+                      colorFilter: const ColorFilter.mode(
+                        Color(AppColors.uiBorder),
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
             ),
           ),
           const SizedBox(height: 12),
