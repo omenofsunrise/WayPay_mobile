@@ -154,13 +154,34 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           return ValueListenableBuilder<AppMode?>(
             valueListenable: AppModeController.instance,
             builder: (context, mode, _) {
+              final Widget selectedApp;
               if (mode == null) {
-                return const AppModeSelectionScreen();
+                selectedApp = const AppModeSelectionScreen();
+              } else if (mode == AppMode.blacklistPlus && !isOffline!) {
+                selectedApp = const BlacklistPlusApp();
+              } else {
+                selectedApp = _buildWayPay(app);
               }
-              if (mode == AppMode.blacklistPlus && !isOffline!) {
-                return const BlacklistPlusApp();
-              }
-              return _buildWayPay(app);
+
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 320),
+                reverseDuration: const Duration(milliseconds: 260),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) =>
+                    FadeTransition(opacity: animation, child: child),
+                layoutBuilder: (currentChild, previousChildren) => Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ...previousChildren,
+                    if (currentChild != null) currentChild,
+                  ],
+                ),
+                child: KeyedSubtree(
+                  key: ValueKey<AppMode?>(mode),
+                  child: selectedApp,
+                ),
+              );
             },
           );
         },
