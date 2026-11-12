@@ -34,6 +34,8 @@ import 'package:waypay_mobile/blacklist_plus/core/di/dependency_injection.dart'
     as blacklist_plus;
 import 'package:waypay_mobile/core/app_mode/app_mode.dart';
 import 'package:waypay_mobile/core/app_mode/app_mode_selection_screen.dart';
+import 'package:waypay_mobile/core/app_consent/app_consent.dart';
+import 'package:waypay_mobile/core/app_consent/app_consent_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +46,7 @@ void main() async {
   } catch (e) {
     debugPrint('⚠️ ЧС+ не инициализировался: $e');
   }
+  await AppConsentController.instance.load();
   await AppModeController.instance.load();
 
   // Пуши не должны мешать запуску: если Firebase не настроен или разрешение
@@ -134,16 +137,22 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             theme: WayPayTheme.light,
           );
 
-    return ValueListenableBuilder<AppMode?>(
-      valueListenable: AppModeController.instance,
-      builder: (context, mode, _) {
-        if (mode == null) {
-          return const AppModeSelectionScreen();
-        }
-        if (mode == AppMode.blacklistPlus && !isOffline!) {
-          return const BlacklistPlusApp();
-        }
-        return _buildWayPay(app);
+    return ValueListenableBuilder<bool>(
+      valueListenable: AppConsentController.instance,
+      builder: (context, accepted, _) {
+        if (!accepted) return const AppConsentScreen();
+        return ValueListenableBuilder<AppMode?>(
+          valueListenable: AppModeController.instance,
+          builder: (context, mode, _) {
+            if (mode == null) {
+              return const AppModeSelectionScreen();
+            }
+            if (mode == AppMode.blacklistPlus && !isOffline!) {
+              return const BlacklistPlusApp();
+            }
+            return _buildWayPay(app);
+          },
+        );
       },
     );
   }
