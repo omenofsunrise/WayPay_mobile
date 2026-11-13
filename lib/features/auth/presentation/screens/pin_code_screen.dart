@@ -1,4 +1,5 @@
 import 'package:waypay_mobile/core/network/notification_socket.dart';
+import 'package:waypay_mobile/core/app_mode/app_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:waypay_mobile/assets/resources.dart' show Images;
@@ -270,7 +271,16 @@ class _PinCodeScreenState extends State<PinCodeScreen> {
                     ),
                     child: Column(
                       children: [
-                        const SizedBox(height: 32),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: IconButton(
+                            tooltip: 'Назад к выбору сервиса',
+                            onPressed:
+                                AppModeController.instance.clearSelection,
+                            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
                         Image.asset(
                           Images.backgroundLogo,
                           height: 84,

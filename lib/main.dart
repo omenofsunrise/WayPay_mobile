@@ -27,11 +27,25 @@ import 'package:waypay_mobile/features/network_error/screens/network_error_scree
 import 'package:waypay_mobile/routes/app_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
+import 'package:waypay_mobile/blacklist_plus/blacklist_plus_app.dart';
+import 'package:waypay_mobile/blacklist_plus/core/di/dependency_injection.dart'
+    as blacklist_plus;
+import 'package:waypay_mobile/core/app_mode/app_mode.dart';
+import 'package:waypay_mobile/core/app_mode/app_mode_selection_screen.dart';
+import 'package:waypay_mobile/core/app_consent/app_consent.dart';
+import 'package:waypay_mobile/core/app_consent/app_consent_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ru_RU', null);
   await initDependencies();
+  try {
+    await blacklist_plus.initDependencies();
+  } catch (e) {
+    debugPrint('⚠️ ЧС+ не инициализировался: $e');
+  }
+  await AppConsentController.instance.load();
+  await AppModeController.instance.load();
 
   // Пуши не должны мешать запуску: если Firebase не настроен или разрешение
   // не выдано, приложение обязано открыться как обычно.
@@ -102,25 +116,79 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     if (isOffline == null) {
       return const MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+        color: Color(AppColors.background),
+        home: Scaffold(
+          backgroundColor: Color(AppColors.background),
+          body: Center(child: CircularProgressIndicator()),
+        ),
       );
     }
 
     final app = isOffline!
         ? const MaterialApp(
             debugShowCheckedModeBanner: false,
+            color: Color(AppColors.background),
             home: NetworkErrorScreen(),
           )
         : MaterialApp.router(
             debugShowCheckedModeBanner: false,
             title: 'waypay_mobile',
+            color: const Color(AppColors.background),
             routerConfig: AppRouter.router,
             // Уведомления по сокету должны всплывать на любом экране.
-            builder: (context, child) =>
-                LiveNotifications(child: child ?? const SizedBox.shrink()),
+            builder: (context, child) => ColoredBox(
+              color: const Color(AppColors.background),
+              child: LiveNotifications(child: child ?? const SizedBox.expand()),
+            ),
             theme: WayPayTheme.light,
           );
 
+    return ColoredBox(
+      color: const Color(AppColors.background),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: AppConsentController.instance,
+        builder: (context, accepted, _) {
+          if (!accepted) return const AppConsentScreen();
+          return ValueListenableBuilder<AppMode?>(
+            valueListenable: AppModeController.instance,
+            builder: (context, mode, _) {
+              final Widget selectedApp;
+              if (mode == null) {
+                selectedApp = const AppModeSelectionScreen();
+              } else if (mode == AppMode.blacklistPlus && !isOffline!) {
+                selectedApp = const BlacklistPlusApp();
+              } else {
+                selectedApp = _buildWayPay(app);
+              }
+
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 320),
+                reverseDuration: const Duration(milliseconds: 260),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) =>
+                    FadeTransition(opacity: animation, child: child),
+                layoutBuilder: (currentChild, previousChildren) => Stack(
+                  fit: StackFit.expand,
+                  alignment: Alignment.topLeft,
+                  children: [
+                    ...previousChildren,
+                    if (currentChild != null) currentChild,
+                  ],
+                ),
+                child: KeyedSubtree(
+                  key: ValueKey<AppMode?>(mode),
+                  child: selectedApp,
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildWayPay(Widget app) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => getIt<AuthCubit>()),

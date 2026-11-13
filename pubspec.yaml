@@ -66,6 +66,8 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/sounds/
+    - assets/blacklist_plus/images/
+    - assets/blacklist_plus/icons/
     - assets/fonts/Roboto-Regular.ttf
     - assets/fonts/Roboto-Bold.ttf
   fonts:
@@ -91,3 +93,6 @@ flutter_launcher_icons:
   adaptive_icon_background: "#ffffff"
   adaptive_icon_foreground: "assets/images/app_icon.png"
   remove_alpha_ios: true
+
+dependency_overrides:
+  objective_c: 9.1.0

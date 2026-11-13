@@ -34,31 +34,31 @@ ApiError _fromDio(DioException e, {String? fallback}) {
   final status = e.response?.statusCode;
   final data = e.response?.data;
 
-  switch (e.type) {
-    case DioExceptionType.connectionTimeout:
-    case DioExceptionType.sendTimeout:
-    case DioExceptionType.receiveTimeout:
-      return ApiError(
-        'Превышено время ожидания. Возможно, у вас включён VPN — '
-        'отключите его и попробуйте ещё раз. Также проверьте интернет-соединение.',
-        statusCode: status,
-        code: 'TIMEOUT',
-      );
-    case DioExceptionType.connectionError:
-      return ApiError(
-        'Нет подключения к интернету. Проверьте сеть и попробуйте снова.',
-        statusCode: status,
-      );
-    case DioExceptionType.cancel:
-      return ApiError('Запрос был отменён.', statusCode: status);
-    case DioExceptionType.badCertificate:
-      return ApiError(
-        'Не удалось проверить безопасное соединение. Попробуйте позже.',
-        statusCode: status,
-      );
-    case DioExceptionType.badResponse:
-    case DioExceptionType.unknown:
-      break;
+  final type = e.type;
+  if (type == DioExceptionType.connectionTimeout ||
+      type == DioExceptionType.sendTimeout ||
+      type == DioExceptionType.receiveTimeout) {
+    return ApiError(
+      'Превышено время ожидания. Возможно, у вас включён VPN — '
+      'отключите его и попробуйте ещё раз. Также проверьте интернет-соединение.',
+      statusCode: status,
+      code: 'TIMEOUT',
+    );
+  }
+  if (type == DioExceptionType.connectionError) {
+    return ApiError(
+      'Нет подключения к интернету. Проверьте сеть и попробуйте снова.',
+      statusCode: status,
+    );
+  }
+  if (type == DioExceptionType.cancel) {
+    return ApiError('Запрос был отменён.', statusCode: status);
+  }
+  if (type == DioExceptionType.badCertificate) {
+    return ApiError(
+      'Не удалось проверить безопасное соединение. Попробуйте позже.',
+      statusCode: status,
+    );
   }
 
   final serverMessage = _extractServerMessage(data);
