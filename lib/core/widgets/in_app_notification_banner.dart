@@ -2,126 +2,249 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
+import 'package:waypay_mobile/core/notifications/notification_presentation.dart';
 
-OverlayEntry? _current;
-Timer? _timer;
+OverlayEntry? _entry;
+OverlayState? _overlay;
+final List<_ActiveNotification> _notifications = [];
+var _nextId = 0;
 
-/// Показывает уведомление поверх любого экрана.
-///
-/// Слой берётся напрямую у навигатора, а не поиском по контексту: слой лежит
-/// в дереве ниже навигатора, поэтому поиск вверх от его контекста ничего не
-/// находит и показ молча срывается.
-void showInAppNotification(
+int showInAppNotification(
   OverlayState overlay, {
   required String title,
   required String body,
-  Duration duration = const Duration(seconds: 5),
-  VoidCallback? onTap,
+  String? type,
+  String? image,
+  DateTime? timestamp,
+  FutureOr<void> Function()? onTap,
+  FutureOr<void> Function()? onClose,
 }) {
-  hideInAppNotification();
-
-  final entry = OverlayEntry(
-    builder: (context) => _Banner(
+  _overlay = overlay;
+  final id = ++_nextId;
+  _notifications.insert(
+    0,
+    _ActiveNotification(
+      id: id,
       title: title,
       body: body,
-      onTap: () {
-        hideInAppNotification();
-        onTap?.call();
-      },
+      type: type,
+      image: image,
+      timestamp: timestamp ?? DateTime.now(),
+      onTap: onTap,
+      onClose: onClose,
     ),
   );
-
-  _current = entry;
-  overlay.insert(entry);
-  _timer = Timer(duration, hideInAppNotification);
+  if (_notifications.length > 5) {
+    _notifications.removeRange(5, _notifications.length);
+  }
+  _render();
+  return id;
 }
 
-void hideInAppNotification() {
-  _timer?.cancel();
-  _timer = null;
-  _current?.remove();
-  _current = null;
+void hideInAppNotification(int id) {
+  _notifications.removeWhere((item) => item.id == id);
+  _render();
 }
 
-class _Banner extends StatelessWidget {
-  const _Banner({required this.title, required this.body, required this.onTap});
+void hideAllInAppNotifications() {
+  _notifications.clear();
+  _render();
+}
 
+void _render() {
+  if (_notifications.isEmpty) {
+    _entry?.remove();
+    _entry = null;
+    return;
+  }
+  if (_entry == null) {
+    final overlay = _overlay;
+    if (overlay == null) return;
+    _entry = OverlayEntry(builder: (_) => const _NotificationStack());
+    overlay.insert(_entry!);
+  } else {
+    _entry!.markNeedsBuild();
+  }
+}
+
+class _ActiveNotification {
+  const _ActiveNotification({
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.type,
+    required this.image,
+    required this.timestamp,
+    required this.onTap,
+    required this.onClose,
+  });
+
+  final int id;
   final String title;
   final String body;
-  final VoidCallback onTap;
+  final String? type;
+  final String? image;
+  final DateTime timestamp;
+  final FutureOr<void> Function()? onTap;
+  final FutureOr<void> Function()? onClose;
+}
+
+class _NotificationStack extends StatelessWidget {
+  const _NotificationStack();
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      left: 16,
-      right: 16,
-      top: MediaQuery.of(context).padding.top + 12,
+      left: 12,
+      right: 12,
+      top: MediaQuery.paddingOf(context).top + 10,
       child: Material(
         color: Colors.transparent,
-        child: GestureDetector(
-          onTap: onTap,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: const Color(AppColors.white),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(AppColors.greyLight)),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x1F000000),
-                  blurRadius: 18,
-                  offset: Offset(0, 8),
-                ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * 0.72,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final notification in _notifications)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _NotificationBanner(notification: notification),
+                  ),
               ],
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NotificationBanner extends StatelessWidget {
+  const _NotificationBanner({required this.notification});
+
+  final _ActiveNotification notification;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = notificationDisplayTitle(
+      notification.title,
+      notification.type,
+    );
+    final isCampaign = isAdminWhatsAppNotification(notification.type);
+
+    return Material(
+      key: ValueKey('notification-banner-${notification.id}'),
+      color: const Color(AppColors.white),
+      borderRadius: BorderRadius.circular(12),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          hideInAppNotification(notification.id);
+          unawaited(Future.sync(() => notification.onTap?.call()));
+        },
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isCampaign
+                  ? const Color(0xFF7C3AED)
+                  : const Color(AppColors.greyLight),
+              width: isCampaign ? 2 : 1,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x26000000),
+                blurRadius: 14,
+                offset: Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              NotificationLeading(
+                title: title,
+                type: notification.type,
+                image: notification.image,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isCampaign) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0x1F7C3AED),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          '📣 Ответ на рекламу',
+                          style: TextStyle(
+                            color: Color(0xFF7C3AED),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                    ],
+                    Text(
+                      title,
+                      style: AppStyle.manrope(
+                        size: 14,
+                        weight: FontWeight.w600,
+                        color: const Color(AppColors.black),
+                      ),
+                    ),
+                    if (notification.body.trim().isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      NotificationLinkText(
+                        notification.body,
+                        style: AppStyle.manrope(
+                          size: 13,
+                          weight: FontWeight.w500,
+                          color: const Color(AppColors.grey),
+                        ),
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Icon(
-                    Icons.notifications_none_rounded,
-                    color: Color(AppColors.primary),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (title.trim().isNotEmpty)
-                          Text(
-                            title,
-                            style: AppStyle.manrope(
-                              size: 14,
-                              weight: FontWeight.w600,
-                              color: const Color(AppColors.black),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        if (title.trim().isNotEmpty && body.trim().isNotEmpty)
-                          const SizedBox(height: 2),
-                        if (body.trim().isNotEmpty)
-                          Text(
-                            body,
-                            style: AppStyle.manrope(
-                              size: 13,
-                              weight: FontWeight.w500,
-                              color: const Color(AppColors.grey),
-                            ),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                      ],
+                  Text(
+                    formatNotificationRelativeTime(notification.timestamp),
+                    style: AppStyle.manrope(
+                      size: 10,
+                      weight: FontWeight.w400,
+                      color: const Color(AppColors.grey),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(height: 4),
                   InkWell(
                     borderRadius: BorderRadius.circular(16),
-                    onTap: hideInAppNotification,
+                    onTap: () {
+                      hideInAppNotification(notification.id);
+                      unawaited(
+                        Future.sync(() => notification.onClose?.call()),
+                      );
+                    },
                     child: const Padding(
-                      padding: EdgeInsets.all(2),
+                      padding: EdgeInsets.all(3),
                       child: Icon(
                         Icons.close,
                         color: Color(AppColors.grey),
@@ -131,7 +254,7 @@ class _Banner extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
+            ],
           ),
         ),
       ),

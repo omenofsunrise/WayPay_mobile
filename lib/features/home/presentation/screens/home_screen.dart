@@ -1,10 +1,9 @@
 import 'package:waypay_mobile/features/notifications/presentation/widgets/notifications_bell_button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:waypay_mobile/core/navigation/app_destinations.dart';
 import 'package:waypay_mobile/core/network/dio_client.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
-import 'package:waypay_mobile/core/widgets/search/search_destinations.dart';
-import 'package:waypay_mobile/core/widgets/search/search_suggester.dart';
 import 'package:waypay_mobile/features/home/domain/repositories/home_repository_impl.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
@@ -47,7 +46,7 @@ class _AddRow extends StatelessWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late Future<EmployeeModel> _employeeDataFuture;
   late GetEmployeeDataUseCase _getEmployeeDataUseCase;
-  late final List<SearchDestination> _destinations;
+  final List<AppDestination> _destinations = appDestinations;
 
   @override
   void initState() {
@@ -56,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _getEmployeeDataUseCase = GetEmployeeDataUseCase(
       HomeRepositoryImpl(HomeRemoteDataSourceImpl(dio)),
     );
-    _destinations = getDefaultSearchDestinations();
     _loadEmployeeData();
   }
 
@@ -64,6 +62,87 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _employeeDataFuture = _getEmployeeDataUseCase();
     });
+  }
+
+  void _openNavigationMenu() {
+    showWayPayBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.35),
+      builder: (sheetContext) {
+        return Container(
+          height: MediaQuery.sizeOf(sheetContext).height * 0.72,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Меню',
+                        style: AppStyle.manrope(
+                          size: 24,
+                          weight: FontWeight.w700,
+                          color: const Color(AppColors.black),
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        tooltip: 'Закрыть',
+                        onPressed: () => Navigator.of(sheetContext).pop(),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: _destinations.length,
+                    separatorBuilder: (_, __) =>
+                        const Divider(height: 1, indent: 20, endIndent: 20),
+                    itemBuilder: (_, index) {
+                      final destination = _destinations[index];
+                      return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 2,
+                        ),
+                        title: Text(
+                          destination.title,
+                          style: AppStyle.manrope(
+                            size: 16,
+                            weight: FontWeight.w500,
+                            color: const Color(AppColors.black),
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.chevron_right_rounded,
+                          color: Color(AppColors.uiBorder),
+                        ),
+                        onTap: () {
+                          Navigator.of(sheetContext).pop();
+                          context.pushNamed(destination.route.toName);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   // Кнопку «+» убрали с главного экрана, её место занял колокольчик.
@@ -264,6 +343,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
+                            tooltip: 'Меню',
+                            onPressed: _openNavigationMenu,
+                            icon: const Icon(
+                              Icons.menu_rounded,
+                              color: Color(AppColors.uiBorder),
+                            ),
+                          ),
+                          IconButton(
                             tooltip: 'Панель управления',
                             onPressed: () => context.pushNamed(
                               Routes.controlPanelScreen.toName,
@@ -280,14 +367,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SearchSuggester(destinations: _destinations),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 13),
                   Expanded(
                     child: CustomScrollView(
                       physics: const ClampingScrollPhysics(),

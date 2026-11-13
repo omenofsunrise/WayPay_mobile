@@ -22,8 +22,6 @@ import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_e
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
 import 'package:waypay_mobile/features/investors/presentation/bloc/investors_bloc.dart';
 import 'package:waypay_mobile/features/profile/presentation/bloc/employees_bloc.dart';
-import 'package:waypay_mobile/features/profile/presentation/cubit/credit_stats_cubit.dart';
-import 'package:waypay_mobile/features/profile/presentation/cubit/payment_stats_cubit.dart';
 import 'package:waypay_mobile/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:waypay_mobile/features/network_error/screens/network_error_screen.dart';
 import 'package:waypay_mobile/routes/app_router.dart';
@@ -201,8 +199,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         BlocProvider(create: (_) => getIt<ProfileCubit>()),
         BlocProvider(create: (_) => getIt<EmployeesBloc>()),
         BlocProvider(create: (_) => getIt<CompanyCubit>()),
-        BlocProvider(create: (_) => getIt<PaymentStatsCubit>()),
-        BlocProvider(create: (_) => getIt<CreditStatsCubit>()),
         BlocProvider(create: (_) => getIt<AnalyticItemsCubit>()),
         BlocProvider(create: (_) => getIt<DebtDynamicCubit>()),
         BlocProvider(create: (_) => getIt<InvestmentDynamicCubit>()),

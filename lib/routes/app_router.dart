@@ -15,6 +15,7 @@ import 'package:waypay_mobile/features/auth/presentation/screens/pin_code_screen
 import 'package:waypay_mobile/features/bottom_navigation_bar/main_layout.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/create_credit/new_credit_creation_screen.dart';
 import 'package:waypay_mobile/features/credit/presentation/screens/credit_screen.dart';
+import 'package:waypay_mobile/features/credit/presentation/widgets/credit_tab.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_expense_bloc.dart';
 import 'package:waypay_mobile/features/finance/presentation/bloc/budget/budget_income_bloc.dart';
 import 'package:waypay_mobile/features/home/data/models/credit_applications/credit_application_model.dart';
@@ -41,7 +42,6 @@ import 'package:waypay_mobile/features/investors/presentation/screens/investors_
 import 'package:waypay_mobile/features/finance/presentation/screens/finance_main_screen.dart';
 import 'package:waypay_mobile/features/finance/presentation/screens/budget_applications_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/profile_screen.dart';
-import 'package:waypay_mobile/features/profile/presentation/screens/profile_statistics_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/active_sessions_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/employees_screen.dart';
 import 'package:waypay_mobile/features/profile/presentation/screens/add_employee_screen.dart';
@@ -254,15 +254,6 @@ class AppRouter {
           return AddEmployeeScreen(employeesBloc: bloc);
         },
       ),
-      GoRoute(
-        path: Routes.profileStatsScreen.toPath,
-        name: Routes.profileStatsScreen.toName,
-        builder: (context, state) {
-          final employeeId = state.extra as int?;
-          return ProfileStatisticsScreen(employeeId: employeeId);
-        },
-      ),
-
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainLayout(navigationShell: navigationShell);
@@ -465,7 +456,11 @@ class AppRouter {
                   GoRoute(
                     path: Routes.creditsScreen.toPath,
                     name: Routes.creditsScreen.toName,
-                    builder: (context, state) => const CreditsScreen(),
+                    builder: (context, state) => CreditsScreen(
+                      initialTab: state.uri.queryParameters['tab'] == 'debtors'
+                          ? CreditTab.debtors
+                          : CreditTab.all,
+                    ),
                   ),
                 ],
               ),

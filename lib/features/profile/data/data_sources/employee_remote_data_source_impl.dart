@@ -5,9 +5,7 @@ import 'package:mime/mime.dart';
 
 import 'package:waypay_mobile/core/network/api_error.dart';
 import 'package:waypay_mobile/features/profile/data/data_sources/employee_remote_data_source.dart';
-import 'package:waypay_mobile/features/profile/data/models/credit_stat.dart';
 import 'package:waypay_mobile/features/profile/data/models/employee.dart';
-import 'package:waypay_mobile/features/profile/data/models/payment_stat.dart';
 
 class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
   final Dio dio;
@@ -207,91 +205,6 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
       return;
     } else {
       throw const ApiError('Не удалось удалить сотрудника.');
-    }
-  }
-
-  @override
-  Future<List<CreditStat>> getCreditsStats({int months = 12}) async {
-    final response = await dio.get(
-      'Employee/credits-stats',
-      queryParameters: {'months': months},
-    );
-
-    if (response.statusCode == 200) {
-      final List list = response.data;
-      return list.map((e) => CreditStat.fromJson(e)).toList();
-    } else {
-      throw const ApiError('Не удалось загрузить статистику по договорам.');
-    }
-  }
-
-  @override
-  Future<List<PaymentStat>> getPaymentsStats({int months = 12}) async {
-    final response = await dio.get(
-      'Employee/payments-stats',
-      queryParameters: {'months': months},
-    );
-    if (response.statusCode == 200 && response.data is List) {
-      return (response.data as List)
-          .map((e) => PaymentStat.fromJson(e))
-          .toList();
-    } else {
-      throw const ApiError('Не удалось загрузить статистику по платежам.');
-    }
-  }
-
-  @override
-  Future<List<PaymentStat>> getPaymentsStatsById({
-    required int employeeId,
-    int months = 12,
-  }) async {
-    final url = 'Employee/payments-stats$employeeId';
-    debugPrint('📡 [Request] GET $url?months=$months');
-
-    final response = await dio.get(url, queryParameters: {'months': months});
-
-    debugPrint('✅ [Response ${response.statusCode}] $url');
-
-    if (response.statusCode == 200) {
-      final List data = response.data;
-      debugPrint('📦 [Data] Loaded ${data.length} records');
-      return data.map((e) => PaymentStat.fromJson(e)).toList();
-    } else {
-      throw const ApiError('Не удалось загрузить статистику по платежам.');
-    }
-  }
-
-  @override
-  Future<List<CreditStat>> getCreditsStatsById({
-    required int employeeId,
-    int months = 12,
-  }) async {
-    try {
-      final url = 'Employee/credits-stats$employeeId';
-      final query = {'months': months};
-
-      debugPrint('📡 [Request] GET $url?months=$months');
-
-      final response = await dio.get(url, queryParameters: query);
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-
-        debugPrint('✅ [Response] ${data.length} items loaded');
-
-        return data.map((e) => CreditStat.fromJson(e)).toList();
-      } else {
-        debugPrint('❌ [Error] Status code: ${response.statusCode}');
-        throw const ApiError('Не удалось загрузить статистику по договорам.');
-      }
-    } catch (e, stackTrace) {
-      debugPrint('❌ [Exception] $e');
-      debugPrint('$stackTrace');
-      if (e is ApiError) rethrow;
-      throw mapApiError(
-        e,
-        fallback: 'Не удалось загрузить статистику по договорам.',
-      );
     }
   }
 

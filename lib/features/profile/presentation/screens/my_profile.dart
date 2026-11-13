@@ -151,31 +151,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         widget.employeeId != null && widget.employeeId != widget.currentUserId;
 
     if (isViewingOther) {
-      return [
-        [
-          _ProfileMenuItem(
-            icon: SvgPicture.asset(SvgIcons.statistics),
-            label: 'Статистика',
-            onTap: () => context.pushNamed(
-              Routes.profileStatsScreen.toName,
-              extra: widget.employeeId,
-            ),
-          ),
-        ],
-      ];
+      return const [];
     }
 
     return [
-      [
-        _ProfileMenuItem(
-          icon: SvgPicture.asset(SvgIcons.statistics),
-          label: 'Статистика',
-          onTap: () => context.pushNamed(
-            Routes.profileStatsScreen.toName,
-            extra: widget.employeeId,
-          ),
-        ),
-      ],
       [
         _ProfileMenuItem(
           icon: SvgPicture.asset(SvgIcons.activeSession),

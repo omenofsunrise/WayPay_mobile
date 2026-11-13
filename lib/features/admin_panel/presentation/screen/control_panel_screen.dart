@@ -13,6 +13,9 @@ class _ControlPanelScreenState extends State<ControlPanelScreen> {
   final _storage = UserStorage();
 
   late bool _notifications;
+  late bool _notificationsEnabled;
+  late bool _creditNotifications;
+  late bool _whatsAppNotifications;
   late bool _creditName;
   late bool _catalog;
   late bool _category;
@@ -21,6 +24,9 @@ class _ControlPanelScreenState extends State<ControlPanelScreen> {
   void initState() {
     super.initState();
     _notifications = _storage.showNotifications;
+    _notificationsEnabled = _storage.notificationsEnabled;
+    _creditNotifications = _storage.showCreditNotifications;
+    _whatsAppNotifications = _storage.showWhatsAppNotifications;
     _creditName = _storage.showCreditName;
     _catalog = _storage.showCreditCatalog;
     _category = _storage.showCreditCategory;
@@ -29,6 +35,21 @@ class _ControlPanelScreenState extends State<ControlPanelScreen> {
   Future<void> _setNotifications(bool value) async {
     setState(() => _notifications = value);
     await _storage.saveInterfaceVisibility(showNotifications: value);
+  }
+
+  Future<void> _setNotificationsEnabled(bool value) async {
+    setState(() => _notificationsEnabled = value);
+    await _storage.saveNotificationSettings(enabled: value);
+  }
+
+  Future<void> _setCreditNotifications(bool value) async {
+    setState(() => _creditNotifications = value);
+    await _storage.saveNotificationSettings(showCreditCreation: value);
+  }
+
+  Future<void> _setWhatsAppNotifications(bool value) async {
+    setState(() => _whatsAppNotifications = value);
+    await _storage.saveNotificationSettings(showWhatsApp: value);
   }
 
   Future<void> _setCreditName(bool value) async {
@@ -69,10 +90,40 @@ class _ControlPanelScreenState extends State<ControlPanelScreen> {
               ),
               const SizedBox(height: 10),
               _VisibilityTile(
-                title: 'Уведомления',
+                title: 'Значок уведомлений',
                 subtitle: 'Показывать колокольчик на главном экране',
                 value: _notifications,
                 onChanged: _setNotifications,
+              ),
+              const SizedBox(height: 22),
+              const Text(
+                'Уведомления',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 10),
+              _VisibilityTile(
+                title: 'Получать уведомления',
+                subtitle: 'Показывать всплывающие сообщения в приложении',
+                value: _notificationsEnabled,
+                onChanged: _setNotificationsEnabled,
+              ),
+              const SizedBox(height: 10),
+              _VisibilityTile(
+                title: 'Создание договора',
+                subtitle: 'Показывать уведомления о новых договорах',
+                value: _creditNotifications,
+                onChanged: _notificationsEnabled
+                    ? _setCreditNotifications
+                    : null,
+              ),
+              const SizedBox(height: 10),
+              _VisibilityTile(
+                title: 'WhatsApp',
+                subtitle: 'Показывать входящие сообщения WhatsApp',
+                value: _whatsAppNotifications,
+                onChanged: _notificationsEnabled
+                    ? _setWhatsAppNotifications
+                    : null,
               ),
               const SizedBox(height: 22),
               const Text(
@@ -119,7 +170,7 @@ class _VisibilityTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool value;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -129,36 +180,39 @@ class _VisibilityTile extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+      child: Opacity(
+        opacity: onChanged == null ? 0.5 : 1,
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(AppColors.uiBorder),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(AppColors.uiBorder),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Switch.adaptive(
-            value: value,
-            activeTrackColor: const Color(AppColors.primary),
-            onChanged: onChanged,
-          ),
-        ],
+            Switch.adaptive(
+              value: value,
+              activeTrackColor: const Color(AppColors.primary),
+              onChanged: onChanged,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -7,7 +7,6 @@ enum Routes {
   investorPoolScreen,
   investorPoolDetailScreen,
   profileScreen,
-  profileStatsScreen,
   profileActiveSessionsScreen,
   profileEmployeesScreen,
   profileAddEmployeeScreen,
@@ -65,8 +64,6 @@ extension RoutesExtension on Routes {
         return '/investor_pool_detail_screen';
       case Routes.profileScreen:
         return '/profile_screen';
-      case Routes.profileStatsScreen:
-        return '/profile_stats_screen';
       case Routes.profileActiveSessionsScreen:
         return '/profile_active_sessions_screen';
       case Routes.profileEmployeesScreen:
@@ -160,8 +157,6 @@ extension RoutesExtension on Routes {
         return 'INVESTOR_POOL_DETAIL_SCREEN';
       case Routes.profileScreen:
         return 'PROFILE_SCREEN';
-      case Routes.profileStatsScreen:
-        return 'PROFILE_STATS_SCREEN';
       case Routes.profileActiveSessionsScreen:
         return 'PROFILE_ACTIVE_SESSIONS_SCREEN';
       case Routes.profileEmployeesScreen:
