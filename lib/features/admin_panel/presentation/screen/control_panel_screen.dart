@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:waypay_flutter_library/waypay_styles.dart';
 import 'package:waypay_mobile/core/storage/user_storage.dart';
+import 'package:waypay_mobile/features/contract_templates/presentation/contract_templates_screen.dart';
 
 class ControlPanelScreen extends StatefulWidget {
   const ControlPanelScreen({super.key});
@@ -74,8 +75,7 @@ class _ControlPanelScreenState extends State<ControlPanelScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: ListView(
             children: [
               const Header(
                 title: 'Настройка интерфейса',
@@ -150,6 +150,32 @@ class _ControlPanelScreenState extends State<ControlPanelScreen> {
                 subtitle: 'Показывать выбор категории',
                 value: _category,
                 onChanged: _setCategory,
+              ),
+              const SizedBox(height: 22),
+              const Text(
+                'Документы',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 10),
+              ListTile(
+                tileColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                leading: const Icon(
+                  Icons.description_outlined,
+                  color: Color(AppColors.primary),
+                ),
+                title: const Text('Шаблоны договоров'),
+                subtitle: const Text(
+                  'Загрузка DOCX и автоматическое заполнение',
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const ContractTemplatesScreen(),
+                  ),
+                ),
               ),
             ],
           ),

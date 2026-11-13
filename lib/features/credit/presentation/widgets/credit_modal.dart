@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -27,6 +29,9 @@ import 'package:waypay_mobile/features/sold_products/data/data_sources/sold_prod
 import 'package:waypay_mobile/features/sold_products/data/models/sold_product_model.dart';
 import 'package:waypay_mobile/routes/routes.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:waypay_mobile/features/contract_templates/data/contract_template.dart';
+import 'package:waypay_mobile/features/contract_templates/data/contract_template_service.dart';
 
 class CreditFullScreen extends StatefulWidget {
   final CreditModel credit;
@@ -645,7 +650,7 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
                   ),
                 ),
                 Text(
-                  'Поделиться в WhatsApp',
+                  'Поделиться',
                   textAlign: TextAlign.center,
                   style: AppStyle.manrope(
                     size: 18,
@@ -677,12 +682,106 @@ class _CreditFullScreenState extends State<CreditFullScreen> {
                     _sharePaymentsHistory();
                   },
                 ),
+                const SizedBox(height: 12),
+                DefaultButton(
+                  text: 'Сформировать договор по шаблону',
+                  showIcon: true,
+                  icon: Icons.file_copy_outlined,
+                  color: const Color(AppColors.primary),
+                  textColor: Colors.white,
+                  onPressed: () {
+                    Navigator.of(sheetCtx).pop();
+                    _generateContractTemplate();
+                  },
+                ),
               ],
             ),
           ),
         );
       },
     );
+  }
+
+  Future<void> _generateContractTemplate() async {
+    final service = getIt<ContractTemplateService>();
+    List<ContractTemplate> templates;
+    try {
+      templates = await service.getAll();
+    } catch (_) {
+      if (mounted) {
+        showAppMessage(
+          context,
+          'Не удалось загрузить шаблоны',
+          type: AppMessageType.error,
+        );
+      }
+      return;
+    }
+    if (!mounted) return;
+    if (templates.isEmpty) {
+      showAppMessage(context, 'Сначала загрузите шаблон в панели управления');
+      return;
+    }
+
+    final selected = await showWayPayBottomSheet<ContractTemplate>(
+      context: context,
+      backgroundColor: Colors.white,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Выберите шаблон',
+                textAlign: TextAlign.center,
+                style: AppStyle.manrope(size: 18, weight: FontWeight.w600),
+              ),
+              const SizedBox(height: 12),
+              ...templates.map(
+                (template) => ListTile(
+                  leading: const Icon(
+                    Icons.description_outlined,
+                    color: Color(AppColors.primary),
+                  ),
+                  title: Text(template.name),
+                  subtitle: Text(template.fileName),
+                  onTap: () => Navigator.pop(sheetContext, template),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (selected == null || !mounted) return;
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+    try {
+      final bytes = await service.generate(selected.id, widget.credit.id);
+      final directory = await getApplicationDocumentsDirectory();
+      final safeName = selected.name.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+      final file = File(
+        '${directory.path}/${safeName}_договор_${widget.credit.id}.docx',
+      );
+      await file.writeAsBytes(bytes, flush: true);
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+      if (mounted) showAppMessage(context, 'Договор сформирован и сохранён');
+    } catch (_) {
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+      if (mounted) {
+        showAppMessage(
+          context,
+          'Не удалось сформировать договор',
+          type: AppMessageType.error,
+        );
+      }
+    }
   }
 
   Future<void> _shareContractData() async {
