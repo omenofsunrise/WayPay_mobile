@@ -25,6 +25,7 @@ import 'package:waypay_mobile/features/clients/data/data_sources/clients/clients
 import 'package:waypay_mobile/features/clients/presentation/bloc/clients/clients_bloc.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/data/data_source/credit_remote_data_source_impl.dart';
+import 'package:waypay_mobile/features/contract_templates/data/contract_template_service.dart';
 import 'package:waypay_mobile/features/objectType/data/data_source/object_type_remote_data_source.dart';
 import 'package:waypay_mobile/features/credit/presentation/bloc/credit_bloc.dart';
 import 'package:waypay_mobile/features/objectType/presentation/block/object_type_bloc.dart';
@@ -109,6 +110,9 @@ Future<void> initDependencies() async {
   );
   getIt.registerLazySingleton<CreditRemoteDataSource>(
     () => CreditRemoteDataSourceImpl(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<ContractTemplateService>(
+    () => ContractTemplateService(getIt<Dio>()),
   );
   getIt.registerLazySingleton<NoteRemoteDataSource>(
     () => NoteRemoteDataSourceImpl(getIt<Dio>()),
